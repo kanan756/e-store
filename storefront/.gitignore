@@ -1,0 +1,17 @@
+# Env files
+.env*
+!.env.example
+!.env.local.template
+
+# Directories
+node_modules/
+.next/
+dist/
+build/
+out/
+
+# Caches
+*.tsbuildinfo
+
+# OS specific
+.DS_Store

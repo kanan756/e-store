@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(ls \"C:\\\\Users\\\\heet1\\\\.claude\\\\projects\\\\c--Users-heet1-OneDrive-Desktop-College-MCT\\\\design_bundle\" -Recurse 2>/dev/null || echo \"empty or error\")",
+      "Read(//c/Users/heet1/.claude/projects/c--Users-heet1-OneDrive-Desktop-College-MCT/design_bundle/**)",
+      "Bash(mkdir -p C:/Users/heet1/.claude/projects/c--Users-heet1-OneDrive-Desktop-College-MCT/design_bundle)",
+      "Bash(tar -xzf C:/Users/heet1/.claude/projects/c--Users-heet1-OneDrive-Desktop-College-MCT/348c0c48-b888-4a3b-9613-e32aa9cdac0c/tool-results/webfetch-1778751244937-4potnw.bin -C C:/Users/heet1/.claude/projects/c--Users-heet1-OneDrive-Desktop-College-MCT/design_bundle)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(npm show *)",
+      "Bash(npm audit *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>x.startsWith\\('1.'\\)\\).slice\\(-5\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>!x.includes\\('snapshot'\\)&&!x.includes\\('preview'\\)\\).slice\\(-5\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>!x.includes\\('snapshot'\\)&&!x.includes\\('alpha'\\)&&!x.includes\\('beta'\\)&&!x.includes\\('canary'\\)\\).slice\\(-8\\).join\\('\\\\n'\\)\\)\")"
+    ]
+  }
+}
