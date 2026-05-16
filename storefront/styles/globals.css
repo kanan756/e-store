@@ -1021,11 +1021,169 @@ button {
 }
 
 @media (max-width: 700px) {
-  .W { padding: 0 24px; }
-  .hdr { padding-left: 24px; padding-right: 24px; }
-  .hero__scroll { left: 24px; }
+  .W { padding: 0 20px; }
+  .hdr { padding-left: 20px; padding-right: 20px; }
+  .hero__scroll { left: 20px; }
   .catG, .prodG { grid-template-columns: 1fr; }
   .ft__g { grid-template-columns: 1fr; }
-  .hdr__nav { display: none; }
   .cart-item { grid-template-columns: 80px 1fr; }
+
+  /* Hide desktop-only header elements on mobile */
+  .hdr__nav  { display: none; }   /* hide full desktop nav */
+  .hdr--desk { display: none; }   /* hide individual desktop-only icons */
+
+  /* Show hamburger button on mobile */
+  .hdr__burger { display: flex !important; }
+}
+
+/* ── HAMBURGER BUTTON ─────────────────────────────────────────────────────── */
+/* Hidden by default — shown only on mobile via the media query above */
+.hdr__burger {
+  display: none;
+}
+
+/* ── MOBILE DRAWER ────────────────────────────────────────────────────────── */
+.mob-nav {
+  /* Full-viewport overlay that slides down from the header */
+  position: fixed;
+  inset: 0;
+  z-index: 999;                          /* just below the header (z:1000) */
+  background: rgba(8, 8, 7, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 100px 32px 40px;             /* top padding clears the fixed header */
+  pointer-events: none;                  /* not interactive when closed */
+
+  /* Slide + fade animation */
+  opacity: 0;
+  transform: translateY(-16px);
+  transition:
+    opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] .mob-nav {
+  background: rgba(250, 250, 248, 0.97);
+}
+
+/* Open state */
+.mob-nav--open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Only show the drawer on mobile screens */
+@media (min-width: 701px) {
+  .mob-nav { display: none; }
+}
+
+/* ── DRAWER NAV LINKS ─────────────────────────────────────────────────────── */
+.mob-nav__links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.mob-nav__link {
+  font-family: var(--font-sora), "Sora", sans-serif;
+  font-size: clamp(28px, 8vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: block;
+  line-height: 1.1;
+
+  /* Each link slides up and fades in with a stagger delay */
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.18s;
+}
+
+[data-theme="light"] .mob-nav__link {
+  color: var(--text);
+  border-bottom-color: var(--bd);
+}
+
+.mob-nav--open .mob-nav__link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mob-nav__link:hover {
+  color: #fff;
+  padding-left: 8px;
+}
+
+[data-theme="light"] .mob-nav__link:hover {
+  color: var(--acc);
+}
+
+/* ── DRAWER BOTTOM ACTION BAR ─────────────────────────────────────────────── */
+.mob-nav__bar {
+  display: flex;
+  gap: 12px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+}
+
+[data-theme="light"] .mob-nav__bar {
+  border-top-color: var(--bd);
+}
+
+.mob-nav__act {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  font-family: var(--font-sora), "Sora", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+[data-theme="light"] .mob-nav__act {
+  color: var(--text2);
+  background: var(--bg2);
+  border-color: var(--bd);
+}
+
+.mob-nav__act:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Cart item count badge */
+.mob-cart-dot {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--acc);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
 }

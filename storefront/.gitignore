@@ -1,17 +1,30 @@
 # Env files
 .env*
 !.env.example
-!.env.local.template
 
-# Directories
-node_modules/
+# Build output
 .next/
 dist/
 build/
 out/
 
-# Caches
+# Dependencies
+node_modules/
+
+# TypeScript cache
 *.tsbuildinfo
 
-# OS specific
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel
+
+# AI assistant config
+.claude/
+.gemini/
+
+# OS
 .DS_Store
+Thumbs.db

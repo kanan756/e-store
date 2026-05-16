@@ -3,7 +3,13 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useCart } from "@/context/cart-context"
-import { formatPrice } from "@/lib/medusa-client"
+
+function formatPrice(rs: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR",
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(rs)
+}
 
 function ArrowIcon() {
   return (
@@ -26,10 +32,8 @@ function TrashIcon() {
 }
 
 export default function CartPage() {
-  const { cart, loading, error, removeItem, updateQuantity } = useCart()
+  const { items, loading, subtotal, removeItem, updateQuantity } = useCart()
 
-  const items = cart?.items ?? []
-  const subtotal = cart?.subtotal ?? 0
   const isEmpty = items.length === 0
 
   return (
@@ -40,11 +44,7 @@ export default function CartPage() {
           <h1 className="D3">Shopping Cart</h1>
         </div>
 
-        {error && (
-          <div style={{ marginBottom: 24, padding: "14px 18px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, color: "#ef4444", fontSize: 14 }}>
-            {error}
-          </div>
-        )}
+
 
         {isEmpty ? (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
@@ -64,17 +64,17 @@ export default function CartPage() {
                 <div key={item.id} className="cart-item">
                   {/* Thumbnail */}
                   <div style={{ borderRadius: 12, overflow: "hidden", background: "var(--bg2)", aspectRatio: "1", position: "relative" }}>
-                    {item.thumbnail ? (
+                    {(() => { try { return item.imageUrl && new URL(item.imageUrl) } catch { return false } })() ? (
                       <Image
-                        src={item.thumbnail}
-                        alt={item.title}
+                        src={item.imageUrl}
+                        alt={item.name}
                         fill
                         sizes="100px"
                         style={{ objectFit: "cover" }}
                       />
                     ) : (
                       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "var(--textM)", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
-                        {item.title}
+                        {item.name}
                       </div>
                     )}
                   </div>
@@ -82,15 +82,11 @@ export default function CartPage() {
                   {/* Details */}
                   <div>
                     <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
-                      {item.title}
+                      {item.name}
                     </div>
-                    {item.description && (
-                      <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>
-                        {item.description}
-                      </div>
-                    )}
+                    <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>{item.category}</div>
                     <div style={{ fontSize: 14, color: "var(--acc)", fontWeight: 600 }}>
-                      {item.unit_price != null ? formatPrice(item.unit_price) : "—"}
+                      {formatPrice(item.price)}
                     </div>
                   </div>
 
@@ -118,9 +114,7 @@ export default function CartPage() {
                   {/* Remove */}
                   <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                     <div style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 18 }}>
-                      {item.unit_price != null
-                        ? formatPrice(item.unit_price * item.quantity)
-                        : "—"}
+                      {formatPrice(item.price * item.quantity)}
                     </div>
                     <button
                       onClick={() => removeItem(item.id)}

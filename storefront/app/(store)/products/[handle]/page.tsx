@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { medusa } from "@/lib/medusa-client"
+import { getProductByHandle } from "@/lib/sheets"
 import { ProductSchema } from "@/components/ProductSchema"
 import ProductDetailClient from "@/components/ProductDetailClient"
 
@@ -8,35 +8,25 @@ interface PageProps {
   params: Promise<{ handle: string }>
 }
 
-async function getProduct(handle: string) {
-  try {
-    const { products } = await medusa.products.list({ handle })
-    return products[0] ?? null
-  } catch {
-    return null
-  }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { handle } = await params
-  const product = await getProduct(handle)
+  const product = await getProductByHandle(handle)
   if (!product) return { title: "Product Not Found" }
-  const title = product.title ?? "Product"
 
   return {
-    title,
-    description: product.description ?? undefined,
+    title: product.name,
+    description: product.description || undefined,
     openGraph: {
-      title,
-      description: product.description ?? undefined,
-      images: product.thumbnail ? [{ url: product.thumbnail }] : [],
+      title: product.name,
+      description: product.description || undefined,
+      images: product.imageUrl ? [{ url: product.imageUrl }] : [],
     },
   }
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { handle } = await params
-  const product = await getProduct(handle)
+  const product = await getProductByHandle(handle)
 
   if (!product) notFound()
 

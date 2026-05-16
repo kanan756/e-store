@@ -1,6 +1,6 @@
 import ProductCard from "@/components/ProductCard"
 import Link from "next/link"
-import type { StoreProduct } from "@/lib/types"
+import type { Product } from "@/lib/sheets"
 
 function ArrowIcon() {
   return (
@@ -11,7 +11,7 @@ function ArrowIcon() {
 }
 
 interface FeaturedProductsProps {
-  products: StoreProduct[]
+  products: Product[]
 }
 
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {

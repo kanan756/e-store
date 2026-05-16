@@ -6,7 +6,7 @@ import FeaturedProducts from "@/components/FeaturedProducts"
 import WhyUs from "@/components/WhyUs"
 import Banner from "@/components/Banner"
 import Cta from "@/components/Cta"
-import { medusa } from "@/lib/medusa-client"
+import type { Product } from "@/lib/sheets"
 
 export const metadata: Metadata = {
   title: "Client Store — Premium Industrial Products",
@@ -16,10 +16,13 @@ export const metadata: Metadata = {
 
 export const revalidate = 60
 
-async function getFeaturedProducts() {
+async function getFeaturedProducts(): Promise<Product[]> {
   try {
-    const { products } = await medusa.products.list({ limit: 6 })
-    return products
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STORE_URL}/api/products`, {
+      next: { revalidate: 60 },
+    })
+    const data = await res.json()
+    return (data.products ?? []).slice(0, 6)
   } catch {
     return []
   }

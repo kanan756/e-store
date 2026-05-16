@@ -1,11 +1,27 @@
+/**
+ * @file components/ProductCard.tsx
+ * @description Reusable product card component used on the shop listing page.
+ *   Renders product image (with URL validation fallback to placeholder),
+ *   category label, product name, price, and an "Add to Cart" / "View" CTA.
+ *
+ *   Props:
+ *     product  – Product object from Google Sheets
+ *     index    – Card index used for staggered reveal animation delay
+ *
+ *   Image handling: validates URL before passing to next/image to prevent
+ *   crashes when imageUrl is empty, "-", or an invalid URL string.
+ *
+ * @owner Heet-P
+ * @lastModified May 16, 2026
+ */
+
 "use client"
 
 import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useState } from "react"
 import { useCart } from "@/context/cart-context"
-import { formatPrice, getVariantPriceAmount } from "@/lib/medusa-client"
-import type { StoreProduct } from "@/lib/types"
+import type { Product } from "@/lib/sheets"
 
 function ArrowIcon() {
   return (
@@ -16,65 +32,72 @@ function ArrowIcon() {
 }
 
 interface ProductCardProps {
-  product: StoreProduct
+  product: Product
   index?: number
 }
 
+function formatPrice(rs: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR",
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(rs)
+}
+
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const { addItem, loading } = useCart()
+  const { addItem } = useCart()
   const [adding, setAdding] = useState(false)
+  const [added, setAdded] = useState(false)
 
-  const firstVariant = product.variants?.[0]
-  const price = getVariantPriceAmount(firstVariant)
-  const variantId = firstVariant?.id
-
-  const handleAddToCart = useCallback(async () => {
-    if (!variantId) return
+  const handleAddToCart = useCallback(() => {
     setAdding(true)
-    try {
-      await addItem(variantId)
-    } finally {
-      setAdding(false)
-    }
-  }, [addItem, variantId])
+    addItem({
+      id: product.handle || product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      category: product.category,
+    })
+    setAdding(false)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 2000)
+  }, [addItem, product])
 
-  const thumbnail = product.thumbnail
-  const title = product.title ?? "Product"
   const href = product.handle ? `/products/${product.handle}` : "/products"
+
+  const isValidUrl = (url: string) => {
+    if (!url || url === "-") return false
+    try { new URL(url); return true } catch { return false }
+  }
 
   return (
     <div className="prodC rv" style={{ transitionDelay: `${index * 0.07}s` }}>
       <div className="prodC__img">
-        {thumbnail ? (
+        {isValidUrl(product.imageUrl) ? (
           <Image
-            src={thumbnail}
-            alt={title}
+            src={product.imageUrl}
+            alt={product.name}
             fill
             sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
             style={{ objectFit: "cover" }}
           />
         ) : (
-          <PlaceholderImage title={title} />
-        )}
-        {product.tags?.[0] && (
-          <span className="prodC__tag">{product.tags[0].value}</span>
+          <PlaceholderImage title={product.name} />
         )}
       </div>
       <div className="prodC__bd">
-        <div className="prodC__cat">
-          {product.collection?.title ?? product.type?.value ?? "Product"}
-        </div>
-        <div className="prodC__nm">{title}</div>
+        <div className="prodC__cat">{product.category || "Product"}</div>
+        <div className="prodC__nm">{product.name}</div>
         <div className="prodC__pr">
-          {price != null ? formatPrice(price) : "—"}
+          {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
         </div>
         <div className="prodC__row">
           <button
             className="btn bp bsm"
             onClick={handleAddToCart}
-            disabled={adding || loading || !variantId}
+            disabled={adding}
+            style={added ? { background: "#16a34a" } : {}}
           >
-            {adding ? "Adding…" : "Add to Cart"}
+            {added ? "✓ Added!" : adding ? "Adding…" : "Add to Cart"}
           </button>
           <Link href={href} className="btn bod bsm">
             View <ArrowIcon />

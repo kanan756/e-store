@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { medusa } from "@/lib/medusa-client"
+import { getProducts } from "@/lib/sheets"
 
 const BASE = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
@@ -7,16 +7,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let productUrls: MetadataRoute.Sitemap = []
 
   try {
-    const { products } = await medusa.products.list({ limit: 500 })
+    const products = await getProducts()
     productUrls = products.map((p) => ({
       url: `${BASE}/products/${p.handle}`,
-      lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
-      changeFrequency: "weekly",
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
       priority: 0.8,
     }))
   } catch {
-    // Backend may not be reachable at build time — skip product URLs
+    // Sheets may not be reachable at build time — skip product URLs
   }
+
 
   return [
     {

@@ -1,27 +1,21 @@
-import type { StoreProduct } from "@/lib/types"
-import { getVariantPriceAmount } from "@/lib/medusa-client"
+import type { Product } from "@/lib/sheets"
 
-export function ProductSchema({ product }: { product: StoreProduct }) {
-  const price = getVariantPriceAmount(product.variants?.[0])
-  const inStock = (product.variants?.[0]?.inventory_quantity ?? 0) > 0
-
+export function ProductSchema({ product }: { product: Product }) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.title,
+    name: product.name,
     description: product.description ?? "",
-    image: product.thumbnail ?? "",
+    image: product.imageUrl ?? "",
     brand: {
       "@type": "Brand",
       name: "Client Store",
     },
     offers: {
       "@type": "Offer",
-      price: price != null ? price / 100 : undefined,
+      price: product.price > 0 ? product.price / 100 : undefined,
       priceCurrency: "INR",
-      availability: inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      availability: "https://schema.org/InStock",
       url: `${process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"}/products/${product.handle}`,
     },
   }

@@ -3,9 +3,8 @@
 import Image from "next/image"
 import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
-import { formatPrice, getVariantPriceAmount } from "@/lib/medusa-client"
 import { useCart } from "@/context/cart-context"
-import type { StoreProduct, StoreVariant } from "@/lib/types"
+import type { Product } from "@/lib/sheets"
 
 function ArrowIcon() {
   return (
@@ -15,37 +14,49 @@ function ArrowIcon() {
   )
 }
 
-export default function ProductDetailClient({ product }: { product: StoreProduct }) {
+function formatPrice(rs: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR",
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(rs)
+}
+
+export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter()
   const { addItem } = useCart()
-  const [selectedVariant, setSelectedVariant] = useState<StoreVariant | undefined>(
-    product.variants[0]
-  )
   const [adding, setAdding] = useState(false)
+  const [added, setAdded] = useState(false)
 
-  const price = getVariantPriceAmount(selectedVariant)
-  const inStock = (selectedVariant?.inventory_quantity ?? 0) > 0
-  const title = product.title ?? "Product"
-
-  const handleAddToCart = useCallback(async () => {
-    if (!selectedVariant?.id) return
+  const handleAddToCart = useCallback(() => {
     setAdding(true)
-    try {
-      await addItem(selectedVariant.id)
+    addItem({
+      id: product.handle || product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      category: product.category,
+    })
+    setAdding(false)
+    setAdded(true)
+    setTimeout(() => {
+      setAdded(false)
       router.push("/cart")
-    } finally {
-      setAdding(false)
-    }
-  }, [addItem, selectedVariant, router])
+    }, 800)
+  }, [addItem, product, router])
+
+  const isValidUrl = (url: string) => {
+    if (!url || url === "-") return false
+    try { new URL(url); return true } catch { return false }
+  }
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
       {/* ── Image ───────────────────────────────────────────────────────── */}
       <div style={{ borderRadius: "var(--rL)", overflow: "hidden", aspectRatio: "4/3", position: "relative", background: "var(--bg2)" }}>
-        {product.thumbnail ? (
+        {isValidUrl(product.imageUrl) ? (
           <Image
-            src={product.thumbnail}
-            alt={title}
+            src={product.imageUrl}
+            alt={product.name}
             fill
             sizes="50vw"
             style={{ objectFit: "cover" }}
@@ -53,55 +64,31 @@ export default function ProductDetailClient({ product }: { product: StoreProduct
           />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--textM)", fontFamily: "monospace", fontSize: 12, padding: 16, textAlign: "center" }}>
-            {title}
+            {product.name}
           </div>
         )}
       </div>
 
       {/* ── Details ─────────────────────────────────────────────────────── */}
       <div style={{ paddingTop: 20 }}>
-        <div className="lbl" style={{ marginBottom: 16 }}>
-          {product.collection?.title ?? product.type?.value ?? "Product"}
-        </div>
-        <h1 className="D3" style={{ marginBottom: 16 }}>{title}</h1>
+        <div className="lbl" style={{ marginBottom: 16 }}>{product.category || "Product"}</div>
+        <h1 className="D3" style={{ marginBottom: 16 }}>{product.name}</h1>
         <div style={{ fontFamily: "var(--font-sora)", fontSize: 36, fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 24, color: "var(--acc)" }}>
-          {price != null ? formatPrice(price) : "—"}
+          {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
         </div>
 
         {product.description && (
           <p className="Bd" style={{ marginBottom: 32 }}>{product.description}</p>
         )}
 
-        {/* Variant selector */}
-        {product.variants.length > 1 && (
-          <div style={{ marginBottom: 32 }}>
-            <div className="form-label" style={{ marginBottom: 12 }}>Select Variant</div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {product.variants.map((v) => (
-                <button
-                  key={v.id}
-                  className={`btn ${selectedVariant?.id === v.id ? "bp" : "bod"} bsm`}
-                  onClick={() => setSelectedVariant(v)}
-                >
-                  {v.title}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div style={{ marginBottom: 32, fontSize: 13, color: inStock ? "#22c55e" : "#ef4444", fontWeight: 600 }}>
-          {inStock ? "✓ In Stock" : "✗ Out of Stock"}
-        </div>
-
         <div style={{ display: "flex", gap: 12 }}>
           <button
             className="btn bp"
             onClick={handleAddToCart}
-            disabled={adding || !inStock}
-            style={{ flex: 1 }}
+            disabled={adding}
+            style={{ flex: 1, background: added ? "#16a34a" : undefined }}
           >
-            {adding ? "Adding…" : "Add to Cart"} <ArrowIcon />
+            {added ? "✓ Added to Cart!" : adding ? "Adding…" : "Add to Cart"} {!added && <ArrowIcon />}
           </button>
         </div>
       </div>

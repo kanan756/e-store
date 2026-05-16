@@ -1,3 +1,25 @@
+/**
+ * @file components/Header.tsx
+ * @description Global site header / navigation bar — Client Component.
+ *   Features:
+ *     - Transparent-to-solid transition on scroll (adds `.on` class after 60px)
+ *     - Active solid state on all non-homepage routes
+ *     - Navigation links: Home, About, Shop, Blog, Track Order, Contact
+ *     - Cart icon with unread-items dot badge (via CartContext)
+ *     - Track Order icon shortcut (pin/location SVG)
+ *     - Light / Dark mode toggle (persists to localStorage as `cs-theme`)
+ *     - Mobile: animated hamburger (☰ / ✕) that opens a full-height slide-down
+ *       drawer with all nav links, cart count, and theme toggle.
+ *       Body scroll is locked while drawer is open.
+ *       Drawer auto-closes on route change.
+ *
+ *   Theme is applied via `data-theme` attribute on `<html>` element.
+ *   Reading localStorage happens post-mount only (client-side safe).
+ *
+ * @owner Heet-P
+ * @lastModified May 16, 2026
+ */
+
 "use client"
 
 import Link from "next/link"
@@ -44,34 +66,67 @@ function IcoMoon() {
   )
 }
 
-// ── Nav links ─────────────────────────────────────────────────────────────────
+// Animated hamburger / close button icon
+function IcoBurger({ open }: { open: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      {open ? (
+        // ✕ close icon
+        <>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </>
+      ) : (
+        // ☰ hamburger lines
+        <>
+          <line x1="3" y1="7" x2="21" y2="7" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="17" x2="21" y2="17" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+// ── Nav link definitions ───────────────────────────────────────────────────────
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/#about", label: "About" },
   { href: "/products", label: "Shop" },
-  { href: "/#categories", label: "Categories" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/blog", label: "Blog" },
+  { href: "/track-order", label: "Track Order" },
+  { href: "/contact", label: "Contact" },
 ]
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Main component ─────────────────────────────────────────────────────────────
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [menuOpen, setMenuOpen] = useState(false) // mobile drawer state
   const { totalItems } = useCart()
   const pathname = usePathname()
 
-  // Read initial theme (after mount — localStorage is client-only)
+  // Read saved theme on mount (localStorage is client-only)
   useEffect(() => {
     const saved = localStorage.getItem("cs-theme") as "light" | "dark" | null
     if (saved) setTheme(saved)
   }, [])
 
-  // Track scroll
+  // Trigger solid header background after scrolling 60px
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60)
     window.addEventListener("scroll", fn, { passive: true })
     return () => window.removeEventListener("scroll", fn)
   }, [])
+
+  // Auto-close mobile drawer when user navigates to a new route
+  useEffect(() => { setMenuOpen(false) }, [pathname])
+
+  // Lock body scroll while mobile drawer is open (prevents background scroll)
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [menuOpen])
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => {
@@ -82,38 +137,98 @@ export default function Header() {
     })
   }, [])
 
-  // On non-homepage, always show the solid background
+  // Non-homepage routes always show solid header; homepage shows it after scroll
   const isHome = pathname === "/"
   const solid = scrolled || !isHome
 
   return (
-    <header className={`hdr${solid ? " on" : ""}`}>
-      <Link href="/" className="hdr__logo">CLIENT STORE</Link>
+    <>
+      {/* ── Desktop / Mobile Header bar ────────────────────────────────────── */}
+      <header className={`hdr${solid ? " on" : ""}`}>
+        <Link href="/" className="hdr__logo">CLIENT STORE</Link>
 
-      <nav className="hdr__nav">
-        {NAV.map(({ href, label }) => (
-          <Link key={href} href={href}>{label}</Link>
-        ))}
-      </nav>
+        {/* Desktop navigation — hidden on mobile via CSS */}
+        <nav className="hdr__nav">
+          {NAV.map(({ href, label }) => (
+            <Link key={href} href={href}>{label}</Link>
+          ))}
+        </nav>
 
-      <div className="hdr__icons">
-        <Link href="/products" className="hic" aria-label="Search products">
-          <IcoSearch />
-        </Link>
+        {/* Right icon cluster */}
+        <div className="hdr__icons">
+          {/* Search shortcut (desktop) */}
+          <Link href="/products" className="hic hdr--desk" aria-label="Search products">
+            <IcoSearch />
+          </Link>
 
-        <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
-          <IcoCart />
-          {totalItems > 0 && <span className="cdot" />}
-        </Link>
+          {/* Cart icon with dot badge */}
+          <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
+            <IcoCart />
+            {totalItems > 0 && <span className="cdot" />}
+          </Link>
 
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {theme === "dark" ? <IcoSun /> : <IcoMoon />}
-        </button>
+          {/* Track order pin icon (desktop only) */}
+          <Link href="/track-order" className="hic hdr--desk" aria-label="Track your order" title="Track Order">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </Link>
+
+          {/* Theme toggle (desktop only) */}
+          <button
+            className="theme-toggle hdr--desk"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <IcoSun /> : <IcoMoon />}
+          </button>
+
+          {/* Hamburger — visible on mobile only */}
+          <button
+            className="hic hdr__burger"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+          >
+            <IcoBurger open={menuOpen} />
+          </button>
+        </div>
+      </header>
+
+      {/* ── Mobile full-screen drawer ───────────────────────────────────────── */}
+      <div className={`mob-nav${menuOpen ? " mob-nav--open" : ""}`} aria-hidden={!menuOpen}>
+
+        {/* Nav links — stagger-animated in */}
+        <nav className="mob-nav__links">
+          {NAV.map(({ href, label }, i) => (
+            <Link
+              key={href}
+              href={href}
+              className="mob-nav__link"
+              style={{ transitionDelay: menuOpen ? `${i * 55}ms` : "0ms" }}
+              onClick={() => setMenuOpen(false)}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Quick-action row at the bottom of drawer */}
+        <div className="mob-nav__bar">
+          <Link href="/cart" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
+            <IcoCart />
+            Cart
+            {totalItems > 0 && <span className="mob-cart-dot">{totalItems}</span>}
+          </Link>
+          <Link href="/track-order" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
+            📦 Track Order
+          </Link>
+          <button className="mob-nav__act" onClick={toggleTheme}>
+            {theme === "dark" ? <><IcoSun /> Light</> : <><IcoMoon /> Dark</>}
+          </button>
+        </div>
       </div>
-    </header>
+    </>
   )
 }

@@ -1,19 +1,21 @@
 import type { Metadata } from "next"
-import { medusa } from "@/lib/medusa-client"
+import type { Product } from "@/lib/sheets"
 import ProductCard from "@/components/ProductCard"
 
 export const metadata: Metadata = {
   title: "Shop All Products",
-  description:
-    "Browse our full catalog of premium industrial and lifestyle products.",
+  description: "Browse our full catalog of premium industrial and lifestyle products.",
 }
 
 export const revalidate = 60
 
-async function getAllProducts() {
+async function getAllProducts(): Promise<Product[]> {
   try {
-    const { products } = await medusa.products.list({ limit: 100 })
-    return products
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STORE_URL}/api/products`, {
+      next: { revalidate: 60 },
+    })
+    const data = await res.json()
+    return data.products ?? []
   } catch {
     return []
   }
@@ -33,7 +35,7 @@ export default async function ProductsPage() {
 
         {products.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text2)" }}>
-            <p>No products found. Add your first product in the admin panel.</p>
+            <p>No products found. Add your first product in the Google Sheet.</p>
           </div>
         ) : (
           <div className="prodG">

@@ -1,17 +1,56 @@
+/**
+ * @file next.config.ts
+ * @description Next.js configuration for Client Store.
+ *   - Security headers on every response (CSP, HSTS, no-sniff, frame deny, etc.)
+ *   - Allowed image domains for next/image remote patterns
+ *   - Turbopack / build settings
+ *
+ * @owner Heet-P
+ * @lastModified May 16, 2026
+ */
+
 import type { NextConfig } from "next"
 
+// ── Security headers applied to every route ──────────────────────────────────
 const securityHeaders = [
-  { key: "X-DNS-Prefetch-Control", value: "on" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // Block pages from being embedded in iframes (clickjacking protection)
+  { key: "X-Frame-Options", value: "DENY" },
+
+  // Prevent MIME-type sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
+
+  // Control referrer info sent with requests
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+
+  // Restrict browser feature access
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+
+  // Enable DNS prefetch for performance
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+
+  // Strict HTTPS — 1 year, include subdomains (only active over HTTPS)
+  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+
+  // Content Security Policy
+  // Allows: self, Google Fonts, Google OAuth, Razorpay, trusted image CDNs
   {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=()",
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.google.com https://www.gstatic.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https: http://localhost:*",
+      "frame-src https://checkout.razorpay.com https://accounts.google.com",
+      "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
+      "form-action 'self'",
+      "base-uri 'self'",
+    ].join("; "),
   },
 ]
 
 const nextConfig: NextConfig = {
+  // Apply security headers to all responses
   async headers() {
     return [
       {
@@ -20,22 +59,17 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+
+  // Allowed remote image hostnames for next/image
+  // Add any CDN or external image host your products use here
   images: {
     remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "9000",
-        pathname: "/uploads/**",
-      },
-      {
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_SUPABASE_STORAGE_HOSTNAME ?? "your-project.supabase.co",
-      },
-      {
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_MEDUSA_IMAGE_HOSTNAME ?? "your-backend.railway.app",
-      },
+      // Google user profile photos (used in OAuth track-order page)
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      // General HTTPS images (product images, blog covers stored externally)
+      { protocol: "https", hostname: "**" },
+      // Local dev only
+      { protocol: "http", hostname: "localhost" },
     ],
   },
 }

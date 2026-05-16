@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import { Sora, DM_Sans } from "next/font/google"
 import "@/styles/globals.css"
-import { CartProvider } from "@/context/cart-context"
 import { ThemeScript } from "@/components/ThemeScript"
+import Providers from "@/components/Providers"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -44,13 +44,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* Inline script runs before paint to apply saved theme and prevent flash */}
         <ThemeScript />
       </head>
       <body className={`${sora.variable} ${dmSans.variable}`}>
-        <CartProvider>{children}</CartProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

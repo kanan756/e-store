@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from "react"
 import type { ChangeEvent, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
-import { medusa, formatPrice } from "@/lib/medusa-client"
 import { useCart } from "@/context/cart-context"
 
 declare global {
@@ -19,21 +18,14 @@ interface RazorpayOptions {
   currency: string
   name: string
   description: string
-  order_id?: string
   handler: (response: RazorpayResponse) => void
   prefill: { name: string; email: string; contact: string }
   theme: { color: string }
   modal?: { ondismiss: () => void }
 }
-
-interface RazorpayInstance {
-  open(): void
-}
-
+interface RazorpayInstance { open(): void }
 interface RazorpayResponse {
   razorpay_payment_id: string
-  razorpay_order_id?: string
-  razorpay_signature?: string
 }
 
 interface FormData {
@@ -51,11 +43,11 @@ const checkoutSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required.").max(50),
   lastName: z.string().trim().min(1, "Last name is required.").max(50),
   email: z.string().trim().email("Enter a valid email address.").max(254),
-  phone: z.string().trim().regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian phone number."),
+  phone: z.string().trim().min(6, "Enter a valid phone number.").max(20),
   address1: z.string().trim().min(5, "Enter a complete address.").max(200),
   city: z.string().trim().min(2, "City is required.").max(100),
   province: z.string().trim().min(2, "State is required.").max(100),
-  postalCode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit pincode."),
+  postalCode: z.string().trim().min(4, "Enter a valid postal code.").max(10),
 })
 
 const EMPTY_FORM: FormData = {
@@ -63,8 +55,15 @@ const EMPTY_FORM: FormData = {
   address1: "", city: "", province: "", postalCode: "",
 }
 
+function formatPrice(rs: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency", currency: "INR",
+    minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }).format(rs)
+}
+
 export default function CheckoutPage() {
-  const { cart, clearCart } = useCart()
+  const { items, subtotal, clearCart } = useCart()
   const router = useRouter()
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
@@ -79,86 +78,66 @@ export default function CheckoutPage() {
     return () => { document.body.removeChild(s) }
   }, [])
 
-  const set = (field: keyof FormData) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const set = (field: keyof FormData) => (e: ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }))
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault()
-      if (!cart || loading) return
+      if (items.length === 0 || loading) return
       setLoading(true)
       setError("")
 
       try {
         const parsed = checkoutSchema.safeParse(form)
         if (!parsed.success) {
-          setError(parsed.error.issues[0]?.message ?? "Please check your details and try again.")
+          setError(parsed.error.issues[0]?.message ?? "Please check your details.")
           setLoading(false)
           return
         }
 
         const details = parsed.data
 
-        // 1. Attach guest details to cart
-        await medusa.carts.update(cart.id, {
-          email: details.email,
-          shipping_address: {
-            first_name: details.firstName,
-            last_name: details.lastName,
-            address_1: details.address1,
-            city: details.city,
-            province: details.province,
-            country_code: "in",
-            postal_code: details.postalCode,
-            phone: details.phone,
-          },
-        })
-
-        // 1.5 Fetch and add shipping method (Required by Medusa to complete an order)
-        const { shipping_options } = await medusa.fulfillment.listCartOptions(cart.id)
-        if (shipping_options && shipping_options.length > 0) {
-          await medusa.carts.addShippingMethod(cart.id, {
-            option_id: shipping_options[0].id,
-          })
+        if (!window.Razorpay) {
+          setError("Payment service is still loading. Please refresh and try again.")
+          setLoading(false)
+          return
         }
 
-        // 2. Create payment sessions
-        await medusa.carts.createPaymentSessions(cart.id)
+        // Build a readable product list string for Google Sheets
+        const productSummary = items
+          .map((i) => `${i.name} x${i.quantity}`)
+          .join(", ")
 
-        // 3. Select Payment Provider
-        await medusa.carts.setPaymentSession(cart.id, {
-          provider_id: process.env.NEXT_PUBLIC_MEDUSA_PAYMENT_PROVIDER_ID || "pp_system_default",
-        })
-
-        // 4. Open Razorpay modal
-        const subtotal = cart.subtotal ?? 0
         const options: RazorpayOptions = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "",
-          amount: subtotal,
+          amount: subtotal * 100, // Razorpay expects paise; price stored in Rs
           currency: "INR",
+
           name: "Client Store",
-          description: "Order payment",
+          description: productSummary,
           handler: async (response: RazorpayResponse) => {
             try {
-              // 5. Complete the cart to create the order
-              await medusa.carts.complete(cart.id)
+              // Write order to Google Sheets
+              const res = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  customerName: `${details.firstName} ${details.lastName}`,
+                  email: details.email,
+                  product: productSummary,
+                  amount: subtotal,
+                  paymentId: response.razorpay_payment_id,
+                }),
+              })
+
+              const data = await res.json()
+              if (!res.ok) throw new Error(data.error)
+
               clearCart()
-              router.push(`/order-confirmed?payment_id=${encodeURIComponent(response.razorpay_payment_id)}`)
+              router.push(`/order-confirmed?order_id=${encodeURIComponent(data.orderId)}&payment_id=${encodeURIComponent(response.razorpay_payment_id)}`)
             } catch {
-              // Medusa V2 sometimes throws a 400 state error even when the order was successfully created.
-              // Let's verify if the cart actually completed before showing an error.
-              try {
-                const { cart: verifyCart } = await medusa.carts.retrieve(cart.id)
-                if (verifyCart?.completed_at) {
-                  clearCart()
-                  router.push(`/order-confirmed?payment_id=${encodeURIComponent(response.razorpay_payment_id)}`)
-                  return
-                }
-              } catch (e) {
-                // ignore
-              }
-              
-              setError("Payment was received, but we couldn't finalize the order. Please contact support.")
+              setError("Payment received but order save failed. Please contact support with your payment ID: " + response.razorpay_payment_id)
               setLoading(false)
             }
           },
@@ -173,11 +152,6 @@ export default function CheckoutPage() {
           },
         }
 
-        if (!window.Razorpay) {
-          setError("Payment service is still loading. Please refresh and try again.")
-          setLoading(false)
-          return
-        }
         const rzp = new window.Razorpay(options)
         rzp.open()
       } catch {
@@ -185,10 +159,10 @@ export default function CheckoutPage() {
         setLoading(false)
       }
     },
-    [cart, form, loading, clearCart, router]
+    [items, subtotal, form, loading, clearCart, router]
   )
 
-  if (!cart || cart.items?.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="checkout-page">
         <div className="W" style={{ textAlign: "center" }}>
@@ -209,30 +183,30 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmit}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
 
-            {/* ── Guest details form ────────────────────────────────────── */}
+            {/* ── Details form ─────────────────────────────────────────── */}
             <div>
               <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 20, fontWeight: 700, marginBottom: 28 }}>
                 Your Details
               </h2>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
-                <Field label="First Name" placeholder="Heet" value={form.firstName} onChange={set("firstName")} required maxLength={50} />
-                <Field label="Last Name" placeholder="Parikh" value={form.lastName} onChange={set("lastName")} required maxLength={50} />
+                <Field label="First Name" placeholder="John" value={form.firstName} onChange={set("firstName")} required maxLength={50} />
+                <Field label="Last Name" placeholder="Smith" value={form.lastName} onChange={set("lastName")} required maxLength={50} />
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
                 <Field label="Email Address" type="email" placeholder="you@example.com" value={form.email} onChange={set("email")} required maxLength={254} />
-                <Field label="Phone Number" type="tel" placeholder="9999999999" value={form.phone} onChange={set("phone")} required maxLength={10} />
+                <Field label="Phone Number" type="tel" placeholder="+1 555 000 0000" value={form.phone} onChange={set("phone")} required maxLength={20} />
               </div>
 
               <div style={{ marginBottom: 18 }}>
-                <Field label="Address Line 1" placeholder="123 Street Name, Area" value={form.address1} onChange={set("address1")} required maxLength={200} />
+                <Field label="Address" placeholder="123 Street Name, Area" value={form.address1} onChange={set("address1")} required maxLength={200} />
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 }}>
-                <Field label="City" placeholder="Ahmedabad" value={form.city} onChange={set("city")} required maxLength={100} />
-                <Field label="State" placeholder="Gujarat" value={form.province} onChange={set("province")} required maxLength={100} />
-                <Field label="Pincode" placeholder="380001" value={form.postalCode} onChange={set("postalCode")} required maxLength={6} />
+                <Field label="City" placeholder="New York" value={form.city} onChange={set("city")} required maxLength={100} />
+                <Field label="State / Province" placeholder="NY" value={form.province} onChange={set("province")} required maxLength={100} />
+                <Field label="Postal Code" placeholder="10001" value={form.postalCode} onChange={set("postalCode")} required maxLength={10} />
               </div>
 
               {error && (
@@ -248,13 +222,13 @@ export default function CheckoutPage() {
                 Order Summary
               </div>
 
-              {cart.items?.map((item) => (
+              {items.map((item) => (
                 <div key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, fontSize: 14 }}>
                   <span style={{ color: "var(--text2)" }}>
-                    {item.title} × {item.quantity}
+                    {item.name} × {item.quantity}
                   </span>
                   <span style={{ fontWeight: 600 }}>
-                    {item.unit_price != null ? formatPrice(item.unit_price * item.quantity) : "—"}
+                    {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -262,7 +236,7 @@ export default function CheckoutPage() {
               <div style={{ borderTop: "1px solid var(--bd)", marginTop: 16, paddingTop: 16, display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 22, color: "var(--acc)" }}>
-                  {formatPrice(cart.subtotal ?? 0)}
+                  {formatPrice(subtotal)}
                 </span>
               </div>
 

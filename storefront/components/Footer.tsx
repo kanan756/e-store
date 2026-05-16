@@ -1,3 +1,17 @@
+/**
+ * @file components/Footer.tsx
+ * @description Global site footer — Server Component.
+ *   Static four-column layout:
+ *     1. Brand column  – Logo, tagline, social icon buttons
+ *     2. Quick Links   – Home, About, Shop, Categories, Contact
+ *     3. Support Links – FAQ, Shipping Policy, Returns, Track Order, Warranty
+ *     4. Contact Info  – Email, phone, physical address
+ *   Bottom bar: copyright notice + Privacy / Terms / Cookies links.
+ *
+ * @owner Heet-P
+ * @lastModified May 16, 2026
+ */
+
 import Link from "next/link"
 
 const SOCIALS = ["X", "in", "f", "IG"]

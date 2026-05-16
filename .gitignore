@@ -1,0 +1,35 @@
+# ── Secrets / Environment ───────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!storefront/.env.example
+
+# ── AI assistant config ─────────────────────────────────────────────────────────
+.claude/
+.gemini/
+
+# ── Node ────────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+*.log
+
+# ── Next.js build output ────────────────────────────────────────────────────────
+.next/
+out/
+dist/
+build/
+
+# ── TypeScript ──────────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Vercel ──────────────────────────────────────────────────────────────────────
+.vercel
+
+# ── Markdown working docs (not README) ─────────────────────────────────────────
+# Keeps README.md tracked, ignores everything else
+*.md
+!README.md
+
+# ── OS ──────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
