@@ -1,3 +1,12 @@
+/**
+ * @file components/Cta.tsx
+ * @description Call-to-action section on the home page.
+ *   "Contact Us" now correctly links to the /contact page.
+ *
+ * @owner Heet-P
+ * @lastModified May 18, 2026
+ */
+
 import Link from "next/link"
 
 function ArrowIcon() {
@@ -10,15 +19,15 @@ function ArrowIcon() {
 
 export default function Cta() {
   return (
-    <section id="contact" className="cta">
+    <section id="cta" className="cta">
       <div className="W">
         <h2 className="D3 cta__h rv">
-          Ready To Elevate Your<br />Shopping Experience?
+          Ready to Partner With Us?
         </h2>
         <p className="cta__s rv d1">
-          Get in touch with our team for personalized solutions.
+          Get in touch for custom wire harness, cable assembly, or PCB assembly solutions tailored to your OEM requirements.
         </p>
-        <Link href="mailto:hello@clientstore.com" className="btn bp rv d2">
+        <Link href="/contact" className="btn bp rv d2">
           Contact Us <ArrowIcon />
         </Link>
       </div>

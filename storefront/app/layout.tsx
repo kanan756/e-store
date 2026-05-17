@@ -1,22 +1,33 @@
 import type { Metadata } from "next"
-import { Sora, DM_Sans } from "next/font/google"
+import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google"
 import "@/styles/globals.css"
 import { ThemeScript } from "@/components/ThemeScript"
 import Providers from "@/components/Providers"
 
-const sora = Sora({
+// Display / headline font — tight tracking, bold weights
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  weight: ["300", "400", "600", "700", "800"],
-  variable: "--font-sora",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sora",   // keep same CSS var name — no component changes needed
   display: "swap",
 })
 
-const dmSans = DM_Sans({
+// Body copy — exceptional legibility across locales
+const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
-  variable: "--font-dm-sans",
+  variable: "--font-dm-sans", // keep same CSS var name — no component changes needed
   display: "swap",
 })
+
+// Labels, metadata, technical specs — "Precision" brand pillar
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-mono",
+  display: "swap",
+})
+
 
 export const metadata: Metadata = {
   title: {
@@ -49,7 +60,7 @@ export default function RootLayout({
         {/* Inline script runs before paint to apply saved theme and prevent flash */}
         <ThemeScript />
       </head>
-      <body className={`${sora.variable} ${dmSans.variable}`}>
+      <body className={`${hanken.variable} ${inter.variable} ${mono.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -1,10 +1,26 @@
 import Link from "next/link"
 
 const CATS = [
-  { name: "Electronics",  sub: "Advanced tech & gadgets",   href: "/products?category=electronics"  },
-  { name: "Fashion",      sub: "Premium apparel & style",   href: "/products?category=fashion"      },
-  { name: "Accessories",  sub: "Precision-crafted details", href: "/products?category=accessories"  },
-  { name: "Essentials",   sub: "Industrial daily use",      href: "/products?category=essentials"   },
+  {
+    name: "Wire Harnesses",
+    sub: "Custom OEM & small-batch wiring",
+    href: "/products?category=wire-harnesses",
+  },
+  {
+    name: "Cable Assemblies",
+    sub: "Multi-industry connector builds",
+    href: "/products?category=cable-assemblies",
+  },
+  {
+    name: "PCB Assemblies",
+    sub: "SMT & through-hole boards",
+    href: "/products?category=pcb-assemblies",
+  },
+  {
+    name: "OEM Solutions",
+    sub: "White goods, robotics & medical",
+    href: "/products?category=oem-solutions",
+  },
 ]
 
 function ArrowIcon() {
@@ -15,14 +31,14 @@ function ArrowIcon() {
   )
 }
 
-// SVG placeholder matching the design's striped pattern
+// SVG placeholder with diagonal-line texture and category label
 function CategoryPlaceholder({ name }: { name: string }) {
   const id = `cat-${name.replace(/\W/g, "")}`
   const colors: Record<string, { bg: string; line: string }> = {
-    Electronics:  { bg: "#0D1520", line: "#1A2F44" },
-    Fashion:      { bg: "#1A0F12", line: "#2E1A22" },
-    Accessories:  { bg: "#0D1A14", line: "#1A2E22" },
-    Essentials:   { bg: "#1A1408", line: "#2E2210" },
+    "Wire Harnesses":   { bg: "#0A1A12", line: "#143322" },
+    "Cable Assemblies": { bg: "#0A1218", line: "#132030" },
+    "PCB Assemblies":   { bg: "#101A0A", line: "#1E3014" },
+    "OEM Solutions":    { bg: "#160F0A", line: "#2A1A10" },
   }
   const { bg, line } = colors[name] ?? { bg: "#1A1A18", line: "#2A2A24" }
 
@@ -48,7 +64,7 @@ export default function Categories() {
       <div className="W">
         <div className="sHdr sHdr--c rv">
           <div className="lbl">SHOP BY CATEGORY</div>
-          <h2 className="D2" style={{ marginTop: 16 }}>Explore Our Collections</h2>
+          <h2 className="D2" style={{ marginTop: 16 }}>Our Product Categories</h2>
         </div>
         <div className="catG">
           {CATS.map((c, i) => (

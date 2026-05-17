@@ -30,14 +30,14 @@ import type { Product, Order, Blog, Inquiry } from "@/lib/sheets"
 const s = {
   page: {
     minHeight: "100vh",
-    background: "#0f0f13",
+    background: "#131310",
     fontFamily: "'Inter', system-ui, sans-serif",
-    color: "#e0e0f0",
+    color: "#e5e2db",
   } as React.CSSProperties,
   sidebar: {
     width: 240,
-    background: "#1a1a24",
-    borderRight: "1px solid #252535",
+    background: "#1c1c18",
+    borderRight: "1px solid #2a2a24",
     position: "fixed" as const,
     top: 0, left: 0, bottom: 0,
     display: "flex", flexDirection: "column" as const,
@@ -49,8 +49,8 @@ const s = {
     minHeight: "100vh",
   } as React.CSSProperties,
   card: {
-    background: "#1e1e2a",
-    border: "1px solid #252535",
+    background: "#1c1c18",
+    border: "1px solid #2a2a24",
     borderRadius: 16,
     padding: 24,
   } as React.CSSProperties,
@@ -60,12 +60,12 @@ const s = {
   } as React.CSSProperties,
   input: {
     width: "100%", boxSizing: "border-box" as const,
-    padding: "10px 14px", background: "#252535",
-    border: "1px solid #333344", borderRadius: 8,
-    color: "#e0e0f0", fontSize: 14, outline: "none",
+    padding: "10px 14px", background: "#252520",
+    border: "1px solid #333330", borderRadius: 8,
+    color: "#e5e2db", fontSize: 14, outline: "none",
   } as React.CSSProperties,
   label: {
-    display: "block", color: "#8888aa", fontSize: 12,
+    display: "block", color: "#737874", fontSize: 12,
     fontWeight: 600, marginBottom: 6, textTransform: "uppercase" as const,
     letterSpacing: "0.05em",
   } as React.CSSProperties,
@@ -76,20 +76,20 @@ function formatPrice(rs: number) {
 }
 
 // ── Nav Item ──────────────────────────────────────────────────────────────────
-function NavItem({ icon, label, active, onClick }: { icon: string; label: string; active: boolean; onClick: () => void }) {
+function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       style={{
         display: "flex", alignItems: "center", gap: 12,
-        padding: "12px 20px", background: active ? "rgba(37,99,235,0.15)" : "transparent",
-        border: "none", borderLeft: active ? "3px solid #2563eb" : "3px solid transparent",
-        color: active ? "#60a5fa" : "#8888aa", cursor: "pointer",
+        padding: "12px 20px", background: active ? "rgba(0,109,55,0.12)" : "transparent",
+        border: "none", borderLeft: active ? "3px solid #006d37" : "3px solid transparent",
+        color: active ? "#4ae183" : "#737874", cursor: "pointer",
         fontSize: 14, fontWeight: active ? 700 : 500, width: "100%", textAlign: "left",
         transition: "all 0.15s",
       }}
     >
-      <span>{icon}</span> {label}
+      <span style={{ opacity: active ? 1 : 0.7 }}>{icon}</span> {label}
     </button>
   )
 }
@@ -171,8 +171,8 @@ function ProductForm({
       </div>
       {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-        <button type="button" onClick={onCancel} style={{ ...s.btn, background: "#252535", color: "#aaa" }}>Cancel</button>
-        <button type="submit" disabled={saving} style={{ ...s.btn, background: "#2563eb", color: "#fff", opacity: saving ? 0.7 : 1 }}>
+        <button type="button" onClick={onCancel} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>Cancel</button>
+        <button type="submit" disabled={saving} style={{ ...s.btn, background: "#4ae183", color: "#131310", opacity: saving ? 0.7 : 1 }}>
           {saving ? "Saving…" : rowIndex !== undefined ? "Update Product" : "Add Product"}
         </button>
       </div>
@@ -191,7 +191,7 @@ function ProductsTab() {
     setLoading(true)
     const res = await fetch("/api/admin/products")
     const data = await res.json()
-    setProducts((data.products ?? []).map((p: Product, i: number) => ({ ...p, rowIndex: i + 2 })))
+    setProducts(data.products ?? [])
     setLoading(false)
   }, [])
 
@@ -212,7 +212,7 @@ function ProductsTab() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Products</h2>
         <button onClick={() => { setShowForm(true); setEditing(null) }}
-          style={{ ...s.btn, background: "#2563eb", color: "#fff" }}>+ Add Product</button>
+          style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>+ Add Product</button>
       </div>
 
       {(showForm || editing) && (
@@ -235,22 +235,22 @@ function ProductsTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #252535" }}>
+              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
                 {["Name", "Category", "Price", "Handle", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#8888aa", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#737874", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {products.map((p) => (
-                <tr key={p.id} style={{ borderBottom: "1px solid #1e1e2a" }}>
+                <tr key={p.id} style={{ borderBottom: "1px solid #1c1c18" }}>
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
-                  <td style={{ padding: "14px 12px", color: "#8888aa" }}>{p.category || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "#60a5fa" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#737874" }}>{p.category || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#4ae183" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{p.handle}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "#252535", color: "#aaa", padding: "6px 12px" }}>Edit</button>
+                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "#252520", color: "#aaa", padding: "6px 12px" }}>Edit</button>
                       <button onClick={() => handleDelete(p.rowIndex, p.name)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
                     </div>
                   </td>
@@ -319,7 +319,7 @@ function OrdersTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Orders</h2>
-        <button onClick={fetchOrders} style={{ ...s.btn, background: "#252535", color: "#aaa" }}>↻ Refresh</button>
+        <button onClick={fetchOrders} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>↻ Refresh</button>
       </div>
 
       {editing && (
@@ -343,13 +343,13 @@ function OrdersTab() {
               type="checkbox"
               checked={sendEmail}
               onChange={(e) => setSendEmail(e.target.checked)}
-              style={{ width: 16, height: 16, accentColor: "#2563eb" }}
+              style={{ width: 16, height: 16, accentColor: "#4ae183" }}
             />
-            <span>📧 Send status update email to <strong style={{ color: "#60a5fa" }}>{editing.email}</strong></span>
+            <span>📧 Send status update email to <strong style={{ color: "#4ae183" }}>{editing.email}</strong></span>
           </label>
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-            <button onClick={() => setEditing(null)} style={{ ...s.btn, background: "#252535", color: "#aaa" }}>Cancel</button>
-            <button onClick={saveOrder} disabled={saving} style={{ ...s.btn, background: "#16a34a", color: "#fff" }}>
+            <button onClick={() => setEditing(null)} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>Cancel</button>
+            <button onClick={saveOrder} disabled={saving} style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>
               {saving ? "Saving…" : "Update Status"}
             </button>
           </div>
@@ -364,16 +364,16 @@ function OrdersTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #252535" }}>
+              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
                 {["Order ID", "Customer", "Product", "Amount", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#8888aa", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#737874", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => (
-                <tr key={o.orderId} style={{ borderBottom: "1px solid #1e1e2a" }}>
-                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "#60a5fa" }}>{o.orderId}</td>
+                <tr key={o.orderId} style={{ borderBottom: "1px solid #1c1c18" }}>
+                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "#4ae183" }}>{o.orderId}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ fontWeight: 600 }}>{o.customerName}</div>
                     <div style={{ fontSize: 12, color: "#666" }}>{o.email}</div>
@@ -388,7 +388,7 @@ function OrdersTab() {
                     }}>{o.status}</span>
                   </td>
                   <td style={{ padding: "14px 12px" }}>
-                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "#252535", color: "#aaa", padding: "6px 12px" }}>
+                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "#252520", color: "#aaa", padding: "6px 12px" }}>
                       Update
                     </button>
                   </td>
@@ -418,7 +418,7 @@ function BlogsTab() {
     setLoading(true)
     const res = await fetch("/api/admin/blogs")
     const data = await res.json()
-    setBlogs((data.blogs ?? []).map((b: Blog, i: number) => ({ ...b, rowIndex: i + 2 })))
+    setBlogs(data.blogs ?? [])
     setLoading(false)
   }, [])
 
@@ -451,7 +451,7 @@ function BlogsTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Blog Posts</h2>
-        <button onClick={() => setShowForm(true)} style={{ ...s.btn, background: "#7c3aed", color: "#fff" }}>+ New Blog Post</button>
+        <button onClick={() => setShowForm(true)} style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>+ New Blog Post</button>
       </div>
 
       {showForm && (
@@ -492,8 +492,8 @@ function BlogsTab() {
             </div>
             {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
             <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-              <button type="button" onClick={() => setShowForm(false)} style={{ ...s.btn, background: "#252535", color: "#aaa" }}>Cancel</button>
-              <button type="submit" disabled={saving} style={{ ...s.btn, background: "#7c3aed", color: "#fff" }}>{saving ? "Saving…" : "Publish Blog"}</button>
+              <button type="button" onClick={() => setShowForm(false)} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>Cancel</button>
+              <button type="submit" disabled={saving} style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>{saving ? "Saving…" : "Publish Blog"}</button>
             </div>
           </form>
         </div>
@@ -507,23 +507,23 @@ function BlogsTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #252535" }}>
+              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
                 {["Title", "Slug", "Publish Date", "Keywords", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#8888aa", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#737874", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {blogs.map((b) => (
-                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid #1e1e2a" }}>
+                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid #1c1c18" }}>
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{b.title}</td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{b.slug}</td>
-                  <td style={{ padding: "14px 12px", color: "#8888aa" }}>{b.publishDate || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "#8888aa", fontSize: 12 }}>{b.keywords || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#737874" }}>{b.publishDate || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#737874", fontSize: 12 }}>{b.keywords || "—"}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: b.published ? "rgba(22,163,74,0.12)" : "rgba(136,136,136,0.12)",
-                      color: b.published ? "#16a34a" : "#888",
+                      background: b.published ? "rgba(74,225,131,0.15)" : "rgba(136,136,136,0.12)",
+                      color: b.published ? "#4ae183" : "#888",
                     }}>{b.published ? "Published" : "Draft"}</span>
                   </td>
                   <td style={{ padding: "14px 12px" }}>
@@ -573,7 +573,7 @@ function InquiriesTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Inquiries</h2>
-        <button onClick={fetchInquiries} style={{ ...s.btn, background: "#252535", color: "#aaa" }}>↻ Refresh</button>
+        <button onClick={fetchInquiries} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>↻ Refresh</button>
       </div>
       <div style={s.card}>
         {loading ? (
@@ -584,7 +584,7 @@ function InquiriesTab() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {inquiries.map((inq) => (
               <div key={inq.id} style={{
-                border: `1px solid ${expanded === inq.id ? "#2563eb44" : "#252535"}`,
+                border: `1px solid ${expanded === inq.id ? "rgba(74,225,131,0.2)" : "#2a2a24"}`,
                 borderRadius: 12, overflow: "hidden",
               }}>
                 <div
@@ -593,8 +593,8 @@ function InquiriesTab() {
                 >
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{inq.subject}</div>
-                    <div style={{ fontSize: 13, color: "#8888aa" }}>
-                      {inq.name} &bull; <a href={`mailto:${inq.email}`} style={{ color: "#60a5fa" }}>{inq.email}</a>
+                    <div style={{ fontSize: 13, color: "#737874" }}>
+                      {inq.name} &bull; <a href={`mailto:${inq.email}`} style={{ color: "#4ae183" }}>{inq.email}</a>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
@@ -607,8 +607,8 @@ function InquiriesTab() {
                   </div>
                 </div>
                 {expanded === inq.id && (
-                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #252535" }}>
-                    <div style={{ padding: "14px 16px", background: "#252535", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "#ccc", fontSize: 14 }}>
+                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #2a2a24" }}>
+                    <div style={{ padding: "14px 16px", background: "#252520", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "#ccc", fontSize: 14 }}>
                       {inq.message}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -634,14 +634,17 @@ function InquiriesTab() {
 }
 
 // ── Stats Cards ───────────────────────────────────────────────────────────────
-function StatsTab() {
+function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
   const [stats, setStats] = useState({ products: 0, orders: 0, revenue: 0 })
+  const [latestOrders, setLatestOrders] = useState<Order[]>(recentOrders)
+
   useEffect(() => {
     Promise.all([
       fetch("/api/admin/products").then((r) => r.json()),
       fetch("/api/admin/orders").then((r) => r.json()),
     ]).then(([pd, od]) => {
       const orders: Order[] = od.orders ?? []
+      setLatestOrders(orders.slice(-5).reverse())
       setStats({
         products: pd.products?.length ?? 0,
         orders: orders.length,
@@ -650,29 +653,106 @@ function StatsTab() {
     })
   }, [])
 
-  const cards = [
-    { label: "Total Products", value: stats.products, icon: "📦", color: "#2563eb" },
-    { label: "Total Orders", value: stats.orders, icon: "🛒", color: "#7c3aed" },
-    { label: "Total Revenue", value: stats.revenue > 0 ? formatPrice(stats.revenue) : "₹0", icon: "💰", color: "#16a34a" },
+  const STATUS_COLOR: Record<string, string> = {
+    Processing: "#f59e0b", Packed: "#8b5cf6", Shipped: "#2563eb",
+    "In Transit": "#0891b2", Delivered: "#16a34a", Cancelled: "#ef4444",
+  }
+
+  const kpis = [
+    {
+      label: "TOTAL PRODUCTS",
+      value: stats.products,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+      ),
+    },
+    {
+      label: "ORDERS PROCESSED",
+      value: stats.orders,
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+      ),
+    },
+    {
+      label: "TOTAL REVENUE",
+      value: stats.revenue > 0 ? formatPrice(stats.revenue) : "₹0",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      ),
+    },
   ]
 
   return (
     <div>
-      <h2 style={{ margin: "0 0 24px", fontSize: 22, fontWeight: 800 }}>Dashboard Overview</h2>
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.12em", color: "#4ae183", marginBottom: 12, textTransform: "uppercase" }}>OVERVIEW</div>
+        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fcf9f2" }}>Dashboard</h2>
+      </div>
+
+      {/* KPI Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 32 }}>
-        {cards.map((c) => (
-          <div key={c.label} style={{ ...s.card }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>{c.icon}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: c.color }}>{c.value}</div>
-            <div style={{ fontSize: 13, color: "#8888aa", marginTop: 4 }}>{c.label}</div>
+        {kpis.map((c) => (
+          <div key={c.label} style={{
+            ...s.card,
+            display: "flex", flexDirection: "column", gap: 16,
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.1em", color: "#737874", textTransform: "uppercase" }}>{c.label}</div>
+              <div style={{
+                width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                background: "rgba(0,109,55,0.1)", border: "1px solid rgba(74,225,131,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>{c.icon}</div>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "#fcf9f2", letterSpacing: "-0.02em" }}>{c.value}</div>
           </div>
         ))}
       </div>
+
+      {/* Recent Orders */}
       <div style={{ ...s.card }}>
-        <h3 style={{ margin: "0 0 12px", color: "#8888aa", fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Quick Navigation</h3>
-        <p style={{ color: "#aaa", fontSize: 14, margin: 0 }}>
-          Use the sidebar to manage Products, view and update Orders. All changes are saved directly to your Google Sheet.
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fcf9f2" }}>Recent Orders</h3>
+          <span style={{ fontSize: 12, color: "#4ae183", fontFamily: "monospace", letterSpacing: "0.05em", cursor: "default" }}>VIEW ALL IN ORDERS TAB →</span>
+        </div>
+        {latestOrders.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "32px 0", color: "#737874" }}>No orders yet.</div>
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
+                {["ORDER ID", "CUSTOMER", "PRODUCT", "AMOUNT", "STATUS"].map((h) => (
+                  <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "#737874", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {latestOrders.map((o, i) => (
+                <tr key={o.orderId + i} style={{ borderBottom: "1px solid #1c1c18" }}>
+                  <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "#4ae183", fontWeight: 700 }}>{o.orderId}</td>
+                  <td style={{ padding: "14px", fontSize: 14, color: "#e5e2db" }}>{o.customerName}</td>
+                  <td style={{ padding: "14px", fontSize: 13, color: "#b0ada6", fontStyle: "italic", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.product}</td>
+                  <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "#fcf9f2" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
+                  <td style={{ padding: "14px" }}>
+                    <span style={{
+                      padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                      background: `${STATUS_COLOR[o.status] ?? "#737874"}18`,
+                      color: STATUS_COLOR[o.status] ?? "#737874",
+                      border: `1px solid ${STATUS_COLOR[o.status] ?? "#737874"}33`,
+                    }}>{o.status}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   )
@@ -692,32 +772,45 @@ export default function AdminDashboard() {
     <div style={s.page}>
       {/* Sidebar */}
       <aside style={s.sidebar}>
-        <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid #252535" }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>🛡️ Admin Panel</div>
-          <div style={{ fontSize: 12, color: "#555", marginTop: 4 }}>Client Store</div>
+        <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid #2a2a24" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+              background: "rgba(0,109,55,0.15)", border: "1px solid rgba(74,225,131,0.2)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#fcf9f2", letterSpacing: "-0.01em" }}>Admin Panel</div>
+              <div style={{ fontSize: 11, color: "#737874", marginTop: 1, fontFamily: "monospace" }}>SHA · Management</div>
+            </div>
+          </div>
         </div>
 
         <nav style={{ flex: 1, padding: "12px 0" }}>
-          <NavItem icon="📊" label="Overview" active={tab === "overview"} onClick={() => setTab("overview")} />
-          <NavItem icon="📦" label="Products" active={tab === "products"} onClick={() => setTab("products")} />
-          <NavItem icon="🛒" label="Orders" active={tab === "orders"} onClick={() => setTab("orders")} />
-          <NavItem icon="✍️" label="Blog Posts" active={tab === "blogs"} onClick={() => setTab("blogs")} />
-          <NavItem icon="📬" label="Inquiries" active={tab === "inquiries"} onClick={() => setTab("inquiries")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} label="Overview" active={tab === "overview"} onClick={() => setTab("overview")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>} label="Products" active={tab === "products"} onClick={() => setTab("products")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} label="Orders" active={tab === "orders"} onClick={() => setTab("orders")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => setTab("blogs")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => setTab("inquiries")} />
         </nav>
 
-        <div style={{ padding: "16px 20px", borderTop: "1px solid #252535" }}>
-          <a href="/" target="_blank" style={{ display: "block", color: "#8888aa", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid #2a2a24" }}>
+          <a href="/" target="_blank" style={{ display: "block", color: "#737874", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
             ↗ View Store
           </a>
           <button onClick={handleLogout} style={{ ...s.btn, background: "transparent", color: "#ef4444", padding: "8px 0", width: "100%", textAlign: "left" }}>
-            ⬅ Logout
+            ← Logout
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <main style={s.main}>
-        {tab === "overview" && <StatsTab />}
+        {tab === "overview" && <StatsTab orders={[]} />}
         {tab === "products" && <ProductsTab />}
         {tab === "orders" && <OrdersTab />}
         {tab === "blogs" && <BlogsTab />}

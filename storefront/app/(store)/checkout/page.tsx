@@ -146,7 +146,7 @@ export default function CheckoutPage() {
             email: details.email,
             contact: details.phone,
           },
-          theme: { color: "#2563EB" },
+          theme: { color: "#006d37" },
           modal: {
             ondismiss: () => setLoading(false),
           },
@@ -181,7 +181,7 @@ export default function CheckoutPage() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
+          <div className="checkout-layout" style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
 
             {/* ── Details form ─────────────────────────────────────────── */}
             <div>
@@ -189,12 +189,12 @@ export default function CheckoutPage() {
                 Your Details
               </h2>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
+              <div className="fields-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
                 <Field label="First Name" placeholder="John" value={form.firstName} onChange={set("firstName")} required maxLength={50} />
                 <Field label="Last Name" placeholder="Smith" value={form.lastName} onChange={set("lastName")} required maxLength={50} />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
+              <div className="fields-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 18 }}>
                 <Field label="Email Address" type="email" placeholder="you@example.com" value={form.email} onChange={set("email")} required maxLength={254} />
                 <Field label="Phone Number" type="tel" placeholder="+1 555 000 0000" value={form.phone} onChange={set("phone")} required maxLength={20} />
               </div>
@@ -203,7 +203,7 @@ export default function CheckoutPage() {
                 <Field label="Address" placeholder="123 Street Name, Area" value={form.address1} onChange={set("address1")} required maxLength={200} />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 }}>
+              <div className="fields-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 }}>
                 <Field label="City" placeholder="New York" value={form.city} onChange={set("city")} required maxLength={100} />
                 <Field label="State / Province" placeholder="NY" value={form.province} onChange={set("province")} required maxLength={100} />
                 <Field label="Postal Code" placeholder="10001" value={form.postalCode} onChange={set("postalCode")} required maxLength={10} />
@@ -217,7 +217,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* ── Order summary ─────────────────────────────────────────── */}
-            <div style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 32, position: "sticky", top: 100 }}>
+            <div className="checkout-summary" style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 32, position: "sticky", top: 100 }}>
               <div style={{ fontFamily: "var(--font-sora)", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20, color: "var(--text2)" }}>
                 Order Summary
               </div>

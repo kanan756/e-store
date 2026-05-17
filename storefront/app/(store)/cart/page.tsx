@@ -56,7 +56,7 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
+          <div className="cart-layout" style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
 
             {/* ── Line items ─────────────────────────────────────────── */}
             <div>
@@ -129,7 +129,7 @@ export default function CartPage() {
             </div>
 
             {/* ── Summary ─────────────────────────────────────────────── */}
-            <div style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 32, position: "sticky", top: 100 }}>
+            <div className="cart-summary" style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 32, position: "sticky", top: 100 }}>
               <div style={{ fontFamily: "var(--font-sora)", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 24, color: "var(--text2)" }}>
                 Order Summary
               </div>

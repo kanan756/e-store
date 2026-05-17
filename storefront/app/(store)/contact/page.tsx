@@ -97,7 +97,7 @@ export default function ContactPage() {
   return (
     <div id="contact" style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80 }}>
       <div className="W" style={{ maxWidth: 900 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 64, alignItems: "start" }}>
+        <div className="contact-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 64, alignItems: "start" }}>
 
           {/* Left — Info */}
           <div>
@@ -109,16 +109,29 @@ export default function ContactPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {[
-                { icon: "📧", label: "Email", value: "hello@clientstore.com" },
-                { icon: "📞", label: "Phone", value: "+1 (800) 555-0190" },
-                { icon: "📍", label: "Address", value: "Industrial Park, New York, NY 10001" },
-                { icon: "⏰", label: "Hours", value: "Mon – Fri, 9 AM – 6 PM EST" },
+                {
+                  label: "Email", value: "hello@clientstore.com",
+                  icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>),
+                },
+                {
+                  label: "Phone", value: "+1 (800) 555-0190",
+                  icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.07 6.07l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>),
+                },
+                {
+                  label: "Address", value: "Industrial Park, New York, NY 10001",
+                  icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>),
+                },
+                {
+                  label: "Hours", value: "Mon – Fri, 9 AM – 6 PM EST",
+                  icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>),
+                },
               ].map((item) => (
                 <div key={item.label} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                    background: "rgba(37,99,235,0.12)", border: "1px solid rgba(37,99,235,0.2)",
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+                    background: "rgba(0,109,55,0.08)", border: "1px solid rgba(0,109,55,0.15)",
+                    color: "var(--acc)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
                   }}>{item.icon}</div>
                   <div>
                     <div style={{ fontSize: 12, color: "var(--text2)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{item.label}</div>
@@ -133,7 +146,12 @@ export default function ContactPage() {
           <div style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 36 }}>
             {status === "success" ? (
               <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <div style={{ fontSize: 56, marginBottom: 20 }}>✅</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--acc)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="56" height="56">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                </div>
                 <h2 style={{ fontFamily: "var(--font-sora)", fontWeight: 800, marginBottom: 12 }}>Message Sent!</h2>
                 <p style={{ color: "var(--text2)", marginBottom: 24 }}>
                   Thanks for reaching out. We&apos;ve sent you a confirmation email and will reply within 1–2 business days.
@@ -204,11 +222,11 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={status === "sending"}
+                  className="btn bp"
                   style={{
-                    padding: "15px", background: "linear-gradient(135deg, #2563eb, #7c3aed)",
-                    color: "#fff", border: "none", borderRadius: 10,
-                    fontSize: 16, fontWeight: 700, cursor: status === "sending" ? "not-allowed" : "pointer",
-                    opacity: status === "sending" ? 0.7 : 1,
+                    width: "100%", justifyContent: "center",
+                    opacity: status === "sending" ? 0.65 : 1,
+                    cursor: status === "sending" ? "not-allowed" : "pointer",
                   }}
                 >
                   {status === "sending" ? "Sending…" : "Send Message →"}

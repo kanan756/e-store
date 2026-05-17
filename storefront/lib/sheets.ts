@@ -34,6 +34,7 @@ const SHEET_ID = process.env.GOOGLE_SHEET_ID!
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface Product {
+  rowIndex?: number
   id: string
   name: string
   category: string
@@ -44,6 +45,7 @@ export interface Product {
 }
 
 export interface Order {
+  rowIndex?: number
   orderId: string
   customerName: string
   email: string
@@ -55,6 +57,7 @@ export interface Order {
 }
 
 export interface Blog {
+  rowIndex?: number
   title: string
   keywords: string
   slug: string
@@ -66,6 +69,7 @@ export interface Blog {
 }
 
 export interface Inquiry {
+  rowIndex?: number
   id: string
   name: string
   email: string
@@ -87,8 +91,8 @@ export async function getProducts(): Promise<Product[]> {
 
   const rows = res.data.values ?? []
   return rows
-    .filter((r) => r[0]) // skip empty rows
     .map((r, i) => ({
+      rowIndex: i + 2,
       id: String(i + 1),
       name: r[0] ?? "",
       category: r[1] ?? "",
@@ -97,6 +101,7 @@ export async function getProducts(): Promise<Product[]> {
       price: Number(r[4]) || 0,
       handle: r[5] ?? slugify(r[0] ?? ""),
     }))
+    .filter((p) => p.name !== "") // skip empty rows
 }
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
@@ -175,8 +180,8 @@ export async function getBlogs(publishedOnly = false): Promise<Blog[]> {
 
   const rows = res.data.values ?? []
   return rows
-    .filter((r) => r[0])
-    .map((r) => ({
+    .map((r, i) => ({
+      rowIndex: i + 2,
       title: r[0] ?? "",
       keywords: r[1] ?? "",
       slug: r[2] ?? slugify(r[0] ?? ""),
@@ -186,6 +191,7 @@ export async function getBlogs(publishedOnly = false): Promise<Blog[]> {
       imageUrl: r[6] ?? "",
       published: (r[7] ?? "true").toLowerCase() !== "false",
     }))
+    .filter((b) => b.title !== "")
     .filter((b) => !publishedOnly || b.published)
 }
 
@@ -216,13 +222,11 @@ export async function appendProduct(product: Omit<Product, "id">): Promise<void>
 }
 
 export async function updateProduct(rowIndex: number, product: Omit<Product, "id">): Promise<void> {
-  // rowIndex is 1-based data index; row 1 is header, so data starts at row 2
-  const sheetRow = rowIndex + 1
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
-    range: `Products!A${sheetRow}:F${sheetRow}`,
+    range: `Products!A${rowIndex}:F${rowIndex}`,
     valueInputOption: "USER_ENTERED",
     requestBody: {
       values: [[
@@ -238,13 +242,12 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
 }
 
 export async function deleteProduct(rowIndex: number): Promise<void> {
-  const sheetRow = rowIndex + 1
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   // Clear the row content (simplest approach — avoids needing sheet ID for delete)
   await sheets.spreadsheets.values.clear({
     spreadsheetId: SHEET_ID,
-    range: `Products!A${sheetRow}:F${sheetRow}`,
+    range: `Products!A${rowIndex}:F${rowIndex}`,
   })
 }
 
@@ -310,12 +313,11 @@ export async function appendBlog(blog: Blog): Promise<void> {
 }
 
 export async function deleteBlog(rowIndex: number): Promise<void> {
-  const sheetRow = rowIndex + 1
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.clear({
     spreadsheetId: SHEET_ID,
-    range: `Blogs!A${sheetRow}:H${sheetRow}`,
+    range: `Blogs!A${rowIndex}:H${rowIndex}`,
   })
 }
 
@@ -324,7 +326,7 @@ export async function updateBlogPublished(rowIndex: number, published: boolean):
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
-    range: `Blogs!H${rowIndex + 1}`,
+    range: `Blogs!H${rowIndex}`,
     valueInputOption: "USER_ENTERED",
     requestBody: { values: [[published ? "true" : "false"]] },
   })
@@ -362,7 +364,6 @@ export async function getAllInquiries(): Promise<(Inquiry & { rowIndex: number }
   })
   const rows = res.data.values ?? []
   return rows
-    .filter((r) => r[0])
     .map((r, i) => ({
       rowIndex: i + 2,
       id: r[0] ?? "",
@@ -373,6 +374,7 @@ export async function getAllInquiries(): Promise<(Inquiry & { rowIndex: number }
       submittedAt: r[5] ?? "",
       status: r[6] ?? "New",
     }))
+    .filter((r) => r.id !== "")
 }
 
 export async function updateInquiryStatus(rowIndex: number, status: string): Promise<void> {
