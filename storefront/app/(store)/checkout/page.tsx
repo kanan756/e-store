@@ -114,7 +114,7 @@ export default function CheckoutPage() {
           amount: subtotal * 100, // Razorpay expects paise; price stored in Rs
           currency: "INR",
 
-          name: "Client Store",
+          name: "Superior Harnessing & Assembly",
           description: productSummary,
           handler: async (response: RazorpayResponse) => {
             try {

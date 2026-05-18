@@ -26,7 +26,8 @@ export const metadata: Metadata = {
 export const revalidate = 3600
 
 function isValidUrl(url: string) {
-  if (!url) return false
+  if (!url || url === "-") return false
+  if (url.startsWith("/")) return true
   try { new URL(url); return true } catch { return false }
 }
 

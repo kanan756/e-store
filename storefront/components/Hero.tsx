@@ -21,7 +21,6 @@ function ArrowIcon() {
   )
 }
 
-const CHIPS = ["Wire Harnessing", "Cable Assembly", "PCB Assembly", "OEM Solutions"]
 
 /** Watches data-theme on <html> and returns true when dark mode is active. */
 function useIsDark() {
@@ -45,7 +44,11 @@ export default function Hero() {
   const isDark = useIsDark()
 
   return (
-    <section id="home" className="hero">
+    <section id="home" className="hero" style={{
+      backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070')",
+      backgroundSize: "cover",
+      backgroundPosition: "center"
+    }}>
       <div className="W hero__split">
 
         {/* ── LEFT 40% — Text ────────────────────────────────── */}
@@ -60,58 +63,36 @@ export default function Hero() {
 
           <p className="hero__sub hu3">
             Trusted wire harnessing, cable assembly, and PCB assembly
-            solutions for OEMs, robotics, medical, and white goods industries.
+            solutions for OEMs, robotics, medical, and white goods industries. 
           </p>
 
-          {/* USP Chips */}
-          <div className="hero__chips hu3">
-            {CHIPS.map((c) => (
-              <span key={c} className="hero__chip">{c}</span>
-            ))}
-          </div>
 
           <div className="hero__btns hu4">
             <Link href="/products" className="btn bp">
               Shop Now <ArrowIcon />
             </Link>
-            <Link href="/about" className="btn bo">
+            <Link href="/about" className="btn bod">
               About Us
             </Link>
           </div>
         </div>
 
-        {/* ── RIGHT 60% — Placeholder (replace with final illustration) ── */}
+        {/* ── RIGHT 60% — Demo Image ── */}
         <div className="hero__img-wrap hu2" style={{
-          border: "1px solid rgba(74, 225, 131, 0.25)",
-          boxShadow: "0 0 32px rgba(74, 225, 131, 0.12), inset 0 0 48px rgba(74, 225, 131, 0.04)",
           borderRadius: "var(--rL)",
+          overflow: "hidden",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 16,
           minHeight: 420,
           background: "transparent",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.1)",
         }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(74,225,131,0.5)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-          </svg>
-          <span style={{
-            fontFamily: "var(--font-mono, monospace)",
-            fontSize: 11,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "rgba(74, 225, 131, 0.5)",
-          }}>
-            Hero Illustration — Coming Soon
-          </span>
-          <span style={{
-            fontSize: 12,
-            color: "var(--textM)",
-            letterSpacing: "0.04em",
-          }}>
-            Wire Harnessing · Cable Assembly · PCB Assembly
-          </span>
+          <img 
+            src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?q=80&w=2070" 
+            alt="Precision Wiring Assembly" 
+            style={{ width: "100%", height: "100%", objectFit: "cover", minHeight: 420 }} 
+          />
         </div>
 
       </div>

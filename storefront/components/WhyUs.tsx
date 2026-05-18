@@ -16,7 +16,13 @@ const FEATS = [
 
 export default function WhyUs() {
   return (
-    <section className="S" style={{ background: "var(--bg2)" }}>
+    <section className="S" style={{ 
+      backgroundImage: "linear-gradient(rgba(248, 249, 250, 0.75), rgba(248, 249, 250, 0.75)), url('https://images.unsplash.com/photo-1555664424-778a1e5e1b48?q=80&w=2070')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      borderTop: "1px solid var(--bd)",
+      borderBottom: "1px solid var(--bd)",
+    }}>
       <div className="W">
         <div className="wyG">
           <div className="wyL">

@@ -19,7 +19,11 @@ function ArrowIcon() {
 
 export default function Cta() {
   return (
-    <section id="cta" className="cta">
+    <section id="cta" className="cta" style={{ 
+      backgroundImage: "linear-gradient(rgba(248, 249, 250, 0.75), rgba(248, 249, 250, 0.75)), url('https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?q=80&w=2070')",
+      backgroundSize: "cover",
+      backgroundPosition: "center"
+    }}>
       <div className="W">
         <h2 className="D3 cta__h rv">
           Ready to Partner With Us?

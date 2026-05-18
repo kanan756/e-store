@@ -263,7 +263,7 @@ export default function TrackOrderPage() {
                 <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>
                   {orders.length} order{orders.length !== 1 ? "s" : ""} found
                 </div>
-                {orders.map((order) => (
+                {[...orders].reverse().map((order) => (
                   <OrderCard key={order.orderId} order={order} />
                 ))}
               </div>

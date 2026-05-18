@@ -1,0 +1,1 @@
+const fs = require('fs'); let c = fs.readFileSync('app/admin/page.tsx', 'utf8'); c = c.replace(/#006d37/g, '#111111'); c = c.replace(/rgba\(0,109,55/g, 'rgba(0,0,0'); c = c.replace(/#fcf9f2/g, '#111111'); c = c.replace(/#ffffff/g, '#e9ecef'); fs.writeFileSync('app/admin/page.tsx', c);

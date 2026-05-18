@@ -19,7 +19,11 @@ function ArrowIcon() {
 
 export default function About() {
   return (
-    <section id="about" className="abt">
+    <section id="about" className="abt" style={{ 
+      backgroundImage: "linear-gradient(rgba(248, 249, 250, 0.75), rgba(248, 249, 250, 0.75)), url('https://images.unsplash.com/photo-1563770660941-20978e870e26?q=80&w=2070')",
+      backgroundSize: "cover",
+      backgroundPosition: "center"
+    }}>
       <div className="W">
         <div className="abt__c">
           <div className="lbl abt__lbl rv d1">ABOUT US</div>

@@ -23,7 +23,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { useCart } from "@/context/cart-context"
 
@@ -105,6 +105,8 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false) // mobile drawer state
   const { totalItems } = useCart()
   const pathname = usePathname()
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Read saved theme on mount (localStorage is client-only)
   useEffect(() => {
@@ -145,7 +147,7 @@ export default function Header() {
     <>
       {/* ── Desktop / Mobile Header bar ────────────────────────────────────── */}
       <header className={`hdr${solid ? " on" : ""}`}>
-        <Link href="/" className="hdr__logo">CLIENT STORE</Link>
+        <Link href="/" className="hdr__logo">SUPERIOR HARNESSING &amp; ASSEMBLY</Link>
 
         {/* Desktop navigation — hidden on mobile via CSS */}
         <nav className="hdr__nav">
@@ -156,10 +158,32 @@ export default function Header() {
 
         {/* Right icon cluster */}
         <div className="hdr__icons">
-          {/* Search shortcut (desktop) */}
-          <Link href="/products" className="hic hdr--desk" aria-label="Search products">
-            <IcoSearch />
-          </Link>
+          {/* Search (desktop) — only visible on products page */}
+          {pathname === "/products" && (
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (searchQuery.trim()) {
+                router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`)
+              } else {
+                router.push(`/products`)
+              }
+            }} style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.05)", borderRadius: 20, padding: "4px 12px", marginRight: 16 }}>
+              <IcoSearch />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  if (e.target.value === "") router.push("/products")
+                }}
+                style={{ background: "transparent", border: "none", outline: "none", fontSize: 13, marginLeft: 8, width: 120, color: "var(--text)" }}
+              />
+              {searchQuery && (
+                <button type="button" onClick={() => { setSearchQuery(""); router.push("/products"); }} style={{ display: "flex", color: "var(--textM)", marginLeft: 4, padding: 2 }}>✕</button>
+              )}
+            </form>
+          )}
 
           {/* Cart icon with dot badge */}
           <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
@@ -175,14 +199,7 @@ export default function Header() {
             </svg>
           </Link>
 
-          {/* Theme toggle (desktop only) */}
-          <button
-            className="theme-toggle hdr--desk"
-            onClick={toggleTheme}
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? <IcoSun /> : <IcoMoon />}
-          </button>
+
 
           {/* Hamburger — visible on mobile only */}
           <button
@@ -224,9 +241,7 @@ export default function Header() {
           <Link href="/track-order" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
             📦 Track Order
           </Link>
-          <button className="mob-nav__act" onClick={toggleTheme}>
-            {theme === "dark" ? <><IcoSun /> Light</> : <><IcoMoon /> Dark</>}
-          </button>
+
         </div>
       </div>
     </>

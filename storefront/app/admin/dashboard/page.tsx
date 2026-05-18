@@ -30,14 +30,14 @@ import type { Product, Order, Blog, Inquiry } from "@/lib/sheets"
 const s = {
   page: {
     minHeight: "100vh",
-    background: "#131310",
+    background: "#f8f9fa",
     fontFamily: "'Inter', system-ui, sans-serif",
-    color: "#e5e2db",
+    color: "#1c1c18",
   } as React.CSSProperties,
   sidebar: {
     width: 240,
-    background: "#1c1c18",
-    borderRight: "1px solid #2a2a24",
+    background: "#ffffff",
+    borderRight: "1px solid #e9ecef",
     position: "fixed" as const,
     top: 0, left: 0, bottom: 0,
     display: "flex", flexDirection: "column" as const,
@@ -49,8 +49,8 @@ const s = {
     minHeight: "100vh",
   } as React.CSSProperties,
   card: {
-    background: "#1c1c18",
-    border: "1px solid #2a2a24",
+    background: "#e9ecef",
+    border: "1px solid #e9ecef",
     borderRadius: 16,
     padding: 24,
   } as React.CSSProperties,
@@ -60,12 +60,12 @@ const s = {
   } as React.CSSProperties,
   input: {
     width: "100%", boxSizing: "border-box" as const,
-    padding: "10px 14px", background: "#252520",
-    border: "1px solid #333330", borderRadius: 8,
-    color: "#e5e2db", fontSize: 14, outline: "none",
+    padding: "10px 14px", background: "#f8f9fa",
+    border: "1px solid rgba(0,0,0,0.15)", borderRadius: 8,
+    color: "#1c1c18", fontSize: 14, outline: "none",
   } as React.CSSProperties,
   label: {
-    display: "block", color: "#737874", fontSize: 12,
+    display: "block", color: "#434844", fontSize: 12,
     fontWeight: 600, marginBottom: 6, textTransform: "uppercase" as const,
     letterSpacing: "0.05em",
   } as React.CSSProperties,
@@ -82,9 +82,9 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
       onClick={onClick}
       style={{
         display: "flex", alignItems: "center", gap: 12,
-        padding: "12px 20px", background: active ? "rgba(0,109,55,0.12)" : "transparent",
-        border: "none", borderLeft: active ? "3px solid #006d37" : "3px solid transparent",
-        color: active ? "#4ae183" : "#737874", cursor: "pointer",
+        padding: "12px 20px", background: active ? "rgba(0,0,0,0.12)" : "transparent",
+        border: "none", borderLeft: active ? "3px solid #111111" : "3px solid transparent",
+        color: active ? "#111111" : "#434844", cursor: "pointer",
         fontSize: 14, fontWeight: active ? 700 : 500, width: "100%", textAlign: "left",
         transition: "all 0.15s",
       }}
@@ -171,8 +171,8 @@ function ProductForm({
       </div>
       {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-        <button type="button" onClick={onCancel} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>Cancel</button>
-        <button type="submit" disabled={saving} style={{ ...s.btn, background: "#4ae183", color: "#131310", opacity: saving ? 0.7 : 1 }}>
+        <button type="button" onClick={onCancel} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>Cancel</button>
+        <button type="submit" disabled={saving} style={{ ...s.btn, background: "#111111", color: "#ffffff", opacity: saving ? 0.7 : 1 }}>
           {saving ? "Saving…" : rowIndex !== undefined ? "Update Product" : "Add Product"}
         </button>
       </div>
@@ -212,7 +212,7 @@ function ProductsTab() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Products</h2>
         <button onClick={() => { setShowForm(true); setEditing(null) }}
-          style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>+ Add Product</button>
+          style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>+ Add Product</button>
       </div>
 
       {(showForm || editing) && (
@@ -235,22 +235,22 @@ function ProductsTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
+              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
                 {["Name", "Category", "Price", "Handle", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#737874", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#434844", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
-                <tr key={p.id} style={{ borderBottom: "1px solid #1c1c18" }}>
+              {[...products].reverse().map((p) => (
+                <tr key={p.id} style={{ borderBottom: "1px solid #e9ecef" }}>
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
-                  <td style={{ padding: "14px 12px", color: "#737874" }}>{p.category || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "#4ae183" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#434844" }}>{p.category || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#111111" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{p.handle}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "#252520", color: "#aaa", padding: "6px 12px" }}>Edit</button>
+                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844", padding: "6px 12px" }}>Edit</button>
                       <button onClick={() => handleDelete(p.rowIndex, p.name)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
                     </div>
                   </td>
@@ -319,7 +319,7 @@ function OrdersTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Orders</h2>
-        <button onClick={fetchOrders} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>↻ Refresh</button>
+        <button onClick={fetchOrders} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>↻ Refresh</button>
       </div>
 
       {editing && (
@@ -338,18 +338,18 @@ function OrdersTab() {
             </div>
           </div>
           {/* Email toggle */}
-          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 16, color: "#ccc", fontSize: 14 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 16, color: "#434844", fontSize: 14 }}>
             <input
               type="checkbox"
               checked={sendEmail}
               onChange={(e) => setSendEmail(e.target.checked)}
-              style={{ width: 16, height: 16, accentColor: "#4ae183" }}
+              style={{ width: 16, height: 16, accentColor: "#111111" }}
             />
-            <span>📧 Send status update email to <strong style={{ color: "#4ae183" }}>{editing.email}</strong></span>
+            <span>📧 Send status update email to <strong style={{ color: "#111111" }}>{editing.email}</strong></span>
           </label>
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-            <button onClick={() => setEditing(null)} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>Cancel</button>
-            <button onClick={saveOrder} disabled={saving} style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>
+            <button onClick={() => setEditing(null)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>Cancel</button>
+            <button onClick={saveOrder} disabled={saving} style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>
               {saving ? "Saving…" : "Update Status"}
             </button>
           </div>
@@ -364,21 +364,21 @@ function OrdersTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
+              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
                 {["Order ID", "Customer", "Product", "Amount", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#737874", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#434844", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {orders.map((o) => (
-                <tr key={o.orderId} style={{ borderBottom: "1px solid #1c1c18" }}>
-                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "#4ae183" }}>{o.orderId}</td>
+              {[...orders].reverse().map((o) => (
+                <tr key={o.orderId} style={{ borderBottom: "1px solid #e9ecef" }}>
+                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "#111111" }}>{o.orderId}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ fontWeight: 600 }}>{o.customerName}</div>
                     <div style={{ fontSize: 12, color: "#666" }}>{o.email}</div>
                   </td>
-                  <td style={{ padding: "14px 12px", color: "#aaa", fontSize: 13, maxWidth: 200 }}>{o.product}</td>
+                  <td style={{ padding: "14px 12px", color: "#434844", fontSize: 13, maxWidth: 200 }}>{o.product}</td>
                   <td style={{ padding: "14px 12px", fontWeight: 700 }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <span style={{
@@ -388,7 +388,7 @@ function OrdersTab() {
                     }}>{o.status}</span>
                   </td>
                   <td style={{ padding: "14px 12px" }}>
-                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "#252520", color: "#aaa", padding: "6px 12px" }}>
+                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844", padding: "6px 12px" }}>
                       Update
                     </button>
                   </td>
@@ -451,7 +451,7 @@ function BlogsTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Blog Posts</h2>
-        <button onClick={() => setShowForm(true)} style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>+ New Blog Post</button>
+        <button onClick={() => setShowForm(true)} style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>+ New Blog Post</button>
       </div>
 
       {showForm && (
@@ -492,8 +492,8 @@ function BlogsTab() {
             </div>
             {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
             <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-              <button type="button" onClick={() => setShowForm(false)} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>Cancel</button>
-              <button type="submit" disabled={saving} style={{ ...s.btn, background: "#4ae183", color: "#131310" }}>{saving ? "Saving…" : "Publish Blog"}</button>
+              <button type="button" onClick={() => setShowForm(false)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>Cancel</button>
+              <button type="submit" disabled={saving} style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>{saving ? "Saving…" : "Publish Blog"}</button>
             </div>
           </form>
         </div>
@@ -507,23 +507,23 @@ function BlogsTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
+              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
                 {["Title", "Slug", "Publish Date", "Keywords", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#737874", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#434844", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {blogs.map((b) => (
-                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid #1c1c18" }}>
+              {[...blogs].reverse().map((b) => (
+                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid #e9ecef" }}>
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{b.title}</td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{b.slug}</td>
-                  <td style={{ padding: "14px 12px", color: "#737874" }}>{b.publishDate || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "#737874", fontSize: 12 }}>{b.keywords || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#434844" }}>{b.publishDate || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "#434844", fontSize: 12 }}>{b.keywords || "—"}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: b.published ? "rgba(74,225,131,0.15)" : "rgba(136,136,136,0.12)",
-                      color: b.published ? "#4ae183" : "#888",
+                      background: b.published ? "rgba(0,0,0,0.15)" : "rgba(136,136,136,0.12)",
+                      color: b.published ? "#111111" : "#888",
                     }}>{b.published ? "Published" : "Draft"}</span>
                   </td>
                   <td style={{ padding: "14px 12px" }}>
@@ -573,7 +573,7 @@ function InquiriesTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Inquiries</h2>
-        <button onClick={fetchInquiries} style={{ ...s.btn, background: "#252520", color: "#aaa" }}>↻ Refresh</button>
+        <button onClick={fetchInquiries} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>↻ Refresh</button>
       </div>
       <div style={s.card}>
         {loading ? (
@@ -582,9 +582,9 @@ function InquiriesTab() {
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No inquiries yet.</div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {inquiries.map((inq) => (
+            {[...inquiries].reverse().map((inq) => (
               <div key={inq.id} style={{
-                border: `1px solid ${expanded === inq.id ? "rgba(74,225,131,0.2)" : "#2a2a24"}`,
+                border: `1px solid ${expanded === inq.id ? "rgba(0,0,0,0.2)" : "#e9ecef"}`,
                 borderRadius: 12, overflow: "hidden",
               }}>
                 <div
@@ -593,8 +593,8 @@ function InquiriesTab() {
                 >
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{inq.subject}</div>
-                    <div style={{ fontSize: 13, color: "#737874" }}>
-                      {inq.name} &bull; <a href={`mailto:${inq.email}`} style={{ color: "#4ae183" }}>{inq.email}</a>
+                    <div style={{ fontSize: 13, color: "#434844" }}>
+                      {inq.name} &bull; <a href={`mailto:${inq.email}`} style={{ color: "#111111" }}>{inq.email}</a>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
@@ -607,8 +607,8 @@ function InquiriesTab() {
                   </div>
                 </div>
                 {expanded === inq.id && (
-                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #2a2a24" }}>
-                    <div style={{ padding: "14px 16px", background: "#252520", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "#ccc", fontSize: 14 }}>
+                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #e9ecef" }}>
+                    <div style={{ padding: "14px 16px", background: "#f8f9fa", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "#434844", fontSize: 14 }}>
                       {inq.message}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -663,7 +663,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       label: "TOTAL PRODUCTS",
       value: stats.products,
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
         </svg>
       ),
@@ -672,7 +672,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       label: "ORDERS PROCESSED",
       value: stats.orders,
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
           <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
         </svg>
@@ -682,7 +682,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       label: "TOTAL REVENUE",
       value: stats.revenue > 0 ? formatPrice(stats.revenue) : "₹0",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
       ),
@@ -692,8 +692,8 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.12em", color: "#4ae183", marginBottom: 12, textTransform: "uppercase" }}>OVERVIEW</div>
-        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fcf9f2" }}>Dashboard</h2>
+        <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.12em", color: "#111111", marginBottom: 12, textTransform: "uppercase" }}>OVERVIEW</div>
+        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#111111" }}>Dashboard</h2>
       </div>
 
       {/* KPI Cards */}
@@ -704,14 +704,14 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
             display: "flex", flexDirection: "column", gap: 16,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.1em", color: "#737874", textTransform: "uppercase" }}>{c.label}</div>
+              <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.1em", color: "#434844", textTransform: "uppercase" }}>{c.label}</div>
               <div style={{
                 width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                background: "rgba(0,109,55,0.1)", border: "1px solid rgba(74,225,131,0.15)",
+                background: "rgba(0,0,0,0.1)", border: "1px solid rgba(0,0,0,0.15)",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>{c.icon}</div>
             </div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: "#fcf9f2", letterSpacing: "-0.02em" }}>{c.value}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "#111111", letterSpacing: "-0.02em" }}>{c.value}</div>
           </div>
         ))}
       </div>
@@ -719,33 +719,33 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       {/* Recent Orders */}
       <div style={{ ...s.card }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fcf9f2" }}>Recent Orders</h3>
-          <span style={{ fontSize: 12, color: "#4ae183", fontFamily: "monospace", letterSpacing: "0.05em", cursor: "default" }}>VIEW ALL IN ORDERS TAB →</span>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111111" }}>Recent Orders</h3>
+          <span style={{ fontSize: 12, color: "#111111", fontFamily: "monospace", letterSpacing: "0.05em", cursor: "default" }}>VIEW ALL IN ORDERS TAB →</span>
         </div>
         {latestOrders.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "#737874" }}>No orders yet.</div>
+          <div style={{ textAlign: "center", padding: "32px 0", color: "#434844" }}>No orders yet.</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #2a2a24" }}>
+              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
                 {["ORDER ID", "CUSTOMER", "PRODUCT", "AMOUNT", "STATUS"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "#737874", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "#434844", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {latestOrders.map((o, i) => (
-                <tr key={o.orderId + i} style={{ borderBottom: "1px solid #1c1c18" }}>
-                  <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "#4ae183", fontWeight: 700 }}>{o.orderId}</td>
-                  <td style={{ padding: "14px", fontSize: 14, color: "#e5e2db" }}>{o.customerName}</td>
+              {[...latestOrders].reverse().map((o, i) => (
+                <tr key={o.orderId + i} style={{ borderBottom: "1px solid #e9ecef" }}>
+                  <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "#111111", fontWeight: 700 }}>{o.orderId}</td>
+                  <td style={{ padding: "14px", fontSize: 14, color: "#1c1c18" }}>{o.customerName}</td>
                   <td style={{ padding: "14px", fontSize: 13, color: "#b0ada6", fontStyle: "italic", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.product}</td>
-                  <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "#fcf9f2" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
+                  <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "#111111" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
                   <td style={{ padding: "14px" }}>
                     <span style={{
                       padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: `${STATUS_COLOR[o.status] ?? "#737874"}18`,
-                      color: STATUS_COLOR[o.status] ?? "#737874",
-                      border: `1px solid ${STATUS_COLOR[o.status] ?? "#737874"}33`,
+                      background: `${STATUS_COLOR[o.status] ?? "#434844"}18`,
+                      color: STATUS_COLOR[o.status] ?? "#434844",
+                      border: `1px solid ${STATUS_COLOR[o.status] ?? "#434844"}33`,
                     }}>{o.status}</span>
                   </td>
                 </tr>
@@ -772,20 +772,20 @@ export default function AdminDashboard() {
     <div style={s.page}>
       {/* Sidebar */}
       <aside style={s.sidebar}>
-        <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid #2a2a24" }}>
+        <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid #e9ecef" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-              background: "rgba(0,109,55,0.15)", border: "1px solid rgba(74,225,131,0.2)",
+              background: "rgba(0,0,0,0.15)", border: "1px solid rgba(0,0,0,0.2)",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4ae183" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#fcf9f2", letterSpacing: "-0.01em" }}>Admin Panel</div>
-              <div style={{ fontSize: 11, color: "#737874", marginTop: 1, fontFamily: "monospace" }}>SHA · Management</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "#111111", letterSpacing: "-0.01em" }}>Admin Panel</div>
+              <div style={{ fontSize: 11, color: "#434844", marginTop: 1, fontFamily: "monospace" }}>SHA · Management</div>
             </div>
           </div>
         </div>
@@ -798,8 +798,8 @@ export default function AdminDashboard() {
           <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => setTab("inquiries")} />
         </nav>
 
-        <div style={{ padding: "16px 20px", borderTop: "1px solid #2a2a24" }}>
-          <a href="/" target="_blank" style={{ display: "block", color: "#737874", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid #e9ecef" }}>
+          <a href="/" target="_blank" style={{ display: "block", color: "#434844", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
             ↗ View Store
           </a>
           <button onClick={handleLogout} style={{ ...s.btn, background: "transparent", color: "#ef4444", padding: "8px 0", width: "100%", textAlign: "left" }}>

@@ -66,15 +66,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
   const isValidUrl = (url: string) => {
     if (!url || url === "-") return false
+    if (url.startsWith("/")) return true
     try { new URL(url); return true } catch { return false }
   }
+
+  const images = product.imageUrl ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl) : []
+  const primaryImage = images.length > 0 ? images[0] : null
 
   return (
     <div className="prodC rv" style={{ transitionDelay: `${index * 0.07}s` }}>
       <div className="prodC__img">
-        {isValidUrl(product.imageUrl) ? (
+        {primaryImage ? (
           <Image
-            src={product.imageUrl}
+            src={primaryImage}
             alt={product.name}
             fill
             sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
@@ -112,14 +116,14 @@ function PlaceholderImage({ title }: { title: string }) {
   const id = `prod-${title.replace(/\W/g, "")}`
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style={{ width: "100%", height: "100%" }}>
-      <rect width="800" height="600" fill="#141418" />
+      <rect width="800" height="600" fill="#f8f9fa" />
       <defs>
         <pattern id={id} width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="9" y1="0" x2="9" y2="18" stroke="#20202C" strokeWidth="2" opacity="0.6" />
+          <line x1="9" y1="0" x2="9" y2="18" stroke="#dee2e6" strokeWidth="2" opacity="0.6" />
         </pattern>
       </defs>
       <rect width="800" height="600" fill={`url(#${id})`} />
-      <text x="400" y="297" fontFamily="monospace" fontSize="11" fill="#20202C" opacity="0.9" textAnchor="middle" dominantBaseline="middle">
+      <text x="400" y="297" fontFamily="monospace" fontSize="11" fill="#adb5bd" opacity="0.9" textAnchor="middle" dominantBaseline="middle">
         {title.toUpperCase()}
       </text>
     </svg>

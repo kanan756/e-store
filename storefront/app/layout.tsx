@@ -31,18 +31,18 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Client Store — Premium Industrial Products",
-    template: "%s | Client Store",
+    default: "Superior Harnessing & Assembly",
+    template: "%s | Superior Harnessing & Assembly",
   },
   description:
-    "Curated premium industrial and lifestyle products — crafted for quality, performance, and modern everyday needs.",
+    "Trusted wire harnessing, cable assembly, and PCB assembly solutions for OEMs, robotics, medical, and white goods industries.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
   ),
   openGraph: {
     type: "website",
     locale: "en_IN",
-    siteName: "Client Store",
+    siteName: "Superior Harnessing & Assembly",
   },
   twitter: {
     card: "summary_large_image",

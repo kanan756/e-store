@@ -244,10 +244,32 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
 export async function deleteProduct(rowIndex: number): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  // Clear the row content (simplest approach — avoids needing sheet ID for delete)
-  await sheets.spreadsheets.values.clear({
+
+  const spreadsheet = await sheets.spreadsheets.get({
     spreadsheetId: SHEET_ID,
-    range: `Products!A${rowIndex}:F${rowIndex}`,
+  })
+  
+  const sheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Products")
+  const sheetId = sheet?.properties?.sheetId
+  
+  if (sheetId === undefined) throw new Error("Products sheet not found")
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: sheetId,
+              dimension: "ROWS",
+              startIndex: rowIndex - 1,
+              endIndex: rowIndex,
+            }
+          }
+        }
+      ]
+    }
   })
 }
 
@@ -315,9 +337,32 @@ export async function appendBlog(blog: Blog): Promise<void> {
 export async function deleteBlog(rowIndex: number): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.clear({
+
+  const spreadsheet = await sheets.spreadsheets.get({
     spreadsheetId: SHEET_ID,
-    range: `Blogs!A${rowIndex}:H${rowIndex}`,
+  })
+  
+  const sheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Blogs")
+  const sheetId = sheet?.properties?.sheetId
+  
+  if (sheetId === undefined) throw new Error("Blogs sheet not found")
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: SHEET_ID,
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: sheetId,
+              dimension: "ROWS",
+              startIndex: rowIndex - 1,
+              endIndex: rowIndex,
+            }
+          }
+        }
+      ]
+    }
   })
 }
 

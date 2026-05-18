@@ -64,9 +64,14 @@ export default function CartPage() {
                 <div key={item.id} className="cart-item">
                   {/* Thumbnail */}
                   <div style={{ borderRadius: 12, overflow: "hidden", background: "var(--bg2)", aspectRatio: "1", position: "relative" }}>
-                    {(() => { try { return item.imageUrl && new URL(item.imageUrl) } catch { return false } })() ? (
+                    {(() => {
+                      const firstUrl = item.imageUrl ? item.imageUrl.split(",")[0].trim() : ""
+                      if (!firstUrl || firstUrl === "-") return false
+                      if (firstUrl.startsWith("/")) return firstUrl
+                      try { new URL(firstUrl); return firstUrl } catch { return false }
+                    })() ? (
                       <Image
-                        src={item.imageUrl}
+                        src={item.imageUrl.split(",")[0].trim()}
                         alt={item.name}
                         fill
                         sizes="100px"
