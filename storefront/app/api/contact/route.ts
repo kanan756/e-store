@@ -115,17 +115,17 @@ export async function POST(request: Request) {
       replyTo: email,
       subject: `📬 New Inquiry: ${subject}`,
       html: `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#1e1e2a;color:#e0e0f0;padding:32px;border-radius:16px;">
-          <h2 style="margin:0 0 24px;color:#fff;">New Contact Inquiry</h2>
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">
+          <h2 style="margin:0 0 24px;color:#fcf9f2;">New Contact Inquiry</h2>
           <table style="width:100%;border-collapse:collapse;">
-            <tr><td style="padding:10px 0;color:#8888aa;width:100px;">Name</td><td style="padding:10px 0;font-weight:700;">${name}</td></tr>
-            <tr><td style="padding:10px 0;color:#8888aa;">Email</td><td style="padding:10px 0;"><a href="mailto:${email}" style="color:#60a5fa;">${email}</a></td></tr>
-            <tr><td style="padding:10px 0;color:#8888aa;">Subject</td><td style="padding:10px 0;">${subject}</td></tr>
+            <tr><td style="padding:10px 0;color:#737874;width:100px;">Name</td><td style="padding:10px 0;font-weight:700;color:#fcf9f2;">${name}</td></tr>
+            <tr><td style="padding:10px 0;color:#737874;">Email</td><td style="padding:10px 0;"><a href="mailto:${email}" style="color:#4ae183;text-decoration:none;">${email}</a></td></tr>
+            <tr><td style="padding:10px 0;color:#737874;">Subject</td><td style="padding:10px 0;color:#fcf9f2;">${subject}</td></tr>
           </table>
-          <div style="margin-top:20px;padding:16px;background:#252535;border-radius:10px;line-height:1.7;">
+          <div style="margin-top:20px;padding:16px;background:#1c1c18;border-radius:10px;line-height:1.7;border:1px solid #2a2a24;">
             ${message.replace(/\n/g, "<br>")}
           </div>
-          <p style="margin-top:16px;font-size:12px;color:#555;">Submitted via Contact Form — Client Store</p>
+          <p style="margin-top:16px;font-size:12px;color:#737874;">Submitted via Contact Form — SHA Store</p>
         </div>
       `,
     })
@@ -136,14 +136,14 @@ export async function POST(request: Request) {
       to: email,
       subject: `We received your message — ${fromName}`,
       html: `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#1e1e2a;color:#e0e0f0;padding:32px;border-radius:16px;">
-          <h2 style="margin:0 0 16px;color:#fff;">Thanks for reaching out, ${name}!</h2>
-          <p style="color:#aaa;line-height:1.7;">We've received your message and will get back to you within 1–2 business days.</p>
-          <div style="margin:24px 0;padding:16px;background:#252535;border-radius:10px;">
-            <div style="color:#8888aa;font-size:12px;margin-bottom:6px;">YOUR MESSAGE</div>
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">
+          <h2 style="margin:0 0 16px;color:#fcf9f2;">Thanks for reaching out, ${name}!</h2>
+          <p style="color:#737874;line-height:1.7;">We've received your message and will get back to you within 1–2 business days.</p>
+          <div style="margin:24px 0;padding:16px;background:#1c1c18;border:1px solid #2a2a24;border-radius:10px;">
+            <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">YOUR MESSAGE</div>
             <div style="line-height:1.7;">${message.replace(/\n/g, "<br>")}</div>
           </div>
-          <p style="color:#555;font-size:12px;">— ${fromName} Team</p>
+          <p style="color:#737874;font-size:12px;">— ${fromName} Team</p>
         </div>
       `,
     })
