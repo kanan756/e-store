@@ -8,6 +8,7 @@
  */
 
 import Link from "next/link"
+import { InteractiveBackground } from "@/components/InteractiveBackground"
 
 function ArrowIcon() {
   return (
@@ -20,20 +21,18 @@ function ArrowIcon() {
 export default function About() {
   return (
     <section id="about" className="abt" style={{ 
-      backgroundImage: "linear-gradient(rgba(248, 249, 250, 0.75), rgba(248, 249, 250, 0.75)), url('https://images.unsplash.com/photo-1563770660941-20978e870e26?q=80&w=2070')",
-      backgroundSize: "cover",
-      backgroundPosition: "center"
+      position: "relative",
+      overflow: "hidden"
     }}>
-      <div className="W">
+      <InteractiveBackground />
+      <div className="W" style={{ position: "relative", zIndex: 1 }}>
         <div className="abt__c">
           <div className="lbl abt__lbl rv d1">ABOUT US</div>
           <h2 className="D2 abt__h rv d2">
-            SUPERIOR<br />HARNESSING &amp;<br />ASSEMBLY
+            SUPERIOR<br />HARNESS &amp;<br />ASSEMBLY LLC
           </h2>
           <p className="abt__p rv d3">
-            We specialise in precision wire harnessing, cable assembly, and PCB assembly services
-            for OEMs, small manufacturers, robotics companies, medical device makers, and white goods producers.
-            Built on a foundation of quality, reliability, and deep industry expertise.
+            We are a custom wire harness and cable assembly manufacturer providing high-quality engineered wiring solutions for OEMs, medical devices, robotics, EV applications, and industrial automation. We support both prototype and production-level manufacturing with flexible low minimum order quantities.
           </p>
           <Link href="/about" className="btn bod rv d4" style={{ marginTop: 36 }}>
             Learn More <ArrowIcon />

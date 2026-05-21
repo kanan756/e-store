@@ -52,7 +52,7 @@ export default function Categories() {
               className="catC rv"
               style={{ transitionDelay: `${i * 0.07}s` }}
             >
-              <Image src={c.img} alt={c.name} fill style={{ objectFit: "cover" }} />
+              <Image src={c.img} alt={c.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" style={{ objectFit: "cover" }} />
               <div className="catC__ov" />
               <div className="catC__info">
                 <div className="catC__name">{c.name}</div>

@@ -1,26 +1,24 @@
 /**
  * @file lib/email.ts
- * @description Nodemailer-based email service for the Client Store.
- *   Sends branded HTML order-status notification emails to customers via
- *   Gmail SMTP (App Password auth).  Admin always receives a CC copy.
- *
- *   Exported functions:
- *     - sendOrderStatusEmail : Sends a styled HTML email with order details,
- *       a status badge, and a "Track Your Order" CTA link.
- *
- *   Required env vars:
- *     GMAIL_USER         – sender Gmail address
- *     GMAIL_APP_PASSWORD – 16-char Gmail App Password (not account password)
- *     EMAIL_FROM_NAME    – display name shown in the From header
+ * @description Email utility functions for the Client Store.
+ *   Configures a reusable Nodemailer transporter using a Gmail App Password
+ *   and exports functions to send order status updates, order confirmations,
+ *   and replies to customer inquiries. All templates are inline HTML.
  *
  * @owner Heet-P
  * @lastModified May 16, 2026
  */
 
 import nodemailer from "nodemailer"
+import { generateInvoicePdf } from "./pdf"
 
+// ── Nodemailer Transporter Configuration ──────────────────────────────────────
+// Uses standard SMTP over TLS (port 465) via Gmail. Ensure you have
+// GMAIL_USER and GMAIL_APP_PASSWORD correctly set in .env.local.
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // true for port 465, false for other ports
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
@@ -34,6 +32,20 @@ const STATUS_ICONS: Record<string, string> = {
   "In Transit":"✈️",
   Delivered:   "✅",
   Cancelled:   "❌",
+}
+
+// ── Common Styling Helpers ───────────────────────────────────────────────────
+// These objects contain CSS style strings used across all email templates
+// to maintain a consistent dark-theme UI in the inbox.
+const theme = {
+  bg: "#131310",
+  bgCard: "#1c1c18",
+  bgSub: "#252520",
+  text: "#fcf9f2",
+  textM: "#e5e2db",
+  textSub: "#737874",
+  bd: "#2a2a24",
+  acc: "#4ae183", // The brand's signature green
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -173,5 +185,195 @@ export async function sendOrderStatusEmail({
     to: process.env.GMAIL_USER,
     subject: `[Alert] Order ${orderId} updated to ${status}`,
     html: adminHtml,
+  })
+}
+
+export async function sendOrderConfirmationEmail({
+  to,
+  customerName,
+  orderId,
+  product,
+  amount,
+  isStripe = false,
+}: {
+  to: string
+  customerName: string
+  orderId: string
+  product: string
+  amount: number
+  isStripe?: boolean
+}) {
+  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
+  
+  let formattedAmount;
+  if (isStripe) {
+    formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  } else {
+    formattedAmount = `Rs. ${amount.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Order Confirmation</title></head>
+<body style="margin:0;padding:0;background:#131310;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#131310;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#1c1c18;border-radius:16px;overflow:hidden;border:1px solid #2a2a24;">
+
+        <!-- Header -->
+        <tr><td style="background:#1c1c18;padding:36px 40px;text-align:center;border-bottom:1px solid #2a2a24;">
+          <div style="font-size:40px;margin-bottom:12px;">🎉</div>
+          <h1 style="margin:0;color:#fcf9f2;font-size:22px;font-weight:800;letter-spacing:-0.02em;">Order Confirmed!</h1>
+          <p style="margin:8px 0 0;color:#737874;font-size:14px;">Thank you for shopping at ${fromName}</p>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="padding:36px 40px;">
+          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${customerName}</strong>,</p>
+          <p style="color:#737874;font-size:14px;margin:0 0 28px;line-height:1.6;">
+            We've received your order and payment. We're getting your items ready for shipment! Here is your auto-generated bill and receipt:
+          </p>
+
+          <!-- Order Details / Bill -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#252520;border-radius:12px;overflow:hidden;margin-bottom:24px;">
+            <tr style="border-bottom:1px solid #2a2a24;">
+              <td style="padding:14px 18px;color:#737874;font-size:13px;width:120px;">Order ID</td>
+              <td style="padding:14px 18px;color:#4ae183;font-size:13px;font-family:monospace;font-weight:700;">${orderId}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #2a2a24;">
+              <td style="padding:14px 18px;color:#737874;font-size:13px;">Items</td>
+              <td style="padding:14px 18px;color:#fcf9f2;font-size:13px;">${product}</td>
+            </tr>
+            <tr>
+              <td style="padding:14px 18px;color:#737874;font-size:13px;">Total Paid</td>
+              <td style="padding:14px 18px;color:#fcf9f2;font-size:16px;font-weight:800;">${formattedAmount}</td>
+            </tr>
+          </table>
+
+          <!-- CTA -->
+          <div style="text-align:center;margin-top:32px;">
+            <a href="${storeUrl}/track-order" style="display:inline-block;padding:14px 28px;background:#4ae183;color:#131310;text-decoration:none;border-radius:10px;font-size:15px;font-weight:700;">
+              Track Your Order →
+            </a>
+          </div>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
+          <p style="margin:0;color:#737874;font-size:12px;">
+            You received this email because you placed an order at ${fromName}.<br>
+            Questions? Reply to this email.
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+`
+
+  let attachments = [];
+  try {
+    const pdfBuffer = await generateInvoicePdf({
+      orderId,
+      customerName,
+      email: to,
+      product,
+      amount,
+      isStripe,
+    });
+    attachments.push({
+      filename: `Invoice_${orderId}.pdf`,
+      content: pdfBuffer,
+      contentType: "application/pdf",
+    });
+  } catch (err) {
+    console.error("Failed to generate PDF invoice for email:", err);
+  }
+
+  await transporter.sendMail({
+    from: `"${fromName}" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: `Order Confirmed: ${orderId}`,
+    html,
+    attachments,
+  })
+}
+
+export async function sendInquiryReplyEmail({
+  to,
+  customerName,
+  originalSubject,
+  replyMessage,
+}: {
+  to: string
+  customerName: string
+  originalSubject: string
+  replyMessage: string
+}) {
+  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Reply to your inquiry</title></head>
+<body style="margin:0;padding:0;background:#131310;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#131310;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#1c1c18;border-radius:16px;overflow:hidden;border:1px solid #2a2a24;">
+
+        <!-- Header -->
+        <tr><td style="background:#1c1c18;padding:36px 40px;text-align:center;border-bottom:1px solid #2a2a24;">
+          <h1 style="margin:0;color:#fcf9f2;font-size:20px;font-weight:700;">Reply to your inquiry</h1>
+          <p style="margin:8px 0 0;color:#737874;font-size:14px;">Re: ${originalSubject}</p>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="padding:36px 40px;">
+          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${customerName}</strong>,</p>
+          <p style="color:#737874;font-size:14px;margin:0 0 24px;line-height:1.6;">
+            Thank you for reaching out to us. Here is the response to your inquiry:
+          </p>
+
+          <!-- Reply Message -->
+          <div style="background:#252520;border-left:4px solid #4ae183;border-radius:0 8px 8px 0;padding:20px;margin-bottom:32px;">
+            <p style="margin:0;color:#fcf9f2;font-size:15px;line-height:1.7;white-space:pre-wrap;">${replyMessage}</p>
+          </div>
+
+          <p style="color:#737874;font-size:14px;margin:0;line-height:1.6;">
+            If you have any further questions, simply reply to this email or visit our website.
+          </p>
+          
+          <div style="text-align:center;margin-top:32px;">
+            <a href="${storeUrl}" style="display:inline-block;padding:12px 24px;background:#4ae183;color:#131310;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;">
+              Visit Our Store
+            </a>
+          </div>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
+          <p style="margin:0;color:#737874;font-size:12px;">
+            ${fromName}<br>
+            Canton, Michigan, 48187
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+`
+
+  await transporter.sendMail({
+    from: `"${fromName}" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: `Re: ${originalSubject}`,
+    html,
   })
 }

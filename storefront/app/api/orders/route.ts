@@ -43,7 +43,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid order data" }, { status: 400 })
     }
 
+    const { paymentId, amount } = parsed.data;
+    
+    // Verify Razorpay Payment (payment IDs start with "pay_")
+    if (paymentId.startsWith("pay_")) {
+      try {
+        const Razorpay = (await import("razorpay")).default;
+        const rzp = new Razorpay({
+          key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
+          key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+        });
+        const payment = await rzp.payments.fetch(paymentId);
+        if (!payment || (payment.status !== "captured" && payment.status !== "authorized")) {
+          return NextResponse.json({ error: "Invalid payment status" }, { status: 400 });
+        }
+        if (Number(payment.amount) / 100 !== amount) {
+          return NextResponse.json({ error: "Payment amount mismatch" }, { status: 400 });
+        }
+      } catch (err) {
+        console.error("Razorpay verification failed:", err);
+        return NextResponse.json({ error: "Payment verification failed" }, { status: 400 });
+      }
+    }
+
     const orderId = await appendOrder(parsed.data)
+
+    // Send the automated bill / confirmation email
+    try {
+      const { sendOrderConfirmationEmail } = await import("@/lib/email")
+      await sendOrderConfirmationEmail({
+        to: parsed.data.email,
+        customerName: parsed.data.customerName,
+        orderId,
+        product: parsed.data.product,
+        amount: parsed.data.amount,
+      })
+    } catch (emailErr) {
+      console.error("Failed to send confirmation email:", emailErr)
+    }
+
     return NextResponse.json({ orderId, success: true })
   } catch (err) {
     console.error("Failed to write order to Google Sheets:", err)

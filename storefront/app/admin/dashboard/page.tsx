@@ -25,19 +25,20 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import type { Product, Order, Blog, Inquiry } from "@/lib/sheets"
+import { ThemeToggle } from "@/components/ThemeToggle"
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const s = {
   page: {
     minHeight: "100vh",
-    background: "#f8f9fa",
+    background: "var(--bg2)",
     fontFamily: "'Inter', system-ui, sans-serif",
-    color: "#1c1c18",
+    color: "var(--text)",
   } as React.CSSProperties,
   sidebar: {
     width: 240,
-    background: "#ffffff",
-    borderRight: "1px solid #e9ecef",
+    background: "var(--bg)",
+    borderRight: "1px solid var(--bd)",
     position: "fixed" as const,
     top: 0, left: 0, bottom: 0,
     display: "flex", flexDirection: "column" as const,
@@ -49,8 +50,8 @@ const s = {
     minHeight: "100vh",
   } as React.CSSProperties,
   card: {
-    background: "#e9ecef",
-    border: "1px solid #e9ecef",
+    background: "var(--cBg)",
+    border: "1px solid var(--bd)",
     borderRadius: 16,
     padding: 24,
   } as React.CSSProperties,
@@ -60,12 +61,12 @@ const s = {
   } as React.CSSProperties,
   input: {
     width: "100%", boxSizing: "border-box" as const,
-    padding: "10px 14px", background: "#f8f9fa",
-    border: "1px solid rgba(0,0,0,0.15)", borderRadius: 8,
-    color: "#1c1c18", fontSize: 14, outline: "none",
+    padding: "10px 14px", background: "var(--bg2)",
+    border: "1px solid var(--bdM)", borderRadius: 8,
+    color: "var(--text)", fontSize: 14, outline: "none",
   } as React.CSSProperties,
   label: {
-    display: "block", color: "#434844", fontSize: 12,
+    display: "block", color: "var(--text2)", fontSize: 12,
     fontWeight: 600, marginBottom: 6, textTransform: "uppercase" as const,
     letterSpacing: "0.05em",
   } as React.CSSProperties,
@@ -83,8 +84,8 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
       style={{
         display: "flex", alignItems: "center", gap: 12,
         padding: "12px 20px", background: active ? "rgba(0,0,0,0.12)" : "transparent",
-        border: "none", borderLeft: active ? "3px solid #111111" : "3px solid transparent",
-        color: active ? "#111111" : "#434844", cursor: "pointer",
+        border: "none", borderLeft: active ? "3px solid var(--text)" : "3px solid transparent",
+        color: active ? "var(--text)" : "var(--text2)", cursor: "pointer",
         fontSize: 14, fontWeight: active ? 700 : 500, width: "100%", textAlign: "left",
         transition: "all 0.15s",
       }}
@@ -171,8 +172,8 @@ function ProductForm({
       </div>
       {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-        <button type="button" onClick={onCancel} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>Cancel</button>
-        <button type="submit" disabled={saving} style={{ ...s.btn, background: "#111111", color: "#ffffff", opacity: saving ? 0.7 : 1 }}>
+        <button type="button" onClick={onCancel} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>Cancel</button>
+        <button type="submit" disabled={saving} style={{ ...s.btn, background: "var(--text)", color: "var(--bg)", opacity: saving ? 0.7 : 1 }}>
           {saving ? "Saving…" : rowIndex !== undefined ? "Update Product" : "Add Product"}
         </button>
       </div>
@@ -212,7 +213,7 @@ function ProductsTab() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Products</h2>
         <button onClick={() => { setShowForm(true); setEditing(null) }}
-          style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>+ Add Product</button>
+          style={{ ...s.btn, background: "var(--text)", color: "var(--bg)" }}>+ Add Product</button>
       </div>
 
       {(showForm || editing) && (
@@ -235,22 +236,22 @@ function ProductsTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
+              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["Name", "Category", "Price", "Handle", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#434844", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[...products].reverse().map((p) => (
-                <tr key={p.id} style={{ borderBottom: "1px solid #e9ecef" }}>
+                <tr key={p.id} style={{ borderBottom: "1px solid var(--bd)" }}>
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
-                  <td style={{ padding: "14px 12px", color: "#434844" }}>{p.category || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "#111111" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{p.category || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "var(--text)" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{p.handle}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844", padding: "6px 12px" }}>Edit</button>
+                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)", padding: "6px 12px" }}>Edit</button>
                       <button onClick={() => handleDelete(p.rowIndex, p.name)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
                     </div>
                   </td>
@@ -319,7 +320,7 @@ function OrdersTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Orders</h2>
-        <button onClick={fetchOrders} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>↻ Refresh</button>
+        <button onClick={fetchOrders} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>↻ Refresh</button>
       </div>
 
       {editing && (
@@ -338,18 +339,18 @@ function OrdersTab() {
             </div>
           </div>
           {/* Email toggle */}
-          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 16, color: "#434844", fontSize: 14 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 16, color: "var(--text2)", fontSize: 14 }}>
             <input
               type="checkbox"
               checked={sendEmail}
               onChange={(e) => setSendEmail(e.target.checked)}
-              style={{ width: 16, height: 16, accentColor: "#111111" }}
+              style={{ width: 16, height: 16, accentColor: "var(--text)" }}
             />
-            <span>📧 Send status update email to <strong style={{ color: "#111111" }}>{editing.email}</strong></span>
+            <span>📧 Send status update email to <strong style={{ color: "var(--text)" }}>{editing.email}</strong></span>
           </label>
           <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-            <button onClick={() => setEditing(null)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>Cancel</button>
-            <button onClick={saveOrder} disabled={saving} style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>
+            <button onClick={() => setEditing(null)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>Cancel</button>
+            <button onClick={saveOrder} disabled={saving} style={{ ...s.btn, background: "var(--text)", color: "var(--bg)" }}>
               {saving ? "Saving…" : "Update Status"}
             </button>
           </div>
@@ -364,21 +365,21 @@ function OrdersTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
+              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["Order ID", "Customer", "Product", "Amount", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#434844", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[...orders].reverse().map((o) => (
-                <tr key={o.orderId} style={{ borderBottom: "1px solid #e9ecef" }}>
-                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "#111111" }}>{o.orderId}</td>
+                <tr key={o.orderId} style={{ borderBottom: "1px solid var(--bd)" }}>
+                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "var(--text)" }}>{o.orderId}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ fontWeight: 600 }}>{o.customerName}</div>
                     <div style={{ fontSize: 12, color: "#666" }}>{o.email}</div>
                   </td>
-                  <td style={{ padding: "14px 12px", color: "#434844", fontSize: 13, maxWidth: 200 }}>{o.product}</td>
+                  <td style={{ padding: "14px 12px", color: "var(--text2)", fontSize: 13, maxWidth: 200 }}>{o.product}</td>
                   <td style={{ padding: "14px 12px", fontWeight: 700 }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <span style={{
@@ -388,7 +389,7 @@ function OrdersTab() {
                     }}>{o.status}</span>
                   </td>
                   <td style={{ padding: "14px 12px" }}>
-                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844", padding: "6px 12px" }}>
+                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)", padding: "6px 12px" }}>
                       Update
                     </button>
                   </td>
@@ -451,7 +452,7 @@ function BlogsTab() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Blog Posts</h2>
-        <button onClick={() => setShowForm(true)} style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>+ New Blog Post</button>
+        <button onClick={() => setShowForm(true)} style={{ ...s.btn, background: "var(--text)", color: "var(--bg)" }}>+ New Blog Post</button>
       </div>
 
       {showForm && (
@@ -492,8 +493,8 @@ function BlogsTab() {
             </div>
             {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
             <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
-              <button type="button" onClick={() => setShowForm(false)} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>Cancel</button>
-              <button type="submit" disabled={saving} style={{ ...s.btn, background: "#111111", color: "#ffffff" }}>{saving ? "Saving…" : "Publish Blog"}</button>
+              <button type="button" onClick={() => setShowForm(false)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>Cancel</button>
+              <button type="submit" disabled={saving} style={{ ...s.btn, background: "var(--text)", color: "var(--bg)" }}>{saving ? "Saving…" : "Publish Blog"}</button>
             </div>
           </form>
         </div>
@@ -507,23 +508,23 @@ function BlogsTab() {
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
+              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["Title", "Slug", "Publish Date", "Keywords", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#434844", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[...blogs].reverse().map((b) => (
-                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid #e9ecef" }}>
+                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid var(--bd)" }}>
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{b.title}</td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{b.slug}</td>
-                  <td style={{ padding: "14px 12px", color: "#434844" }}>{b.publishDate || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "#434844", fontSize: 12 }}>{b.keywords || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{b.publishDate || "—"}</td>
+                  <td style={{ padding: "14px 12px", color: "var(--text2)", fontSize: 12 }}>{b.keywords || "—"}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
                       background: b.published ? "rgba(0,0,0,0.15)" : "rgba(136,136,136,0.12)",
-                      color: b.published ? "#111111" : "#888",
+                      color: b.published ? "var(--text)" : "#888",
                     }}>{b.published ? "Published" : "Draft"}</span>
                   </td>
                   <td style={{ padding: "14px 12px" }}>
@@ -540,6 +541,8 @@ function BlogsTab() {
 }
 
 // ── Inquiries Tab ───────────────────────────────────────────────────────────────
+// Displays all customer inquiries submitted from the frontend contact form.
+// Includes a built-in reply system that sends emails directly via the server API.
 const INQ_STATUSES = ["New", "In Progress", "Replied", "Closed"]
 const INQ_COLORS: Record<string, string> = {
   New: "#f59e0b", "In Progress": "#2563eb", Replied: "#16a34a", Closed: "#888",
@@ -549,6 +552,10 @@ function InquiriesTab() {
   const [inquiries, setInquiries] = useState<(Inquiry & { rowIndex: number })[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
+  
+  // Reply states for composing emails directly from the dashboard
+  const [replyText, setReplyText] = useState("")
+  const [isReplying, setIsReplying] = useState(false)
 
   const fetchInquiries = useCallback(async () => {
     setLoading(true)
@@ -560,6 +567,7 @@ function InquiriesTab() {
 
   useEffect(() => { fetchInquiries() }, [fetchInquiries])
 
+  // Updates the internal sheet status (e.g. marking it "Closed")
   const updateStatus = async (rowIndex: number, status: string) => {
     await fetch("/api/admin/inquiries", {
       method: "PUT",
@@ -569,11 +577,41 @@ function InquiriesTab() {
     fetchInquiries()
   }
 
+  // Submits a reply directly to the customer's email and marks the row as "Replied"
+  const handleReply = async (inq: Inquiry & { rowIndex: number }) => {
+    if (!replyText.trim()) return
+    setIsReplying(true)
+    try {
+      const res = await fetch("/api/admin/inquiries/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rowIndex: inq.rowIndex,
+          email: inq.email,
+          name: inq.name,
+          subject: inq.subject,
+          replyMessage: replyText.trim(),
+        }),
+      })
+      if (res.ok) {
+        setReplyText("")
+        fetchInquiries()
+        alert("Reply sent successfully!")
+      } else {
+        alert("Failed to send reply.")
+      }
+    } catch (err) {
+      alert("Error sending reply.")
+    } finally {
+      setIsReplying(false)
+    }
+  }
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "0 0 24px 0" }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Inquiries</h2>
-        <button onClick={fetchInquiries} style={{ ...s.btn, background: "#f8f9fa", color: "#434844" }}>↻ Refresh</button>
+        <button onClick={fetchInquiries} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>↻ Refresh</button>
       </div>
       <div style={s.card}>
         {loading ? (
@@ -584,17 +622,24 @@ function InquiriesTab() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {[...inquiries].reverse().map((inq) => (
               <div key={inq.id} style={{
-                border: `1px solid ${expanded === inq.id ? "rgba(0,0,0,0.2)" : "#e9ecef"}`,
+                border: `1px solid ${expanded === inq.id ? "rgba(0,0,0,0.2)" : "var(--bd)"}`,
                 borderRadius: 12, overflow: "hidden",
               }}>
                 <div
-                  onClick={() => setExpanded(expanded === inq.id ? null : inq.id)}
+                  onClick={() => {
+                    if (expanded !== inq.id) {
+                      setExpanded(inq.id)
+                      setReplyText("") // Reset text on new expand
+                    } else {
+                      setExpanded(null)
+                    }
+                  }}
                   style={{ padding: "16px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}
                 >
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{inq.subject}</div>
-                    <div style={{ fontSize: 13, color: "#434844" }}>
-                      {inq.name} &bull; <a href={`mailto:${inq.email}`} style={{ color: "#111111" }}>{inq.email}</a>
+                    <div style={{ fontSize: 13, color: "var(--text2)" }}>
+                      {inq.name} &bull; <a href={`mailto:${inq.email}`} style={{ color: "var(--text)" }}>{inq.email}</a>
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
@@ -607,11 +652,13 @@ function InquiriesTab() {
                   </div>
                 </div>
                 {expanded === inq.id && (
-                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #e9ecef" }}>
-                    <div style={{ padding: "14px 16px", background: "#f8f9fa", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "#434844", fontSize: 14 }}>
+                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid var(--bd)" }}>
+                    <div style={{ padding: "14px 16px", background: "var(--bg2)", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "var(--text2)", fontSize: 14 }}>
                       {inq.message}
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    
+                    {/* Status Dropdown */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
                       <label style={{ ...s.label, margin: 0 }}>Status:</label>
                       <select
                         value={inq.status}
@@ -622,6 +669,30 @@ function InquiriesTab() {
                       </select>
                       <span style={{ fontSize: 12, color: "#555", marginLeft: 8 }}>{inq.submittedAt}</span>
                     </div>
+
+                    {/* Reply Section */}
+                    <div style={{ background: "var(--bg)", border: "1px solid var(--bd)", borderRadius: 10, padding: 16 }}>
+                      <label style={{ ...s.label, marginBottom: 8 }}>Reply to {inq.name} ({inq.email})</label>
+                      <textarea
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        placeholder="Write your email reply here..."
+                        style={{ ...s.input, minHeight: 100, marginBottom: 12, resize: "vertical" }}
+                      />
+                      <button
+                        onClick={() => handleReply(inq)}
+                        disabled={!replyText.trim() || isReplying}
+                        style={{
+                          ...s.btn,
+                          background: replyText.trim() && !isReplying ? "var(--text)" : "var(--bd)",
+                          color: replyText.trim() && !isReplying ? "var(--bg)" : "#888",
+                          opacity: isReplying ? 0.7 : 1,
+                        }}
+                      >
+                        {isReplying ? "Sending Email..." : "Send Reply"}
+                      </button>
+                    </div>
+
                   </div>
                 )}
               </div>
@@ -663,7 +734,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       label: "TOTAL PRODUCTS",
       value: stats.products,
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
         </svg>
       ),
@@ -672,7 +743,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       label: "ORDERS PROCESSED",
       value: stats.orders,
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
           <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
         </svg>
@@ -682,7 +753,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       label: "TOTAL REVENUE",
       value: stats.revenue > 0 ? formatPrice(stats.revenue) : "₹0",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
       ),
@@ -692,8 +763,8 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.12em", color: "#111111", marginBottom: 12, textTransform: "uppercase" }}>OVERVIEW</div>
-        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#111111" }}>Dashboard</h2>
+        <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.12em", color: "var(--text)", marginBottom: 12, textTransform: "uppercase" }}>OVERVIEW</div>
+        <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "var(--text)" }}>Dashboard</h2>
       </div>
 
       {/* KPI Cards */}
@@ -704,14 +775,14 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
             display: "flex", flexDirection: "column", gap: 16,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.1em", color: "#434844", textTransform: "uppercase" }}>{c.label}</div>
+              <div style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: "0.1em", color: "var(--text2)", textTransform: "uppercase" }}>{c.label}</div>
               <div style={{
                 width: 40, height: 40, borderRadius: 10, flexShrink: 0,
                 background: "rgba(0,0,0,0.1)", border: "1px solid rgba(0,0,0,0.15)",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>{c.icon}</div>
             </div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: "#111111", letterSpacing: "-0.02em" }}>{c.value}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.02em" }}>{c.value}</div>
           </div>
         ))}
       </div>
@@ -719,33 +790,33 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       {/* Recent Orders */}
       <div style={{ ...s.card }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#111111" }}>Recent Orders</h3>
-          <span style={{ fontSize: 12, color: "#111111", fontFamily: "monospace", letterSpacing: "0.05em", cursor: "default" }}>VIEW ALL IN ORDERS TAB →</span>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Recent Orders</h3>
+          <span style={{ fontSize: 12, color: "var(--text)", fontFamily: "monospace", letterSpacing: "0.05em", cursor: "default" }}>VIEW ALL IN ORDERS TAB →</span>
         </div>
         {latestOrders.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "32px 0", color: "#434844" }}>No orders yet.</div>
+          <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text2)" }}>No orders yet.</div>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #e9ecef" }}>
+              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["ORDER ID", "CUSTOMER", "PRODUCT", "AMOUNT", "STATUS"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "#434844", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "var(--text2)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {[...latestOrders].reverse().map((o, i) => (
-                <tr key={o.orderId + i} style={{ borderBottom: "1px solid #e9ecef" }}>
-                  <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "#111111", fontWeight: 700 }}>{o.orderId}</td>
-                  <td style={{ padding: "14px", fontSize: 14, color: "#1c1c18" }}>{o.customerName}</td>
+              {latestOrders.map((o, i) => (
+                <tr key={o.orderId + i} style={{ borderBottom: "1px solid var(--bd)" }}>
+                  <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "var(--text)", fontWeight: 700 }}>{o.orderId}</td>
+                  <td style={{ padding: "14px", fontSize: 14, color: "var(--text)" }}>{o.customerName}</td>
                   <td style={{ padding: "14px", fontSize: 13, color: "#b0ada6", fontStyle: "italic", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.product}</td>
-                  <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "#111111" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
+                  <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
                   <td style={{ padding: "14px" }}>
                     <span style={{
                       padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: `${STATUS_COLOR[o.status] ?? "#434844"}18`,
-                      color: STATUS_COLOR[o.status] ?? "#434844",
-                      border: `1px solid ${STATUS_COLOR[o.status] ?? "#434844"}33`,
+                      background: `${STATUS_COLOR[o.status] ?? "var(--text2)"}18`,
+                      color: STATUS_COLOR[o.status] ?? "var(--text2)",
+                      border: `1px solid ${STATUS_COLOR[o.status] ?? "var(--text2)"}33`,
                     }}>{o.status}</span>
                   </td>
                 </tr>
@@ -772,20 +843,14 @@ export default function AdminDashboard() {
     <div style={s.page}>
       {/* Sidebar */}
       <aside style={s.sidebar}>
-        <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid #e9ecef" }}>
+        <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid var(--bd)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-              background: "rgba(0,0,0,0.15)", border: "1px solid rgba(0,0,0,0.2)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <img src="/images/logo.png" alt="Logo" style={{ height: "48px", width: "auto" }} />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#111111", letterSpacing: "-0.01em" }}>Admin Panel</div>
-              <div style={{ fontSize: 11, color: "#434844", marginTop: 1, fontFamily: "monospace" }}>SHA · Management</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em" }}>Admin Panel</div>
+              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 1, fontFamily: "monospace" }}>SHA · Management</div>
             </div>
           </div>
         </div>
@@ -798,8 +863,11 @@ export default function AdminDashboard() {
           <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => setTab("inquiries")} />
         </nav>
 
-        <div style={{ padding: "16px 20px", borderTop: "1px solid #e9ecef" }}>
-          <a href="/" target="_blank" style={{ display: "block", color: "#434844", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
+        <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bd)" }}>
+          <div style={{ marginBottom: 16 }}>
+            <ThemeToggle />
+          </div>
+          <a href="/" target="_blank" style={{ display: "block", color: "var(--text2)", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
             ↗ View Store
           </a>
           <button onClick={handleLogout} style={{ ...s.btn, background: "transparent", color: "#ef4444", padding: "8px 0", width: "100%", textAlign: "left" }}>

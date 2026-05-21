@@ -9,6 +9,7 @@
 
 import type { Metadata } from "next"
 import Link from "next/link"
+import { InteractiveBackground } from "@/components/InteractiveBackground"
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -99,22 +100,21 @@ export default function AboutPage() {
 
       {/* ── HERO SPLIT ─────────────────────────────────────────────── */}
       <section style={{
-        backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2070')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        position: "relative",
         padding: "100px 0",
         overflow: "hidden",
         borderBottom: "1px solid var(--bd)"
       }}>
-        <div className="W about-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+        <InteractiveBackground />
+        <div className="W about-hero-grid" style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div>
-            <div className="lbl" style={{ color: "rgba(0,0,0,0.6)", marginBottom: 24 }}>
+            <div className="lbl" style={{ color: "var(--text2)", marginBottom: 24 }}>
               ABOUT SUPERIOR HARNESSING
             </div>
-            <h1 className="D2" style={{ color: "#000", marginBottom: 24 }}>
+            <h1 className="D2" style={{ color: "var(--text)", marginBottom: 24 }}>
               BUILT FOR<br />PRECISION.<br />TRUSTED BY<br />INDUSTRY.
             </h1>
-            <p style={{ fontSize: 17, lineHeight: 1.78, color: "rgba(0,0,0,0.7)", marginBottom: 40, maxWidth: 440 }}>
+            <p style={{ fontSize: 17, lineHeight: 1.78, color: "var(--text2)", marginBottom: 40, maxWidth: 440 }}>
               Superior Harnessing and Assembly delivers precision wire harnessing,
               cable assembly, and PCB assembly to OEMs and manufacturers worldwide.
               Our commitment to quality and flexibility makes us the partner of choice

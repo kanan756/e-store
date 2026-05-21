@@ -26,7 +26,6 @@ const schema = z.object({
   subject: z.string().min(1, "Subject is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
   honeypot: z.string().max(0, "Bot detected"),        // anti-spam honeypot
-  recaptchaToken: z.string().optional().default(""),  // reCAPTCHA v3 token
 })
 
 export async function POST(request: Request) {
@@ -49,54 +48,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
     }
 
-    const { name, email, subject, message, recaptchaToken } = parsed.data
-
-    // 0. Verify reCAPTCHA v3 token (skip check if secret key not configured)
-    const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY
-    if (recaptchaSecret && recaptchaToken) {
-      // Use URLSearchParams so the token's special chars (+, =, /) are properly encoded
-      const verifyBody = new URLSearchParams({
-        secret: recaptchaSecret,
-        response: recaptchaToken,
-      })
-
-      const verifyRes = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: verifyBody.toString(),
-      })
-      const verifyData = await verifyRes.json() as {
-        success: boolean; score: number; action: string; "error-codes"?: string[]
-      }
-
-      // Log in dev so you can see the actual score in terminal
-      console.log("[reCAPTCHA]", {
-        success: verifyData.success,
-        score: verifyData.score,
-        action: verifyData.action,
-        errors: verifyData["error-codes"],
-      })
-
-      // "browser-error" can occur on localhost — treat as warning, not hard failure
-      const errors = verifyData["error-codes"] ?? []
-      const isLocalhostIssue = errors.includes("browser-error")
-
-      if (!isLocalhostIssue) {
-        // Threshold is configurable via env var — defaults to 0.3 for localhost dev
-        // Raise to 0.5+ in production once you have real traffic
-        const minScore = parseFloat(process.env.RECAPTCHA_MIN_SCORE ?? "0.3")
-        if (!verifyData.success || verifyData.score < minScore) {
-          return NextResponse.json(
-            { error: `Bot check failed (score: ${verifyData.score?.toFixed(2) ?? "n/a"}). Please refresh and try again.` },
-            { status: 400 }
-          )
-        }
-      }
-      // If browser-error, log a warning but allow through (localhost limitation)
-      if (isLocalhostIssue) {
-        console.warn("[reCAPTCHA] browser-error detected — likely a localhost limitation, allowing request through")
-      }
-    }
+    const { name, email, subject, message } = parsed.data
 
     // 1. Save to Google Sheets
     await appendInquiry({ name, email, subject, message })

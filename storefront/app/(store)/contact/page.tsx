@@ -17,7 +17,7 @@
 
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useRef } from "react"
 
 const s = {
   input: {
@@ -35,54 +35,27 @@ const s = {
   },
 }
 
-// reCAPTCHA v3 site key — optional (graceful fallback if not configured)
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? ""
-
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "", honeypot: "" })
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
+  const isSubmitting = useRef(false)
   const [errorMsg, setErrorMsg] = useState("")
-  const [recaptchaReady, setRecaptchaReady] = useState(false)
-
-  // Dynamically load the reCAPTCHA v3 script on mount
-  useEffect(() => {
-    if (!RECAPTCHA_SITE_KEY) return // skip if key not configured
-    if (document.getElementById("recaptcha-script")) { setRecaptchaReady(true); return }
-    const script = document.createElement("script")
-    script.id = "recaptcha-script"
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`
-    script.async = true
-    script.onload = () => setRecaptchaReady(true)
-    document.head.appendChild(script)
-    return () => { /* keep script for page lifetime */ }
-  }, [])
-
-  // Execute reCAPTCHA v3 challenge and get a token
-  const getRecaptchaToken = useCallback((): Promise<string> => {
-    if (!RECAPTCHA_SITE_KEY || !recaptchaReady) return Promise.resolve("")
-    return new Promise((resolve) => {
-      // @ts-expect-error — grecaptcha loaded by external script
-      window.grecaptcha.ready(() => {
-        // @ts-expect-error
-        window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: "contact" }).then(resolve)
-      })
-    })
-  }, [recaptchaReady])
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [field]: e.target.value }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSubmitting.current) return
+    
+    isSubmitting.current = true
     setStatus("sending")
     setErrorMsg("")
     try {
-      // Get reCAPTCHA token (empty string if not configured — API handles gracefully)
-      const recaptchaToken = await getRecaptchaToken()
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, recaptchaToken }),
+        body: JSON.stringify({ ...form }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -91,6 +64,8 @@ export default function ContactPage() {
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong")
       setStatus("error")
+    } finally {
+      isSubmitting.current = false
     }
   }
 
@@ -110,19 +85,19 @@ export default function ContactPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {[
                 {
-                  label: "Email", value: "hello@clientstore.com",
+                  label: "Email", value: "pateltushar1987@gmail.com",
                   icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>),
                 },
                 {
-                  label: "Phone", value: "+1 (800) 555-0190",
+                  label: "Phone", value: "734 891 0248",
                   icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.07 6.07l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>),
                 },
                 {
-                  label: "Address", value: "Industrial Park, New York, NY 10001",
+                  label: "Address", value: "Canton, Michigan, 48187",
                   icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>),
                 },
                 {
-                  label: "Hours", value: "Mon – Fri, 9 AM – 6 PM EST",
+                  label: "Hours", value: "Monday – Friday: 8:00 AM – 6:00 PM",
                   icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>),
                 },
               ].map((item) => (
@@ -234,12 +209,6 @@ export default function ContactPage() {
 
                 <p style={{ fontSize: 12, color: "var(--textM)", textAlign: "center", margin: 0 }}>
                   Your message is saved securely. We respond within 1–2 business days.
-                  {RECAPTCHA_SITE_KEY && (
-                    <> This form is protected by reCAPTCHA.
-                      {" "}<a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style={{ color: "var(--acc)" }}>Privacy</a>
-                      {" & "}<a href="https://policies.google.com/terms" target="_blank" rel="noopener" style={{ color: "var(--acc)" }}>Terms</a> apply.
-                    </>
-                  )}
                 </p>
               </form>
             )}

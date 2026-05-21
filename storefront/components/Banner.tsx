@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { InteractiveBackground } from "@/components/InteractiveBackground"
 
 function ArrowIcon() {
   return (
@@ -11,11 +12,11 @@ function ArrowIcon() {
 export default function Banner() {
   return (
     <section className="bnr" style={{ 
-      backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), url('https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=2070')",
-      backgroundSize: "cover",
-      backgroundPosition: "center"
+      position: "relative",
+      overflow: "hidden"
     }}>
-      <div className="bnr__in W">
+      <InteractiveBackground bg="var(--bg2)" />
+      <div className="bnr__in W" style={{ position: "relative", zIndex: 1 }}>
         <div className="lbl bnr__lbl rv">EXPLORE NOW</div>
         <h2 className="D2 bnr__h rv d1">SHOP COLLECTION</h2>
         <p className="bnr__s rv d2">Explore our latest premium selections.</p>

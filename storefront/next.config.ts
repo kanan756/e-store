@@ -32,22 +32,20 @@ const securityHeaders = [
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
 
   // Content Security Policy
-  // Allows: self, Google Fonts, Google OAuth, Razorpay, reCAPTCHA, trusted image CDNs
+  // Allows: self, Google Fonts, Google OAuth, Razorpay, trusted image CDNs
   {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Scripts: self + inline/eval (Next.js needs these) + Razorpay + Google reCAPTCHA
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdn.razorpay.com https://www.google.com https://www.gstatic.com",
+      // Scripts: self + inline/eval (Next.js needs these) + Razorpay
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdn.razorpay.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http://localhost:*",
       // Frames: Razorpay checkout modal (both domains it uses) + Google OAuth
       "frame-src https://checkout.razorpay.com https://api.razorpay.com https://accounts.google.com",
-      // Fetch/XHR: own API + Razorpay API + analytics ping + Google OAuth + reCAPTCHA
-      "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-dx.razorpay.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://www.google.com https://recaptcha.google.com",
-      // Frames: Razorpay checkout modal + Google OAuth + reCAPTCHA challenge widget
-      "frame-src https://checkout.razorpay.com https://api.razorpay.com https://accounts.google.com https://www.google.com https://recaptcha.google.com",
+      // Fetch/XHR: own API + Razorpay API + analytics ping + Google OAuth
+      "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-dx.razorpay.com https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com",
       "form-action 'self'",
       "base-uri 'self'",
     ].join("; "),
@@ -77,6 +75,7 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "localhost" },
     ],
   },
+  serverExternalPackages: ["pdfkit"],
 }
 
 export default nextConfig

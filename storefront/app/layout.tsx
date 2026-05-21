@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google"
 import "@/styles/globals.css"
-import { ThemeScript } from "@/components/ThemeScript"
 import Providers from "@/components/Providers"
 
 // Display / headline font — tight tracking, bold weights
@@ -31,18 +30,18 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Superior Harnessing & Assembly",
-    template: "%s | Superior Harnessing & Assembly",
+    default: "Superior Harness & Assembly LLC | Custom Cable Assembly Manufacturer",
+    template: "%s | Superior Harness & Assembly LLC",
   },
   description:
-    "Trusted wire harnessing, cable assembly, and PCB assembly solutions for OEMs, robotics, medical, and white goods industries.",
+    "Custom wire harness and cable assembly manufacturer providing engineered wiring solutions for OEMs, medical devices, robotics, EV applications, and more.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
   ),
   openGraph: {
     type: "website",
-    locale: "en_IN",
-    siteName: "Superior Harnessing & Assembly",
+    locale: "en_US",
+    siteName: "Superior Harness & Assembly LLC",
   },
   twitter: {
     card: "summary_large_image",
@@ -57,8 +56,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* Inline script runs before paint to apply saved theme and prevent flash */}
-        <ThemeScript />
       </head>
       <body className={`${hanken.variable} ${inter.variable} ${mono.variable}`}>
         <Providers>{children}</Providers>

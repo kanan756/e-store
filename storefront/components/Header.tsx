@@ -26,15 +26,9 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { useCart } from "@/context/cart-context"
+import { ThemeToggle } from "./ThemeToggle"
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-function IcoSearch() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="22" y2="22" />
-    </svg>
-  )
-}
 
 function IcoCart() {
   return (
@@ -106,13 +100,6 @@ export default function Header() {
   const { totalItems } = useCart()
   const pathname = usePathname()
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
-
-  // Read saved theme on mount (localStorage is client-only)
-  useEffect(() => {
-    const saved = localStorage.getItem("cs-theme") as "light" | "dark" | null
-    if (saved) setTheme(saved)
-  }, [])
 
   // Trigger solid header background after scrolling 60px
   useEffect(() => {
@@ -130,15 +117,6 @@ export default function Header() {
     return () => { document.body.style.overflow = "" }
   }, [menuOpen])
 
-  const toggleTheme = useCallback(() => {
-    setTheme((t) => {
-      const next = t === "dark" ? "light" : "dark"
-      document.documentElement.setAttribute("data-theme", next)
-      localStorage.setItem("cs-theme", next)
-      return next
-    })
-  }, [])
-
   // Non-homepage routes always show solid header; homepage shows it after scroll
   const isHome = pathname === "/"
   const solid = scrolled || !isHome
@@ -147,7 +125,10 @@ export default function Header() {
     <>
       {/* ── Desktop / Mobile Header bar ────────────────────────────────────── */}
       <header className={`hdr${solid ? " on" : ""}`}>
-        <Link href="/" className="hdr__logo">SUPERIOR HARNESSING &amp; ASSEMBLY</Link>
+        <Link href="/" className="hdr__logo" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <img src="/images/logo.png" alt="Superior Harness & Assembly LLC Logo" style={{ height: "56px", width: "auto" }} />
+          <span>SUPERIOR HARNESS &amp; ASSEMBLY LLC</span>
+        </Link>
 
         {/* Desktop navigation — hidden on mobile via CSS */}
         <nav className="hdr__nav">
@@ -158,32 +139,7 @@ export default function Header() {
 
         {/* Right icon cluster */}
         <div className="hdr__icons">
-          {/* Search (desktop) — only visible on products page */}
-          {pathname === "/products" && (
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              if (searchQuery.trim()) {
-                router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`)
-              } else {
-                router.push(`/products`)
-              }
-            }} style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.05)", borderRadius: 20, padding: "4px 12px", marginRight: 16 }}>
-              <IcoSearch />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  if (e.target.value === "") router.push("/products")
-                }}
-                style={{ background: "transparent", border: "none", outline: "none", fontSize: 13, marginLeft: 8, width: 120, color: "var(--text)" }}
-              />
-              {searchQuery && (
-                <button type="button" onClick={() => { setSearchQuery(""); router.push("/products"); }} style={{ display: "flex", color: "var(--textM)", marginLeft: 4, padding: 2 }}>✕</button>
-              )}
-            </form>
-          )}
+
 
           {/* Cart icon with dot badge */}
           <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
@@ -199,9 +155,9 @@ export default function Header() {
             </svg>
           </Link>
 
-
-
-          {/* Hamburger — visible on mobile only */}
+          <div className="hdr--desk" style={{ marginLeft: 8 }}>
+            <ThemeToggle />
+          </div>          {/* Hamburger — visible on mobile only */}
           <button
             className="hic hdr__burger"
             onClick={() => setMenuOpen((o) => !o)}
@@ -241,7 +197,9 @@ export default function Header() {
           <Link href="/track-order" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
             📦 Track Order
           </Link>
-
+          <div className="mob-nav__act">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </>

@@ -1,3 +1,5 @@
+import { InteractiveBackground } from "@/components/InteractiveBackground"
+
 function ArrowIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -17,20 +19,20 @@ const FEATS = [
 export default function WhyUs() {
   return (
     <section className="S" style={{ 
-      backgroundImage: "linear-gradient(rgba(248, 249, 250, 0.75), rgba(248, 249, 250, 0.75)), url('https://images.unsplash.com/photo-1555664424-778a1e5e1b48?q=80&w=2070')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
+      position: "relative",
+      overflow: "hidden",
       borderTop: "1px solid var(--bd)",
       borderBottom: "1px solid var(--bd)",
     }}>
-      <div className="W">
+      <InteractiveBackground />
+      <div className="W" style={{ position: "relative", zIndex: 1 }}>
         <div className="wyG">
           <div className="wyL">
             <div className="lbl rv" style={{ marginBottom: 28 }}>WHY CHOOSE US</div>
-            <h2 className="D2 rv d1" style={{ marginBottom: 24 }}>
+            <h2 className="D1 rv d1" style={{ marginBottom: 24, fontSize: "56px", lineHeight: "1.1" }}>
               Built For<br />Professionals.<br />Designed For<br />Everyone.
             </h2>
-            <p className="Bd rv d2" style={{ marginBottom: 40 }}>
+            <p className="Bd rv d2" style={{ marginBottom: 40, fontSize: "20px" }}>
               Every product in our catalog is chosen with care, tested for quality, and backed
               by our unwavering commitment to excellence.
             </p>

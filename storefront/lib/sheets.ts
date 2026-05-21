@@ -168,6 +168,11 @@ export async function getOrdersByEmail(email: string): Promise<Order[]> {
     }))
 }
 
+export async function getOrderByPaymentId(paymentId: string): Promise<Order | null> {
+  const orders = await getAllOrders()
+  return orders.find(o => o.comments.includes(paymentId)) ?? null
+}
+
 // ── Blogs ─────────────────────────────────────────────────────────────────────
 export async function getBlogs(publishedOnly = false): Promise<Blog[]> {
   const auth = getAuth()

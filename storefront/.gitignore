@@ -28,3 +28,11 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Temporary / Workspace
+scratch/
+.vscode/
+.temp/
+coverage/
+*.sqlite
+*.sqlite3

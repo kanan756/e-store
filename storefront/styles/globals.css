@@ -4,7 +4,7 @@
 
 /* ── THEME TOKENS ─────────────────────────────────────────────────────────── */
 /* ── ECHELON GLOBAL — LIGHT (default) ───────────────────────── */
-:root, [data-theme="dark"] {
+:root {
   --bg: #ffffff;
   --bg2: #f8f9fa;
   --bg3: #f1f3f5;
@@ -12,8 +12,8 @@
   --bgDk2: #f8f9fa;
   --hBg: rgba(255, 255, 255, 0.92);
   --text: #000000;
-  --text2: #000000;
-  --textM: #000000;
+  --text2: #444444;
+  --textM: #888888;
   --inv: #ffffff;
   --acc: #000000;
   --accH: #333333;
@@ -22,6 +22,28 @@
   --sh: 0 0 0 1px rgba(0,0,0,0.08);
   --shH: 0 0 0 1px rgba(0,0,0,0.15), 0 4px 24px rgba(0,0,0,0.08);
   --cBg: #ffffff;
+  --r: 8px;
+  --rL: 12px;
+}
+
+[data-theme="dark"] {
+  --bg: #111111;
+  --bg2: #1a1a1a;
+  --bg3: #222222;
+  --bgDk: #111111;
+  --bgDk2: #1a1a1a;
+  --hBg: rgba(17, 17, 17, 0.92);
+  --text: #ffffff;
+  --text2: rgba(255, 255, 255, 0.7);
+  --textM: rgba(255, 255, 255, 0.5);
+  --inv: #000000;
+  --acc: #4ae183;
+  --accH: #70f09e;
+  --bd: rgba(255, 255, 255, 0.15);
+  --bdM: rgba(255, 255, 255, 0.25);
+  --sh: 0 0 0 1px rgba(255,255,255,0.08);
+  --shH: 0 0 0 1px rgba(255,255,255,0.15), 0 4px 24px rgba(0,0,0,0.4);
+  --cBg: #181818;
   --r: 8px;
   --rL: 12px;
 }
@@ -161,6 +183,16 @@ button {
   color: #ffffff;
 }
 
+[data-theme="dark"] .bp {
+  background: #ffffff;
+  color: #000000;
+}
+
+[data-theme="dark"] .bp:hover {
+  background: #e5e5e5;
+  color: #000000;
+}
+
 /* Outline on dark bg */
 .bo {
   border: 1.5px solid rgba(252, 249, 242, 0.28);
@@ -294,6 +326,21 @@ button {
   color: var(--text);
 }
 
+/* Force transparent navbar to stay dark because the Home Hero image is light */
+[data-theme="dark"] .hdr:not(.on) .hdr__logo,
+[data-theme="dark"] .hdr:not(.on) .hic,
+[data-theme="dark"] .hdr:not(.on) .theme-toggle {
+  color: #111111 !important;
+}
+
+[data-theme="dark"] .hdr:not(.on) .hdr__nav a {
+  color: #444444 !important;
+}
+
+[data-theme="dark"] .hdr:not(.on) .hdr__nav a:hover {
+  color: #000000 !important;
+}
+
 .hdr__icons {
   display: flex;
   align-items: center;
@@ -425,33 +472,25 @@ button {
 }
 
 .hero__lbl {
-  color: var(--acc) !important;
-  margin-bottom: 28px;
+  color: #000000 !important;
+  margin-bottom: 24px;
 }
 
 .hero__lbl::before {
-  background: currentColor !important;
+  background: #000000 !important;
 }
 
 .hero__h {
-  color: var(--text);
+  color: #000000;
   margin: 0 0 26px;
-}
-
-[data-theme="dark"] .hero__h {
-  color: #fff;
 }
 
 .hero__sub {
   font-size: 18px;
   line-height: 1.7;
-  color: var(--text2);
+  color: rgba(0,0,0,0.7);
   margin-bottom: 44px;
   max-width: 450px;
-}
-
-[data-theme="dark"] .hero__sub {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .hero__btns {
@@ -459,6 +498,25 @@ button {
   gap: 14px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+/* Force hero buttons to stay black/dark because of the light image background.
+   Since the Hero background image doesn't change in dark mode, its internal elements
+   must always use light-mode styling (black text, dark outlines).
+*/
+.hero .bp {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+.hero .bp:hover {
+  background: #333333 !important;
+}
+.hero .bod {
+  border-color: var(--bdM) !important;
+  color: #000000 !important;
+}
+.hero .bod:hover {
+  background: rgba(0,0,0,0.04) !important;
 }
 
 .hero__chips {
@@ -822,7 +880,7 @@ button {
 
 .bnr__lbl {
   justify-content: center !important;
-  color: rgba(0, 0, 0, 0.6) !important;
+  color: var(--text2) !important;
   margin-bottom: 24px;
 }
 
@@ -831,13 +889,13 @@ button {
 }
 
 .bnr__h {
-  color: #000;
+  color: var(--text);
   margin-bottom: 18px;
 }
 
 .bnr__s {
   font-size: 17px;
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--text2);
   margin-bottom: 44px;
 }
 

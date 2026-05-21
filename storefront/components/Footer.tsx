@@ -16,7 +16,7 @@ import Link from "next/link"
 
 const SOCIALS = ["X", "in", "f", "IG"]
 const QUICK_LINKS = ["Home", "About", "Shop", "Categories", "Contact"]
-const SUPPORT_LINKS = ["FAQ", "Shipping Policy", "Returns", "Track Order", "Warranty"]
+const SUPPORT_LINKS = ["Track Order"]
 
 export default function Footer() {
   return (
@@ -25,10 +25,9 @@ export default function Footer() {
         <div className="ft__g">
           {/* Brand */}
           <div>
-            <div className="ft__brand">CLIENT STORE</div>
+            <div className="ft__brand">SUPERIOR HARNESS & ASSEMBLY LLC</div>
             <p className="ft__desc">
-              Premium industrial and lifestyle products — crafted for
-              professionals and everyday excellence.
+              Custom wire harness and cable assembly manufacturer specializing in high-quality engineered wiring solutions.
             </p>
             <div className="ft__soc">
               {SOCIALS.map((s) => (
@@ -42,7 +41,12 @@ export default function Footer() {
             <div className="ft__ch">Quick Links</div>
             <div className="ft__lks">
               {QUICK_LINKS.map((l) => (
-                <Link key={l} href={l === "Shop" ? "/products" : l === "Home" ? "/" : `/#${l.toLowerCase()}`}>
+                <Link key={l} href={
+                  l === "Shop" ? "/products" : 
+                  l === "Home" ? "/" : 
+                  l === "Contact" ? "/contact" : 
+                  `/#${l.toLowerCase()}`
+                }>
                   {l}
                 </Link>
               ))}
@@ -54,7 +58,7 @@ export default function Footer() {
             <div className="ft__ch">Support</div>
             <div className="ft__lks">
               {SUPPORT_LINKS.map((l) => (
-                <Link key={l} href="#">{l}</Link>
+                <Link key={l} href={l === "Track Order" ? "/track-order" : "#"}>{l}</Link>
               ))}
             </div>
           </div>
@@ -62,20 +66,20 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <div className="ft__ch">Contact</div>
-            <div className="ft__ci">hello@clientstore.com</div>
-            <div className="ft__ci">+1 (800) 555-0190</div>
+            <div className="ft__ci">pateltushar1987@gmail.com</div>
+            <div className="ft__ci">734 891 0248</div>
             <div className="ft__ci">
-              Industrial Park<br />New York, NY 10001
+              Canton<br />Michigan, 48187
             </div>
           </div>
         </div>
 
         <div className="ft__btm">
-          <div className="ft__copy">© 2026 Client Store. All rights reserved.</div>
+          <div className="ft__copy">© 2026 Superior Harness & Assembly LLC. All rights reserved.</div>
           <div className="ft__bls">
-            <Link href="#">Privacy</Link>
-            <Link href="#">Terms</Link>
-            <Link href="#">Cookies</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/cookies">Cookies</Link>
           </div>
         </div>
       </div>

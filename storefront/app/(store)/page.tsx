@@ -9,9 +9,9 @@ import Cta from "@/components/Cta"
 import type { Product } from "@/lib/sheets"
 
 export const metadata: Metadata = {
-  title: "Client Store — Premium Industrial Products",
+  title: "Superior Harness & Assembly LLC — Custom Wire Harness Manufacturer",
   description:
-    "Curated premium industrial and lifestyle products — crafted for quality, performance, and modern everyday needs.",
+    "Custom wire harness and cable assembly manufacturer specializing in high-quality engineered wiring solutions for OEMs, medical devices, robotics, and EV applications.",
 }
 
 export const revalidate = 60

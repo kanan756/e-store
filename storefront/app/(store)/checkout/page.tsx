@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import type { ChangeEvent, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
@@ -67,7 +67,21 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
+  const isSubmitting = useRef(false)
   const [error, setError] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "razorpay">("stripe")
+  const [saveInfo, setSaveInfo] = useState(false)
+
+  // Load saved address
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("clientStore_savedInfo")
+      if (saved) {
+        setForm(JSON.parse(saved))
+        setSaveInfo(true)
+      }
+    } catch {}
+  }, [])
 
   // Load Razorpay script
   useEffect(() => {
@@ -84,7 +98,9 @@ export default function CheckoutPage() {
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault()
-      if (items.length === 0 || loading) return
+      if (items.length === 0 || isSubmitting.current) return
+      
+      isSubmitting.current = true
       setLoading(true)
       setError("")
 
@@ -93,21 +109,59 @@ export default function CheckoutPage() {
         if (!parsed.success) {
           setError(parsed.error.issues[0]?.message ?? "Please check your details.")
           setLoading(false)
+          isSubmitting.current = false
           return
         }
 
         const details = parsed.data
 
+        if (saveInfo) {
+          localStorage.setItem("clientStore_savedInfo", JSON.stringify(details))
+        } else {
+          localStorage.removeItem("clientStore_savedInfo")
+        }
+
         if (!window.Razorpay) {
           setError("Payment service is still loading. Please refresh and try again.")
           setLoading(false)
+          isSubmitting.current = false
           return
         }
-
         // Build a readable product list string for Google Sheets
         const productSummary = items
           .map((i) => `${i.name} x${i.quantity}`)
           .join(", ")
+
+        if (paymentMethod === "stripe") {
+          const res = await fetch("/api/stripe/checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              customerName: `${details.firstName} ${details.lastName}`,
+              email: details.email,
+              productSummary,
+              amount: subtotal,
+              successUrl: `${window.location.origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
+              cancelUrl: `${window.location.origin}/checkout`,
+            }),
+          })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || "Failed to initialize Stripe checkout")
+          if (data.url) {
+            clearCart() // clear cart before redirecting
+            window.location.href = data.url
+          } else {
+            throw new Error("No checkout URL returned")
+          }
+          return
+        }
+
+        if (!window.Razorpay) {
+          setError("Payment service is still loading. Please refresh and try again.")
+          setLoading(false)
+          isSubmitting.current = false
+          return
+        }
 
         const options: RazorpayOptions = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "",
@@ -139,6 +193,7 @@ export default function CheckoutPage() {
             } catch {
               setError("Payment received but order save failed. Please contact support with your payment ID: " + response.razorpay_payment_id)
               setLoading(false)
+              isSubmitting.current = false
             }
           },
           prefill: {
@@ -148,18 +203,22 @@ export default function CheckoutPage() {
           },
           theme: { color: "#006d37" },
           modal: {
-            ondismiss: () => setLoading(false),
+            ondismiss: () => {
+              setLoading(false)
+              isSubmitting.current = false
+            },
           },
         }
 
         const rzp = new window.Razorpay(options)
         rzp.open()
-      } catch {
-        setError("Something went wrong. Please try again.")
+      } catch (err: any) {
+        setError(err.message || "Something went wrong. Please try again.")
         setLoading(false)
+        isSubmitting.current = false
       }
     },
-    [items, subtotal, form, loading, clearCart, router]
+    [items, subtotal, form, clearCart, router, paymentMethod, saveInfo]
   )
 
   if (items.length === 0) {
@@ -203,17 +262,36 @@ export default function CheckoutPage() {
                 <Field label="Address" placeholder="123 Street Name, Area" value={form.address1} onChange={set("address1")} required maxLength={200} />
               </div>
 
-              <div className="fields-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18 }}>
+              <div className="fields-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, marginBottom: 24 }}>
                 <Field label="City" placeholder="New York" value={form.city} onChange={set("city")} required maxLength={100} />
                 <Field label="State / Province" placeholder="NY" value={form.province} onChange={set("province")} required maxLength={100} />
                 <Field label="Postal Code" placeholder="10001" value={form.postalCode} onChange={set("postalCode")} required maxLength={10} />
               </div>
+
+              <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 32 }}>
+                <input type="checkbox" checked={saveInfo} onChange={(e) => setSaveInfo(e.target.checked)} style={{ accentColor: "var(--acc)", width: 16, height: 16 }} />
+                <span style={{ fontSize: 14, color: "var(--text2)", fontWeight: 500 }}>Save this information for next time</span>
+              </label>
 
               {error && (
                 <div style={{ marginTop: 20, padding: "14px 18px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 12, color: "#ef4444", fontSize: 14 }}>
                   {error}
                 </div>
               )}
+
+              <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 20, fontWeight: 700, marginBottom: 28, marginTop: 40 }}>
+                Payment Method
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 18 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px", border: paymentMethod === "stripe" ? "2px solid var(--acc)" : "1px solid var(--bd)", borderRadius: "var(--rL)", cursor: "pointer", background: paymentMethod === "stripe" ? "rgba(0,109,55,0.05)" : "transparent" }}>
+                  <input type="radio" name="paymentMethod" value="stripe" checked={paymentMethod === "stripe"} onChange={() => setPaymentMethod("stripe")} style={{ accentColor: "var(--acc)", width: 18, height: 18 }} />
+                  <span style={{ fontWeight: 600 }}>Credit Card / Apple Pay (Stripe)</span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px", border: paymentMethod === "razorpay" ? "2px solid var(--acc)" : "1px solid var(--bd)", borderRadius: "var(--rL)", cursor: "pointer", background: paymentMethod === "razorpay" ? "rgba(0,109,55,0.05)" : "transparent" }}>
+                  <input type="radio" name="paymentMethod" value="razorpay" checked={paymentMethod === "razorpay"} onChange={() => setPaymentMethod("razorpay")} style={{ accentColor: "var(--acc)", width: 18, height: 18 }} />
+                  <span style={{ fontWeight: 600 }}>UPI / Wallets / Cards (Razorpay)</span>
+                </label>
+              </div>
             </div>
 
             {/* ── Order summary ─────────────────────────────────────────── */}
@@ -250,7 +328,7 @@ export default function CheckoutPage() {
               </button>
 
               <p style={{ textAlign: "center", marginTop: 12, fontSize: 12, color: "var(--textM)" }}>
-                Secured by Razorpay
+                Secured by {paymentMethod === "stripe" ? "Stripe" : "Razorpay"}
               </p>
             </div>
           </div>

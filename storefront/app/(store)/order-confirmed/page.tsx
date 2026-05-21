@@ -8,7 +8,7 @@ import { useCart } from "@/context/cart-context"
 function OrderConfirmedContent() {
   const { clearCart } = useCart()
   const searchParams = useSearchParams()
-  const paymentId = searchParams.get("payment_id") ?? ""
+  const paymentId = searchParams.get("payment_id") ?? searchParams.get("session_id") ?? ""
 
   useEffect(() => {
     clearCart()
@@ -61,9 +61,16 @@ function OrderConfirmedContent() {
           ))}
         </div>
 
-        <Link href="/products" className="btn bp">
-          Continue Shopping
-        </Link>
+        <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+          <Link href="/products" className="btn bp">
+            Continue Shopping
+          </Link>
+          {paymentId && (
+            <a href={`/api/invoice?paymentId=${paymentId}`} target="_blank" rel="noopener noreferrer" className="btn" style={{ background: "transparent", border: "1px solid var(--bd)", color: "var(--text)" }}>
+              Download Invoice
+            </a>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -42,14 +42,10 @@ export default function AdminLoginPage() {
       }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <div style={{
-            width: 56, height: 56, borderRadius: 16,
-            background: "rgba(0,0,0,0.1)", border: "1px solid rgba(0,0,0,0.2)",
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             marginBottom: 16,
           }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="28" height="28">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
+            <img src="/images/logo.png" alt="Logo" style={{ height: "80px", width: "auto" }} />
           </div>
           <h1 style={{ color: "#1c1c18", fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>Admin Panel</h1>
           <p style={{ color: "#737874", margin: "8px 0 0", fontSize: 14 }}>SHA Store Management</p>
