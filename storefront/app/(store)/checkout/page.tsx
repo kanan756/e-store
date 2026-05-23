@@ -148,7 +148,12 @@ export default function CheckoutPage() {
           const data = await res.json()
           if (!res.ok) throw new Error(data.error || "Failed to initialize Stripe checkout")
           if (data.url) {
-            clearCart() // clear cart before redirecting
+            // Store token in sessionStorage so order-confirmed can build the
+            // invoice download URL without exposing it in the browser history.
+            if (data.downloadToken) {
+              sessionStorage.setItem("invoice_token", data.downloadToken)
+            }
+            clearCart()
             window.location.href = data.url
           } else {
             throw new Error("No checkout URL returned")
@@ -188,6 +193,9 @@ export default function CheckoutPage() {
               const data = await res.json()
               if (!res.ok) throw new Error(data.error)
 
+              if (data.downloadToken) {
+                sessionStorage.setItem("invoice_token", data.downloadToken)
+              }
               clearCart()
               router.push(`/order-confirmed?order_id=${encodeURIComponent(data.orderId)}&payment_id=${encodeURIComponent(response.razorpay_payment_id)}`)
             } catch {

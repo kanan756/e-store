@@ -42,18 +42,27 @@ export async function POST(request: Request) {
         return NextResponse.json({ received: true, message: "Order already processed" })
       }
 
-      const { customerName, email, productSummary, amount } = session.metadata || {}
-      
-      if (!customerName || !email || !amount) {
+      const { customerName, email, productSummary } = session.metadata || {}
+
+      if (!customerName || !email) {
         console.error("Missing metadata in session", session.id)
         return NextResponse.json({ error: "Missing metadata in session" }, { status: 400 })
       }
+
+      // Use the amount Stripe actually confirmed (amount_total) rather than
+      // the client-supplied metadata value, which could have been tampered
+      // with before the checkout session was created.
+      // amount_total is in the smallest currency unit (paise/cents), so
+      // divide by 100 to get the decimal amount stored in the sheet.
+      const confirmedAmount = session.amount_total != null
+        ? session.amount_total / 100
+        : 0
 
       const orderId = await appendOrder({
         customerName,
         email,
         product: productSummary || "Stripe Order",
-        amount: parseFloat(amount),
+        amount: confirmedAmount,
         paymentId: paymentIntentId,
       })
 
@@ -65,7 +74,7 @@ export async function POST(request: Request) {
           customerName,
           orderId,
           product: productSummary || "Stripe Order",
-          amount: parseFloat(amount),
+          amount: confirmedAmount,
           isStripe: true,
         })
       } catch (emailErr) {

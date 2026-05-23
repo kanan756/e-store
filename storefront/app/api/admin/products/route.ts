@@ -21,7 +21,9 @@ import { z } from "zod"
 async function checkAuth() {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
-  return session?.value === "authenticated"
+  if (!session?.value) return false
+  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
+  return verifyAdminToken(session.value)
 }
 
 const productSchema = z.object({
@@ -61,6 +63,9 @@ export async function PUT(request: Request) {
   try {
     const body = await request.json()
     const { rowIndex, ...productData } = body
+    if (!Number.isInteger(rowIndex) || rowIndex < 2) {
+      return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })
+    }
     const parsed = productSchema.safeParse(productData)
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
     await updateProduct(rowIndex, parsed.data)
@@ -74,6 +79,9 @@ export async function DELETE(request: Request) {
   if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const { rowIndex } = await request.json()
+    if (!Number.isInteger(rowIndex) || rowIndex < 2) {
+      return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })
+    }
     await deleteProduct(rowIndex)
     return NextResponse.json({ success: true })
   } catch {

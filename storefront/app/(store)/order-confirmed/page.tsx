@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 
@@ -9,9 +9,19 @@ function OrderConfirmedContent() {
   const { clearCart } = useCart()
   const searchParams = useSearchParams()
   const paymentId = searchParams.get("payment_id") ?? searchParams.get("session_id") ?? ""
+  const [downloadToken, setDownloadToken] = useState("")
 
   useEffect(() => {
     clearCart()
+    // Retrieve the HMAC token stored by the checkout page before redirect.
+    // Using sessionStorage (not the URL) keeps the token out of server logs
+    // and browser history. Cleared immediately after reading so it cannot
+    // be reused by another tab or a page refresh.
+    const tok = sessionStorage.getItem("invoice_token") ?? ""
+    if (tok) {
+      setDownloadToken(tok)
+      sessionStorage.removeItem("invoice_token")
+    }
   }, [clearCart])
 
   return (
@@ -65,8 +75,8 @@ function OrderConfirmedContent() {
           <Link href="/products" className="btn bp">
             Continue Shopping
           </Link>
-          {paymentId && (
-            <a href={`/api/invoice?paymentId=${paymentId}`} target="_blank" rel="noopener noreferrer" className="btn" style={{ background: "transparent", border: "1px solid var(--bd)", color: "var(--text)" }}>
+          {paymentId && downloadToken && (
+            <a href={`/api/invoice?paymentId=${encodeURIComponent(paymentId)}&token=${encodeURIComponent(downloadToken)}`} target="_blank" rel="noopener noreferrer" className="btn" style={{ background: "transparent", border: "1px solid var(--bd)", color: "var(--text)" }}>
               Download Invoice
             </a>
           )}

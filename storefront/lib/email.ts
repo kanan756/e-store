@@ -12,6 +12,18 @@
 import nodemailer from "nodemailer"
 import { generateInvoicePdf } from "./pdf"
 
+// Escapes HTML special characters to prevent XSS in email templates.
+// Must be applied to every user-supplied or database-sourced string
+// before interpolation into HTML strings.
+function escapeHtml(str: unknown): string {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+}
+
 // ── Nodemailer Transporter Configuration ──────────────────────────────────────
 // Uses standard SMTP over TLS (port 465) via Gmail. Ensure you have
 // GMAIL_USER and GMAIL_APP_PASSWORD correctly set in .env.local.
@@ -77,6 +89,16 @@ export async function sendOrderStatusEmail({
   const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
+  // Escaped aliases — applied to every user-sourced or admin-sourced string
+  // before interpolation into HTML to prevent XSS in email clients.
+  const eName     = escapeHtml(customerName)
+  const eOrderId  = escapeHtml(orderId)
+  const eProduct  = escapeHtml(product)
+  const eStatus   = escapeHtml(status)
+  const eComments = comments != null ? escapeHtml(comments) : undefined
+  const eTo       = escapeHtml(to)
+  const eFromName = escapeHtml(fromName)
+
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -90,12 +112,12 @@ export async function sendOrderStatusEmail({
         <tr><td style="background:#1c1c18;padding:36px 40px;text-align:center;border-bottom:1px solid #2a2a24;">
           <div style="font-size:40px;margin-bottom:12px;">${icon}</div>
           <h1 style="margin:0;color:#fcf9f2;font-size:22px;font-weight:800;letter-spacing:-0.02em;">Order Status Update</h1>
-          <p style="margin:8px 0 0;color:#737874;font-size:14px;">${fromName}</p>
+          <p style="margin:8px 0 0;color:#737874;font-size:14px;">${eFromName}</p>
         </td></tr>
 
         <!-- Body -->
         <tr><td style="padding:36px 40px;">
-          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${customerName}</strong>,</p>
+          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${eName}</strong>,</p>
           <p style="color:#737874;font-size:14px;margin:0 0 28px;line-height:1.6;">
             Your order has been updated. Here are the latest details:
           </p>
@@ -103,7 +125,7 @@ export async function sendOrderStatusEmail({
           <!-- Status Badge -->
           <div style="text-align:center;margin-bottom:32px;">
             <span style="display:inline-block;padding:10px 24px;border-radius:999px;font-size:16px;font-weight:800;background:${color}18;color:${color};border:1px solid ${color}33;">
-              ${icon} ${status}
+              ${icon} ${eStatus}
             </span>
           </div>
 
@@ -111,23 +133,23 @@ export async function sendOrderStatusEmail({
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#252520;border-radius:12px;overflow:hidden;margin-bottom:24px;">
             <tr style="border-bottom:1px solid #2a2a24;">
               <td style="padding:14px 18px;color:#737874;font-size:13px;width:120px;">Order ID</td>
-              <td style="padding:14px 18px;color:#4ae183;font-size:13px;font-family:monospace;font-weight:700;">${orderId}</td>
+              <td style="padding:14px 18px;color:#4ae183;font-size:13px;font-family:monospace;font-weight:700;">${eOrderId}</td>
             </tr>
             <tr style="border-bottom:1px solid #2a2a24;">
               <td style="padding:14px 18px;color:#737874;font-size:13px;">Product</td>
-              <td style="padding:14px 18px;color:#fcf9f2;font-size:13px;">${product}</td>
+              <td style="padding:14px 18px;color:#fcf9f2;font-size:13px;">${eProduct}</td>
             </tr>
             <tr>
               <td style="padding:14px 18px;color:#737874;font-size:13px;">Status</td>
-              <td style="padding:14px 18px;color:${color};font-size:13px;font-weight:700;">${status}</td>
+              <td style="padding:14px 18px;color:${color};font-size:13px;font-weight:700;">${eStatus}</td>
             </tr>
           </table>
 
-          ${comments ? `
+          ${eComments ? `
           <!-- Comment -->
           <div style="background:${color}10;border:1px solid ${color}20;border-radius:10px;padding:16px 20px;margin-bottom:24px;">
             <p style="margin:0 0 6px;color:${color};font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Update from our team</p>
-            <p style="margin:0;color:#e5e2db;font-size:14px;line-height:1.6;">${comments}</p>
+            <p style="margin:0;color:#e5e2db;font-size:14px;line-height:1.6;">${eComments}</p>
           </div>
           ` : ""}
 
@@ -142,7 +164,7 @@ export async function sendOrderStatusEmail({
         <!-- Footer -->
         <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
           <p style="margin:0;color:#737874;font-size:12px;">
-            You received this email because you placed an order at ${fromName}.<br>
+            You received this email because you placed an order at ${eFromName}.<br>
             Questions? Reply to this email.
           </p>
         </td></tr>
@@ -167,14 +189,14 @@ export async function sendOrderStatusEmail({
   <div style="font-family:sans-serif;padding:24px;background:#131310;color:#e5e2db;border:1px solid #2a2a24;border-radius:12px;max-width:500px;margin:0 auto;">
     <h3 style="color:#4ae183;margin:0 0 16px;font-size:16px;letter-spacing:0.05em;text-transform:uppercase;">Order Status Updated</h3>
     <table style="width:100%;border-collapse:collapse;font-size:14px;">
-      <tr><td style="padding:6px 0;color:#737874;width:80px;">Order ID</td><td style="padding:6px 0;font-weight:700;font-family:monospace;color:#fcf9f2;">${orderId}</td></tr>
-      <tr><td style="padding:6px 0;color:#737874;">Customer</td><td style="padding:6px 0;">${customerName} (<a href="mailto:${to}" style="color:#4ae183;text-decoration:none;">${to}</a>)</td></tr>
-      <tr><td style="padding:6px 0;color:#737874;">Status</td><td style="padding:6px 0;font-weight:700;color:${color};">${status}</td></tr>
+      <tr><td style="padding:6px 0;color:#737874;width:80px;">Order ID</td><td style="padding:6px 0;font-weight:700;font-family:monospace;color:#fcf9f2;">${eOrderId}</td></tr>
+      <tr><td style="padding:6px 0;color:#737874;">Customer</td><td style="padding:6px 0;">${eName} (<a href="mailto:${to}" style="color:#4ae183;text-decoration:none;">${eTo}</a>)</td></tr>
+      <tr><td style="padding:6px 0;color:#737874;">Status</td><td style="padding:6px 0;font-weight:700;color:${color};">${eStatus}</td></tr>
     </table>
-    ${comments ? `
+    ${eComments ? `
     <div style="margin-top:16px;padding:12px;background:#1c1c18;border-radius:8px;border:1px solid #2a2a24;">
       <div style="color:#737874;font-size:11px;margin-bottom:4px;text-transform:uppercase;">Admin Comment</div>
-      <div style="font-size:13px;line-height:1.5;">${comments}</div>
+      <div style="font-size:13px;line-height:1.5;">${eComments}</div>
     </div>
     ` : ""}
   </div>
@@ -205,7 +227,12 @@ export async function sendOrderConfirmationEmail({
 }) {
   const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
-  
+
+  const eName     = escapeHtml(customerName)
+  const eOrderId  = escapeHtml(orderId)
+  const eProduct  = escapeHtml(product)
+  const eFromName = escapeHtml(fromName)
+
   let formattedAmount;
   if (isStripe) {
     formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -226,12 +253,12 @@ export async function sendOrderConfirmationEmail({
         <tr><td style="background:#1c1c18;padding:36px 40px;text-align:center;border-bottom:1px solid #2a2a24;">
           <div style="font-size:40px;margin-bottom:12px;">🎉</div>
           <h1 style="margin:0;color:#fcf9f2;font-size:22px;font-weight:800;letter-spacing:-0.02em;">Order Confirmed!</h1>
-          <p style="margin:8px 0 0;color:#737874;font-size:14px;">Thank you for shopping at ${fromName}</p>
+          <p style="margin:8px 0 0;color:#737874;font-size:14px;">Thank you for shopping at ${eFromName}</p>
         </td></tr>
 
         <!-- Body -->
         <tr><td style="padding:36px 40px;">
-          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${customerName}</strong>,</p>
+          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${eName}</strong>,</p>
           <p style="color:#737874;font-size:14px;margin:0 0 28px;line-height:1.6;">
             We've received your order and payment. We're getting your items ready for shipment! Here is your auto-generated bill and receipt:
           </p>
@@ -240,11 +267,11 @@ export async function sendOrderConfirmationEmail({
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#252520;border-radius:12px;overflow:hidden;margin-bottom:24px;">
             <tr style="border-bottom:1px solid #2a2a24;">
               <td style="padding:14px 18px;color:#737874;font-size:13px;width:120px;">Order ID</td>
-              <td style="padding:14px 18px;color:#4ae183;font-size:13px;font-family:monospace;font-weight:700;">${orderId}</td>
+              <td style="padding:14px 18px;color:#4ae183;font-size:13px;font-family:monospace;font-weight:700;">${eOrderId}</td>
             </tr>
             <tr style="border-bottom:1px solid #2a2a24;">
               <td style="padding:14px 18px;color:#737874;font-size:13px;">Items</td>
-              <td style="padding:14px 18px;color:#fcf9f2;font-size:13px;">${product}</td>
+              <td style="padding:14px 18px;color:#fcf9f2;font-size:13px;">${eProduct}</td>
             </tr>
             <tr>
               <td style="padding:14px 18px;color:#737874;font-size:13px;">Total Paid</td>
@@ -263,7 +290,7 @@ export async function sendOrderConfirmationEmail({
         <!-- Footer -->
         <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
           <p style="margin:0;color:#737874;font-size:12px;">
-            You received this email because you placed an order at ${fromName}.<br>
+            You received this email because you placed an order at ${eFromName}.<br>
             Questions? Reply to this email.
           </p>
         </td></tr>
@@ -317,6 +344,11 @@ export async function sendInquiryReplyEmail({
   const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
+  const eName     = escapeHtml(customerName)
+  const eSubject  = escapeHtml(originalSubject)
+  const eReply    = escapeHtml(replyMessage)
+  const eFromName = escapeHtml(fromName)
+
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -329,25 +361,25 @@ export async function sendInquiryReplyEmail({
         <!-- Header -->
         <tr><td style="background:#1c1c18;padding:36px 40px;text-align:center;border-bottom:1px solid #2a2a24;">
           <h1 style="margin:0;color:#fcf9f2;font-size:20px;font-weight:700;">Reply to your inquiry</h1>
-          <p style="margin:8px 0 0;color:#737874;font-size:14px;">Re: ${originalSubject}</p>
+          <p style="margin:8px 0 0;color:#737874;font-size:14px;">Re: ${eSubject}</p>
         </td></tr>
 
         <!-- Body -->
         <tr><td style="padding:36px 40px;">
-          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${customerName}</strong>,</p>
+          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;">Hi <strong style="color:#fcf9f2;">${eName}</strong>,</p>
           <p style="color:#737874;font-size:14px;margin:0 0 24px;line-height:1.6;">
             Thank you for reaching out to us. Here is the response to your inquiry:
           </p>
 
           <!-- Reply Message -->
           <div style="background:#252520;border-left:4px solid #4ae183;border-radius:0 8px 8px 0;padding:20px;margin-bottom:32px;">
-            <p style="margin:0;color:#fcf9f2;font-size:15px;line-height:1.7;white-space:pre-wrap;">${replyMessage}</p>
+            <p style="margin:0;color:#fcf9f2;font-size:15px;line-height:1.7;white-space:pre-wrap;">${eReply}</p>
           </div>
 
           <p style="color:#737874;font-size:14px;margin:0;line-height:1.6;">
             If you have any further questions, simply reply to this email or visit our website.
           </p>
-          
+
           <div style="text-align:center;margin-top:32px;">
             <a href="${storeUrl}" style="display:inline-block;padding:12px 24px;background:#4ae183;color:#131310;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;">
               Visit Our Store
@@ -358,7 +390,7 @@ export async function sendInquiryReplyEmail({
         <!-- Footer -->
         <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
           <p style="margin:0;color:#737874;font-size:12px;">
-            ${fromName}<br>
+            ${eFromName}<br>
             Canton, Michigan, 48187
           </p>
         </td></tr>

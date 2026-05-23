@@ -126,7 +126,7 @@ export async function appendOrder(order: {
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Orders!A:H",
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[
         orderId,
@@ -212,7 +212,7 @@ export async function appendProduct(product: Omit<Product, "id">): Promise<void>
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Products!A:F",
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[
         product.name,
@@ -232,7 +232,7 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Products!A${rowIndex}:F${rowIndex}`,
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[
         product.name,
@@ -309,7 +309,7 @@ export async function updateOrderStatus(rowIndex: number, status: string, commen
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Orders!F${rowIndex}:H${rowIndex}`,
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[status, comments, `Admin (${now})`]],
     },
@@ -323,7 +323,7 @@ export async function appendBlog(blog: Blog): Promise<void> {
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Blogs!A:H",
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[
         blog.title,
@@ -377,7 +377,7 @@ export async function updateBlogPublished(rowIndex: number, published: boolean):
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Blogs!H${rowIndex}`,
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: { values: [[published ? "true" : "false"]] },
   })
 }
@@ -390,7 +390,7 @@ export async function appendInquiry(inq: Omit<Inquiry, "id" | "submittedAt" | "s
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Inquiries!A:F",
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[
         `INQ-${Date.now()}`,
@@ -433,7 +433,7 @@ export async function updateInquiryStatus(rowIndex: number, status: string): Pro
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Inquiries!G${rowIndex}`,
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: { values: [[status]] },
   })
 }

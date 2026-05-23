@@ -15,7 +15,9 @@ import { sendInquiryReplyEmail } from "@/lib/email"
 async function checkAuth() {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
-  return session?.value === "authenticated"
+  if (!session?.value) return false
+  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
+  return verifyAdminToken(session.value)
 }
 
 export async function POST(request: Request) {

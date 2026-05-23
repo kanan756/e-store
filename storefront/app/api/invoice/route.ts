@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
-import { getAllOrders } from "@/lib/sheets";
 import { generateInvoicePdf } from "@/lib/pdf";
+import { verifyInvoiceToken } from "@/lib/invoice-token";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const paymentId = searchParams.get("paymentId");
+  const token = searchParams.get("token") ?? "";
 
   if (!paymentId) {
     return NextResponse.json({ error: "Missing paymentId" }, { status: 400 });
+  }
+
+  // Verify the HMAC token generated at order-creation time.
+  // Prevents unauthenticated enumeration of all customer invoices by
+  // payment ID — an attacker who guesses a valid paymentId still cannot
+  // compute a valid token without the server secret (NEXTAUTH_SECRET).
+  if (!verifyInvoiceToken(paymentId, token)) {
+    return NextResponse.json({ error: "Invalid or missing download token" }, { status: 403 });
   }
 
   try {

@@ -23,7 +23,9 @@ import { z } from "zod"
 async function checkAuth() {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
-  return session?.value === "authenticated"
+  if (!session?.value) return false
+  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
+  return verifyAdminToken(session.value)
 }
 
 const blogSchema = z.object({
@@ -64,6 +66,9 @@ export async function DELETE(request: Request) {
   if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const { rowIndex } = await request.json()
+    if (!Number.isInteger(rowIndex) || rowIndex < 2) {
+      return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })
+    }
     await deleteBlog(rowIndex)
     return NextResponse.json({ success: true })
   } catch {

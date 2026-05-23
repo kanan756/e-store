@@ -20,7 +20,9 @@ import { sendOrderStatusEmail } from "@/lib/email"
 async function checkAuth() {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
-  return session?.value === "authenticated"
+  if (!session?.value) return false
+  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
+  return verifyAdminToken(session.value)
 }
 
 export async function GET() {
@@ -37,6 +39,10 @@ export async function PUT(request: Request) {
   if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const { rowIndex, status, comments, sendEmail } = await request.json()
+
+    if (!Number.isInteger(rowIndex) || rowIndex < 2) {
+      return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })
+    }
 
     // 1. Update Google Sheets
     await updateOrderStatus(rowIndex, status, comments ?? "")

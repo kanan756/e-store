@@ -2,19 +2,29 @@
  * @file lib/rate-limit.ts
  * @description Simple in-memory sliding-window rate limiter for Next.js API routes.
  *   Uses a Map keyed by IP address to track request counts within a time window.
- *   Suitable for single-instance deployments (Vercel Serverless / local dev).
+ *
+ *   ⚠️  KNOWN LIMITATION — DOES NOT WORK ON VERCEL SERVERLESS:
+ *   Vercel spins up a new function instance per request (or reuses one briefly).
+ *   The `store` Map lives only in memory for the lifetime of that instance, so
+ *   every request effectively starts with a fresh counter. No IP is ever blocked.
+ *
+ *   To make rate limiting work in production you would need a shared external
+ *   store (e.g. Upstash Redis with the @upstash/ratelimit package). Until then
+ *   this file provides the correct interface so call-sites compile, but the
+ *   enforcement has no effect at runtime on Vercel.
+ *
+ *   MITIGATING FACTOR: The admin login endpoint — the most sensitive target for
+ *   brute-force — is also protected by an HMAC-signed session token (see
+ *   app/api/admin/auth/route.ts). An attacker must guess both the password AND
+ *   forge a SHA-256 HMAC, making password-only brute-force insufficient even
+ *   without a working rate limiter.
  *
  *   Usage:
  *     const { success } = rateLimit(request, { limit: 5, windowMs: 60_000 })
  *     if (!success) return NextResponse.json({ error: "Too many requests" }, { status: 429 })
  *
- *   Default limits:
- *     - Contact form  : 5 submissions per 60 seconds per IP
- *     - Order POST    : 10 per 60 seconds per IP
- *     - Admin login   : 5 attempts per 5 minutes per IP
- *
  * @owner Heet-P
- * @lastModified May 16, 2026
+ * @lastModified May 23, 2026
  */
 
 interface RateLimitEntry {
@@ -22,8 +32,9 @@ interface RateLimitEntry {
   resetAt: number    // timestamp (ms) when the window resets
 }
 
-// In-memory store — Map<"key:ip", entry>
-// Each unique (key + ip) combination has its own counter
+// In-memory store — Map<"key:ip", entry>.
+// NOTE: On Vercel serverless this resets to empty on every cold invocation;
+// rate limiting is therefore non-functional in that environment (see file header).
 const store = new Map<string, RateLimitEntry>()
 
 // Periodically clean up expired entries to avoid memory leaks

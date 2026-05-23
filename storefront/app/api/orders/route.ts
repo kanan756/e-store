@@ -13,7 +13,8 @@
  */
 
 import { NextResponse } from "next/server"
-import { appendOrder } from "@/lib/sheets"
+import { appendOrder, getOrderByPaymentId } from "@/lib/sheets"
+import { generateInvoiceToken } from "@/lib/invoice-token"
 import { z } from "zod"
 import { rateLimit } from "@/lib/rate-limit"
 
@@ -44,7 +45,22 @@ export async function POST(request: Request) {
     }
 
     const { paymentId, amount } = parsed.data;
-    
+
+    // Deduplication: reject if this payment ID already has an order.
+    // Checked before the Razorpay API call to avoid an unnecessary round-trip
+    // on retries (e.g. browser crash after payment, user resubmits).
+    // Returns the existing orderId so the frontend can redirect normally.
+    if (paymentId.startsWith("pay_")) {
+      const existing = await getOrderByPaymentId(paymentId)
+      if (existing) {
+        return NextResponse.json({
+          orderId: existing.orderId,
+          success: true,
+          downloadToken: generateInvoiceToken(paymentId),
+        })
+      }
+    }
+
     // Verify Razorpay Payment (payment IDs start with "pay_")
     if (paymentId.startsWith("pay_")) {
       try {
@@ -82,7 +98,11 @@ export async function POST(request: Request) {
       console.error("Failed to send confirmation email:", emailErr)
     }
 
-    return NextResponse.json({ orderId, success: true })
+    return NextResponse.json({
+      orderId,
+      success: true,
+      downloadToken: generateInvoiceToken(parsed.data.paymentId),
+    })
   } catch (err) {
     console.error("Failed to write order to Google Sheets:", err)
     return NextResponse.json({ error: "Failed to save order" }, { status: 500 })
@@ -95,6 +115,24 @@ export async function GET(request: Request) {
 
   if (!email) {
     return NextResponse.json({ error: "Email required" }, { status: 400 })
+  }
+
+  // Require a valid NextAuth session and verify the session email matches
+  // the requested email so customers can only see their own orders.
+  try {
+    const { getServerSession } = await import("next-auth")
+    const { authOptions } = await import("@/app/api/auth/[...nextauth]/route")
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    }
+
+    if (session.user.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+  } catch {
+    return NextResponse.json({ error: "Authentication check failed" }, { status: 500 })
   }
 
   try {
