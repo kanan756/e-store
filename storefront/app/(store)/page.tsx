@@ -6,7 +6,7 @@ import FeaturedProducts from "@/components/FeaturedProducts"
 import WhyUs from "@/components/WhyUs"
 import Banner from "@/components/Banner"
 import Cta from "@/components/Cta"
-import type { Product } from "@/lib/sheets"
+import { getProducts } from "@/lib/sheets"
 
 export const metadata: Metadata = {
   title: "Superior Harness & Assembly LLC — Custom Wire Harness Manufacturer",
@@ -16,20 +16,9 @@ export const metadata: Metadata = {
 
 export const revalidate = 60
 
-async function getFeaturedProducts(): Promise<Product[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STORE_URL}/api/products`, {
-      next: { revalidate: 60 },
-    })
-    const data = await res.json()
-    return (data.products ?? []).slice(0, 6)
-  } catch {
-    return []
-  }
-}
-
 export default async function HomePage() {
-  const products = await getFeaturedProducts()
+  const allProducts = await getProducts()
+  const products = allProducts.slice(0, 6)
 
   return (
     <>

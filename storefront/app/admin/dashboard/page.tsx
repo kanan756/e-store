@@ -24,8 +24,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import type { Product, Order, Blog, Inquiry } from "@/lib/sheets"
+import type { Product, Order, Blog, Inquiry, Quote } from "@/lib/sheets"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { formatPrice } from "@/lib/format"
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const s = {
@@ -72,10 +73,6 @@ const s = {
   } as React.CSSProperties,
 }
 
-function formatPrice(rs: number) {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0 }).format(rs)
-}
-
 // ── Nav Item ──────────────────────────────────────────────────────────────────
 function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
@@ -111,6 +108,7 @@ function ProductForm({
     imageUrl: initial?.imageUrl ?? "",
     price: initial?.price ?? 0,
     handle: initial?.handle ?? "",
+    inStock: initial?.inStock ?? true,
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -162,13 +160,39 @@ function ProductForm({
           <input style={s.input} value={form.imageUrl} onChange={set("imageUrl")} placeholder="https://..." />
         </div>
         <div>
-          <label style={s.label}>Price (in Rs — e.g. 600 for ₹600)</label>
+          <label style={s.label}>Price (e.g. 600 for $600)</label>
           <input style={s.input} type="number" value={form.price} onChange={set("price")} min="0" placeholder="600" />
         </div>
       </div>
       <div>
         <label style={s.label}>Handle (URL slug — auto-generated if empty)</label>
         <input style={s.input} value={form.handle} onChange={set("handle")} placeholder="winter-jacket" />
+      </div>
+      <div>
+        <label style={s.label}>Availability</label>
+        <button
+          type="button"
+          onClick={() => setForm((f) => ({ ...f, inStock: !f.inStock }))}
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer",
+            background: "none", border: "none", padding: 0,
+          }}
+        >
+          <span style={{
+            width: 44, height: 24, borderRadius: 12, position: "relative",
+            background: form.inStock ? "var(--acc)" : "var(--bd)",
+            transition: "background 0.2s", flexShrink: 0, display: "block",
+          }}>
+            <span style={{
+              position: "absolute", top: 3, left: form.inStock ? 23 : 3,
+              width: 18, height: 18, borderRadius: "50%", background: "#fff",
+              transition: "left 0.2s", display: "block",
+            }} />
+          </span>
+          <span style={{ color: form.inStock ? "var(--acc)" : "var(--text2)", fontWeight: 600, fontSize: 14 }}>
+            {form.inStock ? "In Stock" : "Out of Stock"}
+          </span>
+        </button>
       </div>
       {error && <div style={{ color: "#ef4444", fontSize: 13, padding: "8px 12px", background: "rgba(239,68,68,0.1)", borderRadius: 8 }}>{error}</div>}
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
@@ -237,7 +261,7 @@ function ProductsTab() {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--bd)" }}>
-                {["Name", "Category", "Price", "Handle", "Actions"].map((h) => (
+                {["Name", "Category", "Price", "Stock", "Handle", "Actions"].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
@@ -248,6 +272,15 @@ function ProductsTab() {
                   <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
                   <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{p.category || "—"}</td>
                   <td style={{ padding: "14px 12px", color: "var(--text)" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
+                  <td style={{ padding: "14px 12px" }}>
+                    <span style={{
+                      display: "inline-block", padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                      background: p.inStock ? "rgba(74,225,131,0.12)" : "rgba(239,68,68,0.1)",
+                      color: p.inStock ? "var(--acc)" : "#ef4444",
+                    }}>
+                      {p.inStock ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </td>
                   <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{p.handle}</td>
                   <td style={{ padding: "14px 12px" }}>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -704,6 +737,121 @@ function InquiriesTab() {
   )
 }
 
+// ── Quotes Tab ────────────────────────────────────────────────────────────────
+const QUOTE_STATUSES = ["New", "Reviewing", "Quoted", "Accepted", "Closed"]
+const QUOTE_COLORS: Record<string, string> = {
+  New: "#f59e0b", Reviewing: "#2563eb", Quoted: "#8b5cf6", Accepted: "#16a34a", Closed: "#888",
+}
+
+function QuotesTab() {
+  const [quotes, setQuotes] = useState<(Quote & { rowIndex: number })[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState<string | null>(null)
+
+  const fetchQuotes = useCallback(async () => {
+    setLoading(true)
+    const res = await fetch("/api/admin/quotes")
+    const data = await res.json()
+    setQuotes(data.quotes ?? [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchQuotes() }, [fetchQuotes])
+
+  const updateStatus = async (rowIndex: number, status: string) => {
+    await fetch("/api/admin/quotes", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rowIndex, status }),
+    })
+    fetchQuotes()
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Quote Requests</h2>
+        <button onClick={fetchQuotes} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>↻ Refresh</button>
+      </div>
+      <div style={s.card}>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>Loading quotes…</div>
+        ) : quotes.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No quote requests yet.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {[...quotes].reverse().map((q) => (
+              <div key={q.id} style={{
+                border: `1px solid ${expanded === q.id ? "rgba(0,0,0,0.2)" : "var(--bd)"}`,
+                borderRadius: 12, overflow: "hidden",
+              }}>
+                <div
+                  onClick={() => setExpanded(expanded === q.id ? null : q.id)}
+                  style={{ padding: "16px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                      {q.name}
+                      {q.company && <span style={{ fontWeight: 400, color: "var(--text2)", marginLeft: 8 }}>· {q.company}</span>}
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--text2)" }}>
+                      <a href={`mailto:${q.email}`} style={{ color: "var(--text)" }}>{q.email}</a>
+                      {q.phone && <span> · {q.phone}</span>}
+                      {q.application && <span> · {q.application}</span>}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                    <span style={{
+                      padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                      background: `${QUOTE_COLORS[q.status] ?? "#888"}20`,
+                      color: QUOTE_COLORS[q.status] ?? "#888",
+                    }}>{q.status}</span>
+                    <span style={{ color: "#555", fontSize: 16 }}>{expanded === q.id ? "▲" : "▼"}</span>
+                  </div>
+                </div>
+                {expanded === q.id && (
+                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid var(--bd)" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "16px 0" }}>
+                      {[
+                        { label: "Email", value: q.email },
+                        { label: "Phone", value: q.phone || "—" },
+                        { label: "Company", value: q.company || "—" },
+                        { label: "Application", value: q.application || "—" },
+                        { label: "Quantity", value: q.quantity || "—" },
+                        { label: "Submitted", value: q.submittedAt || "—" },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <div style={{ fontSize: 11, color: "var(--text2)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>{label}</div>
+                          <div style={{ fontSize: 14, color: "var(--text)" }}>{value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ padding: "14px 16px", background: "var(--bg2)", borderRadius: 10, marginBottom: 16, lineHeight: 1.7, color: "var(--text2)", fontSize: 14 }}>
+                      <div style={{ fontSize: 11, color: "var(--text2)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Project Description</div>
+                      {q.description}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <label style={{ ...s.label, margin: 0 }}>Status:</label>
+                      <select
+                        value={q.status}
+                        onChange={(e) => updateStatus(q.rowIndex, e.target.value)}
+                        style={{ ...s.input, width: "auto", padding: "6px 12px" }}
+                      >
+                        {QUOTE_STATUSES.map((st) => <option key={st}>{st}</option>)}
+                      </select>
+                      <span style={{ fontSize: 12, color: "#555", marginLeft: 8 }}>{q.submittedAt}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Stats Cards ───────────────────────────────────────────────────────────────
 function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
   const [stats, setStats] = useState({ products: 0, orders: 0, revenue: 0 })
@@ -751,7 +899,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
     },
     {
       label: "TOTAL REVENUE",
-      value: stats.revenue > 0 ? formatPrice(stats.revenue) : "₹0",
+      value: stats.revenue > 0 ? formatPrice(stats.revenue) : "$0",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
           <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -831,7 +979,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
-  const [tab, setTab] = useState<"overview" | "products" | "orders" | "blogs" | "inquiries">("overview")
+  const [tab, setTab] = useState<"overview" | "products" | "orders" | "blogs" | "inquiries" | "quotes">("overview")
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -861,6 +1009,7 @@ export default function AdminDashboard() {
           <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} label="Orders" active={tab === "orders"} onClick={() => setTab("orders")} />
           <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => setTab("blogs")} />
           <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => setTab("inquiries")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} label="Quotes" active={tab === "quotes"} onClick={() => setTab("quotes")} />
         </nav>
 
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bd)" }}>
@@ -878,11 +1027,12 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <main style={s.main}>
-        {tab === "overview" && <StatsTab orders={[]} />}
-        {tab === "products" && <ProductsTab />}
-        {tab === "orders" && <OrdersTab />}
-        {tab === "blogs" && <BlogsTab />}
-        {tab === "inquiries" && <InquiriesTab />}
+        {tab === "overview"   && <StatsTab orders={[]} />}
+        {tab === "products"   && <ProductsTab />}
+        {tab === "orders"     && <OrdersTab />}
+        {tab === "blogs"      && <BlogsTab />}
+        {tab === "inquiries"  && <InquiriesTab />}
+        {tab === "quotes"     && <QuotesTab />}
       </main>
     </div>
   )

@@ -32,7 +32,10 @@ export default function About() {
             SUPERIOR<br />HARNESS &amp;<br />ASSEMBLY LLC
           </h2>
           <p className="abt__p rv d3">
-            We are a custom wire harness and cable assembly manufacturer providing high-quality engineered wiring solutions for OEMs, medical devices, robotics, EV applications, and industrial automation. We support both prototype and production-level manufacturing with flexible low minimum order quantities.
+            We are a custom wire harness manufacturer committed to delivering high-quality, reliable, and fully customized wiring solutions. With a team that brings over 30 years of combined experience in the wire harness industry, we understand the importance of precision, durability, and performance in every project we undertake.
+          </p>
+          <p className="abt__p rv d3" style={{ marginTop: 20 }}>
+            We specialize in low to medium volume production with flexible minimum order quantities, allowing us to support startups, OEMs, and large-scale manufacturers alike — delivering products that meet your technical specifications, timelines, and budget.
           </p>
           <Link href="/about" className="btn bod rv d4" style={{ marginTop: 36 }}>
             Learn More <ArrowIcon />

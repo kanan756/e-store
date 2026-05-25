@@ -14,7 +14,21 @@
       "Bash(node -e ' *)",
       "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>x.startsWith\\('1.'\\)\\).slice\\(-5\\).join\\('\\\\n'\\)\\)\")",
       "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>!x.includes\\('snapshot'\\)&&!x.includes\\('preview'\\)\\).slice\\(-5\\).join\\('\\\\n'\\)\\)\")",
-      "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>!x.includes\\('snapshot'\\)&&!x.includes\\('alpha'\\)&&!x.includes\\('beta'\\)&&!x.includes\\('canary'\\)\\).slice\\(-8\\).join\\('\\\\n'\\)\\)\")"
+      "Bash(node -e \"const v=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(v.filter\\(x=>!x.includes\\('snapshot'\\)&&!x.includes\\('alpha'\\)&&!x.includes\\('beta'\\)&&!x.includes\\('canary'\\)\\).slice\\(-8\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\heet1\\\\OneDrive\\\\Desktop\\\\College\\\\MCT\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(xargs ls -la)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\heet1\\\\OneDrive\\\\Desktop\\\\College\\\\MCT\\\\storefront\\\\middleware.ts\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "WebSearch",
+      "WebFetch(domain:www.pexels.com)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\heet1\\\\OneDrive\\\\Desktop\\\\College\\\\MCT\\\\storefront\" -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(grep -E \"\\\\.\\(pdf|md\\)$\")",
+      "Bash(grep -E \"\\\\.\\(pdf|md|MD\\)$\")",
+      "Bash(git rm *)"
     ]
   }
 }

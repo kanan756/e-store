@@ -22,6 +22,7 @@ import Link from "next/link"
 import { useCallback, useState } from "react"
 import { useCart } from "@/context/cart-context"
 import type { Product } from "@/lib/sheets"
+import { formatPrice } from "@/lib/format"
 
 function ArrowIcon() {
   return (
@@ -34,13 +35,6 @@ function ArrowIcon() {
 interface ProductCardProps {
   product: Product
   index?: number
-}
-
-function formatPrice(rs: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR",
-    minimumFractionDigits: 0, maximumFractionDigits: 0,
-  }).format(rs)
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
@@ -73,19 +67,34 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const images = product.imageUrl ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl) : []
   const primaryImage = images.length > 0 ? images[0] : null
 
+  const outOfStock = product.inStock === false
+
   return (
-    <div className="prodC rv" style={{ transitionDelay: `${index * 0.07}s` }}>
-      <div className="prodC__img">
+    <div className="prodC rv" style={{ transitionDelay: `${index * 0.07}s`, opacity: outOfStock ? 0.55 : 1 }}>
+      <div className="prodC__img" style={{ position: "relative" }}>
         {primaryImage ? (
           <Image
             src={primaryImage}
             alt={product.name}
             fill
             sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
-            style={{ objectFit: "cover" }}
+            style={{ objectFit: "contain", padding: "8px", filter: outOfStock ? "grayscale(70%)" : "none" }}
           />
         ) : (
           <PlaceholderImage title={product.name} />
+        )}
+        {outOfStock && (
+          <div style={{
+            position: "absolute", top: 10, left: 10,
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(4px)",
+            color: "#e5e2db",
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            padding: "4px 10px", borderRadius: 6,
+          }}>
+            Out of Stock
+          </div>
         )}
       </div>
       <div className="prodC__bd">
@@ -98,10 +107,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           <button
             className="btn bp bsm"
             onClick={handleAddToCart}
-            disabled={adding}
-            style={added ? { background: "#16a34a" } : {}}
+            disabled={adding || outOfStock}
+            style={outOfStock ? { opacity: 0.4, cursor: "not-allowed" } : added ? { background: "#16a34a" } : {}}
           >
-            {added ? "✓ Added!" : adding ? "Adding…" : "Add to Cart"}
+            {outOfStock ? "Out of Stock" : added ? "✓ Added!" : adding ? "Adding…" : "Add to Cart"}
           </button>
           <Link href={href} className="btn bod bsm">
             View <ArrowIcon />

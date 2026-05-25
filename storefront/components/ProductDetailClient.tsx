@@ -5,6 +5,7 @@ import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import type { Product } from "@/lib/sheets"
+import { formatPrice } from "@/lib/format"
 
 function ArrowIcon() {
   return (
@@ -12,13 +13,6 @@ function ArrowIcon() {
       <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12,5 19,12 12,19" />
     </svg>
   )
-}
-
-function formatPrice(rs: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR",
-    minimumFractionDigits: 0, maximumFractionDigits: 0,
-  }).format(rs)
 }
 
 export default function ProductDetailClient({ product }: { product: Product }) {

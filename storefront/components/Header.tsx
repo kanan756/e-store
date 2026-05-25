@@ -23,8 +23,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useCart } from "@/context/cart-context"
 import { ThemeToggle } from "./ThemeToggle"
 
@@ -36,26 +36,6 @@ function IcoCart() {
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <path d="M16 10a4 4 0 0 1-8 0" />
-    </svg>
-  )
-}
-
-function IcoSun() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <circle cx="12" cy="12" r="5" />
-      <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-      <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-    </svg>
-  )
-}
-
-function IcoMoon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>
   )
 }
@@ -95,11 +75,9 @@ const NAV = [
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
-  const [theme, setTheme] = useState<"light" | "dark">("light")
-  const [menuOpen, setMenuOpen] = useState(false) // mobile drawer state
+  const [menuOpen, setMenuOpen] = useState(false)
   const { totalItems } = useCart()
   const pathname = usePathname()
-  const router = useRouter()
 
   // Trigger solid header background after scrolling 60px
   useEffect(() => {
@@ -135,6 +113,9 @@ export default function Header() {
           {NAV.map(({ href, label }) => (
             <Link key={href} href={href}>{label}</Link>
           ))}
+          <Link href="/get-a-quote" className="btn bsm hdr-quote-btn">
+            Get a Quote
+          </Link>
         </nav>
 
         {/* Right icon cluster */}
@@ -186,6 +167,18 @@ export default function Header() {
             </Link>
           ))}
         </nav>
+
+        {/* Get a Quote CTA */}
+        <div style={{ padding: "0 24px 24px" }}>
+          <Link
+            href="/get-a-quote"
+            className="btn hdr-quote-btn"
+            style={{ width: "100%", justifyContent: "center" }}
+            onClick={() => setMenuOpen(false)}
+          >
+            Get a Quote →
+          </Link>
+        </div>
 
         {/* Quick-action row at the bottom of drawer */}
         <div className="mob-nav__bar">

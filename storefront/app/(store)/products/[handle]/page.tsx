@@ -1,8 +1,16 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getProductByHandle } from "@/lib/sheets"
+import { getProducts, getProductByHandle } from "@/lib/sheets"
 import { ProductSchema } from "@/components/ProductSchema"
 import ProductDetailClient from "@/components/ProductDetailClient"
+
+// Pre-render all product pages at build time; revalidate hourly via ISR
+export const revalidate = 3600
+
+export async function generateStaticParams() {
+  const products = await getProducts()
+  return products.map((p) => ({ handle: p.handle }))
+}
 
 interface PageProps {
   params: Promise<{ handle: string }>

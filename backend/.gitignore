@@ -18,3 +18,8 @@ uploads/
 
 # OS specific
 .DS_Store
+
+# Reports / docs
+*.pdf
+*.md
+!README.md

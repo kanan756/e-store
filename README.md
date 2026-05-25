@@ -92,3 +92,7 @@ Open the URL in a browser. You should see the home page, a hamburger menu on mob
 3. Deploy! Vercel will build the app automatically.
 4. After deployment, go back to the Google reCAPTCHA console, add your new domain, and replace the site/secret keys in Vercel.
 5. Raise `RECAPTCHA_MIN_SCORE` to `0.5` (or higher) for production.
+
+# Stripe for localhost:
+
+stripe listen --forward-to localhost:3000/api/webhooks/stripe

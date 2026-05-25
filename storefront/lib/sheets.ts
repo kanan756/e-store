@@ -17,6 +17,7 @@
  */
 
 import { google } from "googleapis"
+import { cache } from "react"
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 function getAuth() {
@@ -42,6 +43,7 @@ export interface Product {
   imageUrl: string
   price: number
   handle: string
+  inStock: boolean
 }
 
 export interface Order {
@@ -80,7 +82,10 @@ export interface Inquiry {
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
-export async function getProducts(): Promise<Product[]> {
+// cache() deduplicates repeated calls within the same server render cycle.
+// Both generateMetadata and the page component call getProductByHandle →
+// getProducts(); without this, each triggers a full Sheets API round-trip.
+export const getProducts = cache(async (): Promise<Product[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
 
@@ -100,9 +105,10 @@ export async function getProducts(): Promise<Product[]> {
       imageUrl: r[3] ?? "",
       price: Number(r[4]) || 0,
       handle: r[5] ?? slugify(r[0] ?? ""),
+      inStock: (r[6] ?? "true").toLowerCase() !== "false",
     }))
     .filter((p) => p.name !== "") // skip empty rows
-}
+})
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
   const products = await getProducts()
@@ -174,7 +180,9 @@ export async function getOrderByPaymentId(paymentId: string): Promise<Order | nu
 }
 
 // ── Blogs ─────────────────────────────────────────────────────────────────────
-export async function getBlogs(publishedOnly = false): Promise<Blog[]> {
+// cache() ensures generateStaticParams, generateMetadata, and the page body
+// all share the same Sheets API result within a single render cycle.
+export const getBlogs = cache(async (publishedOnly = false): Promise<Blog[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
 
@@ -198,7 +206,7 @@ export async function getBlogs(publishedOnly = false): Promise<Blog[]> {
     }))
     .filter((b) => b.title !== "")
     .filter((b) => !publishedOnly || b.published)
-}
+})
 
 export async function getBlogBySlug(slug: string): Promise<Blog | null> {
   const blogs = await getBlogs()
@@ -211,7 +219,7 @@ export async function appendProduct(product: Omit<Product, "id">): Promise<void>
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
-    range: "Products!A:F",
+    range: "Products!A:G",
     valueInputOption: "RAW",
     requestBody: {
       values: [[
@@ -221,6 +229,7 @@ export async function appendProduct(product: Omit<Product, "id">): Promise<void>
         product.imageUrl,
         product.price,
         product.handle || slugify(product.name),
+        product.inStock !== false ? "true" : "false",
       ]],
     },
   })
@@ -231,7 +240,7 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
-    range: `Products!A${rowIndex}:F${rowIndex}`,
+    range: `Products!A${rowIndex}:G${rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
       values: [[
@@ -241,6 +250,7 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
         product.imageUrl,
         product.price,
         product.handle || slugify(product.name),
+        product.inStock !== false ? "true" : "false",
       ]],
     },
   })
@@ -433,6 +443,82 @@ export async function updateInquiryStatus(rowIndex: number, status: string): Pro
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Inquiries!G${rowIndex}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [[status]] },
+  })
+}
+
+// ── Quotes ────────────────────────────────────────────────────────────────────
+export interface Quote {
+  rowIndex?: number
+  id: string
+  name: string
+  email: string
+  phone: string
+  company: string
+  application: string
+  quantity: string
+  description: string
+  submittedAt: string
+  status: string
+}
+
+export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status">): Promise<void> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: "Quotes!A:J",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[
+        `QUO-${Date.now()}`,
+        q.name,
+        q.email,
+        q.phone,
+        q.company,
+        q.application,
+        q.quantity,
+        q.description,
+        now,
+        "New",
+      ]],
+    },
+  })
+}
+
+export async function getAllQuotes(): Promise<(Quote & { rowIndex: number })[]> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: "Quotes!A2:J",
+  })
+  const rows = res.data.values ?? []
+  return rows
+    .map((r, i) => ({
+      rowIndex: i + 2,
+      id: r[0] ?? "",
+      name: r[1] ?? "",
+      email: r[2] ?? "",
+      phone: r[3] ?? "",
+      company: r[4] ?? "",
+      application: r[5] ?? "",
+      quantity: r[6] ?? "",
+      description: r[7] ?? "",
+      submittedAt: r[8] ?? "",
+      status: r[9] ?? "New",
+    }))
+    .filter((r) => r.id !== "")
+}
+
+export async function updateQuoteStatus(rowIndex: number, status: string): Promise<void> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range: `Quotes!J${rowIndex}`,
     valueInputOption: "RAW",
     requestBody: { values: [[status]] },
   })

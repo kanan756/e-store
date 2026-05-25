@@ -62,7 +62,33 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
   if (!blog || !blog.published) notFound()
 
+  const BASE = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: blog.title,
+    description: blog.metaDescription ?? "",
+    datePublished: blog.publishDate ?? "",
+    image: isValidUrl(blog.imageUrl) ? blog.imageUrl : undefined,
+    url: `${BASE}/blog/${blog.slug}`,
+    author: {
+      "@type": "Organization",
+      name: "Superior Harness & Assembly LLC",
+      url: BASE,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Superior Harness & Assembly LLC",
+      url: BASE,
+    },
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
     <div style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80 }}>
       <div className="W" style={{ maxWidth: 780 }}>
 
@@ -134,5 +160,6 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         </div>
       </div>
     </div>
+    </>
   )
 }

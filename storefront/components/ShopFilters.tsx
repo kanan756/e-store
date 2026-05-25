@@ -15,6 +15,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
   const [minPrice, setMinPrice] = useState<string>("")
   const [maxPrice, setMaxPrice] = useState<string>("")
   const [inStockOnly, setInStockOnly] = useState(false)
+  const [sortOrder, setSortOrder] = useState<"" | "low-high" | "high-low">("")
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   // Disable body scroll when mobile filter is open
@@ -67,17 +68,25 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
       if (minPrice && p.price < Number(minPrice)) return false
       if (maxPrice && p.price > Number(maxPrice)) return false
 
-      // Availability (mocked: assume all in stock for now unless they have 0 price maybe?)
-      // if (inStockOnly && !p.inStock) return false
+      // Availability
+      if (inStockOnly && !p.inStock) return false
 
       return true
+    }).sort((a, b) => {
+      if (sortOrder === "low-high") return a.price - b.price
+      if (sortOrder === "high-low") return b.price - a.price
+      return 0
     })
-  }, [initialProducts, search, selectedCategories, minPrice, maxPrice, inStockOnly])
+  }, [initialProducts, search, selectedCategories, minPrice, maxPrice, inStockOnly, sortOrder])
 
-  // Re-trigger reveal animation when filtered products change
+  // Re-trigger reveal animation when filtered products change.
+  // io is declared outside the timeout so cleanup can disconnect it whether
+  // or not the 50ms timer has fired — prevents orphaned observer accumulation.
   useEffect(() => {
+    let io: IntersectionObserver | null = null
+
     const timeoutId = setTimeout(() => {
-      const io = new IntersectionObserver(
+      io = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
             if (e.isIntersecting) e.target.classList.add("in")
@@ -85,9 +94,13 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
         },
         { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
       )
-      document.querySelectorAll(".shop-container .rv").forEach((el) => io.observe(el))
+      document.querySelectorAll(".shop-container .rv").forEach((el) => io!.observe(el))
     }, 50)
-    return () => clearTimeout(timeoutId)
+
+    return () => {
+      clearTimeout(timeoutId)
+      io?.disconnect()
+    }
   }, [filteredProducts])
 
   return (
@@ -300,7 +313,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
             <div className="filter-title">Price Range</div>
             <div style={{ marginBottom: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>
-                <span>Min: Rs. {minPrice || "0"}</span>
+                <span>Min: ${minPrice || "0"}</span>
               </div>
               <input 
                 type="range" 
@@ -314,7 +327,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
             </div>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>
-                <span>Max: Rs. {maxPrice || maxPossiblePrice}</span>
+                <span>Max: ${maxPrice || maxPossiblePrice}</span>
               </div>
               <input 
                 type="range" 
@@ -326,6 +339,25 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
                 style={{ width: "100%", accentColor: "var(--acc)", cursor: "pointer" }}
               />
             </div>
+          </div>
+
+          <div className="filter-section">
+            <div className="filter-title">Sort By</div>
+            {(["", "low-high", "high-low"] as const).map((val) => {
+              const label = val === "" ? "Default" : val === "low-high" ? "Price: Low to High" : "Price: High to Low"
+              return (
+                <label key={val} className="filter-label">
+                  <input
+                    type="radio"
+                    name="sortOrder"
+                    checked={sortOrder === val}
+                    onChange={() => setSortOrder(val)}
+                    style={{ accentColor: "var(--acc)", width: 16, height: 16 }}
+                  />
+                  {label}
+                </label>
+              )
+            })}
           </div>
 
           <div className="filter-section" style={{ borderBottom: "none" }}>
@@ -341,14 +373,15 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
             </label>
           </div>
 
-          {(selectedCategories.length > 0 || minPrice || maxPrice || inStockOnly || search) && (
-            <button 
+          {(selectedCategories.length > 0 || minPrice || maxPrice || inStockOnly || search || sortOrder) && (
+            <button
               onClick={() => {
                 setSearch("")
                 setSelectedCategories([])
                 setMinPrice("")
                 setMaxPrice("")
                 setInStockOnly(false)
+                setSortOrder("")
               }}
               className="btn bod" 
               style={{ width: "100%", justifyContent: "center" }}
@@ -364,13 +397,14 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
           {filteredProducts.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text2)", background: "rgba(0,109,55,0.02)", borderRadius: "var(--rL)", border: "1px dashed var(--bd)" }}>
               <p>No products match your filters.</p>
-              <button 
+              <button
                 onClick={() => {
                   setSearch("")
                   setSelectedCategories([])
                   setMinPrice("")
                   setMaxPrice("")
                   setInStockOnly(false)
+                  setSortOrder("")
                 }}
                 className="btn bod"
                 style={{ marginTop: 16 }}

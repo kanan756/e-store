@@ -3,14 +3,16 @@
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 
-// Attaches IntersectionObserver to all .rv elements to trigger scroll-reveal
 export default function RevealObserver() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Slight delay to ensure DOM is fully painted after route change
+    // Hold a reference outside the timeout so the cleanup can reach it
+    // whether or not the timer has already fired.
+    let io: IntersectionObserver | null = null
+
     const timeoutId = setTimeout(() => {
-      const io = new IntersectionObserver(
+      io = new IntersectionObserver(
         (entries) => {
           entries.forEach((e) => {
             if (e.isIntersecting) e.target.classList.add("in")
@@ -19,14 +21,16 @@ export default function RevealObserver() {
         { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
       )
 
-      document.querySelectorAll(".rv").forEach((el) => io.observe(el))
-      
-      // Cleanup function to disconnect this specific observer instance
-      // Note: we can't just return io.disconnect() because timeout
-      // So we attach it to window or just let it be. Actually, we should clear it.
+      document.querySelectorAll(".rv").forEach((el) => io!.observe(el))
     }, 100)
 
-    return () => clearTimeout(timeoutId)
+    // Cleanup cancels the pending timer AND disconnects the observer if it
+    // was already created — previously only the timer was cleared, leaving
+    // the observer alive across route changes (memory leak).
+    return () => {
+      clearTimeout(timeoutId)
+      io?.disconnect()
+    }
   }, [pathname])
 
   return null

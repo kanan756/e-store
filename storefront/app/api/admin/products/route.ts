@@ -15,8 +15,15 @@
 
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { revalidatePath } from "next/cache"
 import { getProducts, appendProduct, updateProduct, deleteProduct } from "@/lib/sheets"
 import { z } from "zod"
+
+function revalidateProductPages() {
+  revalidatePath("/")                          // homepage FeaturedProducts
+  revalidatePath("/products")                  // shop listing
+  revalidatePath("/products/[handle]", "page") // all product detail pages
+}
 
 async function checkAuth() {
   const cookieStore = await cookies()
@@ -33,6 +40,7 @@ const productSchema = z.object({
   imageUrl: z.string().default(""),
   price: z.number().min(0),
   handle: z.string().default(""),
+  inStock: z.boolean().default(true),
 })
 
 export async function GET() {
@@ -52,6 +60,7 @@ export async function POST(request: Request) {
     const parsed = productSchema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
     await appendProduct(parsed.data)
+    revalidateProductPages()
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: "Failed to add product" }, { status: 500 })
@@ -69,6 +78,7 @@ export async function PUT(request: Request) {
     const parsed = productSchema.safeParse(productData)
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
     await updateProduct(rowIndex, parsed.data)
+    revalidateProductPages()
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 })
@@ -83,6 +93,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })
     }
     await deleteProduct(rowIndex)
+    revalidateProductPages()
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: "Failed to delete product" }, { status: 500 })

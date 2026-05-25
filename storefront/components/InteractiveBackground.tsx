@@ -1,28 +1,41 @@
 "use client"
 
-import React, { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
 export function InteractiveBackground({ bg = 'var(--bg)' }: { bg?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
+  // Track the pending rAF handle so we never queue more than one write per frame
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     setMounted(true)
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!ref.current) return
       const rect = ref.current.getBoundingClientRect()
-      // Only track if mouse is somewhat near the element to save performance
       const isNear = e.clientY >= rect.top - 500 && e.clientY <= rect.bottom + 500
       if (!isNear) return
-      
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      ref.current.style.setProperty('--x', `${x}px`)
-      ref.current.style.setProperty('--y', `${y}px`)
+
+      // Cancel any pending frame before scheduling a new one — ensures at most
+      // one DOM write per paint cycle regardless of raw event frequency.
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
+
+      rafRef.current = requestAnimationFrame(() => {
+        if (!ref.current) return
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+        ref.current.style.setProperty('--x', `${x}px`)
+        ref.current.style.setProperty('--y', `${y}px`)
+        rafRef.current = null
+      })
     }
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
+    }
   }, [])
 
   return (
@@ -62,7 +75,7 @@ export function InteractiveBackground({ bg = 'var(--bg)' }: { bg?: string }) {
           }}
         />
       )}
-      
+
       {/* Fading borders at top and bottom to blend smoothly into page */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to bottom, var(--bg), transparent)' }} />
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(to top, var(--bg), transparent)' }} />

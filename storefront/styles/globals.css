@@ -57,8 +57,10 @@
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -191,6 +193,33 @@ button {
 [data-theme="dark"] .bp:hover {
   background: #e5e5e5;
   color: #000000;
+}
+
+/* Get a Quote nav button — plain text with underline-draw on hover */
+.hdr-quote-btn {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  margin-left: 8px;
+  position: relative;
+  text-decoration: none;
+}
+.hdr-quote-btn::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--text);
+  transition: width 0.25s ease;
+}
+.hdr-quote-btn:hover {
+  background: transparent;
+  color: var(--text);
+}
+.hdr-quote-btn:hover::after {
+  width: 100%;
 }
 
 /* Outline on dark bg */

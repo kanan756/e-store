@@ -56,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        <link rel="preconnect" href="https://images.unsplash.com" />
       </head>
       <body className={`${hanken.variable} ${inter.variable} ${mono.variable}`}>
         <Providers>{children}</Providers>

@@ -11,6 +11,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useEffect } from "react"
 
 function ArrowIcon() {
@@ -62,8 +63,7 @@ export default function Hero() {
           </h1>
 
           <p className="hero__sub hu3">
-            Trusted wire harnessing, cable assembly, and PCB assembly
-            solutions for OEMs, robotics, medical, and white goods industries. 
+            Precision-driven custom wire harness &amp; cable assembly manufacturer with over 30 years of combined industry experience — delivering reliable, cost-effective wiring solutions tailored to your exact specifications.
           </p>
 
 
@@ -81,17 +81,18 @@ export default function Hero() {
         <div className="hero__img-wrap hu2" style={{
           borderRadius: "var(--rL)",
           overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          position: "relative",
           minHeight: 420,
           background: "transparent",
           boxShadow: "0 24px 60px rgba(0,0,0,0.1)",
         }}>
-          <img 
-            src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?q=80&w=2070" 
-            alt="Precision Wiring Assembly" 
-            style={{ width: "100%", height: "100%", objectFit: "cover", minHeight: 420 }} 
+          <Image
+            src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?q=80&w=2070"
+            alt="Precision Wiring Assembly"
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 60vw"
+            style={{ objectFit: "cover" }}
           />
         </div>
 

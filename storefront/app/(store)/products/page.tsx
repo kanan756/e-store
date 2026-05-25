@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import type { Product } from "@/lib/sheets"
+import { getProducts } from "@/lib/sheets"
 import ShopFilters from "@/components/ShopFilters"
 
 export const metadata: Metadata = {
@@ -9,25 +9,13 @@ export const metadata: Metadata = {
 
 export const revalidate = 60
 
-async function getAllProducts(): Promise<Product[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STORE_URL}/api/products`, {
-      next: { revalidate: 60 },
-    })
-    const data = await res.json()
-    return data.products ?? []
-  } catch {
-    return []
-  }
-}
-
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>
 }) {
   const resolvedSearchParams = await searchParams
-  const products = await getAllProducts()
+  const products = await getProducts()
   const query = resolvedSearchParams?.q?.toLowerCase() || ""
 
   return (
