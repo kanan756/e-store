@@ -12,8 +12,8 @@ const checkoutSessionSchema = z.object({
   email: z.string().email(),
   productSummary: z.string(),
   amount: z.number().positive(),
-  successUrl: z.string().url(),
-  cancelUrl: z.string().url(),
+  successUrl: z.url(),
+  cancelUrl: z.url(),
 })
 
 export async function POST(request: Request) {
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       line_items: [
         {
           price_data: {
-            currency: "inr",
+            currency: "usd",
             product_data: {
               name: "Superior Harness & Assembly LLC Order",
               description: productSummary.substring(0, 500),

@@ -127,7 +127,7 @@ export async function appendOrder(order: {
   const sheets = google.sheets({ version: "v4", auth })
 
   const orderId = `ORD-${Date.now()}`
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
@@ -315,7 +315,7 @@ export async function getAllOrders(): Promise<(Order & { rowIndex: number })[]> 
 export async function updateOrderStatus(rowIndex: number, status: string, comments: string): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Orders!F${rowIndex}:H${rowIndex}`,
@@ -396,7 +396,7 @@ export async function updateBlogPublished(rowIndex: number, published: boolean):
 export async function appendInquiry(inq: Omit<Inquiry, "id" | "submittedAt" | "status">): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Inquiries!A:F",
@@ -466,7 +466,7 @@ export interface Quote {
 export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status">): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Quotes!A:J",
