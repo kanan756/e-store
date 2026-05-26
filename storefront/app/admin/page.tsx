@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -17,13 +18,13 @@ export default function AdminLoginPage() {
     const res = await fetch("/api/admin/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     })
 
     if (res.ok) {
       router.push("/admin/dashboard")
     } else {
-      setError("Invalid password. Please try again.")
+      setError("Invalid email or password. Please try again.")
       setLoading(false)
     }
   }
@@ -52,6 +53,24 @@ export default function AdminLoginPage() {
         </div>
 
         <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: "block", color: "#434844", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
+              Admin Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter admin email"
+              required
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "12px 16px",
+                background: "#e9ecef", border: "1px solid rgba(0,0,0,0.15)", borderRadius: 10,
+                color: "#1c1c18", fontSize: 15, outline: "none",
+              }}
+            />
+          </div>
+
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: "block", color: "#434844", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
               Admin Password

@@ -200,7 +200,7 @@ export default function TrackOrderClient() {
               onClick={() => signIn("google")}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 12,
-                padding: "14px 28px", background: "var(--bgDk)", color: "#fcf9f2",
+                padding: "14px 28px", background: "#111111", color: "#f5f5f5",
                 border: "none", borderRadius: 12, fontSize: 16, fontWeight: 700,
                 cursor: "pointer",
               }}

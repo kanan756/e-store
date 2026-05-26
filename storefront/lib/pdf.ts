@@ -8,15 +8,13 @@ export async function generateInvoicePdf({
   email,
   product,
   amount,
-  isStripe = false,
-  date = new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" }),
+  date = new Date().toLocaleDateString("en-US", { timeZone: "America/New_York" }),
 }: {
   orderId: string;
   customerName: string;
   email: string;
   product: string;
   amount: number;
-  isStripe?: boolean;
   date?: string;
 }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -95,12 +93,7 @@ export async function generateInvoicePdf({
       const tableRow = tableTop + 45;
       doc.fillColor(TEXT_MAIN).font("Helvetica").fontSize(12);
 
-      let formattedAmount;
-      if (isStripe) {
-        formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      } else {
-        formattedAmount = `Rs. ${amount.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-      }
+      const formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
       doc.text(product, 65, tableRow, { width: 300, lineGap: 4 });
       doc.font("Helvetica-Bold").text(formattedAmount, 400, tableRow, { width: 130, align: "right" });

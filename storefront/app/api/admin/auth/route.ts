@@ -68,10 +68,13 @@ export async function POST(request: Request) {
     )
   }
 
-  const { password } = await request.json()
+  const { email, password } = await request.json()
 
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Invalid password" }, { status: 401 })
+  if (
+    email !== process.env.ADMIN_EMAIL ||
+    password !== process.env.ADMIN_PASSWORD
+  ) {
+    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 })
   }
 
   const response = NextResponse.json({ success: true })

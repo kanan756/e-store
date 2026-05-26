@@ -75,7 +75,6 @@ export async function POST(request: Request) {
           orderId,
           product: productSummary || "Stripe Order",
           amount: confirmedAmount,
-          isStripe: true,
         })
       } catch (emailErr) {
         console.error("Failed to send confirmation email:", emailErr)

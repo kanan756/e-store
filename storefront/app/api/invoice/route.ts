@@ -37,15 +37,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const isStripe = order.comments.includes("pi_") || order.comments.includes("cs_");
-
     const pdfBuffer = await generateInvoicePdf({
       orderId: order.orderId,
       customerName: order.customerName,
       email: order.email,
       product: order.product,
       amount: order.amount,
-      isStripe,
     });
 
     return new NextResponse(pdfBuffer as any, {

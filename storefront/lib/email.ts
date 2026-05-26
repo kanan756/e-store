@@ -216,14 +216,12 @@ export async function sendOrderConfirmationEmail({
   orderId,
   product,
   amount,
-  isStripe = false,
 }: {
   to: string
   customerName: string
   orderId: string
   product: string
   amount: number
-  isStripe?: boolean
 }) {
   const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
@@ -233,12 +231,7 @@ export async function sendOrderConfirmationEmail({
   const eProduct  = escapeHtml(product)
   const eFromName = escapeHtml(fromName)
 
-  let formattedAmount;
-  if (isStripe) {
-    formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  } else {
-    formattedAmount = `Rs. ${amount.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-  }
+  const formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const html = `
 <!DOCTYPE html>
@@ -310,7 +303,6 @@ export async function sendOrderConfirmationEmail({
       email: to,
       product,
       amount,
-      isStripe,
     });
     attachments.push({
       filename: `Invoice_${orderId}.pdf`,
