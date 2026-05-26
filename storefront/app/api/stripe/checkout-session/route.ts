@@ -2,18 +2,19 @@ import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { z } from "zod"
 import { generateInvoiceToken } from "@/lib/invoice-token"
+import { stripEmoji } from "@/lib/sanitize"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2025-01-27.acacia" as any, 
 })
 
 const checkoutSessionSchema = z.object({
-  customerName: z.string().min(1),
-  email: z.string().email(),
-  productSummary: z.string(),
-  amount: z.number().positive(),
-  successUrl: z.url(),
-  cancelUrl: z.url(),
+  customerName:   z.string().min(1).transform(stripEmoji),
+  email:          z.email(),
+  productSummary: z.string().transform(stripEmoji),
+  amount:         z.number().positive(),
+  successUrl:     z.url(),
+  cancelUrl:      z.url(),
 })
 
 export async function POST(request: Request) {

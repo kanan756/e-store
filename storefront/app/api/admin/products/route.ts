@@ -18,6 +18,7 @@ import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 import { getProducts, appendProduct, updateProduct, deleteProduct } from "@/lib/sheets"
 import { z } from "zod"
+import { stripEmoji } from "@/lib/sanitize"
 
 function revalidateProductPages() {
   revalidatePath("/")                          // homepage FeaturedProducts
@@ -34,13 +35,13 @@ async function checkAuth() {
 }
 
 const productSchema = z.object({
-  name: z.string().min(1),
-  category: z.string().default(""),
-  description: z.string().default(""),
-  imageUrl: z.string().default(""),
-  price: z.number().min(0),
-  handle: z.string().default(""),
-  inStock: z.boolean().default(true),
+  name:        z.string().min(1).transform(stripEmoji),
+  category:    z.string().default("").transform(stripEmoji),
+  description: z.string().default("").transform(stripEmoji),
+  imageUrl:    z.string().default(""),
+  price:       z.number().min(0),
+  handle:      z.string().default("").transform(stripEmoji),
+  inStock:     z.boolean().default(true),
 })
 
 export async function GET() {

@@ -16,16 +16,17 @@ import { appendQuote } from "@/lib/sheets"
 import { z } from "zod"
 import nodemailer from "nodemailer"
 import { rateLimit } from "@/lib/rate-limit"
+import { stripEmoji } from "@/lib/sanitize"
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  phone: z.string().default(""),
-  company: z.string().default(""),
-  application: z.string().default(""),
-  quantity: z.string().default(""),
-  description: z.string().min(10, "Please describe your project in at least 10 characters"),
-  honeypot: z.string().max(0, "Bot detected"),
+  name:        z.string().min(1, "Name is required").transform(stripEmoji),
+  email:       z.string().email("Invalid email"),
+  phone:       z.string().default("").transform(stripEmoji),
+  company:     z.string().default("").transform(stripEmoji),
+  application: z.string().default("").transform(stripEmoji),
+  quantity:    z.string().default("").transform(stripEmoji),
+  description: z.string().min(10, "Please describe your project in at least 10 characters").transform(stripEmoji),
+  honeypot:    z.string().max(0, "Bot detected"),
 })
 
 export async function POST(request: Request) {

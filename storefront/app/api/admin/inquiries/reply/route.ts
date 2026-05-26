@@ -11,6 +11,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { updateInquiryStatus } from "@/lib/sheets"
 import { sendInquiryReplyEmail } from "@/lib/email"
+import { stripEmoji } from "@/lib/sanitize"
 
 async function checkAuth() {
   const cookieStore = await cookies()
@@ -24,7 +25,8 @@ export async function POST(request: Request) {
   if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   
   try {
-    const { rowIndex, email, name, subject, replyMessage } = await request.json()
+    const { rowIndex, email, name, subject, replyMessage: rawReply } = await request.json()
+    const replyMessage = typeof rawReply === "string" ? stripEmoji(rawReply) : rawReply
     
     if (!email || !replyMessage || !rowIndex) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })

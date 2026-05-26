@@ -19,6 +19,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { getBlogs, appendBlog, deleteBlog } from "@/lib/sheets"
 import { z } from "zod"
+import { stripEmoji } from "@/lib/sanitize"
 
 async function checkAuth() {
   const cookieStore = await cookies()
@@ -29,14 +30,14 @@ async function checkAuth() {
 }
 
 const blogSchema = z.object({
-  title: z.string().min(1),
-  keywords: z.string().default(""),
-  slug: z.string().default(""),
-  publishDate: z.string().default(""),
-  content: z.string().default(""),
-  metaDescription: z.string().default(""),
-  imageUrl: z.string().default(""),
-  published: z.boolean().default(true),
+  title:           z.string().min(1).transform(stripEmoji),
+  keywords:        z.string().default("").transform(stripEmoji),
+  slug:            z.string().default("").transform(stripEmoji),
+  publishDate:     z.string().default(""),
+  content:         z.string().default("").transform(stripEmoji),
+  metaDescription: z.string().default("").transform(stripEmoji),
+  imageUrl:        z.string().default(""),
+  published:       z.boolean().default(true),
 })
 
 export async function GET() {

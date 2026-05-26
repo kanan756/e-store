@@ -16,6 +16,7 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { getAllOrders, updateOrderStatus } from "@/lib/sheets"
 import { sendOrderStatusEmail } from "@/lib/email"
+import { stripEmoji } from "@/lib/sanitize"
 
 async function checkAuth() {
   const cookieStore = await cookies()
@@ -38,7 +39,8 @@ export async function GET() {
 export async function PUT(request: Request) {
   if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
-    const { rowIndex, status, comments, sendEmail } = await request.json()
+    const { rowIndex, status, comments: rawComments, sendEmail } = await request.json()
+    const comments = typeof rawComments === "string" ? stripEmoji(rawComments) : rawComments
 
     if (!Number.isInteger(rowIndex) || rowIndex < 2) {
       return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })

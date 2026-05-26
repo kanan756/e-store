@@ -87,7 +87,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026") }}
       />
     <div style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80 }}>
       <div className="W" style={{ maxWidth: 780 }}>

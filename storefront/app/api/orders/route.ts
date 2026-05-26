@@ -17,13 +17,14 @@ import { appendOrder, getOrderByPaymentId } from "@/lib/sheets"
 import { generateInvoiceToken } from "@/lib/invoice-token"
 import { z } from "zod"
 import { rateLimit } from "@/lib/rate-limit"
+import { stripEmoji } from "@/lib/sanitize"
 
 const orderSchema = z.object({
-  customerName: z.string().min(1),
-  email: z.string().email(),
-  product: z.string().min(1),
-  amount: z.number().positive(),
-  paymentId: z.string().min(1),
+  customerName: z.string().min(1).transform(stripEmoji),
+  email:        z.email(),
+  product:      z.string().min(1).transform(stripEmoji),
+  amount:       z.number().positive(),
+  paymentId:    z.string().min(1),
 })
 
 export async function POST(request: Request) {

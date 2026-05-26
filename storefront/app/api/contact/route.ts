@@ -19,13 +19,14 @@ import { appendInquiry } from "@/lib/sheets"
 import { z } from "zod"
 import nodemailer from "nodemailer"
 import { rateLimit } from "@/lib/rate-limit"
+import { stripEmoji } from "@/lib/sanitize"
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  subject: z.string().min(1, "Subject is required"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-  honeypot: z.string().max(0, "Bot detected"),        // anti-spam honeypot
+  name:     z.string().min(1, "Name is required").transform(stripEmoji),
+  email:    z.string().email("Invalid email"),
+  subject:  z.string().min(1, "Subject is required").transform(stripEmoji),
+  message:  z.string().min(10, "Message must be at least 10 characters").transform(stripEmoji),
+  honeypot: z.string().max(0, "Bot detected"),
 })
 
 export async function POST(request: Request) {
