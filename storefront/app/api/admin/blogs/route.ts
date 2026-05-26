@@ -17,6 +17,7 @@
 
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { revalidatePath } from "next/cache"
 import { getBlogs, appendBlog, deleteBlog } from "@/lib/sheets"
 import { z } from "zod"
 import { stripEmoji } from "@/lib/sanitize"
@@ -57,6 +58,8 @@ export async function POST(request: Request) {
     const parsed = blogSchema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
     await appendBlog(parsed.data)
+    revalidatePath("/blog")
+    revalidatePath("/blog/[slug]", "page")
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: "Failed to add blog" }, { status: 500 })
@@ -71,6 +74,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid rowIndex" }, { status: 400 })
     }
     await deleteBlog(rowIndex)
+    revalidatePath("/blog")
+    revalidatePath("/blog/[slug]", "page")
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: "Failed to delete blog" }, { status: 500 })

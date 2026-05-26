@@ -295,13 +295,33 @@ export async function sendOrderConfirmationEmail({
 </html>
 `
 
+  // Resolve per-item prices from the products sheet so the PDF is itemized.
+  let invoiceItems: { name: string; quantity: number; unitPrice: number }[] = [];
+  try {
+    const { getProducts } = await import("./sheets");
+    const products = await getProducts();
+    const productMap = new Map(products.map((p) => [p.name.toLowerCase(), p.price]));
+    invoiceItems = product
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((segment) => {
+        const m = segment.match(/^(.+)\s+x(\d+)$/i);
+        const name = m ? m[1].trim() : segment;
+        const quantity = m ? parseInt(m[2], 10) : 1;
+        return { name, quantity, unitPrice: productMap.get(name.toLowerCase()) ?? 0 };
+      });
+  } catch {
+    invoiceItems = [{ name: product, quantity: 1, unitPrice: amount }];
+  }
+
   let attachments = [];
   try {
     const pdfBuffer = await generateInvoicePdf({
       orderId,
       customerName,
       email: to,
-      product,
+      items: invoiceItems,
       amount,
     });
     attachments.push({
