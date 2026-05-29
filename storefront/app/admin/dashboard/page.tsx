@@ -261,8 +261,9 @@ function ProductsTab() {
         ) : products.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No products yet. Click &quot;Add Product&quot; to get started.</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+              <thead>
               <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["Name", "Category", "Price", "Stock", "Handle", "Actions"].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
@@ -294,7 +295,8 @@ function ProductsTab() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
     </div>
@@ -399,8 +401,9 @@ function OrdersTab() {
         ) : orders.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No orders yet.</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
+              <thead>
               <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["Order ID", "Customer", "Product", "Amount", "Status", "Actions"].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
@@ -433,6 +436,7 @@ function OrdersTab() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
@@ -542,8 +546,9 @@ function BlogsTab() {
         ) : blogs.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No blog posts yet. Click &quot;New Blog Post&quot; to start.</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+              <thead>
               <tr style={{ borderBottom: "1px solid var(--bd)" }}>
                 {["Title", "Slug", "Publish Date", "Keywords", "Status", "Actions"].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
@@ -570,6 +575,7 @@ function BlogsTab() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
@@ -1029,6 +1035,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [tab, setTab] = useState<"overview" | "products" | "orders" | "blogs" | "inquiries" | "quotes">("overview")
+  const [mobileMenu, setMobileMenu] = useState(false)
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -1038,8 +1045,53 @@ export default function AdminDashboard() {
 
   return (
     <div style={s.page}>
+      <style>{`
+        @media (max-width: 800px) {
+          .admin-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+          }
+          .admin-sidebar.open {
+            transform: translateX(0);
+          }
+          .admin-main {
+            margin-left: 0 !important;
+            padding: 24px 16px !important;
+          }
+          .admin-hamburger {
+            display: flex !important;
+          }
+        }
+        .admin-hamburger {
+          display: none;
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          z-index: 50;
+          background: var(--cBg);
+          border: 1px solid var(--bd);
+          border-radius: 8px;
+          padding: 10px;
+          cursor: pointer;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+      `}</style>
+
+      {/* Mobile Hamburger */}
+      <button className="admin-hamburger" onClick={() => setMobileMenu(!mobileMenu)}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {mobileMenu ? (
+            <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+          ) : (
+            <><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></>
+          )}
+        </svg>
+      </button>
+
       {/* Sidebar */}
-      <aside style={s.sidebar}>
+      <aside style={s.sidebar} className={`admin-sidebar ${mobileMenu ? "open" : ""}`}>
         <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid var(--bd)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1053,12 +1105,12 @@ export default function AdminDashboard() {
         </div>
 
         <nav style={{ flex: 1, padding: "12px 0" }}>
-          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} label="Overview" active={tab === "overview"} onClick={() => setTab("overview")} />
-          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>} label="Products" active={tab === "products"} onClick={() => setTab("products")} />
-          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} label="Orders" active={tab === "orders"} onClick={() => setTab("orders")} />
-          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => setTab("blogs")} />
-          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => setTab("inquiries")} />
-          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} label="Quotes" active={tab === "quotes"} onClick={() => setTab("quotes")} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} label="Overview" active={tab === "overview"} onClick={() => { setTab("overview"); setMobileMenu(false); }} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>} label="Products" active={tab === "products"} onClick={() => { setTab("products"); setMobileMenu(false); }} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} label="Orders" active={tab === "orders"} onClick={() => { setTab("orders"); setMobileMenu(false); }} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => { setTab("blogs"); setMobileMenu(false); }} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => { setTab("inquiries"); setMobileMenu(false); }} />
+          <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} label="Quotes" active={tab === "quotes"} onClick={() => { setTab("quotes"); setMobileMenu(false); }} />
         </nav>
 
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bd)" }}>
@@ -1073,7 +1125,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main style={s.main}>
+      <main style={s.main} className="admin-main">
         {tab === "overview"   && <StatsTab orders={[]} />}
         {tab === "products"   && <ProductsTab />}
         {tab === "orders"     && <OrdersTab />}
