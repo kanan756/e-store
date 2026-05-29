@@ -118,9 +118,26 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setSending(true)
-    await new Promise(r => setTimeout(r, 1200))
-    setSending(false)
-    setSubmitted(true)
+    const fd = new FormData(e.currentTarget)
+    const data = Object.fromEntries(fd.entries())
+
+    try {
+      const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        const err = await res.json()
+        alert(err.error || "Failed to submit quote")
+      }
+    } catch (err) {
+      alert("Failed to submit quote request. Please try again.")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -164,11 +181,11 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <label className="quote-modal__label">
                   Name <span className="quote-modal__req">*</span>
                 </label>
-                <input type="text" placeholder="Jane Doe" required autoComplete="name" />
+                <input type="text" name="name" placeholder="Jane Doe" required autoComplete="name" />
               </div>
               <div className="quote-modal__field">
                 <label className="quote-modal__label">Phone</label>
-                <input type="tel" placeholder="(586) 555-0100" autoComplete="tel" />
+                <input type="tel" name="phone" placeholder="(586) 555-0100" autoComplete="tel" />
               </div>
             </div>
 
@@ -178,11 +195,11 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <label className="quote-modal__label">
                   Email <span className="quote-modal__req">*</span>
                 </label>
-                <input type="email" placeholder="jane@acme.com" required autoComplete="email" />
+                <input type="email" name="email" placeholder="jane@acme.com" required autoComplete="email" />
               </div>
               <div className="quote-modal__field">
                 <label className="quote-modal__label">Company</label>
-                <input type="text" placeholder="Acme Mfg." autoComplete="organization" />
+                <input type="text" name="company" placeholder="Acme Mfg." autoComplete="organization" />
               </div>
             </div>
 
@@ -192,18 +209,14 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 Project details <span className="quote-modal__req">*</span>
               </label>
               <textarea
+                name="description"
                 placeholder="Describe your assembly, quantities, target lead time..."
                 rows={4}
                 required
               />
             </div>
 
-
-
-
-
-            {/* Submit */}
-            <button type="submit" className="quote-modal__submit" disabled={sending}>
+            <input type="text" name="honeypot" style={{ display: "none" }} tabIndex={-1} autoComplete="off" /><button type="submit" className="quote-modal__submit" disabled={sending}>
               {sending ? "Sending..." : "Submit Request"}
               {!sending && (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
