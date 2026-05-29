@@ -319,14 +319,17 @@ export default function Header() {
           </nav>
 
           {/* Right icons */}
-          <div className="hdr__icons">
+          <div className="hdr__icons" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            {/* Track Order */}
+            <Link href="/track-order" className="hdr--desk" style={{ fontFamily: "var(--font-sora), sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.09em", color: "#fff", textTransform: "uppercase" }}>
+              Track Order
+            </Link>
+
             {/* Cart */}
             <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
               <IcoCart />
               {totalItems > 0 && <span className="cdot" />}
             </Link>
-
-
             {/* Request Quote — opens modal */}
             <button
               className="hdr-quote-btn hdr--desk"
