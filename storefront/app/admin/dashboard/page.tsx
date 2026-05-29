@@ -865,7 +865,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
     Promise.all([
       fetch("/api/admin/products").then((r) => r.json()),
       fetch("/api/admin/orders").then((r) => r.json()),
-      fetch("/api/admin/settings").then((r) => r.json().catch(() => ({}))),
+      fetch(`/api/admin/settings?_t=${Date.now()}`).then((r) => r.json().catch(() => ({}))),
     ]).then(([pd, od, setd]) => {
       const orders: Order[] = od.orders ?? []
       setLatestOrders(orders.slice(-5).reverse())
@@ -934,7 +934,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       </div>
 
       {/* KPI Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 32 }}>
         {kpis.map((c) => (
           <div key={c.label} style={{
             ...s.card,
@@ -962,33 +962,35 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
         {latestOrders.length === 0 ? (
           <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text2)" }}>No orders yet.</div>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
-                {["ORDER ID", "CUSTOMER", "PRODUCT", "AMOUNT", "STATUS"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "var(--text2)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {latestOrders.map((o, i) => (
-                <tr key={o.orderId + i} style={{ borderBottom: "1px solid var(--bd)" }}>
-                  <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "var(--text)", fontWeight: 700 }}>{o.orderId}</td>
-                  <td style={{ padding: "14px", fontSize: 14, color: "var(--text)" }}>{o.customerName}</td>
-                  <td style={{ padding: "14px", fontSize: 13, color: "#b0ada6", fontStyle: "italic", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.product}</td>
-                  <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
-                  <td style={{ padding: "14px" }}>
-                    <span style={{
-                      padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: `${STATUS_COLOR[o.status] ?? "var(--text2)"}18`,
-                      color: STATUS_COLOR[o.status] ?? "var(--text2)",
-                      border: `1px solid ${STATUS_COLOR[o.status] ?? "var(--text2)"}33`,
-                    }}>{o.status}</span>
-                  </td>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--bd)" }}>
+                  {["ORDER ID", "CUSTOMER", "PRODUCT", "AMOUNT", "STATUS"].map((h) => (
+                    <th key={h} style={{ textAlign: "left", padding: "10px 14px", color: "var(--text2)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "monospace" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {latestOrders.map((o, i) => (
+                  <tr key={o.orderId + i} style={{ borderBottom: "1px solid var(--bd)" }}>
+                    <td style={{ padding: "14px", fontFamily: "monospace", fontSize: 13, color: "var(--text)", fontWeight: 700 }}>{o.orderId}</td>
+                    <td style={{ padding: "14px", fontSize: 14, color: "var(--text)" }}>{o.customerName}</td>
+                    <td style={{ padding: "14px", fontSize: 13, color: "#b0ada6", fontStyle: "italic", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.product}</td>
+                    <td style={{ padding: "14px", fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
+                    <td style={{ padding: "14px" }}>
+                      <span style={{
+                        padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        background: `${STATUS_COLOR[o.status] ?? "var(--text2)"}18`,
+                        color: STATUS_COLOR[o.status] ?? "var(--text2)",
+                        border: `1px solid ${STATUS_COLOR[o.status] ?? "var(--text2)"}33`,
+                      }}>{o.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
