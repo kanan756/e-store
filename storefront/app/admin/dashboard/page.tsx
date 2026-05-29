@@ -25,7 +25,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import type { Product, Order, Blog, Inquiry, Quote } from "@/lib/sheets"
-import { ThemeToggle } from "@/components/ThemeToggle"
 import { formatPrice } from "@/lib/format"
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -33,7 +32,7 @@ const s = {
   page: {
     minHeight: "100vh",
     background: "var(--bg2)",
-    fontFamily: "'Inter', system-ui, sans-serif",
+    fontFamily: "var(--font-dm-sans), 'Inter', sans-serif",
     color: "var(--text)",
   } as React.CSSProperties,
   sidebar: {
@@ -53,23 +52,27 @@ const s = {
   card: {
     background: "var(--cBg)",
     border: "1px solid var(--bd)",
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 24,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.03)",
   } as React.CSSProperties,
   btn: {
-    padding: "9px 18px", borderRadius: 8, border: "none",
-    cursor: "pointer", fontSize: 13, fontWeight: 600,
+    padding: "12px 20px", borderRadius: 9999, border: "none",
+    cursor: "pointer", fontSize: 13, fontWeight: 700,
+    fontFamily: "var(--font-sora), 'Sora', sans-serif",
+    letterSpacing: "0.02em",
   } as React.CSSProperties,
   input: {
     width: "100%", boxSizing: "border-box" as const,
     padding: "10px 14px", background: "var(--bg2)",
-    border: "1px solid var(--bdM)", borderRadius: 8,
+    border: "1.5px solid var(--bdM)", borderRadius: 7,
     color: "var(--text)", fontSize: 14, outline: "none",
+    fontFamily: "var(--font-dm-sans), 'Inter', sans-serif",
   } as React.CSSProperties,
   label: {
-    display: "block", color: "var(--text2)", fontSize: 12,
-    fontWeight: 600, marginBottom: 6, textTransform: "uppercase" as const,
-    letterSpacing: "0.05em",
+    display: "block", color: "var(--text)", fontSize: 13,
+    fontWeight: 600, marginBottom: 6,
+    fontFamily: "var(--font-sora), 'Sora', sans-serif",
   } as React.CSSProperties,
 }
 
@@ -856,12 +859,14 @@ function QuotesTab() {
 function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
   const [stats, setStats] = useState({ products: 0, orders: 0, revenue: 0 })
   const [latestOrders, setLatestOrders] = useState<Order[]>(recentOrders)
+  const [settings, setSettings] = useState({ showCertifications: true })
 
   useEffect(() => {
     Promise.all([
       fetch("/api/admin/products").then((r) => r.json()),
       fetch("/api/admin/orders").then((r) => r.json()),
-    ]).then(([pd, od]) => {
+      fetch("/api/admin/settings").then((r) => r.json().catch(() => ({}))),
+    ]).then(([pd, od, setd]) => {
       const orders: Order[] = od.orders ?? []
       setLatestOrders(orders.slice(-5).reverse())
       setStats({
@@ -869,8 +874,21 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
         orders: orders.length,
         revenue: orders.reduce((sum: number, o: Order) => sum + o.amount, 0),
       })
+      if (setd && typeof setd.showCertifications === "boolean") {
+        setSettings(setd)
+      }
     })
   }, [])
+
+  const toggleCertifications = async () => {
+    const nextVal = !settings.showCertifications
+    setSettings({ ...settings, showCertifications: nextVal })
+    await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ showCertifications: nextVal }),
+    })
+  }
 
   const STATUS_COLOR: Record<string, string> = {
     Processing: "#f59e0b", Packed: "#8b5cf6", Shipped: "#2563eb",
@@ -973,6 +991,35 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
           </table>
         )}
       </div>
+
+      {/* Settings */}
+      <div style={{ ...s.card, marginTop: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Site Settings</h3>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", background: "var(--bg2)", borderRadius: 10, border: "1px solid var(--bd)" }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>Certifications Banner</div>
+            <div style={{ fontSize: 13, color: "var(--text2)" }}>Show or hide the certifications banner across the site.</div>
+          </div>
+          <button
+            onClick={toggleCertifications}
+            style={{
+              width: 50, height: 28, borderRadius: 14,
+              background: settings.showCertifications ? "#10b981" : "#d1d5db",
+              position: "relative", cursor: "pointer", border: "none",
+              transition: "background 0.2s", flexShrink: 0,
+            }}
+          >
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%", background: "#fff",
+              position: "absolute", top: 3, left: settings.showCertifications ? 25 : 3,
+              transition: "left 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            }} />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1013,9 +1060,7 @@ export default function AdminDashboard() {
         </nav>
 
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bd)" }}>
-          <div style={{ marginBottom: 16 }}>
-            <ThemeToggle />
-          </div>
+
           <a href="/" target="_blank" style={{ display: "block", color: "var(--text2)", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>
             ↗ View Store
           </a>

@@ -1,22 +1,54 @@
-/**
- * @file components/Footer.tsx
- * @description Global site footer — Server Component.
- *   Static four-column layout:
- *     1. Brand column  – Logo, tagline, social icon buttons
- *     2. Quick Links   – Home, About, Shop, Categories, Contact
- *     3. Support Links – FAQ, Shipping Policy, Returns, Track Order, Warranty
- *     4. Contact Info  – Email, phone, physical address
- *   Bottom bar: copyright notice + Privacy / Terms / Cookies links.
- *
- * @owner Heet-P
- * @lastModified May 16, 2026
- */
-
 import Link from "next/link"
 
-const SOCIALS = ["X", "in", "f", "IG"]
-const QUICK_LINKS = ["Home", "About", "Shop", "Categories", "Contact"]
-const SUPPORT_LINKS = ["Track Order"]
+function IcoPin() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  )
+}
+function IcoPhone() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  )
+}
+function IcoMail() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>
+    </svg>
+  )
+}
+function IcoFB() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/>
+    </svg>
+  )
+}
+function IcoX() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  )
+}
+function IcoIn() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+    </svg>
+  )
+}
+function IcoArrow() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  )
+}
 
 export default function Footer() {
   return (
@@ -25,57 +57,66 @@ export default function Footer() {
         <div className="ft__g">
           {/* Brand */}
           <div>
-            <div className="ft__brand">SUPERIOR HARNESS & ASSEMBLY LLC</div>
+            <div className="ft__brand">SUPERIOR HARNESS &amp; ASSEMBLY LLC</div>
             <p className="ft__desc">
-              Custom wire harness and cable assembly manufacturer specializing in high-quality engineered wiring solutions.
+              Precision wire harness and cable assembly manufacturing for the automotive, medical, robotics, EV, and industrial sectors — built to your exact specifications since day one.
             </p>
             <div className="ft__soc">
-              {SOCIALS.map((s) => (
-                <div key={s} className="ft__sb">{s}</div>
-              ))}
+              <a href="https://facebook.com" className="ft__sb" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IcoFB /></a>
+              <a href="https://x.com" className="ft__sb" aria-label="X" target="_blank" rel="noopener noreferrer"><IcoX /></a>
+              <a href="https://linkedin.com" className="ft__sb" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><IcoIn /></a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <div className="ft__ch">Quick Links</div>
+            <div className="ft__ch">Company</div>
             <div className="ft__lks">
-              {QUICK_LINKS.map((l) => (
-                <Link key={l} href={
-                  l === "Shop" ? "/products" : 
-                  l === "Home" ? "/" : 
-                  l === "Contact" ? "/contact" : 
-                  `/#${l.toLowerCase()}`
-                }>
-                  {l}
-                </Link>
-              ))}
+              <Link href="/">Home</Link>
+              <Link href="/about">About Us</Link>
+              <Link href="/products">Shop Products</Link>
+              <Link href="/blog">Blog</Link>
+              <Link href="/contact">Contact</Link>
             </div>
           </div>
 
-          {/* Support */}
+          {/* Products */}
           <div>
-            <div className="ft__ch">Support</div>
+            <div className="ft__ch">Products</div>
             <div className="ft__lks">
-              {SUPPORT_LINKS.map((l) => (
-                <Link key={l} href={l === "Track Order" ? "/track-order" : "#"}>{l}</Link>
-              ))}
+              <Link href="/products?category=wire-harnesses">Wire Harnesses</Link>
+              <Link href="/products?category=cable-assemblies">Cable Assemblies</Link>
+              <Link href="/products?category=pcb-assemblies">PCB Assemblies</Link>
+              <Link href="/products?category=oem-solutions">OEM Solutions</Link>
+              <Link href="/track-order">Track Order</Link>
             </div>
           </div>
 
-          {/* Contact */}
+          {/* Get in touch */}
           <div>
-            <div className="ft__ch">Contact</div>
-            <div className="ft__ci">pateltushar1987@gmail.com</div>
-            <div className="ft__ci">734 891 0248</div>
-            <div className="ft__ci">
-              Canton<br />Michigan, 48187
+            <div className="ft__ch">Get in Touch</div>
+            <div className="ft__contact-info" style={{ color: "rgba(255,255,255,0.48)" }}>
+              <div>
+                <IcoPin />
+                <span>Canton, Michigan 48187</span>
+              </div>
+              <div>
+                <IcoPhone />
+                <span>734 891 0248</span>
+              </div>
+              <div>
+                <IcoMail />
+                <span>pateltushar1987@gmail.com</span>
+              </div>
             </div>
+            <Link href="#quote" className="ft__quote-btn">
+              Request a Quote <IcoArrow />
+            </Link>
           </div>
         </div>
 
         <div className="ft__btm">
-          <div className="ft__copy">© 2026 Superior Harness & Assembly LLC. All rights reserved.</div>
+          <div className="ft__copy">© {new Date().getFullYear()} Superior Harness &amp; Assembly LLC. All rights reserved.</div>
           <div className="ft__bls">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>

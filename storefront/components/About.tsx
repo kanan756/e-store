@@ -1,14 +1,4 @@
-/**
- * @file components/About.tsx
- * @description About snippet shown on the home page.
- *   Links to the full /about page for more details.
- *
- * @owner Heet-P
- * @lastModified May 18, 2026
- */
-
 import Link from "next/link"
-import { InteractiveBackground } from "@/components/InteractiveBackground"
 
 function ArrowIcon() {
   return (
@@ -20,24 +10,22 @@ function ArrowIcon() {
 
 export default function About() {
   return (
-    <section id="about" className="abt" style={{ 
-      position: "relative",
-      overflow: "hidden"
-    }}>
-      <InteractiveBackground />
-      <div className="W" style={{ position: "relative", zIndex: 1 }}>
-        <div className="abt__c">
-          <div className="lbl abt__lbl rv d1">ABOUT US</div>
-          <h2 className="D2 abt__h rv d2">
-            SUPERIOR<br />HARNESS &amp;<br />ASSEMBLY LLC
+    <section id="about" className="sec" style={{ background: "var(--bg)", borderTop: "1px solid var(--bd)" }}>
+      <div className="W">
+        <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center" }}>
+          <h2 className="D2 rv d1" style={{ marginBottom: 32, textTransform: "uppercase" }}>
+            ABOUT
           </h2>
-          <p className="abt__p rv d3">
+          <p className="Bd rv d2" style={{ marginBottom: 18 }}>
             We are a custom wire harness manufacturer committed to delivering high-quality, reliable, and fully customized wiring solutions. With a team that brings over 30 years of combined experience in the wire harness industry, we understand the importance of precision, durability, and performance in every project we undertake.
           </p>
-          <p className="abt__p rv d3" style={{ marginTop: 20 }}>
-            We specialize in low to medium volume production with flexible minimum order quantities, allowing us to support startups, OEMs, and large-scale manufacturers alike — delivering products that meet your technical specifications, timelines, and budget.
+          <p className="Bd rv d2" style={{ marginBottom: 18 }}>
+            We specialize in low to medium volume production with flexible minimum order quantities, allowing us to support startups, OEMs, and large-scale manufacturers alike. Our approach is centered around understanding your exact requirements and delivering products that meet your technical specifications, timelines, and budget.
           </p>
-          <Link href="/about" className="btn bod rv d4" style={{ marginTop: 36 }}>
+          <p className="Bd rv d2" style={{ marginBottom: 38 }}>
+            From concept to completion, we work closely with our clients to ensure every wire harness and cable assembly is built to perform in its intended environment. Our commitment to quality and customer satisfaction makes us a trusted partner for businesses looking for dependable wiring solutions.
+          </p>
+          <Link href="/about" className="btn bod rv d3">
             Learn More <ArrowIcon />
           </Link>
         </div>

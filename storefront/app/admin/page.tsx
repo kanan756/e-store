@@ -32,82 +32,100 @@ export default function AdminLoginPage() {
   return (
     <div style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      backgroundImage: "linear-gradient(rgba(248, 249, 250, 0.85), rgba(248, 249, 250, 0.85)), url('https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      fontFamily: "system-ui, sans-serif",
+      background: "#f4f4f5", // Light neutral gray
+      fontFamily: "var(--font-dm-sans), 'Inter', sans-serif",
     }}>
       <div style={{
-        background: "#ffffff", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 20,
-        padding: "48px 40px", width: "100%", maxWidth: 400, boxShadow: "0 24px 60px rgba(0,0,0,0.05)",
+        background: "#ffffff",
+        borderRadius: 12,
+        width: "100%", maxWidth: 440,
+        boxShadow: "0 28px 80px rgba(0,0,0,0.08)",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
       }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            marginBottom: 16,
-          }}>
-            <img src="/images/logo.png" alt="Logo" style={{ height: "80px", width: "auto" }} />
+        {/* Dark Header Band */}
+        <div style={{
+          background: "#0A0A0A",
+          padding: "32px 32px 28px",
+          textAlign: "center",
+        }}>
+          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+             <img src="/images/logo.png" alt="Logo" style={{ height: "48px", width: "auto", filter: "brightness(0) invert(1)" }} />
           </div>
-          <h1 style={{ color: "#1c1c18", fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>Admin Panel</h1>
-          <p style={{ color: "#737874", margin: "8px 0 0", fontSize: 14 }}>SHA Store Management</p>
+          <h1 style={{ color: "#ffffff", fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: "0.06em", fontFamily: "var(--font-sora), 'Sora', sans-serif", textTransform: "uppercase" }}>Admin Panel</h1>
+          <p style={{ color: "rgba(255,255,255,0.6)", margin: "6px 0 0", fontSize: 13, letterSpacing: "0.02em" }}>Secure Access Required</p>
         </div>
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: "block", color: "#434844", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-              Admin Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter admin email"
-              required
+        {/* Form Body */}
+        <div style={{ padding: "32px" }}>
+          <form onSubmit={handleLogin}>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", color: "#111", fontSize: 13, fontWeight: 600, marginBottom: 8, fontFamily: "var(--font-sora), 'Sora', sans-serif" }}>
+                Email Address <span style={{ color: "#e53e3e" }}>*</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@superiorharness.com"
+                required
+                style={{
+                  width: "100%", boxSizing: "border-box", padding: "12px 14px",
+                  background: "#fff", border: "1.5px solid #d1d5db", borderRadius: 7,
+                  color: "#111", fontSize: 14, outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
+                }}
+                onFocus={(e) => { e.target.style.borderColor = "#0A0A0A"; e.target.style.boxShadow = "0 0 0 3px rgba(0,0,0,0.07)"; }}
+                onBlur={(e) => { e.target.style.borderColor = "#d1d5db"; e.target.style.boxShadow = "none"; }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", color: "#111", fontSize: 13, fontWeight: 600, marginBottom: 8, fontFamily: "var(--font-sora), 'Sora', sans-serif" }}>
+                Password <span style={{ color: "#e53e3e" }}>*</span>
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                style={{
+                  width: "100%", boxSizing: "border-box", padding: "12px 14px",
+                  background: "#fff", border: "1.5px solid #d1d5db", borderRadius: 7,
+                  color: "#111", fontSize: 14, outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
+                }}
+                onFocus={(e) => { e.target.style.borderColor = "#0A0A0A"; e.target.style.boxShadow = "0 0 0 3px rgba(0,0,0,0.07)"; }}
+                onBlur={(e) => { e.target.style.borderColor = "#d1d5db"; e.target.style.boxShadow = "none"; }}
+              />
+            </div>
+
+            {error && (
+              <div style={{
+                padding: "12px 14px", background: "#fff0f0", border: "1px solid #fecaca",
+                borderRadius: 7, color: "#dc2626", fontSize: 13, marginBottom: 20,
+              }}>{error}</div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
               style={{
-                width: "100%", boxSizing: "border-box", padding: "12px 16px",
-                background: "#e9ecef", border: "1px solid rgba(0,0,0,0.15)", borderRadius: 10,
-                color: "#1c1c18", fontSize: 15, outline: "none",
+                width: "100%", padding: "15px", background: "#0A0A0A",
+                color: "#ffffff", border: "none", borderRadius: 9999, fontSize: 14, fontWeight: 700,
+                fontFamily: "var(--font-sora), 'Sora', sans-serif", letterSpacing: "0.02em",
+                cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1,
+                transition: "background 0.2s, transform 0.15s",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8
               }}
-            />
-          </div>
-
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: "block", color: "#434844", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-              Admin Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter admin password"
-              required
-              style={{
-                width: "100%", boxSizing: "border-box", padding: "12px 16px",
-                background: "#e9ecef", border: "1px solid rgba(0,0,0,0.15)", borderRadius: 10,
-                color: "#1c1c18", fontSize: 15, outline: "none",
-              }}
-            />
-          </div>
-
-          {error && (
-            <div style={{
-              padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
-              borderRadius: 8, color: "#ef4444", fontSize: 13, marginBottom: 16,
-            }}>{error}</div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%", padding: "13px", background: "#111111",
-              color: "#e9ecef", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 700,
-              cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? "Signing in…" : "Sign In"}
-          </button>
-        </form>
+              onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#222", e.currentTarget.style.transform = "translateY(-1px)")}
+              onMouseLeave={(e) => !loading && (e.currentTarget.style.background = "#0A0A0A", e.currentTarget.style.transform = "none")}
+            >
+              {loading ? "Authenticating..." : "Sign In"}
+              {!loading && <span>→</span>}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

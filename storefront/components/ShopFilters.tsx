@@ -140,13 +140,13 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
         /* Mobile Drawer Defaults */
         .shop-sidebar {
           position: fixed;
-          top: 0;
+          top: 120px;
           left: -100%;
           width: 320px;
           max-width: 85vw;
-          height: 100vh;
+          height: calc(100vh - 120px);
           background: var(--bg);
-          z-index: 9999;
+          z-index: 900;
           padding: 24px;
           overflow-y: auto;
           transition: left 0.3s ease;
@@ -161,7 +161,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
           position: fixed;
           inset: 0;
           background: rgba(0,0,0,0.5);
-          z-index: 9998;
+          z-index: 899;
           backdrop-filter: blur(4px);
         }
         .sidebar-overlay.open {

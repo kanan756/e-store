@@ -1,14 +1,4 @@
-/**
- * @file components/Cta.tsx
- * @description Call-to-action section on the home page.
- *   "Contact Us" now correctly links to the /contact page.
- *
- * @owner Heet-P
- * @lastModified May 18, 2026
- */
-
 import Link from "next/link"
-import { InteractiveBackground } from "@/components/InteractiveBackground"
 
 function ArrowIcon() {
   return (
@@ -20,20 +10,23 @@ function ArrowIcon() {
 
 export default function Cta() {
   return (
-    <section id="cta" className="cta" style={{ 
-      position: "relative",
-      overflow: "hidden"
-    }}>
-      <InteractiveBackground />
-      <div className="W" style={{ position: "relative", zIndex: 1 }}>
+    <section id="cta" className="cta">
+      <div className="W">
         <h2 className="D3 cta__h rv">
-          Ready to Partner With Us?
+          Ready to put your next program<br />in reliable hands?
         </h2>
         <p className="cta__s rv d1">
-          Get in touch for custom wire harness, cable assembly, or PCB assembly solutions tailored to your OEM requirements.
+          Send us your print or describe your application — we&apos;ll respond with a quote within two business days.
         </p>
-        <Link href="/contact" className="btn bp rv d2">
-          Contact Us <ArrowIcon />
+        <Link href="#quote" className="btn rv d2" style={{
+          background: "#fff", color: "#0A0A0A", borderRadius: "9999px",
+          padding: "14px 32px", fontWeight: 700, fontSize: 13,
+          letterSpacing: "0.04em", textTransform: "uppercase",
+          fontFamily: "var(--font-sora)",
+          display: "inline-flex", alignItems: "center", gap: 8,
+          transition: "background 0.2s, transform 0.2s",
+        }}>
+          Request a Quote <ArrowIcon />
         </Link>
       </div>
     </section>

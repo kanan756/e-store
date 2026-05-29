@@ -1,38 +1,15 @@
-/**
- * @file components/Header.tsx
- * @description Global site header / navigation bar — Client Component.
- *   Features:
- *     - Transparent-to-solid transition on scroll (adds `.on` class after 60px)
- *     - Active solid state on all non-homepage routes
- *     - Navigation links: Home, About, Shop, Blog, Track Order, Contact
- *     - Cart icon with unread-items dot badge (via CartContext)
- *     - Track Order icon shortcut (pin/location SVG)
- *     - Light / Dark mode toggle (persists to localStorage as `cs-theme`)
- *     - Mobile: animated hamburger (☰ / ✕) that opens a full-height slide-down
- *       drawer with all nav links, cart count, and theme toggle.
- *       Body scroll is locked while drawer is open.
- *       Drawer auto-closes on route change.
- *
- *   Theme is applied via `data-theme` attribute on `<html>` element.
- *   Reading localStorage happens post-mount only (client-side safe).
- *
- * @owner Heet-P
- * @lastModified May 16, 2026
- */
-
 "use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useCart } from "@/context/cart-context"
-import { ThemeToggle } from "./ThemeToggle"
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
 function IcoCart() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <path d="M16 10a4 4 0 0 1-8 0" />
@@ -40,24 +17,62 @@ function IcoCart() {
   )
 }
 
-// Animated hamburger / close button icon
 function IcoBurger({ open }: { open: boolean }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
       {open ? (
-        // ✕ close icon
-        <>
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </>
+        <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
       ) : (
-        // ☰ hamburger lines
-        <>
-          <line x1="3" y1="7" x2="21" y2="7" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="17" x2="21" y2="17" />
-        </>
+        <><line x1="3" y1="7" x2="21" y2="7" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="17" x2="21" y2="17" /></>
       )}
+    </svg>
+  )
+}
+
+function IcoPhone() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  )
+}
+
+function IcoMail() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>
+    </svg>
+  )
+}
+
+function IcoFB() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/>
+    </svg>
+  )
+}
+
+function IcoX() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  )
+}
+
+function IcoIn() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+    </svg>
+  )
+}
+
+function IcoClose() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   )
 }
@@ -65,102 +80,285 @@ function IcoBurger({ open }: { open: boolean }) {
 // ── Nav link definitions ───────────────────────────────────────────────────────
 const NAV = [
   { href: "/", label: "Home" },
-  { href: "/#about", label: "About" },
-  { href: "/products", label: "Shop" },
-  { href: "/blog", label: "Blog" },
-  { href: "/track-order", label: "Track Order" },
+  { href: "/about", label: "About" },
+  { href: "/products", label: "Products", dd: [
+    { label: "Wire Harnesses", href: "/products?category=Wire+Harnesses" },
+    { label: "Cable Assemblies", href: "/products?category=Cable+Assemblies" },
+    { label: "PCB Assemblies", href: "/products?category=PCB+Assemblies" },
+    { label: "OEM Solutions", href: "/products?category=OEM+Solutions" },
+  ]},
+  { href: "/capabilities", label: "Capabilities" },
+  { href: "/services", label: "Services" },
+  { href: "/industries", label: "Industries" },
   { href: "/contact", label: "Contact" },
 ]
+
+// ── Quote Modal ───────────────────────────────────────────────────────────────
+function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [sending, setSending] = useState(false)
+
+  // Lock body scroll when open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [open])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return
+    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    window.addEventListener("keydown", fn)
+    return () => window.removeEventListener("keydown", fn)
+  }, [open, onClose])
+
+  if (!open) return null
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSending(true)
+    await new Promise(r => setTimeout(r, 1200))
+    setSending(false)
+    setSubmitted(true)
+  }
+
+  return (
+    <div
+      ref={overlayRef}
+      className="quote-overlay"
+      onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
+      aria-modal="true"
+      role="dialog"
+      aria-label="Request a Quote"
+    >
+      <div className="quote-modal">
+        {/* ── Dark header ── */}
+        <div className="quote-modal__hdr">
+          <div>
+            <div className="quote-modal__title">REQUEST A QUOTE</div>
+            <div className="quote-modal__subtitle">We respond within two business days.</div>
+          </div>
+          <button className="quote-modal__close" onClick={onClose} aria-label="Close">
+            <IcoClose />
+          </button>
+        </div>
+
+        {/* ── Body ── */}
+        {submitted ? (
+          <div className="quote-modal__success">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+            </svg>
+            <h3>Request Received</h3>
+            <p>We&apos;ll get back to you within two business days.</p>
+            <button className="quote-modal__submit" style={{ marginTop: 24, width: "auto", padding: "14px 40px" }} onClick={() => { setSubmitted(false); onClose() }}>
+              Close
+            </button>
+          </div>
+        ) : (
+          <form className="quote-modal__form" onSubmit={handleSubmit}>
+            {/* Row 1: Name + Phone */}
+            <div className="quote-modal__grid">
+              <div className="quote-modal__field">
+                <label className="quote-modal__label">
+                  Name <span className="quote-modal__req">*</span>
+                </label>
+                <input type="text" placeholder="Jane Doe" required autoComplete="name" />
+              </div>
+              <div className="quote-modal__field">
+                <label className="quote-modal__label">Phone</label>
+                <input type="tel" placeholder="(586) 555-0100" autoComplete="tel" />
+              </div>
+            </div>
+
+            {/* Row 2: Email + Company */}
+            <div className="quote-modal__grid">
+              <div className="quote-modal__field">
+                <label className="quote-modal__label">
+                  Email <span className="quote-modal__req">*</span>
+                </label>
+                <input type="email" placeholder="jane@acme.com" required autoComplete="email" />
+              </div>
+              <div className="quote-modal__field">
+                <label className="quote-modal__label">Company</label>
+                <input type="text" placeholder="Acme Mfg." autoComplete="organization" />
+              </div>
+            </div>
+
+            {/* Project details */}
+            <div className="quote-modal__field">
+              <label className="quote-modal__label">
+                Project details <span className="quote-modal__req">*</span>
+              </label>
+              <textarea
+                placeholder="Describe your assembly, quantities, target lead time..."
+                rows={4}
+                required
+              />
+            </div>
+
+
+
+
+
+            {/* Submit */}
+            <button type="submit" className="quote-modal__submit" disabled={sending}>
+              {sending ? "Sending..." : "Submit Request"}
+              {!sending && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              )}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
 
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [quoteOpen, setQuoteOpen] = useState(false)
   const { totalItems } = useCart()
   const pathname = usePathname()
 
-  // Trigger solid header background after scrolling 60px
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60)
     window.addEventListener("scroll", fn, { passive: true })
     return () => window.removeEventListener("scroll", fn)
   }, [])
 
-  // Auto-close mobile drawer when user navigates to a new route
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
-  // Lock body scroll while mobile drawer is open (prevents background scroll)
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
-  }, [menuOpen])
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const link = target.closest("a")
+      const href = link?.getAttribute("href") || link?.href
+      if (href && href.endsWith("#quote")) {
+        e.preventDefault()
+        setQuoteOpen(true)
+      }
+    }
+    document.addEventListener("click", handleGlobalClick)
+    
+    // Also handle initial load if hash is present
+    if (typeof window !== "undefined" && window.location.hash === "#quote") {
+      setQuoteOpen(true)
+      window.history.replaceState(null, "", window.location.pathname + window.location.search)
+    }
+    
+    return () => document.removeEventListener("click", handleGlobalClick)
+  }, [])
 
-  // Non-homepage routes always show solid header; homepage shows it after scroll
-  const isHome = pathname === "/"
-  const solid = scrolled || !isHome
+  useEffect(() => {
+    if (!quoteOpen) {
+      document.body.style.overflow = menuOpen ? "hidden" : ""
+    }
+    return () => { if (!quoteOpen) document.body.style.overflow = "" }
+  }, [menuOpen, quoteOpen])
 
   return (
     <>
-      {/* ── Desktop / Mobile Header bar ────────────────────────────────────── */}
-      <header className={`hdr${solid ? " on" : ""}`}>
-        <Link href="/" className="hdr__logo" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <img src="/images/logo.png" alt="Superior Harness & Assembly LLC Logo" style={{ height: "56px", width: "auto" }} />
-          <span>SUPERIOR HARNESS &amp; ASSEMBLY LLC</span>
-        </Link>
+      <header className={`hdr${scrolled ? " on" : ""}`}>
+        {/* ── Top Contact Bar ──────────────────────────────────────────────── */}
+        <div className="hdr__topbar">
+          <div className="hdr__topbar-in">
+            <div className="hdr__topbar-soc">
+              <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IcoFB /></a>
+              <a href="https://x.com" aria-label="X" target="_blank" rel="noopener noreferrer"><IcoX /></a>
+              <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><IcoIn /></a>
+            </div>
+            <div className="hdr__topbar-contacts">
+              <a className="hdr__topbar-item" href="tel:7348910248">
+                <IcoPhone /> +1 (734) 891-0248
+              </a>
+              <a className="hdr__topbar-item" href="tel:7348910249">
+                <IcoPhone /> +1 (734) 891-0249
+              </a>
+              <a className="hdr__topbar-item" href="mailto:sales@superiorharness.com">
+                <IcoMail /> <span>sales@superiorharness.com</span>
+              </a>
+            </div>
+          </div>
+        </div>
 
-        {/* Desktop navigation — hidden on mobile via CSS */}
-        <nav className="hdr__nav">
-          {NAV.map(({ href, label }) => (
-            <Link key={href} href={href}>{label}</Link>
-          ))}
-          <Link href="/get-a-quote" className="btn bsm hdr-quote-btn">
-            Get a Quote
+        {/* ── Nav Bar ──────────────────────────────────────────────────────── */}
+        <div className="hdr__bar">
+          {/* Logo */}
+          <Link href="/" className="hdr__logo" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span className="hdr__logo-mark">S</span>
+            <span className="hdr__logo-txt">
+              <span className="hdr__logo-name">SUPERIOR HARNESS</span>
+              <span className="hdr__logo-sub">&amp; ASSEMBLY LLC</span>
+            </span>
           </Link>
-        </nav>
 
-        {/* Right icon cluster */}
-        <div className="hdr__icons">
+          {/* Desktop navigation */}
+          <nav className="hdr__nav">
+            {NAV.map(({ href, label, dd }) =>
+              dd ? (
+                <div key={href} className="hdr__dd-wrap">
+                  <Link href={href} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    {label}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}><polyline points="6 9 12 15 18 9"/></svg>
+                  </Link>
+                  <div className="hdr__dd">
+                    {dd.map(d => <Link key={d.label} href={d.href}>{d.label}</Link>)}
+                    <Link href="/products" style={{ fontWeight: 700, color: "var(--ink, #111)", marginTop: 4, display: "block", padding: "10px 14px" }}>View all products →</Link>
+                  </div>
+                </div>
+              ) : (
+                <Link key={href} href={href} data-active={pathname === href ? "true" : undefined}>{label}</Link>
+              )
+            )}
+          </nav>
+
+          {/* Right icons */}
+          <div className="hdr__icons">
+            {/* Cart */}
+            <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
+              <IcoCart />
+              {totalItems > 0 && <span className="cdot" />}
+            </Link>
 
 
-          {/* Cart icon with dot badge */}
-          <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
-            <IcoCart />
-            {totalItems > 0 && <span className="cdot" />}
-          </Link>
+            {/* Request Quote — opens modal */}
+            <button
+              className="hdr-quote-btn hdr--desk"
+              style={{ marginLeft: 12 }}
+              onClick={() => setQuoteOpen(true)}
+              aria-label="Request a Quote"
+            >
+              Request Quote
+            </button>
 
-          {/* Track order pin icon (desktop only) */}
-          <Link href="/track-order" className="hic hdr--desk" aria-label="Track your order" title="Track Order">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          </Link>
-
-          <div className="hdr--desk" style={{ marginLeft: 8 }}>
-            <ThemeToggle />
-          </div>          {/* Hamburger — visible on mobile only */}
-          <button
-            className="hic hdr__burger"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-          >
-            <IcoBurger open={menuOpen} />
-          </button>
+            {/* Hamburger */}
+            <button
+              className="hic hdr__burger"
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+            >
+              <IcoBurger open={menuOpen} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* ── Mobile full-screen drawer ───────────────────────────────────────── */}
+      {/* ── Mobile drawer ──────────────────────────────────────────────────── */}
       <div className={`mob-nav${menuOpen ? " mob-nav--open" : ""}`} aria-hidden={!menuOpen}>
-
-        {/* Nav links — stagger-animated in */}
         <nav className="mob-nav__links">
           {NAV.map(({ href, label }, i) => (
             <Link
               key={href}
               href={href}
               className="mob-nav__link"
-              style={{ transitionDelay: menuOpen ? `${i * 55}ms` : "0ms" }}
+              style={{ transitionDelay: menuOpen ? `${i * 50}ms` : "0ms" }}
               onClick={() => setMenuOpen(false)}
             >
               {label}
@@ -168,33 +366,28 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Get a Quote CTA */}
         <div style={{ padding: "0 24px 24px" }}>
-          <Link
-            href="/get-a-quote"
-            className="btn hdr-quote-btn"
-            style={{ width: "100%", justifyContent: "center" }}
-            onClick={() => setMenuOpen(false)}
+          <button
+            className="btn bp"
+            style={{ width: "100%", justifyContent: "center", display: "flex" }}
+            onClick={() => { setMenuOpen(false); setQuoteOpen(true) }}
           >
-            Get a Quote →
-          </Link>
+            Request Quote
+          </button>
         </div>
 
-        {/* Quick-action row at the bottom of drawer */}
         <div className="mob-nav__bar">
           <Link href="/cart" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
             <IcoCart />
             Cart
             {totalItems > 0 && <span className="mob-cart-dot">{totalItems}</span>}
           </Link>
-          <Link href="/track-order" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
-            📦 Track Order
-          </Link>
-          <div className="mob-nav__act">
-            <ThemeToggle />
-          </div>
+
         </div>
       </div>
+
+      {/* ── Quote Popup Modal ──────────────────────────────────────────────── */}
+      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </>
   )
 }
