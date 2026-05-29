@@ -203,6 +203,18 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               </div>
             </div>
 
+            {/* Row 3: Application + Quantity */}
+            <div className="quote-modal__grid">
+              <div className="quote-modal__field">
+                <label className="quote-modal__label">Application</label>
+                <input type="text" name="application" placeholder="e.g. Medical Device, Automotive" />
+              </div>
+              <div className="quote-modal__field">
+                <label className="quote-modal__label">Quantity</label>
+                <input type="text" name="quantity" placeholder="e.g. 500 units" />
+              </div>
+            </div>
+
             {/* Project details */}
             <div className="quote-modal__field">
               <label className="quote-modal__label">
