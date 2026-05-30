@@ -26,12 +26,15 @@ function revalidateProductPages() {
   revalidatePath("/products/[handle]", "page") // all product detail pages
 }
 
-async function checkAuth() {
+async function checkAuth(allowedRoles?: string[]) {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
   if (!session?.value) return false
-  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
-  return verifyAdminToken(session.value)
+  const { verifyAdminToken } = await import("@/lib/admin-auth")
+  const { valid, role } = verifyAdminToken(session.value)
+  if (!valid || !role) return false
+  if (allowedRoles && !allowedRoles.includes(role)) return false
+  return true
 }
 
 const productSchema = z.object({
@@ -45,7 +48,7 @@ const productSchema = z.object({
 })
 
 export async function GET() {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const products = await getProducts()
     return NextResponse.json({ products })
@@ -55,7 +58,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const body = await request.json()
     const parsed = productSchema.safeParse(body)
@@ -69,7 +72,7 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const body = await request.json()
     const { rowIndex, ...productData } = body
@@ -87,7 +90,7 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const { rowIndex } = await request.json()
     if (!Number.isInteger(rowIndex) || rowIndex < 2) {

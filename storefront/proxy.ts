@@ -35,7 +35,8 @@ async function verifyAdminTokenEdge(token: string): Promise<boolean> {
     const base64 = payload.replace(/-/g, "+").replace(/_/g, "/")
     const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4)
     const decoded = atob(padded)
-    const expiry = parseInt(decoded.split(":")[1] ?? "0", 10)
+    const parts = decoded.split(":")
+    const expiry = parseInt(parts[2] ?? "0", 10)
     return Date.now() < expiry
   } catch {
     return false

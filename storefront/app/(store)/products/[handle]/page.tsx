@@ -41,11 +41,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   return (
     <>
       <ProductSchema product={product} />
-      <div style={{ paddingTop: 100, paddingBottom: 80, background: "var(--bg)", minHeight: "100vh" }}>
-        <div className="W">
-          <ProductDetailClient product={product} />
-        </div>
-      </div>
+      <ProductDetailClient product={product} />
     </>
   )
 }

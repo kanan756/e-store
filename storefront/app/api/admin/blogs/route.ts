@@ -22,12 +22,15 @@ import { getBlogs, appendBlog, deleteBlog } from "@/lib/sheets"
 import { z } from "zod"
 import { stripEmoji } from "@/lib/sanitize"
 
-async function checkAuth() {
+async function checkAuth(allowedRoles?: string[]) {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
   if (!session?.value) return false
-  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
-  return verifyAdminToken(session.value)
+  const { verifyAdminToken } = await import("@/lib/admin-auth")
+  const { valid, role } = verifyAdminToken(session.value)
+  if (!valid || !role) return false
+  if (allowedRoles && !allowedRoles.includes(role)) return false
+  return true
 }
 
 const blogSchema = z.object({
@@ -42,7 +45,7 @@ const blogSchema = z.object({
 })
 
 export async function GET() {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const blogs = await getBlogs()
     return NextResponse.json({ blogs })
@@ -52,7 +55,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const body = await request.json()
     const parsed = blogSchema.safeParse(body)
@@ -67,7 +70,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const { rowIndex } = await request.json()
     if (!Number.isInteger(rowIndex) || rowIndex < 2) {

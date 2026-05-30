@@ -15,16 +15,19 @@ import { cookies } from "next/headers"
 import { getAllQuotes, updateQuoteStatus } from "@/lib/sheets"
 import { z } from "zod"
 
-async function checkAuth() {
+async function checkAuth(allowedRoles?: string[]) {
   const cookieStore = await cookies()
   const session = cookieStore.get("admin_session")
   if (!session?.value) return false
-  const { verifyAdminToken } = await import("@/app/api/admin/auth/route")
-  return verifyAdminToken(session.value)
+  const { verifyAdminToken } = await import("@/lib/admin-auth")
+  const { valid, role } = verifyAdminToken(session.value)
+  if (!valid || !role) return false
+  if (allowedRoles && !allowedRoles.includes(role)) return false
+  return true
 }
 
 export async function GET() {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin", "payment", "support"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const quotes = await getAllQuotes()
     return NextResponse.json({ quotes })
@@ -34,7 +37,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  if (!(await checkAuth())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!(await checkAuth(["admin", "payment", "support"]))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   try {
     const { rowIndex, status } = await request.json()
     if (!Number.isInteger(rowIndex) || rowIndex < 2) {

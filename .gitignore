@@ -43,3 +43,9 @@ coverage/
 *.sqlite3
 
 *.pdf
+
+context/
+
+.agents/
+
+skills-lock.json

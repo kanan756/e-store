@@ -3,7 +3,7 @@ import CheckoutClient from "./CheckoutClient"
 
 export const metadata: Metadata = {
   title: "Checkout",
-  description: "Complete your order securely with Stripe or Razorpay.",
+  description: "Complete your order securely with Stripe.",
   robots: { index: false },
 }
 
