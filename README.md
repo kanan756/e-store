@@ -1,34 +1,74 @@
-# Client Store — Full-Stack Ecommerce
+# Superior Harnessing & Assembly (SHA) Store
+
+Welcome to the **Superior Harnessing & Assembly (SHA) Store** project! This is a full-stack, modern eCommerce storefront and administrative dashboard built with Next.js, tailored specifically for B2B electronics manufacturing (Wire Harnessing, Cable Assembly, PCB Assembly). 
+
+The project leverages Google Sheets as a lightweight, accessible database for products, orders, and blog posts, making it incredibly easy for non-technical users to manage the store's content.
 
 ---
 
-## 🚀 Quick Start & Full Setup Guide (New Features)
+## ✨ Features
 
-This guide walks you through **every** step to get the project up and running, **including** the brand‑new blog system, contact form with reCAPTCHA, mobile navigation, and hardened security. It’s written for absolute beginners – even a kid can follow it!
+### 🛒 User & Core Storefront Experience
+- **Responsive Modern UI:** Fully mobile-responsive layout across all pages with a clean design.
+- **SEO & Meta-Data:** Dynamic routing and metadata configured for SEO best practices.
+- **Dynamic Product Catalog:** The main shop page automatically fetches and renders products directly from the Google Sheets database.
+- **Individual Product Pages:** Dynamic routing (`/products/[handle]`) generates unique pages for every product.
+- **Shopping Cart System:** A fully functional, mobile-optimized cart that handles quantity adjustments, item removal, and persistent state.
+- **Track Order System:** A dedicated page where customers can input their email address to view real-time statuses and tracking comments for all their historical orders.
+- **Blog & Resources:** A dynamic blog page (`/blog`) that reads from the database and renders full articles with SEO-friendly URL slugs.
+- **About & Services:** Themed informational pages specifically tailored for manufacturing services.
 
-### 1️⃣ Prerequisites
+### 💳 Payment & Checkout
+- **Payment Gateway Integration:** Securely process customer transactions using **Razorpay** and **Stripe**.
+- **Automated Order Logging:** Upon successful payment, orders are instantly recorded into the `Orders` tab of your Google Sheet.
 
-- **Node.js ≥ 20** – download from https://nodejs.org or use `nvm install 20`.
-- **Git** – https://git-scm.com/downloads.
-- **A Google account** – needed for several API keys.
-- **A browser** – Chrome/Edge/Firefox.
+### 📧 Contact & Communications
+- **Secure Contact Form:** A user-facing inquiry form equipped with honeypot fields and **Google reCAPTCHA v3** to prevent bot spam.
+- **Customer Auto-Replies:** Customers receive an instant, beautifully branded HTML email confirming their inquiry.
+- **Admin Notifications:** Admins receive lightweight HTML alerts for new contact submissions.
+- **Database Sync:** Form submissions are automatically appended to the `Inquiries` tab in Google Sheets.
 
-### 2️⃣ Clone the repo
+### 🛠️ Admin Dashboard & Management (`/admin`)
+- **Secure Authentication:** Cookie-based protected login to ensure only authorized users can access the backend.
+- **KPI Overview:** High-level dashboard displaying critical metrics (Total Products, Orders Processed, Total Revenue) and a quick-glance table of recent orders.
+- **Product CRUD:** Full ability to add new products, update pricing/details, and delete items with exact-row precision sync to Google Sheets.
+- **Order Management:** View incoming orders, update fulfillment status, and add tracking comments.
+- **Blog CMS:** A built-in content management system to draft, publish, and delete blog posts directly from the dashboard.
+- **Customer Status Emails:** Automatically send customers a rich HTML email whenever their order status is updated.
 
+---
+
+## 💻 Technical Stuff
+
+### Tech Stack
+- **Framework:** Next.js (App Router)
+- **Styling:** Tailwind CSS
+- **Database:** Google Sheets API (`googleapis`)
+- **Authentication:** NextAuth.js
+- **Payments:** Razorpay & Stripe
+- **Emails:** Nodemailer
+- **Validation:** Zod
+
+### 🚀 Quick Start & Setup Guide
+
+#### 1️⃣ Prerequisites
+- **Node.js ≥ 20** – download from https://nodejs.org
+- **Git** – https://git-scm.com/downloads
+- **A Google account** – needed for Google Sheets API and reCAPTCHA
+
+#### 2️⃣ Clone the repo
 ```bash
 git clone https://github.com/Heet-P/e-store.git
 cd e-store
 ```
 
-### 3️⃣ Create environment files
-
-#### Storefront (`storefront/.env.local`)
-
+#### 3️⃣ Create environment files
+Create a `.env.local` file inside the `storefront` directory:
 ```bash
-cp .env.example .env.local   # creates a copy you can edit
+cp storefront/.env.example storefront/.env.local
 ```
 
-Open `.env.local` in any editor and fill in the following keys (all are explained where to obtain them):
+Fill in the following keys in your `.env.local`:
 
 | Variable                                    | What it does                                                      | Where to get it                                                                                                                                                                                                                                 |
 | ------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -50,49 +90,27 @@ Open `.env.local` in any editor and fill in the following keys (all are explaine
 
 > **NOTE:** Keep the surrounding triple quotes around `GOOGLE_PRIVATE_KEY`. Do **not** add extra spaces.
 
-#### Backend (`backend/.env` – optional)
-
-If you want to use the optional PostgreSQL backend, copy the template and fill in the values:
-
+#### 4️⃣ Install dependencies
+Navigate to the storefront directory and install dependencies:
 ```bash
-cp .env.example .env   # if the file exists
+cd storefront
+npm install
 ```
 
-Edit the file and replace placeholders with your Supabase/Postgres connection string, CORS origins, and secrets. If you don’t need the backend, you can leave this file empty – the app will work with Google Sheets only.
-
-### 4️⃣ Install dependencies
-
+#### 5️⃣ Run the development server
 ```bash
-npm install   # runs in the repo root and installs both backend & storefront packages
+npm run dev
+```
+Open `http://localhost:3000` in your browser.
+
+#### 6️⃣ Stripe for localhost (Optional):
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 
-### 5️⃣ Run the development server
-
-```bash
-npm run dev   # starts Next.js on http://localhost:3000
-```
-
-Open the URL in a browser. You should see the home page, a hamburger menu on mobile widths, and a **Contact** link.
-
-### 6️⃣ Test the new features
-
-- **Mobile navigation** – shrink the browser or open DevTools device mode, click the hamburger, watch the drawer slide down.
-- **Blog** – visit `/blog` to see a list of posts pulled from the Google Sheet. Click a post to view its detail page.
-- **Contact form** – fill it out and submit. You’ll get an auto‑reply email, and the server log will show something like:
-  ```
-  [reCAPTCHA] { success: true, score: 0.7, action: 'contact', errors: undefined }
-  ```
-- **Admin panel** – go to `/admin`, log in with the admin password you set, and explore Products, Blogs, Orders, and Inquiries.
-- **Rate limiting** – try submitting the contact form more than 5 times in a minute. You’ll receive a **429 Too Many Requests** response.
-
-### 7️⃣ Deploy (optional)
-
+### ☁️ Deployment
 1. Sign up at https://vercel.com and import the repo.
 2. Add all the environment variables from step 3 as **Vercel Environment Variables** (keep `NEXT_PUBLIC_` keys public, the rest secret).
 3. Deploy! Vercel will build the app automatically.
 4. After deployment, go back to the Google reCAPTCHA console, add your new domain, and replace the site/secret keys in Vercel.
 5. Raise `RECAPTCHA_MIN_SCORE` to `0.5` (or higher) for production.
-
-# Stripe for localhost:
-
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
