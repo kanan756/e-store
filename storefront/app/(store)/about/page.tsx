@@ -81,7 +81,7 @@ export default function AboutPage() {
                 From concept to completion, we work closely with our clients to ensure every wire harness and cable assembly is built to perform in its intended environment.
               </p>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                <Link href="/contact" className="btn bp">
+                <Link href="#quote" className="btn bp">
                   Get a Quote <ArrowIcon />
                 </Link>
                 <Link href="/capabilities" className="btn bod">
