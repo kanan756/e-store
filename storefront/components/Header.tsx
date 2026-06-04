@@ -78,9 +78,9 @@ function IcoClose() {
   )
 }
 
-function IcoChevron() {
+function IcoChevron({ style }: { style?: React.CSSProperties } = {}) {
   return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6, ...style }}>
       <polyline points="6 9 12 15 18 9"/>
     </svg>
   )
@@ -255,6 +255,9 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [quoteOpen, setQuoteOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
+  const [mobProductsOpen, setMobProductsOpen] = useState(false)
+  const [mobIndustriesOpen, setMobIndustriesOpen] = useState(false)
+  const [mobResourcesOpen, setMobResourcesOpen] = useState(false)
   const productsDDRef = useRef<HTMLDivElement>(null)
   const { totalItems } = useCart()
   const pathname = usePathname()
@@ -265,7 +268,13 @@ export default function Header() {
     return () => window.removeEventListener("scroll", fn)
   }, [])
 
-  useEffect(() => { setMenuOpen(false); setProductsOpen(false) }, [pathname])
+  useEffect(() => { 
+    setMenuOpen(false)
+    setProductsOpen(false)
+    setMobProductsOpen(false)
+    setMobIndustriesOpen(false)
+    setMobResourcesOpen(false)
+  }, [pathname])
 
   // Click-outside closes the sticky products dropdown
   useEffect(() => {
@@ -448,21 +457,80 @@ export default function Header() {
 
       {/* ── Mobile drawer ── */}
       <div className={`mob-nav${menuOpen ? " mob-nav--open" : ""}`} aria-hidden={!menuOpen}>
-        <nav className="mob-nav__links">
+        <nav className="mob-nav__links" style={{ overflowY: "auto", paddingBottom: 24 }}>
+          {/* Products Accordion */}
+          <div>
+            <button 
+              className="mob-nav__link" 
+              style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: mobProductsOpen ? "none" : "", transitionDelay: menuOpen ? "0ms" : "0ms" }}
+              onClick={() => setMobProductsOpen(o => !o)}
+            >
+              Products
+              <IcoChevron style={{ transform: mobProductsOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
+            </button>
+            {mobProductsOpen && (
+              <div style={{ paddingLeft: 16, paddingBottom: 16, borderBottom: "1px solid rgba(255, 255, 255, 0.07)" }}>
+                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", textTransform: "uppercase", letterSpacing: "0.1em" }}>Wire Harness</div>
+                {PRODUCTS_WIRE.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
+                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Cable Assembly</div>
+                {PRODUCTS_CABLE.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Industries Accordion */}
+          <div>
+            <button 
+              className="mob-nav__link" 
+              style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: mobIndustriesOpen ? "none" : "", transitionDelay: menuOpen ? "50ms" : "0ms" }}
+              onClick={() => setMobIndustriesOpen(o => !o)}
+            >
+              Industries
+              <IcoChevron style={{ transform: mobIndustriesOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
+            </button>
+            {mobIndustriesOpen && (
+              <div style={{ paddingLeft: 16, paddingBottom: 16, borderBottom: "1px solid rgba(255, 255, 255, 0.07)" }}>
+                {INDUSTRIES_DD.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Resources Accordion */}
+          <div>
+            <button 
+              className="mob-nav__link" 
+              style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: mobResourcesOpen ? "none" : "", transitionDelay: menuOpen ? "100ms" : "0ms" }}
+              onClick={() => setMobResourcesOpen(o => !o)}
+            >
+              Resources
+              <IcoChevron style={{ transform: mobResourcesOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
+            </button>
+            {mobResourcesOpen && (
+              <div style={{ paddingLeft: 16, paddingBottom: 16, borderBottom: "1px solid rgba(255, 255, 255, 0.07)" }}>
+                {RESOURCES_DD.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Static Links */}
           {[
-            { href: "/products", label: "Products" },
-            { href: "/industries", label: "Industries" },
-            { href: "/capabilities", label: "Capabilities" },
             { href: "/about", label: "About" },
             { href: "/contact", label: "Contact" },
             { href: "/shop", label: "Shop" },
-            { href: "/blog", label: "Blog" },
           ].map(({ href, label }, i) => (
             <Link
               key={href}
               href={href}
               className="mob-nav__link"
-              style={{ transitionDelay: menuOpen ? `${i * 50}ms` : "0ms" }}
+              style={{ transitionDelay: menuOpen ? `${150 + i * 50}ms` : "0ms" }}
               onClick={() => setMenuOpen(false)}
             >
               {label}

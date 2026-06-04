@@ -1561,6 +1561,20 @@ button {
 
   /* Show hamburger button on mobile */
   .hdr__burger { display: flex !important; }
+
+  /* Fix logo sizing on mobile so it doesn't push the hamburger off-screen */
+  .hdr__logo {
+    min-width: 0;
+    max-width: 65%;
+  }
+  .hdr__logo img {
+    width: 100% !important;
+    height: auto !important;
+  }
+  .hdr__icons {
+    min-width: 0;
+    flex-shrink: 0;
+  }
 }
 
 
@@ -2239,4 +2253,35 @@ button {
   .pp-caps-grid, .pp-process-grid, .pp-usecases-grid, .pp-related-grid, .pp-verticals-grid { grid-template-columns: 1fr; }
   .pp-hero__stats-grid { grid-template-columns: 1fr 1fr; }
   .pp-spec-table .spec-key { width: 120px; font-size: 9px; }
+}
+
+/* ── SKELETON LOADERS ────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  background: var(--bg2);
+  background-image: linear-gradient(90deg, var(--bg2) 0px, var(--bg3) 50%, var(--bg2) 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-text.title {
+  height: 24px;
+  margin-bottom: 16px;
+}
+
+.skeleton-block {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
 }

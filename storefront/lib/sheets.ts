@@ -19,6 +19,39 @@
 import { google } from "googleapis"
 import { cache } from "react"
 
+// ── Rate Limiting / Caching ───────────────────────────────────────────────────
+// Google Sheets has a strict 60 requests per minute limit. This wrapper holds
+// the result in memory for 10 seconds, coalescing concurrent requests and heavily
+// reducing API pressure during development or traffic bursts.
+function withTTL<T extends (...args: any[]) => Promise<any>>(fn: T, ttlMs = 10000): T {
+  const cacheMap = new Map<string, { data: any; timestamp: number }>();
+  const inflightMap = new Map<string, Promise<any>>();
+
+  return (async (...args: any[]) => {
+    const key = JSON.stringify(args);
+    const cached = cacheMap.get(key);
+    
+    if (cached && Date.now() - cached.timestamp < ttlMs) {
+      return cached.data;
+    }
+
+    const inflight = inflightMap.get(key);
+    if (inflight) return inflight;
+
+    const promise = fn(...args).then(data => {
+      cacheMap.set(key, { data, timestamp: Date.now() });
+      inflightMap.delete(key);
+      return data;
+    }).catch(err => {
+      inflightMap.delete(key);
+      throw err;
+    });
+
+    inflightMap.set(key, promise);
+    return promise;
+  }) as any;
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 function getAuth() {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n")
@@ -85,7 +118,7 @@ export interface Inquiry {
 // cache() deduplicates repeated calls within the same server render cycle.
 // Both generateMetadata and the page component call getProductByHandle →
 // getProducts(); without this, each triggers a full Sheets API round-trip.
-export const getProducts = cache(async (): Promise<Product[]> => {
+export const getProducts = cache(withTTL(async (): Promise<Product[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
 
@@ -108,7 +141,7 @@ export const getProducts = cache(async (): Promise<Product[]> => {
       inStock: (r[6] ?? "true").toLowerCase() !== "false",
     }))
     .filter((p) => p.name !== "") // skip empty rows
-})
+}))
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
   const products = await getProducts()
@@ -150,7 +183,7 @@ export async function appendOrder(order: {
   return orderId
 }
 
-export async function getOrdersByEmail(email: string): Promise<Order[]> {
+export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
 
@@ -172,17 +205,17 @@ export async function getOrdersByEmail(email: string): Promise<Order[]> {
       comments: r[6] ?? "",
       updatedBy: r[7] ?? "",
     }))
-}
+})
 
-export async function getOrderByPaymentId(paymentId: string): Promise<Order | null> {
+export const getOrderByPaymentId = withTTL(async (paymentId: string): Promise<Order | null> => {
   const orders = await getAllOrders()
   return orders.find(o => o.comments.includes(paymentId)) ?? null
-}
+})
 
 // ── Blogs ─────────────────────────────────────────────────────────────────────
 // cache() ensures generateStaticParams, generateMetadata, and the page body
 // all share the same Sheets API result within a single render cycle.
-export const getBlogs = cache(async (publishedOnly = false): Promise<Blog[]> => {
+export const getBlogs = cache(withTTL(async (publishedOnly = false): Promise<Blog[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
 
@@ -206,7 +239,7 @@ export const getBlogs = cache(async (publishedOnly = false): Promise<Blog[]> => 
     }))
     .filter((b) => b.title !== "")
     .filter((b) => !publishedOnly || b.published)
-})
+}))
 
 export async function getBlogBySlug(slug: string): Promise<Blog | null> {
   const blogs = await getBlogs()
@@ -289,7 +322,7 @@ export async function deleteProduct(rowIndex: number): Promise<void> {
 }
 
 // ── Admin: Orders ─────────────────────────────────────────────────────────────
-export async function getAllOrders(): Promise<(Order & { rowIndex: number })[]> {
+export const getAllOrders = withTTL(async (): Promise<(Order & { rowIndex: number })[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   const res = await sheets.spreadsheets.values.get({
@@ -310,7 +343,7 @@ export async function getAllOrders(): Promise<(Order & { rowIndex: number })[]> 
       comments: r[6] ?? "",
       updatedBy: r[7] ?? "",
     }))
-}
+})
 
 export async function updateOrderStatus(rowIndex: number, status: string, comments: string): Promise<void> {
   const auth = getAuth()
@@ -415,7 +448,7 @@ export async function appendInquiry(inq: Omit<Inquiry, "id" | "submittedAt" | "s
   })
 }
 
-export async function getAllInquiries(): Promise<(Inquiry & { rowIndex: number })[]> {
+export const getAllInquiries = withTTL(async (): Promise<(Inquiry & { rowIndex: number })[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   const res = await sheets.spreadsheets.values.get({
@@ -435,7 +468,7 @@ export async function getAllInquiries(): Promise<(Inquiry & { rowIndex: number }
       status: r[6] ?? "New",
     }))
     .filter((r) => r.id !== "")
-}
+})
 
 export async function updateInquiryStatus(rowIndex: number, status: string): Promise<void> {
   const auth = getAuth()
@@ -488,7 +521,7 @@ export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status"
   })
 }
 
-export async function getAllQuotes(): Promise<(Quote & { rowIndex: number })[]> {
+export const getAllQuotes = withTTL(async (): Promise<(Quote & { rowIndex: number })[]> => {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   const res = await sheets.spreadsheets.values.get({
@@ -511,7 +544,7 @@ export async function getAllQuotes(): Promise<(Quote & { rowIndex: number })[]> 
       status: r[9] ?? "New",
     }))
     .filter((r) => r.id !== "")
-}
+})
 
 export async function updateQuoteStatus(rowIndex: number, status: string): Promise<void> {
   const auth = getAuth()

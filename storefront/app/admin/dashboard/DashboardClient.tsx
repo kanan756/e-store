@@ -95,6 +95,36 @@ function NavItem({ icon, label, active, onClick }: { icon: React.ReactNode; labe
   )
 }
 
+// ── Skeleton Loader ───────────────────────────────────────────────────────────
+function TableSkeleton({ columns }: { columns: number }) {
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
+        <thead>
+          <tr style={{ borderBottom: "1px solid var(--bd)" }}>
+            {Array.from({ length: columns }).map((_, i) => (
+              <th key={i} style={{ padding: "10px 12px" }}>
+                <div className="skeleton skeleton-text" style={{ width: "60%", height: 12, marginBottom: 0 }}></div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <tr key={i} style={{ borderBottom: "1px solid var(--bd)" }}>
+              {Array.from({ length: columns }).map((_, j) => (
+                <td key={j} style={{ padding: "14px 12px" }}>
+                  <div className="skeleton skeleton-text" style={{ width: j === 0 ? "80%" : "40%", height: 16, marginBottom: 0 }}></div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 // ── Product Form ──────────────────────────────────────────────────────────────
 function ProductForm({
   initial, rowIndex, onSave, onCancel,
@@ -257,7 +287,7 @@ function ProductsTab() {
 
       <div style={s.card}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>Loading products…</div>
+          <TableSkeleton columns={6} />
         ) : products.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No products yet. Click &quot;Add Product&quot; to get started.</div>
         ) : (
@@ -397,7 +427,7 @@ function OrdersTab() {
 
       <div style={s.card}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>Loading orders…</div>
+          <TableSkeleton columns={7} />
         ) : orders.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No orders yet.</div>
         ) : (
@@ -542,7 +572,7 @@ function BlogsTab() {
 
       <div style={s.card}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>Loading blogs…</div>
+          <TableSkeleton columns={5} />
         ) : blogs.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No blog posts yet. Click &quot;New Blog Post&quot; to start.</div>
         ) : (
@@ -657,7 +687,7 @@ function InquiriesTab() {
       </div>
       <div style={s.card}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>Loading inquiries…</div>
+          <TableSkeleton columns={5} />
         ) : inquiries.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No inquiries yet.</div>
         ) : (
@@ -784,7 +814,7 @@ function QuotesTab() {
       </div>
       <div style={s.card}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>Loading quotes…</div>
+          <TableSkeleton columns={6} />
         ) : quotes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No quote requests yet.</div>
         ) : (
