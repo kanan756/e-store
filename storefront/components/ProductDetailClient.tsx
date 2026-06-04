@@ -117,7 +117,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       transition: "all 0.2s"
                     }}
                   >
-                    <img src={img} alt={`${product.name} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                    <img src={img} alt={`${product.name} thumbnail ${idx + 1}`} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
                   </button>
                 ))}
               </div>
@@ -241,8 +241,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <div style={{ display: "flex", gap: 24, overflowX: "auto", paddingBottom: 16 }}>
               {images.map((img, idx) => (
                 <div key={idx} style={{ flexShrink: 0, width: 280, background: "var(--bg2)", borderRadius: "var(--r)", overflow: "hidden", border: "1px solid var(--bd)" }}>
-                  <div style={{ aspectRatio: "4/3", position: "relative" }}>
-                    <Image src={img} alt={`${product.name} Profile ${idx + 1}`} fill style={{ objectFit: "contain", padding: 16 }} />
+                  <div>
+                    <img src={img} alt={`${product.name} Profile ${idx + 1}`} style={{ width: "100%", height: "auto", display: "block", padding: 16 }} />
                   </div>
                 </div>
               ))}
