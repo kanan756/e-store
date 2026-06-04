@@ -30,7 +30,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
           ))}
         </div>
         <div style={{ textAlign: "center", marginTop: 56 }}>
-          <Link href="/products" className="btn bod">
+          <Link href="/shop" className="btn bod">
             View All Products <ArrowIcon />
           </Link>
         </div>

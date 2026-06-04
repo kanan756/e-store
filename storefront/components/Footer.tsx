@@ -74,7 +74,7 @@ export default function Footer() {
             <div className="ft__lks">
               <Link href="/">Home</Link>
               <Link href="/about">About Us</Link>
-              <Link href="/products">Shop Products</Link>
+              <Link href="/shop">Shop Products</Link>
               <Link href="/blog">Blog</Link>
               <Link href="/contact">Contact</Link>
             </div>
@@ -84,10 +84,10 @@ export default function Footer() {
           <div>
             <div className="ft__ch">Products</div>
             <div className="ft__lks">
-              <Link href="/products?category=wire-harnesses">Wire Harnesses</Link>
-              <Link href="/products?category=cable-assemblies">Cable Assemblies</Link>
-              <Link href="/products?category=pcb-assemblies">PCB Assemblies</Link>
-              <Link href="/products?category=oem-solutions">OEM Solutions</Link>
+              <Link href="/products/custom-wire-harness">Wire Harnesses</Link>
+              <Link href="/products/cable-assembly">Cable Assemblies</Link>
+              <Link href="/products/high-voltage-harness">High Voltage Harness</Link>
+              <Link href="/products/overmolded-harness">Overmolded Harness</Link>
               <Link href="/track-order">Track Order</Link>
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function Footer() {
               </div>
               <div>
                 <IcoPhone />
-                <span>734 891 0248</span>
+                <span>+91 7348910249</span>
               </div>
               <div>
                 <IcoMail />

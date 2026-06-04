@@ -65,14 +65,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <div style={{ borderRadius: "var(--rL)", overflow: "hidden", aspectRatio: "4/3", position: "relative", background: "var(--bg2)", marginBottom: 16 }}>
               {hasImages ? (
                 <>
-                  <Image
-                    src={images[activeImage]}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 700px) 100vw, 50vw"
-                    style={{ objectFit: "cover", transition: "all 0.3s ease" }}
-                    priority
-                  />
+                  <img src={images[activeImage]} alt={product.name} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
                   {images.length > 1 && (
                     <>
                       <button
@@ -124,7 +117,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       transition: "all 0.2s"
                     }}
                   >
-                    <Image src={img} alt={`${product.name} thumbnail ${idx + 1}`} fill sizes="80px" style={{ objectFit: "cover" }} />
+                    <img src={img} alt={`${product.name} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
                   </button>
                 ))}
               </div>

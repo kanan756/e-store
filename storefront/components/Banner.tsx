@@ -15,7 +15,7 @@ export default function Banner() {
         <div className="lbl bnr__lbl rv">EXPLORE NOW</div>
         <h2 className="bnr__h D2 rv d1">SHOP COLLECTION</h2>
         <p className="bnr__s rv d2">Explore our latest premium wire harness and cable assembly selections.</p>
-        <Link href="/products" className="rv d3" style={{
+        <Link href="/shop" className="rv d3" style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "#fff", color: "#0A0A0A", borderRadius: "9999px",
           padding: "14px 32px", fontWeight: 700, fontSize: 13,

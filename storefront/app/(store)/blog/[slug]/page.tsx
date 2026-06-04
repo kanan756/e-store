@@ -127,7 +127,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         {/* Cover image */}
         {isValidUrl(blog.imageUrl) && (
           <div style={{ borderRadius: "var(--rL)", overflow: "hidden", marginBottom: 40, aspectRatio: "16/9", position: "relative" }}>
-            <Image src={blog.imageUrl} alt={blog.title} fill sizes="780px" style={{ objectFit: "cover" }} priority />
+            <img src={blog.imageUrl} alt={blog.title} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
           </div>
         )}
 

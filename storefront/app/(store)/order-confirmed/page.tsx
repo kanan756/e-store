@@ -72,7 +72,7 @@ function OrderConfirmedContent() {
         </div>
 
         <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-          <Link href="/products" className="btn bp">
+          <Link href="/shop" className="btn bp">
             Continue Shopping
           </Link>
           {paymentId && downloadToken && (

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { useCart } from "@/context/cart-context"
@@ -77,20 +78,47 @@ function IcoClose() {
   )
 }
 
-// ── Nav link definitions ───────────────────────────────────────────────────────
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/products", label: "Products", dd: [
-    { label: "Wire Harnesses", href: "/products?category=Wire+Harnesses" },
-    { label: "Cable Assemblies", href: "/products?category=Cable+Assemblies" },
-    { label: "PCB Assemblies", href: "/products?category=PCB+Assemblies" },
-    { label: "OEM Solutions", href: "/products?category=OEM+Solutions" },
-  ]},
-  { href: "/capabilities", label: "Capabilities" },
-  { href: "/services", label: "Services" },
-  { href: "/industries", label: "Industries" },
-  { href: "/contact", label: "Contact" },
+function IcoChevron() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  )
+}
+
+// ── Nav data ───────────────────────────────────────────────────────────────────
+
+const PRODUCTS_WIRE = [
+  { label: "Custom Wire Harness", href: "/products/custom-wire-harness" },
+  { label: "Waterproof Harness", href: "/products/waterproof-harness" },
+  { label: "High Voltage Harness", href: "/products/high-voltage-harness" },
+  { label: "Overmolded Harness", href: "/products/overmolded-harness" },
+  { label: "Prototype / NPI", href: "/products/prototype-npi" },
+]
+
+const PRODUCTS_CABLE = [
+  { label: "Cable Assembly Overview", href: "/products/cable-assembly" },
+  { label: "Medical Cable Assemblies", href: "/products/medical-cable-assemblies" },
+  { label: "Coaxial / RF / Microwave", href: "/products/coaxial-rf-microwave" },
+  { label: "Power & Battery", href: "/products/power-battery" },
+  { label: "Ethernet & USB", href: "/products/ethernet-usb" },
+  { label: "Fiber Optic & Twinax", href: "/products/fiber-optic-twinax" },
+  { label: "Shielded / Hermetic", href: "/products/shielded-hermetic" },
+]
+
+const INDUSTRIES_DD = [
+  { label: "Automotive & EV", href: "/industries/automotive-ev" },
+  { label: "Medical Devices", href: "/industries/medical-devices" },
+  { label: "Robotics & Automation", href: "/industries/robotics-automation" },
+  { label: "Industrial / Factory", href: "/industries/industrial-factory" },
+  { label: "Aerospace & Defense", href: "/industries/aerospace-defense" },
+  { label: "Solar & Energy", href: "/industries/solar-energy" },
+]
+
+const RESOURCES_DD = [
+  { label: "Blog", href: "/blog" },
+  { label: "Certifications", href: "/capabilities#certifications" },
+  { label: "Capabilities", href: "/capabilities" },
 ]
 
 // ── Quote Modal ───────────────────────────────────────────────────────────────
@@ -99,13 +127,11 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [submitted, setSubmitted] = useState(false)
   const [sending, setSending] = useState(false)
 
-  // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
   }, [open])
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return
     const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
@@ -150,7 +176,6 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
       aria-label="Request a Quote"
     >
       <div className="quote-modal">
-        {/* ── Dark header ── */}
         <div className="quote-modal__hdr">
           <div>
             <div className="quote-modal__title">REQUEST A QUOTE</div>
@@ -161,7 +186,6 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           </button>
         </div>
 
-        {/* ── Body ── */}
         {submitted ? (
           <div className="quote-modal__success">
             <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -175,12 +199,9 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
           </div>
         ) : (
           <form className="quote-modal__form" onSubmit={handleSubmit}>
-            {/* Row 1: Name + Phone */}
             <div className="quote-modal__grid">
               <div className="quote-modal__field">
-                <label className="quote-modal__label">
-                  Name <span className="quote-modal__req">*</span>
-                </label>
+                <label className="quote-modal__label">Name <span className="quote-modal__req">*</span></label>
                 <input type="text" name="name" placeholder="Jane Doe" required autoComplete="name" />
               </div>
               <div className="quote-modal__field">
@@ -188,13 +209,9 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <input type="tel" name="phone" placeholder="(586) 555-0100" autoComplete="tel" />
               </div>
             </div>
-
-            {/* Row 2: Email + Company */}
             <div className="quote-modal__grid">
               <div className="quote-modal__field">
-                <label className="quote-modal__label">
-                  Email <span className="quote-modal__req">*</span>
-                </label>
+                <label className="quote-modal__label">Email <span className="quote-modal__req">*</span></label>
                 <input type="email" name="email" placeholder="jane@acme.com" required autoComplete="email" />
               </div>
               <div className="quote-modal__field">
@@ -202,8 +219,6 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <input type="text" name="company" placeholder="Acme Mfg." autoComplete="organization" />
               </div>
             </div>
-
-            {/* Row 3: Application + Quantity */}
             <div className="quote-modal__grid">
               <div className="quote-modal__field">
                 <label className="quote-modal__label">Application</label>
@@ -214,21 +229,12 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <input type="text" name="quantity" placeholder="e.g. 500 units" />
               </div>
             </div>
-
-            {/* Project details */}
             <div className="quote-modal__field">
-              <label className="quote-modal__label">
-                Project details <span className="quote-modal__req">*</span>
-              </label>
-              <textarea
-                name="description"
-                placeholder="Describe your assembly, quantities, target lead time..."
-                rows={4}
-                required
-              />
+              <label className="quote-modal__label">Project details <span className="quote-modal__req">*</span></label>
+              <textarea name="description" placeholder="Describe your assembly, quantities, target lead time..." rows={4} required />
             </div>
-
-            <input type="text" name="honeypot" style={{ display: "none" }} tabIndex={-1} autoComplete="off" /><button type="submit" className="quote-modal__submit" disabled={sending}>
+            <input type="text" name="honeypot" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
+            <button type="submit" className="quote-modal__submit" disabled={sending}>
               {sending ? "Sending..." : "Submit Request"}
               {!sending && (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -248,6 +254,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [quoteOpen, setQuoteOpen] = useState(false)
+  const [productsOpen, setProductsOpen] = useState(false)
+  const productsDDRef = useRef<HTMLDivElement>(null)
   const { totalItems } = useCart()
   const pathname = usePathname()
 
@@ -257,7 +265,27 @@ export default function Header() {
     return () => window.removeEventListener("scroll", fn)
   }, [])
 
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  useEffect(() => { setMenuOpen(false); setProductsOpen(false) }, [pathname])
+
+  // Click-outside closes the sticky products dropdown
+  useEffect(() => {
+    if (!productsOpen) return
+    const fn = (e: MouseEvent) => {
+      if (productsDDRef.current && !productsDDRef.current.contains(e.target as Node)) {
+        setProductsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", fn)
+    return () => document.removeEventListener("mousedown", fn)
+  }, [productsOpen])
+
+  // Close products dropdown on Escape
+  useEffect(() => {
+    if (!productsOpen) return
+    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") setProductsOpen(false) }
+    window.addEventListener("keydown", fn)
+    return () => window.removeEventListener("keydown", fn)
+  }, [productsOpen])
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
@@ -270,13 +298,12 @@ export default function Header() {
       }
     }
     document.addEventListener("click", handleGlobalClick)
-    
-    // Also handle initial load if hash is present
+
     if (typeof window !== "undefined" && window.location.hash === "#quote") {
       setQuoteOpen(true)
       window.history.replaceState(null, "", window.location.pathname + window.location.search)
     }
-    
+
     return () => document.removeEventListener("click", handleGlobalClick)
   }, [])
 
@@ -290,7 +317,7 @@ export default function Header() {
   return (
     <>
       <header className={`hdr${scrolled ? " on" : ""}`}>
-        {/* ── Top Contact Bar ──────────────────────────────────────────────── */}
+        {/* ── Top Contact Bar ── */}
         <div className="hdr__topbar">
           <div className="hdr__topbar-in">
             <div className="hdr__topbar-soc">
@@ -299,55 +326,95 @@ export default function Header() {
               <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><IcoIn /></a>
             </div>
             <div className="hdr__topbar-contacts">
-              <a className="hdr__topbar-item" href="tel:7348910248">
-                <IcoPhone /> +1 (734) 891-0248
-              </a>
-              <a className="hdr__topbar-item" href="tel:7348910249">
-                <IcoPhone /> +1 (734) 891-0249
-              </a>
-              <a className="hdr__topbar-item" href="mailto:sales@superiorharness.com">
-                <IcoMail /> <span>sales@superiorharness.com</span>
-              </a>
+              <a className="hdr__topbar-item" href="tel:+917348910249"><IcoPhone /> +91 7348910249</a>
+              <a className="hdr__topbar-item" href="mailto:sales@superiorharness.com"><IcoMail /> <span>sales@superiorharness.com</span></a>
             </div>
           </div>
         </div>
 
-        {/* ── Nav Bar ──────────────────────────────────────────────────────── */}
+        {/* ── Nav Bar ── */}
         <div className="hdr__bar">
           {/* Logo */}
-          <Link href="/" className="hdr__logo" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span className="hdr__logo-mark">S</span>
-            <span className="hdr__logo-txt">
-              <span className="hdr__logo-name">SUPERIOR HARNESS</span>
-              <span className="hdr__logo-sub">&amp; ASSEMBLY LLC</span>
-            </span>
+          <Link href="/" className="hdr__logo">
+            <Image
+              src="/images/dark-logo.webp"
+              alt="Superior Harness & Assembly"
+              height={50}
+              width={300}
+              style={{ objectFit: "contain", objectPosition: "left center" }}
+              priority
+            />
           </Link>
 
           {/* Desktop navigation */}
           <nav className="hdr__nav">
-            {NAV.map(({ href, label, dd }) =>
-              dd ? (
-                <div key={href} className="hdr__dd-wrap">
-                  <Link href={href} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                    {label}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}><polyline points="6 9 12 15 18 9"/></svg>
-                  </Link>
-                  <div className="hdr__dd">
-                    {dd.map(d => <Link key={d.label} href={d.href}>{d.label}</Link>)}
-                    <Link href="/products" style={{ fontWeight: 700, color: "var(--ink, #111)", marginTop: 4, display: "block", padding: "10px 14px" }}>View all products →</Link>
+            {/* Products — mega dropdown */}
+            <div className="hdr__mega-wrap" ref={productsDDRef} data-open={productsOpen ? "true" : undefined}>
+              <button
+                onClick={() => setProductsOpen(o => !o)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                aria-expanded={productsOpen}
+                aria-haspopup="true"
+              >
+                Products <IcoChevron />
+              </button>
+              <div className="hdr__mega">
+                <div className="hdr__mega-col">
+                  <div className="hdr__mega-section-title">
+                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
+                    Wire Harness
                   </div>
+                  {PRODUCTS_WIRE.map(item => (
+                    <Link key={item.href} href={item.href}>{item.label}</Link>
+                  ))}
                 </div>
-              ) : (
-                <Link key={href} href={href} data-active={pathname === href ? "true" : undefined}>{label}</Link>
-              )
-            )}
+                <div className="hdr__mega-col">
+                  <div className="hdr__mega-section-title">
+                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
+                    Cable Assembly
+                  </div>
+                  {PRODUCTS_CABLE.map(item => (
+                    <Link key={item.href} href={item.href}>{item.label}</Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Industries — simple dropdown */}
+            <div className="hdr__dd-wrap">
+              <Link href="/industries" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                Industries <IcoChevron />
+              </Link>
+              <div className="hdr__dd">
+                {INDUSTRIES_DD.map(d => <Link key={d.href} href={d.href}>{d.label}</Link>)}
+                <Link href="/industries" style={{ fontWeight: 700, color: "var(--ink, #111)", marginTop: 4, display: "block", padding: "10px 14px" }}>View all industries →</Link>
+              </div>
+            </div>
+
+            {/* Resources — simple dropdown */}
+            <div className="hdr__dd-wrap">
+              <Link href="/capabilities" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                Resources <IcoChevron />
+              </Link>
+              <div className="hdr__dd">
+                {RESOURCES_DD.map(d => <Link key={d.href} href={d.href}>{d.label}</Link>)}
+              </div>
+            </div>
+
+            <Link href="/about" data-active={pathname === "/about" ? "true" : undefined}>About</Link>
+            <Link href="/contact" data-active={pathname === "/contact" ? "true" : undefined}>Contact</Link>
           </nav>
 
           {/* Right icons */}
           <div className="hdr__icons" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             {/* Track Order */}
-            <Link href="/track-order" className="hdr--desk" style={{ fontFamily: "var(--font-sora), sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.09em", color: "#fff", textTransform: "uppercase" }}>
+            <Link href="/track-order" className="hdr--desk" style={{ fontFamily: "var(--font-sora), sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.09em", color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
               Track Order
+            </Link>
+
+            {/* Shop */}
+            <Link href="/shop" className="hdr--desk hdr-shop-btn">
+              Shop
             </Link>
 
             {/* Cart */}
@@ -355,7 +422,8 @@ export default function Header() {
               <IcoCart />
               {totalItems > 0 && <span className="cdot" />}
             </Link>
-            {/* Request Quote — opens modal */}
+
+            {/* Request Quote */}
             <button
               className="hdr-quote-btn hdr--desk"
               style={{ marginLeft: 12 }}
@@ -378,10 +446,18 @@ export default function Header() {
         </div>
       </header>
 
-      {/* ── Mobile drawer ──────────────────────────────────────────────────── */}
+      {/* ── Mobile drawer ── */}
       <div className={`mob-nav${menuOpen ? " mob-nav--open" : ""}`} aria-hidden={!menuOpen}>
         <nav className="mob-nav__links">
-          {NAV.map(({ href, label }, i) => (
+          {[
+            { href: "/products", label: "Products" },
+            { href: "/industries", label: "Industries" },
+            { href: "/capabilities", label: "Capabilities" },
+            { href: "/about", label: "About" },
+            { href: "/contact", label: "Contact" },
+            { href: "/shop", label: "Shop" },
+            { href: "/blog", label: "Blog" },
+          ].map(({ href, label }, i) => (
             <Link
               key={href}
               href={href}
@@ -410,11 +486,10 @@ export default function Header() {
             Cart
             {totalItems > 0 && <span className="mob-cart-dot">{totalItems}</span>}
           </Link>
-
         </div>
       </div>
 
-      {/* ── Quote Popup Modal ──────────────────────────────────────────────── */}
+      {/* ── Quote Popup Modal ── */}
       <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
     </>
   )

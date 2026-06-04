@@ -58,7 +58,7 @@ export default function PrivacyPage() {
               Superior Harness & Assembly LLC<br />
               Canton, Michigan, 48187<br />
               Email: pateltushar1987@gmail.com<br />
-              Phone: 734 891 0248
+              Phone: +91 7348910249
             </p>
           </section>
         </div>

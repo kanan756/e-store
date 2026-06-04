@@ -76,7 +76,7 @@ export default async function BlogListPage() {
                   {/* Cover image */}
                   <div style={{ aspectRatio: "16/9", background: "var(--bg2)", position: "relative", overflow: "hidden" }}>
                     {isValidUrl(blog.imageUrl) ? (
-                      <Image src={blog.imageUrl} alt={blog.title} fill sizes="400px" style={{ objectFit: "cover" }} />
+                      <img src={blog.imageUrl} alt={blog.title} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
                     ) : (
                       <div style={{
                         height: "100%", display: "flex", alignItems: "center", justifyContent: "center",

@@ -49,3 +49,4 @@ context/
 .agents/
 
 skills-lock.json
+replace-images.js

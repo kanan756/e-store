@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { getSettings } from "@/lib/settings"
 
 export const dynamic = "force-dynamic"
@@ -7,13 +8,14 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Capabilities | Custom Wire Harness Manufacturing",
   description:
-    "Explore Superior Harness & Assembly's full manufacturing capabilities: cut & strip, crimping, ultrasonic splicing, overmolding, connector loading, and JIT delivery.",
+    "Explore Superior Harness & Assembly's full manufacturing capabilities: cut & strip, crimping, ultrasonic splicing, overmolding, in-house testing, and JIT delivery.",
 }
 
 const CAPS = [
   {
     n: "01",
     title: "Automatic Cut & Strip",
+    img: "/images/automatic-cut-and-strip.png",
     desc: "Computerized wire cutting and stripping machines deliver precise lengths and clean insulation removal for repeatable, high-quality terminations at production volume. Our equipment handles wire gauges from 28 AWG through 2/0 AWG.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -26,6 +28,7 @@ const CAPS = [
   {
     n: "02",
     title: "Terminal Application & Crimping",
+    img: "/images/terminal-application.png",
     desc: "High-precision presses and applicators ensure strong, reliable electrical connections. Every crimp profile is validated with pull testing to IPC/WHMA-A-620 acceptance criteria. We run over 400 terminal configurations in-house.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -36,6 +39,7 @@ const CAPS = [
   {
     n: "03",
     title: "Ultrasonic Splicing",
+    img: "/images/ultrasonic-splicing.png",
     desc: "Ultrasonic welding creates strong, reliable wire splices without soldering — delivering excellent conductivity, reduced resistance, and long-lasting performance. Ideal for high-current and high-vibration applications.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -46,6 +50,7 @@ const CAPS = [
   {
     n: "04",
     title: "Overmolding & Potting",
+    img: "/images/over-molding.png",
     desc: "Custom mold design for your connector geometry adds protection against harsh environments, providing strain relief and enhanced durability for finished assemblies. IP67/IP68-rated configurations available.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -55,8 +60,10 @@ const CAPS = [
   },
   {
     n: "05",
-    title: "Connector Loading & Verification",
-    desc: "Strict verification processes with EOL continuity testing and integrated vision systems ensure every wire is properly inserted, locked, and verified. Our automated test stations catch defects before parts leave the floor.",
+    title: "In-House Testing",
+    img: "/images/in-house-testing.png",
+    desc: "Every assembly undergoes rigorous in-house testing before leaving our floor. Our testing methods include Pull Force Testing to validate crimp integrity, and Resistance Testing to verify low-resistance, high-conductivity connections throughout every harness.",
+    highlights: ["Pull Force Testing", "Resistance Testing", "Continuity Testing", "Visual Inspection"],
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -66,6 +73,7 @@ const CAPS = [
   {
     n: "06",
     title: "Kitting & JIT Delivery",
+    img: "/images/kitting-and-jit.png",
     desc: "Managed inventory, component kitting, kanban programs, and just-in-time delivery keep your production line running without interruption. We maintain safety stock for high-runners and can ship same-day on emergency orders.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -80,7 +88,7 @@ const PROCESS = [
   { step: "1", title: "TOOLING DESIGN", desc: "Custom mold design for your connector and cable geometry." },
   { step: "2", title: "MOLD FABRICATION", desc: "Partnered with local mold manufacturers for precision tooling." },
   { step: "3", title: "OVERMOLDING", desc: "Precision overmolding with chosen material." },
-  { step: "4", title: "TESTING", desc: "Pull testing, IP rating validation, visual inspection." },
+  { step: "4", title: "TESTING", desc: "Pull force testing, resistance testing, IP rating validation, visual inspection." },
   { step: "5", title: "PRODUCTION", desc: "Scale to full production volume." },
 ]
 
@@ -114,12 +122,38 @@ export default async function CapabilitiesPage() {
             <h2 className="D3">Precision At Every Stage</h2>
           </div>
           <div className="caps-row">
-            {CAPS.map(({ n, title, desc, icon }) => (
+            {CAPS.map(({ n, title, desc, img, icon, highlights }) => (
               <div className="caps-cell" key={n}>
-                <div style={{ color: "var(--text2)", marginBottom: 18, opacity: 0.7 }}>{icon}</div>
+                {/* Capability image */}
+                <div style={{ position: "relative", width: "100%", height: 220, borderRadius: 8, overflow: "hidden", marginBottom: 20, background: "var(--bg3)" }}>
+                  <Image
+                    src={img}
+                    alt={title}
+                    fill
+                    style={{ objectFit: "contain", padding: 8 }}
+                    sizes="(max-width: 700px) 100vw, 50vw"
+                  />
+                </div>
+                <div style={{ color: "var(--text2)", marginBottom: 14, opacity: 0.7 }}>{icon}</div>
                 <div className="caps-cell__n">{n}</div>
                 <div className="caps-cell__t">{title}</div>
                 <div className="caps-cell__d">{desc}</div>
+                {/* Testing methods highlight for In-house Testing */}
+                {highlights && (
+                  <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {highlights.map(h => (
+                      <span key={h} style={{
+                        fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
+                        textTransform: "uppercase", padding: "4px 10px",
+                        background: "var(--bg2)", border: "1px solid var(--bd)",
+                        borderRadius: 4, color: "var(--text2)",
+                        fontFamily: "var(--font-mono), monospace",
+                      }}>
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -139,44 +173,35 @@ export default async function CapabilitiesPage() {
             </div>
             <div className="process-flow">
               {PROCESS.map(({ step, title, desc }) => (
-              <div key={step} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: "50%",
-                  background: "#5b1919",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 700,
-                  fontSize: 16,
-                  marginBottom: 16
-                }}>
-                  {step}
+                <div key={step} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: "50%",
+                    background: "#5b1919", color: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: 700, fontSize: 16, marginBottom: 16,
+                  }}>
+                    {step}
+                  </div>
+                  <div style={{
+                    fontFamily: "var(--font-sora), sans-serif",
+                    fontSize: 13, fontWeight: 700, textTransform: "uppercase",
+                    marginBottom: 12, letterSpacing: "0.02em",
+                  }}>
+                    {title}
+                  </div>
+                  <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--text2)" }}>
+                    {desc}
+                  </div>
                 </div>
-                <div style={{
-                  fontFamily: "var(--font-sora), sans-serif",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  marginBottom: 12,
-                  letterSpacing: "0.02em"
-                }}>
-                  {title}
-                </div>
-                <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--text2)" }}>
-                  {desc}
-                </div>
-              </div>
-            ))}
+              ))}
             </div>
           </div>
         </div>
       </section>
+
       {/* Certs Banner */}
       {settings.showCertifications && (
-        <section className="certs-banner">
+        <section id="certifications" className="certs-banner">
           <div className="W">
             <div className="certs-banner__eyebrow">Certifications &amp; Standards</div>
             <h2 className="certs-banner__h">Built to the Highest Standards</h2>

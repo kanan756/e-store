@@ -57,7 +57,7 @@ export async function generateInvoicePdf({
       doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10)
         .text("Canton, Michigan, 48187", { align: "right", width: 245 })
         .text("pateltushar1987@gmail.com", { align: "right", width: 245 })
-        .text("+91 734 891 0248", { align: "right", width: 245 });
+        .text("+91 7348910249", { align: "right", width: 245 });
 
       doc.moveDown(3);
 

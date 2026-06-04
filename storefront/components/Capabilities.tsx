@@ -1,25 +1,30 @@
 import Link from "next/link"
+import Image from "next/image"
 
 const CAPS = [
   {
     n: "01",
     title: "Automatic Cut and Strip",
     desc: "We utilize automated wire cutting and stripping machines to ensure precise lengths and clean stripping of insulation. This process improves consistency, reduces errors, and increases production efficiency.",
+    img: "/images/automatic-cut-and-strip.png",
   },
   {
     n: "02",
     title: "Crimping with Press and Terminal Applicators",
     desc: "Our crimping process uses high-precision presses and applicators to ensure strong, reliable electrical connections. This guarantees consistent quality and long-term durability in every wire harness.",
+    img: "/images/terminal-application.png",
   },
   {
     n: "03",
     title: "Ultrasonic Splicing",
     desc: "We use ultrasonic welding technology to create strong, reliable wire splices without the need for soldering. This method ensures excellent conductivity, reduced resistance, and long-lasting performance.",
+    img: "/images/ultrasonic-splicing.png",
   },
   {
     n: "04",
     title: "Over Molding",
-    desc: "Custom mold design for your connector and cable geometry, to add protective layer of material around connectors and cable assemblies , providing relief from harsh environmental conditions and enhanced durablities.",
+    desc: "Custom mold design for your connector and cable geometry, to add protective layer of material around connectors and cable assemblies, providing relief from harsh environmental conditions and enhanced durabilities.",
+    img: "/images/over-molding.png",
   },
 ]
 
@@ -44,8 +49,17 @@ export default function Capabilities() {
         </div>
 
         <div className="caps-row rv d2">
-          {CAPS.map(({ n, title, desc }) => (
+          {CAPS.map(({ n, title, desc, img }) => (
             <div className="caps-cell" key={n}>
+              <div style={{ position: "relative", width: "100%", height: 200, borderRadius: 8, overflow: "hidden", marginBottom: 24, background: "var(--bg3)" }}>
+                <Image
+                  src={img}
+                  alt={title}
+                  fill
+                  style={{ objectFit: "contain", padding: 8 }}
+                  sizes="(max-width: 700px) 100vw, 50vw"
+                />
+              </div>
               <div className="caps-cell__n">{n}</div>
               <div className="caps-cell__t">{title}</div>
               <div className="caps-cell__d">{desc}</div>
@@ -54,7 +68,7 @@ export default function Capabilities() {
         </div>
 
         <div className="center rv d3" style={{ marginTop: 40, textAlign: "center" }}>
-          <Link href="/about" className="btn bod">
+          <Link href="/capabilities" className="btn bod">
             View All Capabilities <ArrowIcon />
           </Link>
         </div>

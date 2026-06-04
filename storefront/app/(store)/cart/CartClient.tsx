@@ -46,7 +46,7 @@ export default function CartClient() {
             <p style={{ color: "var(--text2)", fontSize: 18, marginBottom: 32 }}>
               Your cart is empty.
             </p>
-            <Link href="/products" className="btn bp">
+            <Link href="/shop" className="btn bp">
               Continue Shopping <ArrowIcon />
             </Link>
           </div>
@@ -65,13 +65,7 @@ export default function CartClient() {
                       if (firstUrl.startsWith("/")) return firstUrl
                       try { new URL(firstUrl); return firstUrl } catch { return false }
                     })() ? (
-                      <Image
-                        src={item.imageUrl.split(",")[0].trim()}
-                        alt={item.name}
-                        fill
-                        sizes="100px"
-                        style={{ objectFit: "cover" }}
-                      />
+                      <img src={item.imageUrl.split(",")[0].trim()} alt={item.name} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
                     ) : (
                       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "var(--textM)", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
                         {item.name}
