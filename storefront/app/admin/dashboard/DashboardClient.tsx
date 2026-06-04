@@ -1110,7 +1110,7 @@ export default function AdminDashboard({ role }: { role: string }) {
         <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid var(--bd)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <img src="/images/logo.png" alt="Logo" style={{ height: "48px", width: "auto" }} />
+              <img src="/images/dark-logo.webp" alt="Logo" style={{ height: "48px", width: "auto" }} />
             </div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em", textTransform: "capitalize" }}>{role} Panel</div>
