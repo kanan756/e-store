@@ -6,11 +6,7 @@ const CERTS = [
   "ISO 13485 Capable",
 ]
 
-import { getSettings } from "@/lib/settings"
-
 export default function CertsBanner() {
-  const settings = getSettings()
-  if (!settings.showCertifications) return null
 
   return (
     <section className="certs-banner">

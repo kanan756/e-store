@@ -11,8 +11,6 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import WhyUs from "@/components/WhyUs"
-import { getSettings } from "@/lib/settings"
-
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
@@ -29,17 +27,8 @@ function ArrowIcon() {
   )
 }
 
-const CERTS_PLACEHOLDER = [
-  { label: "IPC/WHMA-A-620", desc: "Workmanship standard for cable and wire harness assemblies." },
-  { label: "ISO 9001:2015", desc: "Quality management system certification." },
-  { label: "RoHS Compliant", desc: "Restriction of hazardous substances in manufacturing." },
-  { label: "ITAR Registered", desc: "International Traffic in Arms Regulations registration." },
-  { label: "UL Listed", desc: "Underwriters Laboratories product safety certification." },
-]
 
 export default function AboutPage() {
-  const settings = getSettings()
-
   return (
     <main style={{ paddingTop: 120 }}>
 
@@ -85,68 +74,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {/* ── CERTIFICATIONS ──────────────────────────────────────────── */}
-      {settings.showCertifications && (
-        <section className="S" style={{ background: "var(--bg)" }}>
-          <div className="W">
-            <div className="sHdr sHdr--c">
-              <div className="lbl lbl-c rv" style={{ marginBottom: 16 }}>Quality Assurance</div>
-              <h2 className="D3 rv d1" style={{ marginBottom: 16 }}>Certifications</h2>
-              <p className="Bd rv d2" style={{ maxWidth: 520, margin: "0 auto 56px" }}>
-                Our manufacturing processes meet rigorous industry standards, ensuring every assembly leaves our facility with verified quality and compliance.
-              </p>
-            </div>
-
-            <div className="rv d3" style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-              gap: 16,
-            }}>
-              {CERTS_PLACEHOLDER.map(({ label, desc }) => (
-                <div key={label} style={{
-                  background: "var(--cBg)",
-                  border: "1px solid var(--bd)",
-                  borderRadius: "var(--rL)",
-                  padding: "28px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      background: "#0A0A0A",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
-                      </svg>
-                    </div>
-                    <div style={{
-                      fontFamily: "var(--font-sora), sans-serif",
-                      fontWeight: 700,
-                      fontSize: 14,
-                      color: "var(--text)",
-                      letterSpacing: "-0.01em",
-                    }}>
-                      {label}
-                    </div>
-                  </div>
-                  <p style={{ fontSize: 13, color: "var(--text2)", lineHeight: 1.6, paddingLeft: 46 }}>
-                    {desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── WHY CHOOSE US ───────────────────────────────────────────── */}
       <WhyUs />

@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { getSettings } from "@/lib/settings"
-
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
@@ -92,10 +90,7 @@ const PROCESS = [
   { step: "5", title: "PRODUCTION", desc: "Scale to full production volume." },
 ]
 
-const CERTS = ["IPC/WHMA-A-620", "ISO 9001:2015", "RoHS Compliant", "ITAR Registered", "UL Listed"]
-
 export default async function CapabilitiesPage() {
-  const settings = await getSettings()
   return (
     <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
       {/* Inner Banner */}
@@ -198,21 +193,6 @@ export default async function CapabilitiesPage() {
           </div>
         </div>
       </section>
-
-      {/* Certs Banner */}
-      {settings.showCertifications && (
-        <section id="certifications" className="certs-banner">
-          <div className="W">
-            <div className="certs-banner__eyebrow">Certifications &amp; Standards</div>
-            <h2 className="certs-banner__h">Built to the Highest Standards</h2>
-            <div className="certs-banner__badges">
-              {CERTS.map(c => (
-                <span key={c} className="certs-banner__badge">{c}</span>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* CTA */}
       <section className="cta">

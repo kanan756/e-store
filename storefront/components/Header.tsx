@@ -117,7 +117,7 @@ const INDUSTRIES_DD = [
 
 const RESOURCES_DD = [
   { label: "Blog", href: "/blog" },
-  { label: "Certifications", href: "/capabilities#certifications" },
+  { label: "Certifications", href: "/certifications" },
   { label: "Capabilities", href: "/capabilities" },
 ]
 

@@ -2,11 +2,9 @@ import type { Metadata } from "next"
 import Hero from "@/components/Hero"
 import About from "@/components/About"
 import Stats from "@/components/Stats"
-import Categories from "@/components/Categories"
 import FeaturedProducts from "@/components/FeaturedProducts"
 import Capabilities from "@/components/Capabilities"
 import WhyUs from "@/components/WhyUs"
-import CertsBanner from "@/components/CertsBanner"
 import Banner from "@/components/Banner"
 import Cta from "@/components/Cta"
 import { getProducts } from "@/lib/sheets"
@@ -28,11 +26,9 @@ export default async function HomePage() {
       <Hero />
       <About />
       <Stats />
-      <Categories />
       <FeaturedProducts products={products} />
       <Capabilities />
       <WhyUs />
-      <CertsBanner />
       <Banner />
       <Cta />
     </>

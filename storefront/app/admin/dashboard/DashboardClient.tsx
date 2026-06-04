@@ -1108,13 +1108,13 @@ export default function AdminDashboard({ role }: { role: string }) {
       {/* Sidebar */}
       <aside style={s.sidebar} className={`admin-sidebar ${mobileMenu ? "open" : ""}`}>
         <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid var(--bd)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <img src="/images/dark-logo.webp" alt="Logo" style={{ height: "48px", width: "auto" }} />
+              <img src="/images/light-logo.webp" alt="Logo" style={{ width: "150px", height: "auto" }} />
             </div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em", textTransform: "capitalize" }}>{role} Panel</div>
-              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 1, fontFamily: "monospace" }}>SHA · Management</div>
+              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2, fontFamily: "monospace" }}>SHA · Management</div>
             </div>
           </div>
         </div>
