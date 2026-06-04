@@ -522,6 +522,7 @@ export default function Header() {
 
           {/* Static Links */}
           {[
+            { href: "/track-order", label: "Track Order" },
             { href: "/about", label: "About" },
             { href: "/contact", label: "Contact" },
             { href: "/shop", label: "Shop" },

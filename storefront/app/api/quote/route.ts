@@ -64,8 +64,6 @@ export async function POST(request: Request) {
     const eQuantity    = escapeHtml(quantity)
     const eDescription = escapeHtml(description).replace(/\n/g, "<br>")
 
-    await appendQuote({ name, email, phone, company, application, quantity, description })
-
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
@@ -73,46 +71,57 @@ export async function POST(request: Request) {
 
     const fromName = process.env.EMAIL_FROM_NAME ?? "Superior Harnessing"
 
-    await transporter.sendMail({
-      from: `"${fromName} Quotes" <${process.env.GMAIL_USER}>`,
-      to: process.env.GMAIL_USER,
-      replyTo: email,
-      subject: `📋 New Quote Request from ${name}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">
-          <h2 style="margin:0 0 24px;color:#fcf9f2;">New Quote Request</h2>
-          <table style="width:100%;border-collapse:collapse;">
-            <tr><td style="padding:10px 0;color:#737874;width:120px;">Name</td><td style="padding:10px 0;font-weight:700;color:#fcf9f2;">${eName}</td></tr>
-            <tr><td style="padding:10px 0;color:#737874;">Email</td><td style="padding:10px 0;"><a href="mailto:${email}" style="color:#4ae183;text-decoration:none;">${eEmail}</a></td></tr>
-            ${ePhone       ? `<tr><td style="padding:10px 0;color:#737874;">Phone</td><td style="padding:10px 0;color:#fcf9f2;">${ePhone}</td></tr>` : ""}
-            ${eCompany     ? `<tr><td style="padding:10px 0;color:#737874;">Company</td><td style="padding:10px 0;color:#fcf9f2;">${eCompany}</td></tr>` : ""}
-            ${eApplication ? `<tr><td style="padding:10px 0;color:#737874;">Application</td><td style="padding:10px 0;color:#fcf9f2;">${eApplication}</td></tr>` : ""}
-            ${eQuantity    ? `<tr><td style="padding:10px 0;color:#737874;">Quantity</td><td style="padding:10px 0;color:#fcf9f2;">${eQuantity}</td></tr>` : ""}
-          </table>
-          <div style="margin-top:20px;padding:16px;background:#1c1c18;border-radius:10px;line-height:1.7;border:1px solid #2a2a24;">
-            <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">PROJECT DESCRIPTION</div>
-            ${eDescription}
-          </div>
-          <p style="margin-top:16px;font-size:12px;color:#737874;">Submitted via Quote Request Form</p>
+    const adminEmailHtml = `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">
+        <h2 style="margin:0 0 24px;color:#fcf9f2;">New Quote Request</h2>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:10px 0;color:#737874;width:120px;">Name</td><td style="padding:10px 0;font-weight:700;color:#fcf9f2;">${eName}</td></tr>
+          <tr><td style="padding:10px 0;color:#737874;">Email</td><td style="padding:10px 0;"><a href="mailto:${email}" style="color:#4ae183;text-decoration:none;">${eEmail}</a></td></tr>
+          ${ePhone       ? `<tr><td style="padding:10px 0;color:#737874;">Phone</td><td style="padding:10px 0;color:#fcf9f2;">${ePhone}</td></tr>` : ""}
+          ${eCompany     ? `<tr><td style="padding:10px 0;color:#737874;">Company</td><td style="padding:10px 0;color:#fcf9f2;">${eCompany}</td></tr>` : ""}
+          ${eApplication ? `<tr><td style="padding:10px 0;color:#737874;">Application</td><td style="padding:10px 0;color:#fcf9f2;">${eApplication}</td></tr>` : ""}
+          ${eQuantity    ? `<tr><td style="padding:10px 0;color:#737874;">Quantity</td><td style="padding:10px 0;color:#fcf9f2;">${eQuantity}</td></tr>` : ""}
+        </table>
+        <div style="margin-top:20px;padding:16px;background:#1c1c18;border-radius:10px;line-height:1.7;border:1px solid #2a2a24;">
+          <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">PROJECT DESCRIPTION</div>
+          ${eDescription}
         </div>
-      `,
-    })
+        <p style="margin-top:16px;font-size:12px;color:#737874;">Submitted via Quote Request Form</p>
+      </div>
+    `
 
-    await transporter.sendMail({
-      from: `"${fromName}" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: `Your Quote Request Received — ${fromName}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">
-          <h2 style="margin:0 0 16px;color:#fcf9f2;">Thanks for your request, ${eName}!</h2>
-          <p style="color:#737874;line-height:1.7;">We've received your project details and will review them shortly. Our team will get back to you with a competitive quote within 1–2 business days.</p>
-          <div style="margin:24px 0;padding:16px;background:#1c1c18;border:1px solid #2a2a24;border-radius:10px;">
-            <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">YOUR PROJECT DESCRIPTION</div>
-            <div style="line-height:1.7;">${eDescription}</div>
-          </div>
-          <p style="color:#737874;font-size:12px;">— ${fromName} Team</p>
+    const userEmailHtml = `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">
+        <h2 style="margin:0 0 16px;color:#fcf9f2;">Thanks for your request, ${eName}!</h2>
+        <p style="color:#737874;line-height:1.7;">We've received your project details and will review them shortly. Our team will get back to you with a competitive quote within 1–2 business days.</p>
+        <div style="margin:24px 0;padding:16px;background:#1c1c18;border:1px solid #2a2a24;border-radius:10px;">
+          <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">YOUR PROJECT DESCRIPTION</div>
+          <div style="line-height:1.7;">${eDescription}</div>
         </div>
-      `,
+        <p style="color:#737874;font-size:12px;">— ${fromName} Team</p>
+      </div>
+    `
+
+    // 1. Await the database/sheet save first to guarantee data is stored
+    await appendQuote({ name, email, phone, company, application, quantity, description })
+
+    // 2. Fire the two emails off in parallel in the background (fire-and-forget)
+    Promise.all([
+      transporter.sendMail({
+        from: `"${fromName} Quotes" <${process.env.GMAIL_USER}>`,
+        to: process.env.GMAIL_USER,
+        replyTo: email,
+        subject: `📋 New Quote Request from ${name}`,
+        html: adminEmailHtml,
+      }),
+      transporter.sendMail({
+        from: `"${fromName}" <${process.env.GMAIL_USER}>`,
+        to: email,
+        subject: `Your Quote Request Received — ${fromName}`,
+        html: userEmailHtml,
+      }),
+    ]).catch(err => {
+      console.error("Background email task failed:", err)
     })
 
     return NextResponse.json({ success: true })

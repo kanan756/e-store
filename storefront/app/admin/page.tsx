@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
           textAlign: "center",
         }}>
           <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-             <img src="/images/logo.png" alt="Logo" style={{ height: "48px", width: "auto", filter: "brightness(0) invert(1)" }} />
+             <img src="/images/dark-logo.webp" alt="Logo" style={{ height: "48px", width: "auto" }} />
           </div>
           <h1 style={{ color: "#ffffff", fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: "0.06em", fontFamily: "var(--font-sora), 'Sora', sans-serif", textTransform: "uppercase" }}>Admin Panel</h1>
           <p style={{ color: "rgba(255,255,255,0.6)", margin: "6px 0 0", fontSize: 13, letterSpacing: "0.02em" }}>Secure Access Required</p>

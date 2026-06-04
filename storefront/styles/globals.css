@@ -613,6 +613,11 @@ button {
   to { opacity: 1; }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Two-tone container */
 .quote-modal {
   width: 100%;
@@ -810,9 +815,12 @@ button {
 }
 
 @media (max-width: 520px) {
+  .quote-modal__success p { font-size: 14px; }
   .quote-modal__grid { grid-template-columns: 1fr; }
   .quote-modal__form { padding: 20px 18px 24px; }
   .quote-modal__hdr { padding: 18px 18px 16px; }
+  .quote-overlay { padding: 12px; }
+  .quote-modal { max-height: calc(100vh - 24px); border-radius: 8px; }
 }
 
 

@@ -7,29 +7,34 @@ export default function RevealObserver() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Hold a reference outside the timeout so the cleanup can reach it
-    // whether or not the timer has already fired.
-    let io: IntersectionObserver | null = null
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add("in")
+        })
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    )
 
-    const timeoutId = setTimeout(() => {
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) e.target.classList.add("in")
-          })
-        },
-        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
-      )
+    const observeAll = () => {
+      document.querySelectorAll(".rv:not(.in)").forEach((el) => {
+        io.observe(el)
+      })
+    }
 
-      document.querySelectorAll(".rv").forEach((el) => io!.observe(el))
-    }, 100)
+    // Initial check
+    observeAll()
 
-    // Cleanup cancels the pending timer AND disconnects the observer if it
-    // was already created — previously only the timer was cleared, leaving
-    // the observer alive across route changes (memory leak).
+    // Watch for new elements added to the DOM (like on page navigation)
+    const mo = new MutationObserver(() => {
+      observeAll()
+    })
+
+    mo.observe(document.body, { childList: true, subtree: true })
+
     return () => {
-      clearTimeout(timeoutId)
-      io?.disconnect()
+      io.disconnect()
+      mo.disconnect()
     }
   }, [pathname])
 
