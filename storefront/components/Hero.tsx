@@ -20,17 +20,20 @@ function ArrowRight() {
 
 export default function Hero() {
   const [active, setActive] = useState(0)
+  const [paused, setPaused] = useState(false)
 
   useEffect(() => {
+    if (paused) return
     const t = setInterval(() => setActive(i => (i + 1) % SLIDES.length), 4000)
     return () => clearInterval(t)
-  }, [])
+  }, [paused])
 
   return (
     <section className="hero-v2">
       <div className="hero-v2__inner">
+
         {/* ── Left: content ── */}
-        <div>
+        <div className="hero-v2__left">
           <h1 className="hero-v2__h1">
             <span className="hero-v2__h1-primary">Precision</span>
             <span className="hero-v2__h1-muted">Wire Harness &</span>
@@ -65,15 +68,20 @@ export default function Hero() {
             <Link href="/contact" className="hero-v2__cta-primary">
               Contact Us <ArrowRight />
             </Link>
-            <Link href="/capabilities" className="hero-v2__cta-secondary">
-              See Capabilities
+            <Link href="/contact" className="hero-v2__cta-secondary">
+              Request a Quote <ArrowRight />
             </Link>
           </div>
         </div>
 
-        {/* ── Right: carousel + dots ── */}
-        <div className="hero-v2__carousel-wrap">
-          <div className="hero-v2__carousel">
+        {/* ── Right: portrait carousel + dots + footer row ── */}
+        <div className="hero-v2__right">
+
+          <div
+            className="hero-v2__carousel"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+          >
             {SLIDES.map((slide, i) => (
               <div
                 key={slide.src}
@@ -84,7 +92,7 @@ export default function Hero() {
                   src={slide.src}
                   alt={slide.alt}
                   fill
-                  sizes="560px"
+                  sizes="50vw"
                   style={{ objectFit: "cover" }}
                   priority={i === 0}
                 />
@@ -92,7 +100,7 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Dot indicators */}
+          {/* Dots below image */}
           <div className="hero-v2__carousel-dots" role="tablist" aria-label="Carousel slides">
             {SLIDES.map((_, i) => (
               <button
@@ -105,7 +113,19 @@ export default function Hero() {
               />
             ))}
           </div>
+
+          {/* Footer: See Capabilities + Admin Panel */}
+          <div className="hero-v2__right-footer">
+            <Link href="/capabilities" className="hero-v2__cta-secondary hero-v2__right-btn">
+              See Capabilities
+            </Link>
+            <Link href="/admin" className="hero-v2__cta-secondary hero-v2__right-btn">
+              Admin Panel
+            </Link>
+          </div>
+
         </div>
+
       </div>
     </section>
   )

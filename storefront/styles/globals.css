@@ -2100,17 +2100,16 @@ button {
   min-height: 100vh; background: #fff; color: #0B0F1C; display: flex; flex-direction: column; padding-top: 120px;
 }
 .hero-v2__inner {
-  flex: 1; max-width: 1400px; margin: 0 auto; padding: 64px 80px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; width: 100%;
+  flex: 1; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: stretch;
 }
 .hero-v2__badge-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
 .hero-v2__badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono), monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #777777; border: 1px solid #dddddd; border-radius: 4px; padding: 4px 10px; }
 .hero-v2__badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #0B0F1C; flex-shrink: 0; }
-.hero-v2__h1 { font-family: var(--font-sora), "Sora", sans-serif; font-size: clamp(40px, 4vw, 68px); font-weight: 800; line-height: 0.93; letter-spacing: -0.04em; text-transform: uppercase; margin-bottom: 28px; }
+.hero-v2__h1 { font-family: var(--font-sora), "Sora", sans-serif; font-size: clamp(44px, 5vw, 80px); font-weight: 800; line-height: 0.93; letter-spacing: -0.04em; text-transform: uppercase; margin-bottom: 28px; }
 .hero-v2__h1-primary { color: #0B0F1C; display: block; }
 .hero-v2__h1-muted { color: #0B0F1C; display: block; }
 .hero-v2__desc { font-size: 16px; line-height: 1.7; color: #555; max-width: 520px; margin-bottom: 40px; }
-.hero-v2__stats { display: flex; gap: 36px; margin-bottom: 40px; flex-wrap: wrap; }
+.hero-v2__stats { display: flex; gap: 36px; margin-bottom: 40px; flex-wrap: wrap; border-top: 1px solid #e5e5e5; padding-top: 20px; }
 .hero-v2__stat { display: flex; flex-direction: column; gap: 4px; }
 .hero-v2__stat-val { font-family: var(--font-sora), "Sora", sans-serif; font-size: 22px; font-weight: 800; color: #0B0F1C; letter-spacing: -0.02em; }
 .hero-v2__stat-lbl { font-family: var(--font-mono), monospace; font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #777777; }
@@ -2119,12 +2118,18 @@ button {
 .hero-v2__cta-primary:hover { background: #333; }
 .hero-v2__cta-secondary { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #0B0F1C; padding: 12px 28px; font-family: var(--font-mono), monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: 1.5px solid #bbbbbb; border-radius: 4px; transition: border-color 0.2s; text-decoration: none; }
 .hero-v2__cta-secondary:hover { border-color: #0B0F1C; }
-.hero-v2__carousel-wrap { display: flex; flex-direction: column; gap: 18px; }
-.hero-v2__carousel { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+.hero-v2__left { display: flex; flex-direction: column; justify-content: center; padding: 80px 64px 80px 80px; }
+.hero-v2__right { display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 40px 64px 40px 0; }
+.hero-v2__carousel { position: relative; overflow: hidden; border-radius: 16px; width: 100%; flex: 1; min-height: 200px; max-height: 560px; }
 .hero-v2__carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.75s ease; }
-.hero-v2__carousel-dots { display: flex; justify-content: center; gap: 10px; }
-.hero-v2__carousel-dot { width: 9px; height: 9px; border-radius: 50%; border: none; padding: 0; cursor: pointer; background: #d0d0d0; transition: background 0.2s, transform 0.2s; }
-.hero-v2__carousel-dot.active { background: #111; transform: scale(1.3); }
+.hero-v2__carousel-dots { display: flex; gap: 8px; justify-content: center; padding: 4px 0; }
+.hero-v2__carousel-dot { width: 8px; height: 8px; border-radius: 999px; border: none; padding: 0; cursor: pointer; background: #d0d0d0; transition: background 0.2s, width 0.2s; flex-shrink: 0; }
+.hero-v2__carousel-dot.active { background: #0B0F1C; width: 20px; }
+.hero-v2__right-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hero-v2__right-btn { display: flex; justify-content: center; }
+.hero-v2__quote-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: #0B0F1C; color: #fff; height: 52px; flex: 1; font-family: var(--font-mono), monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border-radius: 4px; transition: background 0.2s ease; }
+.hero-v2__quote-btn:hover { background: #333; }
+.hero-v2__admin-cta { white-space: nowrap; padding: 0 20px; }
 .hero-v2__form-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
 .hero-v2__form-badge { display: inline-flex; align-items: center; gap: 6px; background: #0B0F1C; color: #fff; font-family: var(--font-mono), monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; }
 .hero-v2__form-eyebrow { font-family: var(--font-mono), monospace; font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #777777; margin-bottom: 10px; }
@@ -2251,14 +2256,17 @@ button {
 [data-theme="dark"] .pp-verticals { background: var(--bg); }
 
 @media (max-width: 1100px) {
-  .hero-v2__inner { grid-template-columns: 1fr; padding: 40px 48px 56px; }
+  .hero-v2__inner { grid-template-columns: 1fr; padding: 0 32px; }
+  .hero-v2__left { padding: 160px 0 32px; }
+  .hero-v2__right { padding: 0 0 48px; }
+  .hero-v2__carousel { border-radius: 12px; }
   .pp-hero__split { grid-template-columns: 1fr; }
   .pp-hero__stats-grid { grid-template-columns: repeat(4, 1fr); }
   .pp-hero__inner, .pp-meaning__inner, .pp-caps__inner, .pp-specs__inner, .pp-process__inner, .pp-usecases__inner, .pp-quote__inner, .pp-faq__inner, .pp-related__inner, .pp-verticals__inner { padding: 0 48px; }
   .pp-caps-grid, .pp-process-grid, .pp-usecases-grid, .pp-related-grid, .pp-verticals-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 700px) {
-  .hero-v2__inner { padding: 0 20px 40px; }
+  .hero-v2__inner { padding: 0 16px; }
   .hero-v2__form-grid { grid-template-columns: 1fr; }
   .pp-hero__inner, .pp-meaning__inner, .pp-caps__inner, .pp-specs__inner, .pp-process__inner, .pp-usecases__inner, .pp-quote__inner, .pp-faq__inner, .pp-related__inner, .pp-verticals__inner { padding: 0 20px; }
   .pp-meaning__cols { grid-template-columns: 1fr; }
@@ -2309,6 +2317,7 @@ button {
 /* 1 ── Structural setup ─────────────────────────────────────────────────── */
 .hero-v2__cta-primary,
 .hero-v2__cta-secondary,
+.hero-v2__quote-btn,
 .hero-v2__form-submit,
 .hdr-quote-btn,
 .quote-modal__submit,
@@ -2328,6 +2337,7 @@ button {
 /* 2 ── Fill circle: starts fully below, invisible behind overflow:hidden ── */
 .hero-v2__cta-primary::before,
 .hero-v2__cta-secondary::before,
+.hero-v2__quote-btn::before,
 .hero-v2__form-submit::before,
 .hdr-quote-btn::before,
 .quote-modal__submit::before,
@@ -2355,6 +2365,7 @@ button {
 /* 3 ── Hover: circle rises to center, fills the entire button ───────────── */
 .hero-v2__cta-primary:hover::before,
 .hero-v2__cta-secondary:hover::before,
+.hero-v2__quote-btn:hover::before,
 .hero-v2__form-submit:hover:not(:disabled)::before,
 .hdr-quote-btn:hover::before,
 .quote-modal__submit:hover:not(:disabled)::before,
@@ -2371,6 +2382,7 @@ button {
 /* 4 ── Fill colors (match existing hover destination, just animated now) ── */
 .hero-v2__cta-primary   { --fill-clr: #333; }
 .hero-v2__cta-secondary  { --fill-clr: rgba(11, 15, 28, 0.88); }
+.hero-v2__quote-btn      { --fill-clr: #333; }
 .hero-v2__form-submit    { --fill-clr: #333; }
 .hdr-quote-btn           { --fill-clr: #d0d0d0; }
 .quote-modal__submit     { --fill-clr: #222; }
