@@ -116,12 +116,6 @@ const INDUSTRIES = [
   },
 ]
 
-const STATS = [
-  { num: "15+", label: "Industries Served" },
-  { num: "98%", label: "On-Time Delivery" },
-  { num: "30+", label: "Years Experience" },
-  { num: "0.03%", label: "Field Return Rate" },
-]
 
 export default function IndustriesPage() {
   return (
@@ -149,19 +143,6 @@ export default function IndustriesPage() {
         </section>
       </div>
 
-      {/* Stats Bar */}
-      <section className="stats-bar">
-        <div className="W">
-          <div className="stats-bar__grid">
-            {STATS.map(({ num, label }) => (
-              <div className="stats-bar__item" key={label}>
-                <div className="stats-bar__num">{num}</div>
-                <div className="stats-bar__label">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Industries Grid */}
       <section className="S" style={{ background: "var(--bg)" }}>

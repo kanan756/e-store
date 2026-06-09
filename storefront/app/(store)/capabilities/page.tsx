@@ -120,12 +120,12 @@ export default async function CapabilitiesPage() {
             {CAPS.map(({ n, title, desc, img, icon, highlights }) => (
               <div className="caps-cell" key={n}>
                 {/* Capability image */}
-                <div style={{ position: "relative", width: "100%", height: 220, borderRadius: 8, overflow: "hidden", marginBottom: 20, background: "var(--bg3)" }}>
+                <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: 8, overflow: "hidden", marginBottom: 20 }}>
                   <Image
                     src={img}
                     alt={title}
                     fill
-                    style={{ objectFit: "contain", padding: 8 }}
+                    style={{ objectFit: "cover" }}
                     sizes="(max-width: 700px) 100vw, 50vw"
                   />
                 </div>

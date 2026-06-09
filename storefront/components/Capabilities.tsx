@@ -51,12 +51,12 @@ export default function Capabilities() {
         <div className="caps-row rv d2">
           {CAPS.map(({ n, title, desc, img }) => (
             <div className="caps-cell" key={n}>
-              <div style={{ position: "relative", width: "100%", height: 200, borderRadius: 8, overflow: "hidden", marginBottom: 24, background: "var(--bg3)" }}>
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", borderRadius: 8, overflow: "hidden", marginBottom: 24 }}>
                 <Image
                   src={img}
                   alt={title}
                   fill
-                  style={{ objectFit: "contain", padding: 8 }}
+                  style={{ objectFit: "cover" }}
                   sizes="(max-width: 700px) 100vw, 50vw"
                 />
               </div>
