@@ -69,7 +69,7 @@ export default function OvermoldedHarnessPage() {
               <div className="pp-hero__cat">Overmolded Wire Harness</div>
               <h1 className="pp-hero__h">Custom Mold.<span className="muted">In-House.</span><span className="accent">IP-Sealed.</span></h1>
               <p className="pp-hero__desc">Overmolded strain relief and sealed terminations with custom tooling fabricated in-house. TPE, PUR, and Nylon compounds. IP67/IP68 validated. Pull-force tested on every unit.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

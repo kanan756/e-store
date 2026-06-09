@@ -2293,3 +2293,133 @@ button {
   height: 200px;
   border-radius: 8px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FILL HOVER ANIMATION
+   A circle rises from below the button on hover — no HTML changes needed.
+   Each button class gets overflow:hidden + isolation:isolate to clip and
+   stack the ::before circle behind the text (z-index: -1 within the new
+   stacking context). --fill-clr is set per class below.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* 1 ── Structural setup ─────────────────────────────────────────────────── */
+.hero-v2__cta-primary,
+.hero-v2__cta-secondary,
+.hero-v2__form-submit,
+.hdr-quote-btn,
+.quote-modal__submit,
+.ft__quote-btn,
+.pp-hero__cta-primary,
+.pp-hero__cta-secondary,
+.cta-fill,
+.btn.bp,
+.btn.bod {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+}
+
+/* 2 ── Fill circle: starts fully below, invisible behind overflow:hidden ── */
+.hero-v2__cta-primary::before,
+.hero-v2__cta-secondary::before,
+.hero-v2__form-submit::before,
+.hdr-quote-btn::before,
+.quote-modal__submit::before,
+.ft__quote-btn::before,
+.pp-hero__cta-primary::before,
+.pp-hero__cta-secondary::before,
+.cta-fill::before,
+.btn.bp::before,
+.btn.bod::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 220%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--fill-clr);
+  transform: translate(-50%, 0);
+  transition: top 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 3 ── Hover: circle rises to center, fills the entire button ───────────── */
+.hero-v2__cta-primary:hover::before,
+.hero-v2__cta-secondary:hover::before,
+.hero-v2__form-submit:hover:not(:disabled)::before,
+.hdr-quote-btn:hover::before,
+.quote-modal__submit:hover:not(:disabled)::before,
+.ft__quote-btn:hover::before,
+.pp-hero__cta-primary:hover::before,
+.pp-hero__cta-secondary:hover::before,
+.cta-fill:hover::before,
+.btn.bp:hover:not(.no-fill)::before,
+.btn.bod:hover::before {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 4 ── Fill colors (match existing hover destination, just animated now) ── */
+.hero-v2__cta-primary   { --fill-clr: #333; }
+.hero-v2__cta-secondary  { --fill-clr: rgba(11, 15, 28, 0.88); }
+.hero-v2__form-submit    { --fill-clr: #333; }
+.hdr-quote-btn           { --fill-clr: #d0d0d0; }
+.quote-modal__submit     { --fill-clr: #222; }
+.ft__quote-btn           { --fill-clr: #d0d0d0; }
+.pp-hero__cta-primary    { --fill-clr: #dadada; }
+.pp-hero__cta-secondary  { --fill-clr: rgba(40, 40, 40, 0.88); }
+.cta-fill                { --fill-clr: #d8d8d8; }
+.btn.bp                  { --fill-clr: #333; }
+.btn.bod                 { --fill-clr: var(--bg2); }
+.cta .bp                 { --fill-clr: #d8d8d8; }
+[data-theme="dark"] .btn.bp { --fill-clr: #e0e0e0; }
+
+/* 5 ── Suppress instant background flash; fill circle handles color change  */
+.hero-v2__cta-primary:hover {
+  background: #0B0F1C;
+  transform: translateY(-3px);
+  transition: background 0.2s, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.hero-v2__cta-secondary:hover {
+  color: #fcf9f2;
+  transform: translateY(-3px);
+  transition: border-color 0.2s, color 0.25s, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.hero-v2__form-submit:hover:not(:disabled) { background: #0B0F1C; }
+.hdr-quote-btn:hover         { background: #fff; }
+.quote-modal__submit:hover:not(:disabled) { background: #0A0A0A; }
+.ft__quote-btn:hover         { background: #fff; }
+.pp-hero__cta-primary:hover {
+  background: #fff;
+  transform: translateY(-2px);
+  transition: background 0.2s, color 0.2s, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.pp-hero__cta-secondary:hover {
+  transform: translateY(-2px);
+  transition: border-color 0.2s, color 0.2s, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.cta-fill:hover { transform: translateY(-2px); }
+.btn.bp:hover {
+  background: #000;
+  transform: translateY(-2px);
+  transition: background 160ms ease-out, color 160ms ease-out,
+              transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.btn.bod:hover {
+  background: transparent;
+  transform: translateY(-2px);
+  transition: background 160ms ease-out, color 160ms ease-out,
+              transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+[data-theme="dark"] .btn.bp:hover { background: #fff; }
+
+/* 6 ── Restore shop Add-to-Cart / Out-of-Stock buttons to original state ── */
+.btn.bp.no-fill { isolation: auto; overflow: visible; }
+.btn.bp.no-fill::before        { display: none; }
+.btn.bp.no-fill:hover          { background: #333333; transform: none; }
+[data-theme="dark"] .btn.bp.no-fill:hover { background: #e5e5e5; }

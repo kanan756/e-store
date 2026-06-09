@@ -69,7 +69,7 @@ export default function EthernetUSBPage() {
               <div className="pp-hero__cat">Ethernet &amp; USB Cable Assemblies</div>
               <h1 className="pp-hero__h">Cat8. USB-C.<span className="muted">40 Gbps.</span><span className="accent">Custom Lengths.</span></h1>
               <p className="pp-hero__desc">Ethernet patch and trunk assemblies Cat5e through Cat8, USB assemblies 2.0 through USB-C, and industrial M12 connectors for harsh environments. Wire map and continuity tested on every unit.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

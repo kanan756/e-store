@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 function ArrowRight() {
   return (
@@ -14,6 +14,12 @@ function ArrowRight() {
 export default function Hero() {
   const [submitted, setSubmitted] = useState(false)
   const [sending, setSending] = useState(false)
+
+  useEffect(() => {
+    if (!submitted) return
+    const t = setTimeout(() => setSubmitted(false), 6000)
+    return () => clearTimeout(t)
+  }, [submitted])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -155,9 +161,9 @@ export default function Hero() {
               </div>
               <div className="hero-v2__form-field">
                 <label className="hero-v2__form-label">Project Requirements *</label>
-                <textarea name="description" rows={3} placeholder="Wire gauge, connector types, standards, target volumes..." required />
+                <textarea name="description" rows={3} placeholder="Wire gauge, connector types, standards, target volumes..." required minLength={10} />
               </div>
-              <input type="text" name="honeypot" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
+              <input type="hidden" name="honeypot" value="" />
               <button type="submit" className="hero-v2__form-submit" disabled={sending} style={{ minWidth: 160, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                 {sending ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}>

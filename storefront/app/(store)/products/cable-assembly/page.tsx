@@ -68,7 +68,7 @@ export default function CableAssemblyPage() {
               <div className="pp-hero__cat">Cable Assembly</div>
               <h1 className="pp-hero__h">Any Cable.<span className="muted">Any Connector.</span><span className="accent">Build-to-Print.</span></h1>
               <p className="pp-hero__desc">From 2-conductor signal cables to complex multi-branch assemblies — built to your drawings, BOMs, or samples. Crimp, solder, and IDC termination. 100% electrically tested before shipment.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

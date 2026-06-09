@@ -69,7 +69,7 @@ export default function FiberOpticTwinaxPage() {
               <div className="pp-hero__cat">Fiber Optic &amp; Twinax</div>
               <h1 className="pp-hero__h">Single-Mode.<span className="muted">Multi-Mode.</span><span className="accent">Precision Polished.</span></h1>
               <p className="pp-hero__desc">Fiber optic assemblies for data center, telecom, industrial, defense, and medical imaging applications. 100% insertion loss tested. MPO/MTP trunk assemblies, armored fiber, and DAC twinax cables available.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

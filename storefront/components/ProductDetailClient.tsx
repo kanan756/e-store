@@ -138,7 +138,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             <div style={{ display: "flex", gap: 12 }}>
               <button
-                className="btn bp"
+                className="btn bp no-fill"
                 onClick={handleAddToCart}
                 disabled={adding || !product.inStock}
                 style={{ 

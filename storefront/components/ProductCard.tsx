@@ -105,7 +105,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
         <div className="prodC__row">
           <button
-            className="btn bp bsm"
+            className="btn bp bsm no-fill"
             onClick={handleAddToCart}
             disabled={adding || outOfStock}
             style={outOfStock ? { opacity: 0.4, cursor: "not-allowed" } : added ? { background: "#16a34a" } : {}}

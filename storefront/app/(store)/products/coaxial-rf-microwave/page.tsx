@@ -69,7 +69,7 @@ export default function CoaxialRFMicrowavePage() {
               <div className="pp-hero__cat">Coaxial / RF / Microwave</div>
               <h1 className="pp-hero__h">DC to 40 GHz.<span className="muted">VSWR Characterized.</span><span className="accent">Precision Terminated.</span></h1>
               <p className="pp-hero__desc">High-frequency cable assemblies for test & measurement, defense, broadcast, telecom, and medical imaging. Low-loss cable selection, precision connector termination, and VNA characterization on request.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

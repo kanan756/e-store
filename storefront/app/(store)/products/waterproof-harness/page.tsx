@@ -69,7 +69,7 @@ export default function WaterproofHarnessPage() {
               <div className="pp-hero__cat">Waterproof Wire Harness</div>
               <h1 className="pp-hero__h">IP67. IP68.<span className="muted">Sealed.</span><span className="accent">Hipot-Verified.</span></h1>
               <p className="pp-hero__desc">Sealed wire harnesses for marine sensors, EV charging ports, outdoor IoT, and washdown equipment. Peripheral seals, cavity plugs, and overmolded strain relief — validation runs in-house, no third-party lab queue.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

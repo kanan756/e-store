@@ -67,7 +67,7 @@ export default function ShieldedHermeticPage() {
               <div className="pp-hero__cat">Shielded &amp; Hermetic Cables</div>
               <h1 className="pp-hero__h">EMI Immune.<span className="muted">Pressure Rated.</span><span className="accent">Zero Leakage.</span></h1>
               <p className="pp-hero__desc">Cable assemblies designed for the harshest electromagnetic and physical environments. Up to 98% braid coverage, 360-degree shield termination, and hermetic sealing for vacuum and high-pressure applications.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

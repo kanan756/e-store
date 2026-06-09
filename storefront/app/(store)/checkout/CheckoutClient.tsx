@@ -108,10 +108,6 @@ export default function CheckoutClient() {
           localStorage.removeItem("clientStore_savedInfo")
         }
 
-        // Build a readable product list string for Google Sheets
-        const productSummary = items
-          .map((i) => `${i.name} x${i.quantity}`)
-          .join(", ")
 
         const res = await fetch("/api/stripe/checkout-session", {
           method: "POST",
@@ -119,8 +115,13 @@ export default function CheckoutClient() {
           body: JSON.stringify({
             customerName: `${details.firstName} ${details.lastName}`,
             email: details.email,
-            productSummary,
-            amount: subtotal,
+            // Send product handles + quantities so the server can look up
+            // prices from Google Sheets. This prevents cart price tampering.
+            items: items.map((i) => ({
+              handle:   i.id,   // cart id IS the product handle (see cart-context.tsx)
+              name:     i.name,
+              quantity: i.quantity,
+            })),
             successUrl: `${window.location.origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
             cancelUrl: `${window.location.origin}/checkout`,
           }),
@@ -144,7 +145,7 @@ export default function CheckoutClient() {
         isSubmitting.current = false
       }
     },
-    [items, subtotal, form, clearCart, router, saveInfo]
+    [items, form, clearCart, router, saveInfo]
   )
 
   if (items.length === 0) {

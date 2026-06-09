@@ -231,9 +231,9 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             </div>
             <div className="quote-modal__field">
               <label className="quote-modal__label">Project details <span className="quote-modal__req">*</span></label>
-              <textarea name="description" placeholder="Describe your assembly, quantities, target lead time..." rows={4} required />
+              <textarea name="description" placeholder="Describe your assembly, quantities, target lead time..." rows={4} required minLength={10} />
             </div>
-            <input type="text" name="honeypot" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
+            <input type="hidden" name="honeypot" value="" />
             <button type="submit" className="quote-modal__submit" disabled={sending}>
               {sending ? "Sending..." : "Submit Request"}
               {!sending && (

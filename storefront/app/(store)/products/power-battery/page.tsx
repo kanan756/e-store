@@ -69,7 +69,7 @@ export default function PowerBatteryPage() {
               <div className="pp-hero__cat">Power &amp; Battery Cable Assemblies</div>
               <h1 className="pp-hero__h">High Current.<span className="muted">Lugged.</span><span className="accent">Resistance-Tested.</span></h1>
               <p className="pp-hero__desc">Power and battery cable assemblies for EV packs, BESS racks, charging infrastructure, and industrial power distribution. Hydraulic lug crimp, XLPE insulation, and 100% resistance measurement on every unit.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

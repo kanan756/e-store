@@ -69,7 +69,7 @@ export default function PrototypeNPIPage() {
               <div className="pp-hero__cat">Wire Harness Prototype / NPI</div>
               <h1 className="pp-hero__h">1 Piece.<span className="muted">3 Days.</span><span className="accent">Production Standard.</span></h1>
               <p className="pp-hero__desc">Wire harness prototypes and NPI builds with DFM review, FAI reporting, and a direct path to production. Built on production equipment from day one — no hand-built bench samples.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Drawing →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Drawing →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

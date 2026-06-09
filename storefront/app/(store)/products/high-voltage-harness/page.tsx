@@ -69,7 +69,7 @@ export default function HighVoltageHarnessPage() {
               <div className="pp-hero__cat">High Voltage Wire Harness</div>
               <h1 className="pp-hero__h">600V. 800V. 1000V DC.<span className="muted">Hipot-Tested.</span><span className="accent">Every Unit.</span></h1>
               <p className="pp-hero__desc">High-voltage harnesses for EV traction, BESS, charging infrastructure, and industrial power. Orange jacket, XLPE insulation, HVIL loop wiring, and 100% dielectric test before every shipment.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">

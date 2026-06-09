@@ -18,7 +18,7 @@ export default function Cta() {
         <p className="cta__s rv d1">
           Send us your print or describe your application — we&apos;ll respond with a quote within two business days.
         </p>
-        <Link href="#quote" className="btn rv d2" style={{
+        <Link href="#quote" className="btn cta-fill rv d2" style={{
           background: "#fff", color: "#0A0A0A", borderRadius: "9999px",
           padding: "14px 32px", fontWeight: 700, fontSize: 13,
           letterSpacing: "0.04em", textTransform: "uppercase",

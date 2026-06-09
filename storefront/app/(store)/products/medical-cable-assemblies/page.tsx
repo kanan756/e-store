@@ -68,7 +68,7 @@ export default function MedicalCableAssembliesPage() {
               <div className="pp-hero__cat">Medical Cable Assemblies</div>
               <h1 className="pp-hero__h">IEC 60601.<span className="muted">Lot-Traced.</span><span className="accent">100% Hipot.</span></h1>
               <p className="pp-hero__desc">Life-critical cable assemblies for patient monitoring, surgical instruments, diagnostic imaging, and therapy devices. Biocompatible materials, full traceability, and regulatory submission documentation support.</p>
-              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/capabilities" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
+              <div className="pp-hero__ctabar"><Link href="#quote" className="pp-hero__cta-primary">Submit Spec Sheet →</Link><Link href="/contact" className="pp-hero__cta-secondary">Talk to an Engineer</Link></div>
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">
