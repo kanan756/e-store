@@ -68,7 +68,7 @@ export default function Hero() {
             <Link href="/contact" className="hero-v2__cta-primary">
               Contact Us <ArrowRight />
             </Link>
-            <Link href="/contact" className="hero-v2__cta-secondary">
+            <Link href="#quote" className="hero-v2__cta-secondary">
               Request a Quote <ArrowRight />
             </Link>
           </div>

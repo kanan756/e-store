@@ -10,7 +10,7 @@ import Cta from "@/components/Cta"
 import { getProducts } from "@/lib/sheets"
 
 export const metadata: Metadata = {
-  title: "Superior Harness & Assembly LLC — Custom Wire Harness Manufacturer",
+  title: "Superior Harness & Assembly — Custom Wire Harness Manufacturer",
   description:
     "Custom wire harness and cable assembly manufacturer specializing in high-quality engineered wiring solutions for OEMs, medical devices, robotics, and EV applications.",
 }
