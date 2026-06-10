@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Medical Cable Assemblies | Superior Harness & Assembly",
@@ -84,8 +85,9 @@ export default function MedicalCableAssembliesPage() {
         </div>
         </div>
       </section>
-
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What Medical Means Here</div>
           <h2 className="pp-meaning__h">Life-Critical Quality Is<br />a Process, Not a Label.</h2>
@@ -93,20 +95,58 @@ export default function MedicalCableAssembliesPage() {
             <p className="pp-meaning__text">A medical cable assembly that passes IEC 60601-1 dielectric testing but has an untraced material lot or an undocumented process deviation is not a compliant medical component — it is a liability. The difference between a medical cable assembly and a standard cable assembly is not the materials alone; it is the documented evidence that every material is correct, every test was performed, and every record is retrievable when your regulatory body asks for it.</p>
             <p className="pp-meaning__text">We build medical assemblies with lot traceability on every component, 100% electrical test with documented results, and a first-article package designed to feed directly into your regulatory submission. If your application requires waterproof medical cable assemblies for surgical environments, we stack IP sealing on top — see <Link href="/products/waterproof-harness" className="pp-meaning__link">waterproof harness</Link> for the combined spec.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/medical-device-cable.png" alt="Medical device cable assembly" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/cleanroom-cable-assembly.png" alt="Cleanroom cable assembly" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/biocompatible-cable-coil.png" alt="Biocompatible cable coil" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Medical Assembly Capability</div><h2 className="pp-caps__h">Six Medical-Grade<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
-      <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Medical Cable Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
-      <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Controlled Production Flow</div><h2 className="pp-process__h">Regulatory-Ready.<br />Every Lot.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
-      <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Medical<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
-
-      <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Quality Note</div><p className="pp-quote__text">&ldquo;In medical manufacturing, the documentation is not overhead — it is the product. A cable assembly without traceable lot records, a test voltage certificate, and a signed COC is not a compliant medical component regardless of how well it was built. We engineer the documentation package to match the assembly build, not as an afterthought.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Quality Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
-      <FAQAccordion label="Medical Cable FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Medical Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-related-grid__title">Waterproof + Medical</div><div className="pp-related-grid__desc">IP-sealed medical cable assemblies for surgical and fluid-exposure environments.</div><Link href="/products/waterproof-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div className="pp-related-grid__title">Overmolded Medical Cables</div><div className="pp-related-grid__desc">Soft-touch TPE overmold on handpiece and monitoring cables. Autoclave-compatible options.</div><Link href="/products/overmolded-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22l9-4.5V7L12 2 3 7v10.5L12 22z"/></svg><div className="pp-related-grid__title">Prototype / NPI</div><div className="pp-related-grid__desc">Medical device prototype builds with full documentation for regulatory submission support.</div><Link href="/products/prototype-npi" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
-
-      <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Medical Verticals</div><h2 className="pp-verticals__h">Built for These<br />Medical Markets.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Medical Devices</div><div className="pp-verticals-grid__desc">Class II and III medical device cable assemblies for FDA 510(k) and CE technical file submissions.</div><Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Robotics &amp; Automation</div><div className="pp-verticals-grid__desc">Surgical robot arm and instrument wiring with biocompatible materials and flex-life construction.</div><Link href="/industries/robotics-automation" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Aerospace &amp; Defense</div><div className="pp-verticals-grid__desc">Field medical equipment and aeromedical cable assemblies with MIL-SPEC and IPC Class 3 standards.</div><Link href="/industries/aerospace-defense" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Medical Assembly Capability</div><h2 className="pp-caps__h">Six Medical-Grade<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Medical Cable Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Controlled Production Flow</div><h2 className="pp-process__h">Regulatory-Ready.<br />Every Lot.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Medical<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
+        <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Medical Verticals</div><h2 className="pp-verticals__h">Built for These<br />Medical Markets.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Medical Devices</div><div className="pp-verticals-grid__desc">Class II and III medical device cable assemblies for FDA 510(k) and CE technical file submissions.</div><Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Robotics &amp; Automation</div><div className="pp-verticals-grid__desc">Surgical robot arm and instrument wiring with biocompatible materials and flex-life construction.</div><Link href="/industries/robotics-automation" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Aerospace &amp; Defense</div><div className="pp-verticals-grid__desc">Field medical equipment and aeromedical cable assemblies with MIL-SPEC and IPC Class 3 standards.</div><Link href="/industries/aerospace-defense" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Quality Note</div><p className="pp-quote__text">&ldquo;In medical manufacturing, the documentation is not overhead — it is the product. A cable assembly without traceable lot records, a test voltage certificate, and a signed COC is not a compliant medical component regardless of how well it was built. We engineer the documentation package to match the assembly build, not as an afterthought.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Quality Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
+        <FAQAccordion label="Medical Cable FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Medical Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-related-grid__title">Waterproof + Medical</div><div className="pp-related-grid__desc">IP-sealed medical cable assemblies for surgical and fluid-exposure environments.</div><Link href="/products/waterproof-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div className="pp-related-grid__title">Overmolded Medical Cables</div><div className="pp-related-grid__desc">Soft-touch TPE overmold on handpiece and monitoring cables. Autoclave-compatible options.</div><Link href="/products/overmolded-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22l9-4.5V7L12 2 3 7v10.5L12 22z"/></svg><div className="pp-related-grid__title">Prototype / NPI</div><div className="pp-related-grid__desc">Medical device prototype builds with full documentation for regulatory submission support.</div><Link href="/products/prototype-npi" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

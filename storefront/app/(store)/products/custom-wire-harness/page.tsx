@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Custom Wire Harness | Superior Harness & Assembly",
@@ -97,8 +98,9 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-      {/* What it means */}
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What &quot;Build-to-Print&quot; Means Here</div>
           <h2 className="pp-meaning__h">Your Drawing Is the Standard. Nothing Else Qualifies.</h2>
@@ -106,11 +108,37 @@ export default function CustomWireHarnessPage() {
             <p className="pp-meaning__text">A build-to-print harness means the drawing governs every dimension, material, and test criteria — not a catalog default, not what we have in stock, not what is easier to route. If your print specifies a 22 AWG GXL conductor in blue with a 1.5 mm Deutsch DT04-2P terminal at 48 mm ± 1 mm, that is exactly what ships. Deviation requires written approval. That is the only way to produce a harness that will install and perform consistently across a production run.</p>
             <p className="pp-meaning__text">If you need waterproofing on top of a custom harness, see the <Link href="/products/waterproof-harness" className="pp-meaning__link">waterproof harness</Link> page — we stack the specs. If your application is high-voltage, the <Link href="/products/high-voltage-harness" className="pp-meaning__link">high-voltage harness</Link> page covers insulation ratings and hipot requirements. For the unconstrained custom baseline with full drawing control, you are in the right place.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/wire-harness-multi-branch.png" alt="Multi-branch wire harness" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/crimp-terminal-closeup.png" alt="Precision crimp terminals" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/harness-routing-board.png" alt="Harness routing board" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      {/* Capability blocks */}
-      <section className="pp-caps">
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps">
         <div className="pp-caps__inner">
           <div className="pp-caps__label">Manufacturing Capability Block</div>
           <h2 className="pp-caps__h">Six Processes.<br />One Assembly.</h2>
@@ -125,9 +153,9 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-
-      {/* Spec table */}
-      <section className="pp-specs">
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs">
         <div className="pp-specs__inner">
           <div className="pp-specs__label">Specification Sheet</div>
           <h2 className="pp-specs__h">Custom Wire Harness Envelope.</h2>
@@ -140,9 +168,9 @@ export default function CustomWireHarnessPage() {
           </table>
         </div>
       </section>
-
-      {/* Process flow */}
-      <section className="pp-process">
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process">
         <div className="pp-process__inner">
           <div className="pp-process__label">Production Flow</div>
           <h2 className="pp-process__h">Spec to Ship.<br />Six Steps.</h2>
@@ -157,9 +185,10 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-
-      {/* Use cases */}
-      <section className="pp-usecases">
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases">
         <div className="pp-usecases__inner">
           <div className="pp-usecases__label">Application Map</div>
           <h2 className="pp-usecases__h">Six Industries.<br />One Harness Shop.</h2>
@@ -173,9 +202,34 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-
-      {/* Quote */}
-      <section className="pp-quote">
+        <section className="pp-verticals">
+        <div className="pp-verticals__inner">
+          <div className="pp-verticals__label">Where It Ships</div>
+          <h2 className="pp-verticals__h">Custom Harness Verticals.</h2>
+          <div className="pp-verticals-grid">
+            <div className="pp-verticals-grid__cell">
+              <div className="pp-verticals-grid__title">Automotive &amp; EV</div>
+              <div className="pp-verticals-grid__desc">Engine systems, body control, lighting, and EV traction wiring. USCAR-compliant. Kanban delivery available.</div>
+              <Link href="/industries/automotive-ev" className="pp-verticals-grid__link">See Industry →</Link>
+            </div>
+            <div className="pp-verticals-grid__cell">
+              <div className="pp-verticals-grid__title">Medical Devices</div>
+              <div className="pp-verticals-grid__desc">Life-critical assemblies with biocompatible materials, full traceability, and IEC 60601 awareness.</div>
+              <Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link>
+            </div>
+            <div className="pp-verticals-grid__cell">
+              <div className="pp-verticals-grid__title">Industrial / Factory</div>
+              <div className="pp-verticals-grid__desc">Control panel, machine tool, and heavy equipment harnesses. Oil-resistant and high-temp options.</div>
+              <Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote">
         <div className="pp-quote__inner">
           <div className="pp-quote__card">
             <div className="pp-quote__label">Operations Note</div>
@@ -190,9 +244,7 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-
-      {/* Gallery */}
-      <section className="pp-specs" style={{ padding: "80px 0", background: "var(--bg2)" }}>
+        <section className="pp-specs" style={{ padding: "80px 0", background: "var(--bg2)" }}>
         <div className="pp-specs__inner">
           <div className="pp-specs__label">Facility Overview</div>
           <h2 className="pp-specs__h">Precision Equipment.</h2>
@@ -209,12 +261,8 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-
-      {/* FAQ */}
-      <FAQAccordion label="Wire Harness FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      {/* Related */}
-      <section className="pp-related">
+        <FAQAccordion label="Wire Harness FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related">
         <div className="pp-related__inner">
           <div className="pp-related__label">Stack These On Top</div>
           <h2 className="pp-related__h">Related Harness Variants.</h2>
@@ -240,31 +288,9 @@ export default function CustomWireHarnessPage() {
           </div>
         </div>
       </section>
-
-      {/* Industry verticals */}
-      <section className="pp-verticals">
-        <div className="pp-verticals__inner">
-          <div className="pp-verticals__label">Where It Ships</div>
-          <h2 className="pp-verticals__h">Custom Harness Verticals.</h2>
-          <div className="pp-verticals-grid">
-            <div className="pp-verticals-grid__cell">
-              <div className="pp-verticals-grid__title">Automotive &amp; EV</div>
-              <div className="pp-verticals-grid__desc">Engine systems, body control, lighting, and EV traction wiring. USCAR-compliant. Kanban delivery available.</div>
-              <Link href="/industries/automotive-ev" className="pp-verticals-grid__link">See Industry →</Link>
-            </div>
-            <div className="pp-verticals-grid__cell">
-              <div className="pp-verticals-grid__title">Medical Devices</div>
-              <div className="pp-verticals-grid__desc">Life-critical assemblies with biocompatible materials, full traceability, and IEC 60601 awareness.</div>
-              <Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link>
-            </div>
-            <div className="pp-verticals-grid__cell">
-              <div className="pp-verticals-grid__title">Industrial / Factory</div>
-              <div className="pp-verticals-grid__desc">Control panel, machine tool, and heavy equipment harnesses. Oil-resistant and high-temp options.</div>
-              <Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

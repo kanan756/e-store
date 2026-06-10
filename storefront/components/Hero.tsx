@@ -34,43 +34,45 @@ export default function Hero() {
 
         {/* ── Left: content ── */}
         <div className="hero-v2__left">
-          <h1 className="hero-v2__h1">
-            <span className="hero-v2__h1-primary">Precision</span>
-            <span className="hero-v2__h1-muted">Wire Harness &</span>
-            <span className="hero-v2__h1-muted">Cable Assembly.</span>
-          </h1>
+          <div className="hero-v2__block">
+            <h1 className="hero-v2__h1">
+              <span className="hero-v2__h1-primary">Precision</span>
+              <span className="hero-v2__h1-muted">Wire Harness &</span>
+              <span className="hero-v2__h1-muted">Cable Assembly.</span>
+            </h1>
 
-          <p className="hero-v2__desc">
-            Precision-driven custom wire harness and cable assembly manufacturer with 30+ years of combined experience.
-            From low-volume prototyping to high-volume production — consistent, durable, and built to your exact specifications across a wide range of industries.
-          </p>
+            <p className="hero-v2__desc">
+              Precision-driven custom wire harness and cable assembly manufacturer with 30+ <br /> years of combined experience.
+              From low-volume prototyping to high-volume production <br />— consistent, durable, and built to your exact specifications across a wide range of industries.
+            </p>
 
-          <div className="hero-v2__stats">
-            <div className="hero-v2__stat">
-              <span className="hero-v2__stat-val">30+</span>
-              <span className="hero-v2__stat-lbl">Years Experience</span>
+            <div className="hero-v2__stats">
+              <div className="hero-v2__stat">
+                <span className="hero-v2__stat-val">30+</span>
+                <span className="hero-v2__stat-lbl">Years Experience</span>
+              </div>
+              <div className="hero-v2__stat">
+                <span className="hero-v2__stat-val">5–15 Days</span>
+                <span className="hero-v2__stat-lbl">Lead Time</span>
+              </div>
+              <div className="hero-v2__stat">
+                <span className="hero-v2__stat-val">1 Piece</span>
+                <span className="hero-v2__stat-lbl">Min. Order</span>
+              </div>
+              <div className="hero-v2__stat">
+                <span className="hero-v2__stat-val">&lt;24 Hours</span>
+                <span className="hero-v2__stat-lbl">Quote Reply</span>
+              </div>
             </div>
-            <div className="hero-v2__stat">
-              <span className="hero-v2__stat-val">5–15 Days</span>
-              <span className="hero-v2__stat-lbl">Lead Time</span>
-            </div>
-            <div className="hero-v2__stat">
-              <span className="hero-v2__stat-val">1 Piece</span>
-              <span className="hero-v2__stat-lbl">Min. Order</span>
-            </div>
-            <div className="hero-v2__stat">
-              <span className="hero-v2__stat-val">&lt;24 Hours</span>
-              <span className="hero-v2__stat-lbl">Quote Reply</span>
-            </div>
-          </div>
 
-          <div className="hero-v2__ctabar">
-            <Link href="/contact" className="hero-v2__cta-primary">
-              Contact Us <ArrowRight />
-            </Link>
-            <Link href="#quote" className="hero-v2__cta-secondary">
-              Request a Quote <ArrowRight />
-            </Link>
+            <div className="hero-v2__ctabar">
+              <Link href="/contact" className="hero-v2__cta-primary">
+                Contact Us <ArrowRight />
+              </Link>
+              <Link href="#quote" className="hero-v2__cta-secondary">
+                Request a Quote <ArrowRight />
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -112,16 +114,6 @@ export default function Hero() {
                 onClick={() => setActive(i)}
               />
             ))}
-          </div>
-
-          {/* Footer: See Capabilities + Admin Panel */}
-          <div className="hero-v2__right-footer">
-            <Link href="/capabilities" className="hero-v2__cta-secondary hero-v2__right-btn">
-              See Capabilities
-            </Link>
-            <Link href="/admin" className="hero-v2__cta-secondary hero-v2__right-btn">
-              Admin Panel
-            </Link>
           </div>
 
         </div>

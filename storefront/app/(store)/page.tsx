@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Hero from "@/components/Hero"
 import About from "@/components/About"
-import Stats from "@/components/Stats"
+import IndustriesStrip from "@/components/IndustriesStrip"
 import FeaturedProducts from "@/components/FeaturedProducts"
 import Capabilities from "@/components/Capabilities"
 import WhyUs from "@/components/WhyUs"
@@ -25,7 +25,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <About />
-      <Stats />
+      <IndustriesStrip />
       <FeaturedProducts products={products} />
       <Capabilities />
       <WhyUs />

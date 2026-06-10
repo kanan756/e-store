@@ -16,7 +16,7 @@ const FEATS = [
 
 export default function WhyUs() {
   return (
-    <section className="sec sec-bg2">
+    <section className="sec" style={{ background: "var(--bg)" }}>
       <div className="W">
         <div className="why-grid rv">
           {/* Left image */}

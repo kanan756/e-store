@@ -39,13 +39,37 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json()
-    const parsed = schema.safeParse(body)
+    const formData = await request.formData()
+
+    const rawData = {
+      name:        formData.get("name")        ?? "",
+      email:       formData.get("email")       ?? "",
+      phone:       formData.get("phone")       ?? "",
+      company:     formData.get("company")     ?? "",
+      application: formData.get("application") ?? "",
+      quantity:    formData.get("quantity")    ?? "",
+      description: formData.get("description") ?? "",
+      honeypot:    formData.get("honeypot")    ?? "",
+    }
+
+    const parsed = schema.safeParse(rawData)
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
     }
 
     const { name, email, phone, company, application, quantity, description } = parsed.data
+
+    // Build nodemailer attachments from uploaded files
+    const fileEntries = formData.getAll("attachments")
+    const uploadedFiles = fileEntries.filter((f): f is File => f instanceof File && f.size > 0)
+    const attachments = await Promise.all(
+      uploadedFiles.map(async (f) => ({
+        filename: f.name,
+        content: Buffer.from(await f.arrayBuffer()),
+        contentType: f.type || "application/octet-stream",
+      }))
+    )
+    const hasAttachment = attachments.length > 0 ? "Yes" : "No"
 
     function escapeHtml(str: string): string {
       return str
@@ -86,6 +110,11 @@ export async function POST(request: Request) {
           <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">PROJECT DESCRIPTION</div>
           ${eDescription}
         </div>
+        ${attachments.length > 0 ? `
+        <div style="margin-top:12px;padding:14px 16px;background:#1c1c18;border-radius:10px;border:1px solid #2a2a24;">
+          <div style="color:#4ae183;font-size:12px;margin-bottom:6px;font-weight:700;letter-spacing:0.05em;">ATTACHMENTS (${attachments.length})</div>
+          <div style="color:#e5e2db;font-size:13px;line-height:1.7;">${uploadedFiles.map(f => f.name).join("<br>")}</div>
+        </div>` : ""}
         <p style="margin-top:16px;font-size:12px;color:#737874;">Submitted via Quote Request Form</p>
       </div>
     `
@@ -103,7 +132,7 @@ export async function POST(request: Request) {
     `
 
     // 1. Await the database/sheet save first to guarantee data is stored
-    await appendQuote({ name, email, phone, company, application, quantity, description })
+    await appendQuote({ name, email, phone, company, application, quantity, description, hasAttachment })
 
     // 2. Fire the two emails off in parallel in the background (fire-and-forget)
     Promise.all([
@@ -111,8 +140,9 @@ export async function POST(request: Request) {
         from: `"${fromName} Quotes" <${process.env.GMAIL_USER}>`,
         to: process.env.GMAIL_USER,
         replyTo: email,
-        subject: `📋 New Quote Request from ${name}`,
+        subject: `📋 New Quote Request from ${name}${attachments.length > 0 ? ` [${attachments.length} attachment${attachments.length > 1 ? "s" : ""}]` : ""}`,
         html: adminEmailHtml,
+        attachments,
       }),
       transporter.sendMail({
         from: `"${fromName}" <${process.env.GMAIL_USER}>`,

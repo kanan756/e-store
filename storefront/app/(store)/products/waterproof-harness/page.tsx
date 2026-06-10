@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Waterproof Wire Harness | Superior Harness & Assembly",
@@ -85,8 +86,9 @@ export default function WaterproofHarnessPage() {
         </div>
         </div>
       </section>
-
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What &quot;Waterproof&quot; Means Here</div>
           <h2 className="pp-meaning__h">IP Rating Is the Floor.<br />Field Life Is the Ceiling.</h2>
@@ -94,66 +96,72 @@ export default function WaterproofHarnessPage() {
             <p className="pp-meaning__text">IEC 60529 IP ratings describe a 30-minute lab test. A waterproof harness that passes IP67 in the lab can still corrode in the field if the wire seal size is wrong, the cable jacket loses elasticity at −20 °C, or the connector backshell has a tooling-line micro-channel. We build against actual environmental envelopes: temperature swing, UV exposure, chemical contact, and flex count — not just the IP digit.</p>
             <p className="pp-meaning__text">For builds where sealing is the dominant constraint, you are on the right page. If your harness is also high-voltage, see <Link href="/products/high-voltage-harness" className="pp-meaning__link">high-voltage harness</Link> — we stack the two specs. If sealing is delivered through TPE overmold rather than a connector seal, route via <Link href="/products/overmolded-harness" className="pp-meaning__link">overmolded harness</Link>. For the unconstrained custom baseline, see <Link href="/products/custom-wire-harness" className="pp-meaning__link">custom wire harness</Link>.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/waterproof-deutsch-dt.png" alt="Waterproof Deutsch DT connector" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/ip67-spray-test.png" alt="IP67 water spray test" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/outdoor-harness-installed.png" alt="Outdoor waterproof harness installed" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      <section className="pp-caps">
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps">
         <div className="pp-caps__inner">
           <div className="pp-caps__label">Sealing Capability Block</div>
           <h2 className="pp-caps__h">Three Tiers of Seal,<br />One Production Line.</h2>
           <div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div>
         </div>
       </section>
-
-      <section className="pp-specs">
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs">
         <div className="pp-specs__inner">
           <div className="pp-specs__label">Specification Sheet</div>
           <h2 className="pp-specs__h">Waterproof Envelope.</h2>
           <table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table>
         </div>
       </section>
-
-      <section className="pp-process">
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process">
         <div className="pp-process__inner">
           <div className="pp-process__label">Validation-First Flow</div>
           <h2 className="pp-process__h">Spec to Sealed &amp; Shipped.</h2>
           <div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div>
         </div>
       </section>
-
-      <section className="pp-usecases">
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases">
         <div className="pp-usecases__inner">
           <div className="pp-usecases__label">Application Map</div>
           <h2 className="pp-usecases__h">Six Waterproof<br />Use Cases.</h2>
           <div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div>
         </div>
       </section>
-
-      <section className="pp-quote">
-        <div className="pp-quote__inner">
-          <div className="pp-quote__card">
-            <div className="pp-quote__label">Engineering Note</div>
-            <p className="pp-quote__text">&ldquo;The IP digit is the easy part. What kills field reliability is the wrong cable-seal size on a Deutsch DT — the connector passes the lab, but fails at month nine when the jacket shrinks in a Michigan winter. We size every seal against the measured jacket OD, not the spec sheet nominal. That is why our sealed harnesses come back for reorder, not warranty claims.&rdquo;</p>
-            <div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Engineering Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div>
-          </div>
-        </div>
-      </section>
-
-      <FAQAccordion label="Sealing FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      <section className="pp-related">
-        <div className="pp-related__inner">
-          <div className="pp-related__label">Stack These On Top</div>
-          <h2 className="pp-related__h">Related Harness Variants.</h2>
-          <div className="pp-related-grid">
-            <div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div className="pp-related-grid__title">Overmolded Harness</div><div className="pp-related-grid__desc">TPE/PUR liquid-injection overmold — the cleanest path to IP69K and 50K-cycle flex life.</div><Link href="/products/overmolded-harness" className="pp-related-grid__link">Read More →</Link></div>
-            <div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div className="pp-related-grid__title">High-Voltage Harness</div><div className="pp-related-grid__desc">600V to 1,000V orange-jacket EV and BESS harnesses with 1,500V AC hipot 100% tested.</div><Link href="/products/high-voltage-harness" className="pp-related-grid__link">Read More →</Link></div>
-            <div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div className="pp-related-grid__title">In-House Testing</div><div className="pp-related-grid__desc">Hipot, immersion tank, and pull-force testing — all in-house, no third-party lab delay.</div><Link href="/capabilities" className="pp-related-grid__link">Read More →</Link></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="pp-verticals">
+        <section className="pp-verticals">
         <div className="pp-verticals__inner">
           <div className="pp-verticals__label">Where It Ships</div>
           <h2 className="pp-verticals__h">Waterproof Harness Verticals.</h2>
@@ -164,6 +172,34 @@ export default function WaterproofHarnessPage() {
           </div>
         </div>
       </section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote">
+        <div className="pp-quote__inner">
+          <div className="pp-quote__card">
+            <div className="pp-quote__label">Engineering Note</div>
+            <p className="pp-quote__text">&ldquo;The IP digit is the easy part. What kills field reliability is the wrong cable-seal size on a Deutsch DT — the connector passes the lab, but fails at month nine when the jacket shrinks in a Michigan winter. We size every seal against the measured jacket OD, not the spec sheet nominal. That is why our sealed harnesses come back for reorder, not warranty claims.&rdquo;</p>
+            <div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Engineering Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div>
+          </div>
+        </div>
+      </section>
+        <FAQAccordion label="Sealing FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related">
+        <div className="pp-related__inner">
+          <div className="pp-related__label">Stack These On Top</div>
+          <h2 className="pp-related__h">Related Harness Variants.</h2>
+          <div className="pp-related-grid">
+            <div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><div className="pp-related-grid__title">Overmolded Harness</div><div className="pp-related-grid__desc">TPE/PUR liquid-injection overmold — the cleanest path to IP69K and 50K-cycle flex life.</div><Link href="/products/overmolded-harness" className="pp-related-grid__link">Read More →</Link></div>
+            <div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div className="pp-related-grid__title">High-Voltage Harness</div><div className="pp-related-grid__desc">600V to 1,000V orange-jacket EV and BESS harnesses with 1,500V AC hipot 100% tested.</div><Link href="/products/high-voltage-harness" className="pp-related-grid__link">Read More →</Link></div>
+            <div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div className="pp-related-grid__title">In-House Testing</div><div className="pp-related-grid__desc">Hipot, immersion tank, and pull-force testing — all in-house, no third-party lab delay.</div><Link href="/capabilities" className="pp-related-grid__link">Read More →</Link></div>
+          </div>
+        </div>
+      </section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

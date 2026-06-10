@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Cable Assembly | Superior Harness & Assembly",
@@ -84,8 +85,9 @@ export default function CableAssemblyPage() {
         </div>
         </div>
       </section>
-
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What Cable Assembly Means Here</div>
           <h2 className="pp-meaning__h">Your Schematic Is the Build Order.<br />The Test Fixture Is the Proof.</h2>
@@ -93,20 +95,58 @@ export default function CableAssemblyPage() {
             <p className="pp-meaning__text">A cable assembly is not a catalog item with a label swap. It is a specific combination of cable construction, conductor count, termination method, connector orientation, and jacketing that is correct for exactly one application. Any deviation — wrong gauge, wrong crimp height, wrong connector orientation — creates a failure mode that does not show up on the assembly floor but shows up in the field. We build from your schematic, not a closest-match substitution.</p>
             <p className="pp-meaning__text">For applications requiring RF performance, see <Link href="/products/coaxial-rf-microwave" className="pp-meaning__link">coaxial / RF / microwave</Link> — coaxial assemblies are termination-method and VSWR validated. For medical cable assemblies requiring IEC 60601 compliance and lot traceability, see <Link href="/products/medical-cable-assemblies" className="pp-meaning__link">medical cable assemblies</Link>. For power cables with lugged terminations, see <Link href="/products/power-battery" className="pp-meaning__link">power & battery</Link>.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/cable-assembly-variety.png" alt="Cable assembly variety" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/cable-assembly-test-fixture.png" alt="Cable assembly test fixture" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/connector-types-lineup.png" alt="Connector types lineup" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Cable Assembly Capability Block</div><h2 className="pp-caps__h">Six Termination<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
-      <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Cable Assembly Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
-      <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Production Flow</div><h2 className="pp-process__h">Spec to Tested Cable.<br />Six Steps.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
-      <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Cable Assembly<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
-
-      <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Production Note</div><p className="pp-quote__text">&ldquo;Every cable assembly has a correct way to terminate it and a dozen ways that look correct but are not. Crimp height set 0.1 mm low on a 22 AWG terminal passes a pull test on the floor and fails at 50°C in the field. We set crimp height by conductor cross-section, not by part number, and we pull-test every critical termination before it goes in the connector.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Assembly Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
-      <FAQAccordion label="Cable Assembly FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Specialized Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg><div className="pp-related-grid__title">Coaxial / RF Assemblies</div><div className="pp-related-grid__desc">DC to 40+ GHz coaxial cable assemblies with precision SMA, N-type, and BNC termination.</div><Link href="/products/coaxial-rf-microwave" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div className="pp-related-grid__title">Medical Cable Assemblies</div><div className="pp-related-grid__desc">Life-critical cable assemblies with IEC 60601 compliance, biocompatible materials, and full lot traceability.</div><Link href="/products/medical-cable-assemblies" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div className="pp-related-grid__title">Power &amp; Battery Cables</div><div className="pp-related-grid__desc">High-current power and battery cables with lug terminations for industrial and EV applications.</div><Link href="/products/power-battery" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
-
-      <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Where It Ships</div><h2 className="pp-verticals__h">Cable Assembly Verticals.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">Control system, sensor, and actuator cables for PLC, DCS, and motion control applications.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Aerospace &amp; Defense</div><div className="pp-verticals-grid__desc">MIL-SPEC cable assemblies for avionics, ground support, and communications. IPC Class 3.</div><Link href="/industries/aerospace-defense" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Robotics &amp; Automation</div><div className="pp-verticals-grid__desc">Flex-rated servo and encoder cables routed for drag-chain and robotic arm applications.</div><Link href="/industries/robotics-automation" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Cable Assembly Capability Block</div><h2 className="pp-caps__h">Six Termination<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Cable Assembly Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Production Flow</div><h2 className="pp-process__h">Spec to Tested Cable.<br />Six Steps.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Cable Assembly<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
+        <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Where It Ships</div><h2 className="pp-verticals__h">Cable Assembly Verticals.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">Control system, sensor, and actuator cables for PLC, DCS, and motion control applications.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Aerospace &amp; Defense</div><div className="pp-verticals-grid__desc">MIL-SPEC cable assemblies for avionics, ground support, and communications. IPC Class 3.</div><Link href="/industries/aerospace-defense" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Robotics &amp; Automation</div><div className="pp-verticals-grid__desc">Flex-rated servo and encoder cables routed for drag-chain and robotic arm applications.</div><Link href="/industries/robotics-automation" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Production Note</div><p className="pp-quote__text">&ldquo;Every cable assembly has a correct way to terminate it and a dozen ways that look correct but are not. Crimp height set 0.1 mm low on a 22 AWG terminal passes a pull test on the floor and fails at 50°C in the field. We set crimp height by conductor cross-section, not by part number, and we pull-test every critical termination before it goes in the connector.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Assembly Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
+        <FAQAccordion label="Cable Assembly FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Specialized Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg><div className="pp-related-grid__title">Coaxial / RF Assemblies</div><div className="pp-related-grid__desc">DC to 40+ GHz coaxial cable assemblies with precision SMA, N-type, and BNC termination.</div><Link href="/products/coaxial-rf-microwave" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div className="pp-related-grid__title">Medical Cable Assemblies</div><div className="pp-related-grid__desc">Life-critical cable assemblies with IEC 60601 compliance, biocompatible materials, and full lot traceability.</div><Link href="/products/medical-cable-assemblies" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div className="pp-related-grid__title">Power &amp; Battery Cables</div><div className="pp-related-grid__desc">High-current power and battery cables with lug terminations for industrial and EV applications.</div><Link href="/products/power-battery" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

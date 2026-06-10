@@ -122,10 +122,35 @@ const RESOURCES_DD = [
 ]
 
 // ── Quote Modal ───────────────────────────────────────────────────────────────
+const ACCEPTED_MIME = new Set(["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"])
+const MAX_FILES = 5
+const MAX_TOTAL_BYTES = 10 * 1024 * 1024 // 10 MB
+
+function isAccepted(f: File) {
+  return f.type.startsWith("image/") || ACCEPTED_MIME.has(f.type) || /\.(dwg|dxf)$/i.test(f.name)
+}
+
 function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const overlayRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [submitted, setSubmitted] = useState(false)
   const [sending, setSending] = useState(false)
+  const [files, setFiles] = useState<File[]>([])
+  const [fileError, setFileError] = useState("")
+  const [dragOver, setDragOver] = useState(false)
+
+  function addFiles(incoming: File[]) {
+    setFileError("")
+    const valid = incoming.filter(isAccepted)
+    if (valid.length < incoming.length) setFileError("Some files were skipped — only images, PDF, DWG, and DOCX are accepted.")
+    const merged = [...files, ...valid].slice(0, MAX_FILES)
+    if (files.length + valid.length > MAX_FILES) setFileError(`Max ${MAX_FILES} files allowed.`)
+    const total = merged.reduce((s, f) => s + f.size, 0)
+    if (total > MAX_TOTAL_BYTES) { setFileError("Total size exceeds 10 MB. Remove a file and try again."); return }
+    setFiles(merged)
+  }
+
+  function removeFile(i: number) { setFiles(fs => fs.filter((_, j) => j !== i)) }
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : ""
@@ -145,13 +170,14 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     e.preventDefault()
     setSending(true)
     const fd = new FormData(e.currentTarget)
-    const data = Object.fromEntries(fd.entries())
+    // Append files — the hidden input is controlled via state, not the form itself
+    files.forEach(f => fd.append("attachments", f))
 
     try {
       const res = await fetch("/api/quote", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        // No Content-Type header — browser sets multipart/form-data + boundary automatically
+        body: fd,
       })
       if (res.ok) {
         setSubmitted(true)
@@ -234,6 +260,55 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               <textarea name="description" placeholder="Describe your assembly, quantities, target lead time..." rows={4} required minLength={10} />
             </div>
             <input type="hidden" name="honeypot" value="" />
+
+            {/* ── Upload zone ── */}
+            <div className="quote-modal__field">
+              <label className="quote-modal__label">
+                Drawings / Images&nbsp;<span style={{ color: "#999", fontWeight: 400 }}>(optional)</span>
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.dwg,.dxf,.doc,.docx"
+                style={{ display: "none" }}
+                onChange={e => { addFiles(Array.from(e.target.files ?? [])); e.target.value = "" }}
+              />
+              <div
+                className={`qu-dropzone${dragOver ? " drag-over" : ""}`}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => { e.preventDefault(); setDragOver(false); addFiles(Array.from(e.dataTransfer.files)) }}
+              >
+                <div className="qu-dropzone__icon">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <div className="qu-dropzone__title">Click to select files</div>
+                <div className="qu-dropzone__types">PDF, DWG, DOCX, Images</div>
+                <div className="qu-dropzone__limit">Max {MAX_FILES} files · 10 MB total</div>
+              </div>
+              {fileError && <div className="qu-file-error">{fileError}</div>}
+              {files.length > 0 && (
+                <div className="qu-file-list">
+                  {files.map((f, i) => (
+                    <div key={i} className="qu-file-item">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>
+                      </svg>
+                      <span className="qu-file-item__name">{f.name}</span>
+                      <span className="qu-file-item__size">({(f.size / 1024).toFixed(0)} KB)</span>
+                      <button type="button" className="qu-file-item__remove" onClick={() => removeFile(i)} aria-label="Remove file">×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <button type="submit" className="quote-modal__submit" disabled={sending}>
               {sending ? "Sending..." : "Submit Request"}
               {!sending && (
@@ -348,8 +423,8 @@ export default function Header() {
             <Image
               src="/images/dark-logo.webp"
               alt="Superior Harness & Assembly"
-              height={50}
-              width={300}
+              height={64}
+              width={380}
               style={{ objectFit: "contain", objectPosition: "left center" }}
               priority
             />

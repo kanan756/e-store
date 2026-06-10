@@ -21,9 +21,12 @@ import { cache } from "react"
 
 // ── Rate Limiting / Caching ───────────────────────────────────────────────────
 // Google Sheets has a strict 60 requests per minute limit. This wrapper holds
-// the result in memory for 10 seconds, coalescing concurrent requests and heavily
+// the result in memory for 60 seconds, coalescing concurrent requests and heavily
 // reducing API pressure during development or traffic bursts.
-function withTTL<T extends (...args: any[]) => Promise<any>>(fn: T, ttlMs = 10000): T {
+// Note: 60 s is intentionally longer than the old 10 s default so that rapid
+// page navigations in dev (which bypass Next.js ISR) don't each trigger a fresh
+// Sheets API round-trip. Production ISR handles revalidation independently.
+function withTTL<T extends (...args: any[]) => Promise<any>>(fn: T, ttlMs = 60_000): T {
   const cacheMap = new Map<string, { data: any; timestamp: number }>();
   const inflightMap = new Map<string, Promise<any>>();
 
@@ -494,6 +497,7 @@ export interface Quote {
   description: string
   submittedAt: string
   status: string
+  hasAttachment?: string
 }
 
 export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status">): Promise<void> {
@@ -502,7 +506,7 @@ export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status"
   const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
-    range: "Quotes!A:J",
+    range: "Quotes!A:K",
     valueInputOption: "RAW",
     requestBody: {
       values: [[
@@ -516,6 +520,7 @@ export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status"
         q.description,
         now,
         "New",
+        q.hasAttachment ?? "No",
       ]],
     },
   })
@@ -526,7 +531,7 @@ export const getAllQuotes = withTTL(async (): Promise<(Quote & { rowIndex: numbe
   const sheets = google.sheets({ version: "v4", auth })
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
-    range: "Quotes!A2:J",
+    range: "Quotes!A2:K",
   })
   const rows = res.data.values ?? []
   return rows
@@ -542,6 +547,7 @@ export const getAllQuotes = withTTL(async (): Promise<(Quote & { rowIndex: numbe
       description: r[7] ?? "",
       submittedAt: r[8] ?? "",
       status: r[9] ?? "New",
+      hasAttachment: r[10] ?? "No",
     }))
     .filter((r) => r.id !== "")
 })

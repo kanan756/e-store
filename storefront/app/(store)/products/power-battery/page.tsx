@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Power & Battery Cable Assemblies | Superior Harness & Assembly",
@@ -85,8 +86,9 @@ export default function PowerBatteryPage() {
         </div>
         </div>
       </section>
-
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What Power Cable Quality Means</div>
           <h2 className="pp-meaning__h">A Bad Crimp Passes Continuity.<br />It Fails at 200 Amps.</h2>
@@ -94,20 +96,58 @@ export default function PowerBatteryPage() {
             <p className="pp-meaning__text">A standard 1A continuity test will pass a cold-crimped lug with 50 milliohms of contact resistance. At 200 amps, that 50 milliohms generates 2 watts of heat at the terminal — enough to degrade the insulation and eventually cause a thermal event. The only way to detect a marginal crimp joint is a resistance measurement with enough resolution to see the difference between a 1 milliohm good crimp and a 50 milliohm marginal crimp.</p>
             <p className="pp-meaning__text">For applications requiring HV insulation on top of high current, see <Link href="/products/high-voltage-harness" className="pp-meaning__link">high-voltage harness</Link> — we stack the orange jacket and hipot test with the power cable construction. For waterproof power cables used in marine and outdoor applications, see <Link href="/products/waterproof-harness" className="pp-meaning__link">waterproof harness</Link> for the IP sealing method that works with heavy-gauge conductors.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/battery-cable-ring-terminals.png" alt="Battery cable with ring terminals" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/power-cable-large-gauge.png" alt="Large gauge power cable cross section" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/ev-charging-handle-cable.png" alt="EV charging handle cable" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Power Cable Capability</div><h2 className="pp-caps__h">Six High-Current<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
-      <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Power Cable Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
-      <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Power Cable Flow</div><h2 className="pp-process__h">Spec to Resistance-Verified.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
-      <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Power Cable<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
-
-      <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Power Cable Note</div><p className="pp-quote__text">&ldquo;A 4/0 AWG lug crimped with a general-purpose tool instead of the correct die pulls the insulation away from the lug barrel and leaves an air gap. At 300 amps, that gap is a moisture ingress point that corrodes to 200 milliohms in six months. We crimp with the correct die for every conductor size and pull-test every lug before heat-shrink is applied.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Power Cable Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
-      <FAQAccordion label="Power Cable FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Power System Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div className="pp-related-grid__title">High Voltage Harness</div><div className="pp-related-grid__desc">Orange-jacket HV harnesses to 1000V DC with HVIL integration and 100% hipot test.</div><Link href="/products/high-voltage-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-related-grid__title">Waterproof Power Cables</div><div className="pp-related-grid__desc">IP68-rated power cables for marine, outdoor, and EV charging applications.</div><Link href="/products/waterproof-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/></svg><div className="pp-related-grid__title">Custom Wire Harness</div><div className="pp-related-grid__desc">Full harness assemblies combining power, signal, and control wiring in one build.</div><Link href="/products/custom-wire-harness" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
-
-      <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Power Cable Verticals</div><h2 className="pp-verticals__h">Where Power Cables Ship.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Automotive &amp; EV</div><div className="pp-verticals-grid__desc">EV battery pack interconnects, charging cables, and BMS wiring. XLPE 1000V, resistance matched.</div><Link href="/industries/automotive-ev" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Solar &amp; Energy</div><div className="pp-verticals-grid__desc">DC combiner wiring, BESS interconnects, and string cables. UL 4703 compliant to 1000V.</div><Link href="/industries/solar-energy" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">Motor feeds, welding leads, and generator output cables for 480V and 600V industrial systems.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Power Cable Capability</div><h2 className="pp-caps__h">Six High-Current<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Power Cable Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Power Cable Flow</div><h2 className="pp-process__h">Spec to Resistance-Verified.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Power Cable<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
+        <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Power Cable Verticals</div><h2 className="pp-verticals__h">Where Power Cables Ship.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Automotive &amp; EV</div><div className="pp-verticals-grid__desc">EV battery pack interconnects, charging cables, and BMS wiring. XLPE 1000V, resistance matched.</div><Link href="/industries/automotive-ev" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Solar &amp; Energy</div><div className="pp-verticals-grid__desc">DC combiner wiring, BESS interconnects, and string cables. UL 4703 compliant to 1000V.</div><Link href="/industries/solar-energy" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">Motor feeds, welding leads, and generator output cables for 480V and 600V industrial systems.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Power Cable Note</div><p className="pp-quote__text">&ldquo;A 4/0 AWG lug crimped with a general-purpose tool instead of the correct die pulls the insulation away from the lug barrel and leaves an air gap. At 300 amps, that gap is a moisture ingress point that corrodes to 200 milliohms in six months. We crimp with the correct die for every conductor size and pull-test every lug before heat-shrink is applied.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Power Cable Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
+        <FAQAccordion label="Power Cable FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Power System Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><div className="pp-related-grid__title">High Voltage Harness</div><div className="pp-related-grid__desc">Orange-jacket HV harnesses to 1000V DC with HVIL integration and 100% hipot test.</div><Link href="/products/high-voltage-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-related-grid__title">Waterproof Power Cables</div><div className="pp-related-grid__desc">IP68-rated power cables for marine, outdoor, and EV charging applications.</div><Link href="/products/waterproof-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/></svg><div className="pp-related-grid__title">Custom Wire Harness</div><div className="pp-related-grid__desc">Full harness assemblies combining power, signal, and control wiring in one build.</div><Link href="/products/custom-wire-harness" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Ethernet & USB Cable Assemblies | Superior Harness & Assembly",
@@ -85,8 +86,9 @@ export default function EthernetUSBPage() {
         </div>
         </div>
       </section>
-
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What Data Cable Quality Means</div>
           <h2 className="pp-meaning__h">A Miswired Pair Passes<br />Continuity. It Fails at Speed.</h2>
@@ -94,20 +96,58 @@ export default function EthernetUSBPage() {
             <p className="pp-meaning__text">A split pair in a Cat6 cable — where conductors from two different pairs are routed together — has correct continuity at DC and passes at 10 Mbps but fails at 100 Mbps because the pair balance is disrupted. A wire map test catches this; a simple continuity test does not. We run wire map on every Ethernet assembly because the failure mode is data-rate-dependent, not a binary pass/fail at DC.</p>
             <p className="pp-meaning__text">For higher frequency requirements where coaxial cable is appropriate, see <Link href="/products/coaxial-rf-microwave" className="pp-meaning__link">coaxial / RF / microwave</Link>. For EMI-immune optical solutions, see <Link href="/products/fiber-optic-twinax" className="pp-meaning__link">fiber optic & twinax</Link>. For power delivery over cable requiring high-current conductors, see <Link href="/products/power-battery" className="pp-meaning__link">power & battery cables</Link>.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/cat8-cable-rj45.png" alt="Cat8 ethernet cable with RJ45" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/usb-c-cable-assembly.png" alt="USB-C cable assembly" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/patch-panel-neat.png" alt="Patch panel cable management" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Data Cable Capability</div><h2 className="pp-caps__h">Six Ethernet &amp; USB<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
-      <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Data Cable Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
-      <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Data Cable Flow</div><h2 className="pp-process__h">Spec to Wire-Map Tested.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
-      <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Data Cable<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
-
-      <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Data Quality Note</div><p className="pp-quote__text">&ldquo;A split pair in a Cat6 cable has continuity at DC and fails at 100 Mbps. A wire map test catches it in 2 seconds. We do not skip the wire map to save 2 seconds per cable — we run it on every unit because that is the only way to guarantee the cable performs at the rated speed, not just at continuity check.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Assembly Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
-      <FAQAccordion label="Data Cable FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">High-Speed Alternatives</div><h2 className="pp-related__h">Signal Integrity Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10"/><path d="M2 12h20"/></svg><div className="pp-related-grid__title">Fiber Optic &amp; Twinax</div><div className="pp-related-grid__desc">EMI-immune optical assemblies for 100G and 400G data center and telecom interconnects.</div><Link href="/products/fiber-optic-twinax" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"/></svg><div className="pp-related-grid__title">Coaxial / RF</div><div className="pp-related-grid__desc">High-frequency coaxial assemblies for RF and microwave applications above the Ethernet frequency range.</div><Link href="/products/coaxial-rf-microwave" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg><div className="pp-related-grid__title">Shielded / Hermetic</div><div className="pp-related-grid__desc">High-coverage EMI shielding and hermetic sealing for harsh-environment data cable applications.</div><Link href="/products/shielded-hermetic" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
-
-      <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Data Cable Verticals</div><h2 className="pp-verticals__h">Where Data Cables Ship.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">M12 industrial Ethernet for robot, servo, and automation system connectivity in harsh environments.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Robotics &amp; Automation</div><div className="pp-verticals-grid__desc">Drag-chain rated Ethernet and USB assemblies for robot arm and linear axis data connections.</div><Link href="/industries/robotics-automation" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Medical Devices</div><div className="pp-verticals-grid__desc">LSZH USB and Ethernet assemblies for healthcare equipment with biocompatible material options.</div><Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Data Cable Capability</div><h2 className="pp-caps__h">Six Ethernet &amp; USB<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Data Cable Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Data Cable Flow</div><h2 className="pp-process__h">Spec to Wire-Map Tested.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Data Cable<br />Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
+        <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Data Cable Verticals</div><h2 className="pp-verticals__h">Where Data Cables Ship.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">M12 industrial Ethernet for robot, servo, and automation system connectivity in harsh environments.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Robotics &amp; Automation</div><div className="pp-verticals-grid__desc">Drag-chain rated Ethernet and USB assemblies for robot arm and linear axis data connections.</div><Link href="/industries/robotics-automation" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Medical Devices</div><div className="pp-verticals-grid__desc">LSZH USB and Ethernet assemblies for healthcare equipment with biocompatible material options.</div><Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Data Quality Note</div><p className="pp-quote__text">&ldquo;A split pair in a Cat6 cable has continuity at DC and fails at 100 Mbps. A wire map test catches it in 2 seconds. We do not skip the wire map to save 2 seconds per cable — we run it on every unit because that is the only way to guarantee the cable performs at the rated speed, not just at continuity check.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Assembly Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
+        <FAQAccordion label="Data Cable FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">High-Speed Alternatives</div><h2 className="pp-related__h">Signal Integrity Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10"/><path d="M2 12h20"/></svg><div className="pp-related-grid__title">Fiber Optic &amp; Twinax</div><div className="pp-related-grid__desc">EMI-immune optical assemblies for 100G and 400G data center and telecom interconnects.</div><Link href="/products/fiber-optic-twinax" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"/></svg><div className="pp-related-grid__title">Coaxial / RF</div><div className="pp-related-grid__desc">High-frequency coaxial assemblies for RF and microwave applications above the Ethernet frequency range.</div><Link href="/products/coaxial-rf-microwave" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg><div className="pp-related-grid__title">Shielded / Hermetic</div><div className="pp-related-grid__desc">High-coverage EMI shielding and hermetic sealing for harsh-environment data cable applications.</div><Link href="/products/shielded-hermetic" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

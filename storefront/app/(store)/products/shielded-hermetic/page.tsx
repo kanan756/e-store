@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import FAQAccordion from "@/components/FAQAccordion"
+import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
   title: "Shielded & Hermetic Cable Assemblies | Superior Harness & Assembly",
@@ -83,8 +84,9 @@ export default function ShieldedHermeticPage() {
           </div>
         </div>
       </section>
-
-      <section className="pp-meaning">
+      <ProductPageTabs tabs={[
+        { id: "overview", label: "Overview", content: (
+          <section className="pp-meaning">
         <div className="pp-meaning__inner">
           <div className="pp-meaning__label">What Shielding Means Here</div>
           <h2 className="pp-meaning__h">A Broken Shield is an Antenna.<br />Termination is Everything.</h2>
@@ -92,20 +94,58 @@ export default function ShieldedHermeticPage() {
             <p className="pp-meaning__text">Using high-quality shielded cable is only half the battle. If the shield is improperly terminated at the connector—leaving gaps or pigtails that are too long—the shield becomes an antenna that radiates or absorbs EMI. We utilize 360-degree banding, precision solder sleeves, and proper drain wire routing to ensure your signal integrity is protected from end to end.</p>
             <p className="pp-meaning__text">For applications requiring RF signal routing, see <Link href="/products/coaxial-rf-microwave" className="pp-meaning__link">coaxial / RF / microwave</Link>. For assemblies requiring total environmental sealing without pressure differentials, see <Link href="/products/waterproof-harness" className="pp-meaning__link">waterproof harnesses</Link>. For high-speed data requiring absolute EMI immunity, see <Link href="/products/fiber-optic-twinax" className="pp-meaning__link">fiber optic & twinax</Link>.</p>
           </div>
-        </div>
+        
+      
+      <div className="pp-ov-gallery">
+        <img src="/images/hermetic-connector-glass.png" alt="Hermetic glass-to-metal sealed connector" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/braided-shield-termination.png" alt="Braided shield termination" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/mil-spec-circular-connector.png" alt="MIL-spec circular connector" className="pp-ov-gallery__img" loading="lazy" />
+      </div>
+      <div className="pp-ov-divider" />
+      <div className="pp-ov-section-label">Key Specifications</div>
+      <div className="pp-ov-keyspecs">
+        {SPECS.slice(0, 4).map(s => (
+          <div key={s.k} className="pp-ov-spec">
+            <div className="pp-ov-spec__k">{s.k}</div>
+            <div className="pp-ov-spec__v">{s.v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="pp-ov-section-label">Core Capabilities</div>
+      <div className="pp-ov-caps-preview">
+        {CAPS.slice(0, 3).map(c => (
+          <div key={c.title} className="pp-ov-cap">
+            <div className="pp-ov-cap__title">{c.title}</div>
+            <div className="pp-ov-cap__desc">{c.desc}</div>
+          </div>
+        ))}
+      </div>
+</div>
       </section>
-
-      <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Shielding Capability Block</div><h2 className="pp-caps__h">Six Shielded &amp; Hermetic<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
-      <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Shielded / Hermetic Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
-      <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Production Flow</div><h2 className="pp-process__h">Spec to Tested Cable.<br />Six Steps.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
-      <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Shielded Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
-
-      <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Engineering Note</div><p className="pp-quote__text">&ldquo;Hermetic sealing is unforgiving. A microscopic void in the potting compound or a poorly wetted glass-to-metal seal will inevitably lead to a leak under pressure or vacuum. We monitor curing profiles and verify with strict leak testing because visual inspection is never enough for hermeticity.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Advanced Assembly Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
-      <FAQAccordion label="Shielded / Hermetic FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
-
-      <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Performance Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg><div className="pp-related-grid__title">Coaxial / RF Assemblies</div><div className="pp-related-grid__desc">High-frequency coaxial assemblies with precision SMA, N-type, and BNC termination.</div><Link href="/products/coaxial-rf-microwave" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-related-grid__title">Waterproof Harnesses</div><div className="pp-related-grid__desc">IP67/IP68 sealed assemblies for marine, outdoor, and heavy equipment environments.</div><Link href="/products/waterproof-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div className="pp-related-grid__title">Ethernet &amp; USB</div><div className="pp-related-grid__desc">Shielded Cat6A, Cat8, and USB assemblies for data integrity in noisy industrial settings.</div><Link href="/products/ethernet-usb" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
-
-      <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Where It Ships</div><h2 className="pp-verticals__h">Shielded Verticals.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Aerospace &amp; Defense</div><div className="pp-verticals-grid__desc">MIL-SPEC assemblies for radar, avionics, and EW systems. ITAR registered facility.</div><Link href="/industries/aerospace-defense" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">EMI-immune cabling for automated factory equipment and variable frequency drives.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Medical Devices</div><div className="pp-verticals-grid__desc">Heavily shielded assemblies for MRI and ultrasound diagnostic imaging equipment.</div><Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+        )},
+        { id: "capabilities", label: "Capabilities", content: (
+          <section className="pp-caps"><div className="pp-caps__inner"><div className="pp-caps__label">Shielding Capability Block</div><h2 className="pp-caps__h">Six Shielded &amp; Hermetic<br />Capabilities.</h2><div className="pp-caps-grid">{CAPS.map(c => (<div key={c.title} className="pp-caps-grid__cell"><svg className="pp-caps-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-caps-grid__title">{c.title}</div><div className="pp-caps-grid__desc">{c.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "specs", label: "Specifications", content: (
+          <section className="pp-specs"><div className="pp-specs__inner"><div className="pp-specs__label">Specification Sheet</div><h2 className="pp-specs__h">Shielded / Hermetic Envelope.</h2><table className="pp-spec-table"><tbody>{SPECS.map(s => (<tr key={s.k}><td className="spec-key">{s.k}</td><td className="spec-val">{s.v}</td></tr>))}</tbody></table></div></section>
+        )},
+        { id: "process", label: "Process", content: (
+          <section className="pp-process"><div className="pp-process__inner"><div className="pp-process__label">Production Flow</div><h2 className="pp-process__h">Spec to Tested Cable.<br />Six Steps.</h2><div className="pp-process-grid">{PROCESS.map(p => (<div key={p.n} className="pp-process-grid__cell"><div className="pp-process-grid__num">{p.n}</div><div className="pp-process-grid__title">{p.title}</div><div className="pp-process-grid__desc">{p.desc}</div></div>))}</div></div></section>
+        )},
+        { id: "applications", label: "Applications", content: (
+          <>
+        <section className="pp-usecases"><div className="pp-usecases__inner"><div className="pp-usecases__label">Application Map</div><h2 className="pp-usecases__h">Six Shielded Use Cases.</h2><div className="pp-usecases-grid">{USECASES.map(u => (<div key={u.title} className="pp-usecases-grid__cell"><div className="pp-usecases-grid__title">{u.title}</div><div className="pp-usecases-grid__desc">{u.desc}</div></div>))}</div></div></section>
+        <section className="pp-verticals"><div className="pp-verticals__inner"><div className="pp-verticals__label">Where It Ships</div><h2 className="pp-verticals__h">Shielded Verticals.</h2><div className="pp-verticals-grid"><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Aerospace &amp; Defense</div><div className="pp-verticals-grid__desc">MIL-SPEC assemblies for radar, avionics, and EW systems. ITAR registered facility.</div><Link href="/industries/aerospace-defense" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Industrial / Factory</div><div className="pp-verticals-grid__desc">EMI-immune cabling for automated factory equipment and variable frequency drives.</div><Link href="/industries/industrial-factory" className="pp-verticals-grid__link">See Industry →</Link></div><div className="pp-verticals-grid__cell"><div className="pp-verticals-grid__title">Medical Devices</div><div className="pp-verticals-grid__desc">Heavily shielded assemblies for MRI and ultrasound diagnostic imaging equipment.</div><Link href="/industries/medical-devices" className="pp-verticals-grid__link">See Industry →</Link></div></div></div></section>
+          </>
+        )},
+        { id: "resources", label: "Resources", content: (
+          <>
+        <section className="pp-quote"><div className="pp-quote__inner"><div className="pp-quote__card"><div className="pp-quote__label">Engineering Note</div><p className="pp-quote__text">&ldquo;Hermetic sealing is unforgiving. A microscopic void in the potting compound or a poorly wetted glass-to-metal seal will inevitably lead to a leak under pressure or vacuum. We monitor curing profiles and verify with strict leak testing because visual inspection is never enough for hermeticity.&rdquo;</p><div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Advanced Assembly Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div></div></div></section>
+        <FAQAccordion label="Shielded / Hermetic FAQ" heading="Six Questions Engineers Ask." items={FAQS} />
+        <section className="pp-related"><div className="pp-related__inner"><div className="pp-related__label">Related Assemblies</div><h2 className="pp-related__h">Performance Variants.</h2><div className="pp-related-grid"><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg><div className="pp-related-grid__title">Coaxial / RF Assemblies</div><div className="pp-related-grid__desc">High-frequency coaxial assemblies with precision SMA, N-type, and BNC termination.</div><Link href="/products/coaxial-rf-microwave" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div className="pp-related-grid__title">Waterproof Harnesses</div><div className="pp-related-grid__desc">IP67/IP68 sealed assemblies for marine, outdoor, and heavy equipment environments.</div><Link href="/products/waterproof-harness" className="pp-related-grid__link">Read More →</Link></div><div className="pp-related-grid__cell"><svg className="pp-related-grid__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><div className="pp-related-grid__title">Ethernet &amp; USB</div><div className="pp-related-grid__desc">Shielded Cat6A, Cat8, and USB assemblies for data integrity in noisy industrial settings.</div><Link href="/products/ethernet-usb" className="pp-related-grid__link">Read More →</Link></div></div></div></section>
+          </>
+        )},
+      ]} />
     </div>
   )
 }

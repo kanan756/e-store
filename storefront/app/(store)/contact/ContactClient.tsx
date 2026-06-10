@@ -53,19 +53,16 @@ export default function ContactClient() {
   }
 
   return (
-    <div id="contact" style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80 }}>
-      <div className="W" style={{ maxWidth: 900 }}>
-        <div className="contact-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 64, alignItems: "start" }}>
+    <div id="contact" style={{ minHeight: "100vh", paddingTop: 160, paddingBottom: 80 }}>
+      <div className="W">
+        <div className="contact-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr", gap: 80, alignItems: "start" }}>
 
           {/* Left — Info */}
-          <div>
-            <div className="lbl" style={{ marginBottom: 16 }}>CONTACT US</div>
-            <h1 className="D2" style={{ marginBottom: 20 }}>Get in touch with our team</h1>
-            <p className="Bd" style={{ marginBottom: 20 }}>
-              Get in touch with our team to discuss your project requirements. Whether you need a prototype or full-scale production, we are ready to support your needs with reliable and cost-effective solutions.
-            </p>
-            <p className="Bd" style={{ marginBottom: 40 }}>
-              Our team is available to answer your questions, review your drawings, and provide expert guidance for your project.
+          <div style={{ position: "sticky", top: 104 }}>
+            <div className="lbl" style={{ marginBottom: 16 }}>GET IN TOUCH</div>
+            <h1 className="D2" style={{ marginBottom: 24, lineHeight: 1.1 }}>Let&apos;s build something together.</h1>
+            <p className="Bd" style={{ marginBottom: 40, color: "var(--text2)" }}>
+              Our engineering team is ready to assist with technical reviews, production routing, low MOQ planning, and complete custom quoting.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -104,7 +101,13 @@ export default function ContactClient() {
           </div>
 
           {/* Right — Form */}
-          <div style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 36 }}>
+          <div style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: "48px 56px" }}>
+            {/* Form header */}
+            <div style={{ marginBottom: 32, paddingBottom: 28, borderBottom: "1px solid var(--bd)" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--acc)", marginBottom: 10 }}>Get In Touch</div>
+              <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 24, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Send Us a Message</h2>
+              <p style={{ fontSize: 14, color: "var(--text2)", margin: 0, lineHeight: 1.6 }}>For product inquiries, quotes, or technical questions — fill out the form and we'll respond within 1–2 business days.</p>
+            </div>
             {status === "success" ? (
               <div style={{ textAlign: "center", padding: "40px 0" }}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
@@ -126,10 +129,10 @@ export default function ContactClient() {
                 >Send Another Message</button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: "grid", gap: 20 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <form onSubmit={handleSubmit} style={{ display: "grid", gap: 22 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                   <div>
-                    <label style={s.label}>Your Name *</label>
+                    <label style={s.label}>Full Name *</label>
                     <input style={s.input} value={form.name} onChange={set("name")} required placeholder="John Doe" />
                   </div>
                   <div>
@@ -138,27 +141,33 @@ export default function ContactClient() {
                   </div>
                 </div>
 
-                <div>
-                  <label style={s.label}>Subject *</label>
-                  <select style={s.input} value={form.subject} onChange={set("subject")} required>
-                    <option value="">Select a topic…</option>
-                    <option>Product Inquiry</option>
-                    <option>Order Support</option>
-                    <option>Partnership / B2B</option>
-                    <option>General Question</option>
-                    <option>Other</option>
-                  </select>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                  <div>
+                    <label style={s.label}>Phone Number</label>
+                    <input style={s.input} type="tel" placeholder="+1 (000) 000-0000" />
+                  </div>
+                  <div>
+                    <label style={s.label}>Subject *</label>
+                    <select style={s.input} value={form.subject} onChange={set("subject")} required>
+                      <option value="">Select a topic…</option>
+                      <option>Product Inquiry</option>
+                      <option>Order Support</option>
+                      <option>Partnership / B2B</option>
+                      <option>General Question</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
                   <label style={s.label}>Message *</label>
                   <textarea
-                    style={{ ...s.input, minHeight: 140, resize: "vertical" }}
+                    style={{ ...s.input, minHeight: 160, resize: "vertical" }}
                     value={form.message}
                     onChange={set("message")}
                     required
                     minLength={10}
-                    placeholder="Tell us what you need…"
+                    placeholder="Tell us about your project, quantities, timeline, or any technical requirements…"
                   />
                 </div>
 

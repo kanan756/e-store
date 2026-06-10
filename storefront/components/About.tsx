@@ -10,7 +10,7 @@ function ArrowIcon() {
 
 export default function About() {
   return (
-    <section id="about" className="sec" style={{ background: "var(--bg)", borderTop: "1px solid var(--bd)" }}>
+    <section id="about" className="sec" style={{ background: "var(--bg)" }}>
       <div className="W">
         <div style={{ maxWidth: 820, margin: "0 auto", textAlign: "center" }}>
           <h2 className="D2 rv d1" style={{ marginBottom: 32, textTransform: "uppercase" }}>
