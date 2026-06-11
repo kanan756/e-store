@@ -160,6 +160,38 @@ function isAccepted(f: File) {
   return f.type.startsWith("image/") || ACCEPTED_MIME.has(f.type) || /\.(dwg|dxf)$/i.test(f.name)
 }
 
+// Compress images before upload — keeps mobile camera photos well under server limits.
+// Non-image files pass through unchanged.
+async function compressImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file
+  return new Promise((resolve) => {
+    const img = document.createElement("img")
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const MAX_PX = 1920
+      const ratio = Math.min(1, MAX_PX / Math.max(img.naturalWidth, img.naturalHeight))
+      const w = Math.round(img.naturalWidth * ratio)
+      const h = Math.round(img.naturalHeight * ratio)
+      const canvas = document.createElement("canvas")
+      canvas.width = w
+      canvas.height = h
+      canvas.getContext("2d")!.drawImage(img, 0, 0, w, h)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { resolve(file); return }
+          const name = file.name.replace(/\.[^.]+$/, ".jpg")
+          resolve(new File([blob], name, { type: "image/jpeg" }))
+        },
+        "image/jpeg",
+        0.82
+      )
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
+    img.src = url
+  })
+}
+
 function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -168,16 +200,23 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [files, setFiles] = useState<File[]>([])
   const [fileError, setFileError] = useState("")
   const [dragOver, setDragOver] = useState(false)
+  const [compressing, setCompressing] = useState(false)
 
-  function addFiles(incoming: File[]) {
+  async function addFiles(incoming: File[]) {
     setFileError("")
     const valid = incoming.filter(isAccepted)
     if (valid.length < incoming.length) setFileError("Some files were skipped — only images, PDF, DWG, and DOCX are accepted.")
-    const merged = [...files, ...valid].slice(0, MAX_FILES)
-    if (files.length + valid.length > MAX_FILES) setFileError(`Max ${MAX_FILES} files allowed.`)
-    const total = merged.reduce((s, f) => s + f.size, 0)
-    if (total > MAX_TOTAL_BYTES) { setFileError("Total size exceeds 10 MB. Remove a file and try again."); return }
-    setFiles(merged)
+    if (valid.length === 0) return
+    setCompressing(true)
+    const compressed = await Promise.all(valid.map(compressImage))
+    setCompressing(false)
+    setFiles(prev => {
+      const merged = [...prev, ...compressed].slice(0, MAX_FILES)
+      if (prev.length + compressed.length > MAX_FILES) setFileError(`Max ${MAX_FILES} files allowed.`)
+      const total = merged.reduce((s, f) => s + f.size, 0)
+      if (total > MAX_TOTAL_BYTES) { setFileError("Total size exceeds 10 MB. Remove a file and try again."); return prev }
+      return merged
+    })
   }
 
   function removeFile(i: number) { setFiles(fs => fs.filter((_, j) => j !== i)) }
@@ -302,14 +341,14 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 multiple
                 accept="image/*,.pdf,.dwg,.dxf,.doc,.docx"
                 style={{ display: "none" }}
-                onChange={e => { addFiles(Array.from(e.target.files ?? [])); e.target.value = "" }}
+                onChange={async e => { const list = Array.from(e.target.files ?? []); e.target.value = ""; await addFiles(list) }}
               />
               <div
-                className={`qu-dropzone${dragOver ? " drag-over" : ""}`}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                className={`qu-dropzone${dragOver ? " drag-over" : ""}${compressing ? " drag-over" : ""}`}
+                onClick={() => !compressing && fileInputRef.current?.click()}
+                onDragOver={e => { e.preventDefault(); if (!compressing) setDragOver(true) }}
                 onDragLeave={() => setDragOver(false)}
-                onDrop={e => { e.preventDefault(); setDragOver(false); addFiles(Array.from(e.dataTransfer.files)) }}
+                onDrop={async e => { e.preventDefault(); setDragOver(false); await addFiles(Array.from(e.dataTransfer.files)) }}
               >
                 <div className="qu-dropzone__icon">
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -318,7 +357,7 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                     <line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                 </div>
-                <div className="qu-dropzone__title">Click to select files</div>
+                <div className="qu-dropzone__title">{compressing ? "Optimising images…" : "Click to select files"}</div>
                 <div className="qu-dropzone__types">PDF, DWG, DOCX, Images</div>
                 <div className="qu-dropzone__limit">Max {MAX_FILES} files · 10 MB total</div>
               </div>
@@ -339,9 +378,9 @@ function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               )}
             </div>
 
-            <button type="submit" className="quote-modal__submit" disabled={sending}>
-              {sending ? "Sending..." : "Submit Request"}
-              {!sending && (
+            <button type="submit" className="quote-modal__submit" disabled={sending || compressing}>
+              {compressing ? "Optimising images…" : sending ? "Sending..." : "Submit Request"}
+              {!sending && !compressing && (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>

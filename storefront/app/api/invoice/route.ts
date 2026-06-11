@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateInvoicePdf, InvoiceLineItem } from "@/lib/pdf";
 import { verifyInvoiceToken } from "@/lib/invoice-token";
+import Stripe from "stripe";
 
 function parseProductString(product: string): Array<{ name: string; quantity: number }> {
   return product
@@ -29,13 +30,15 @@ export async function GET(request: Request) {
   }
 
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-01-27.acacia" as any });
+
     let lookupId = paymentId;
+    let stripeSession: Stripe.Checkout.Session | null = null;
+
     if (paymentId.startsWith("cs_")) {
-      const Stripe = (await import("stripe")).default;
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-01-27.acacia" as any });
-      const session = await stripe.checkout.sessions.retrieve(paymentId);
-      if (session.payment_intent) {
-        lookupId = session.payment_intent as string;
+      stripeSession = await stripe.checkout.sessions.retrieve(paymentId);
+      if (stripeSession.payment_intent) {
+        lookupId = stripeSession.payment_intent as string;
       }
     }
 
@@ -45,13 +48,42 @@ export async function GET(request: Request) {
       getProducts().catch(() => []),
     ]);
 
-    if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    const productMap = new Map(products.map((p) => [p.name.toLowerCase(), p.price]));
+
+    // Determine invoice data: prefer the saved order, fall back to Stripe session
+    // when the webhook hasn't written the order to Sheets yet (race condition on mobile).
+    let orderId: string;
+    let customerName: string;
+    let email: string;
+    let productStr: string;
+    let amount: number;
+
+    if (order) {
+      orderId = order.orderId;
+      customerName = order.customerName;
+      email = order.email;
+      productStr = order.product;
+      amount = order.amount;
+    } else {
+      // Order not in Sheets yet — fetch from Stripe session directly
+      if (!stripeSession && lookupId.startsWith("pi_")) {
+        const sessions = await stripe.checkout.sessions.list({ payment_intent: lookupId, limit: 1 });
+        stripeSession = sessions.data[0] ?? null;
+      }
+
+      if (!stripeSession) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
+
+      const meta = stripeSession.metadata ?? {};
+      orderId = `INV-${stripeSession.id.slice(-8).toUpperCase()}`;
+      customerName = meta.customerName || stripeSession.customer_details?.name || "Customer";
+      email = meta.email || stripeSession.customer_details?.email || "";
+      productStr = meta.productSummary || "Stripe Order";
+      amount = stripeSession.amount_total != null ? stripeSession.amount_total / 100 : 0;
     }
 
-    const productMap = new Map(products.map((p) => [p.name.toLowerCase(), p.price]));
-    const parsed = parseProductString(order.product);
-
+    const parsed = parseProductString(productStr);
     const items: InvoiceLineItem[] = parsed.map((entry) => ({
       name: entry.name,
       quantity: entry.quantity,
@@ -59,18 +91,18 @@ export async function GET(request: Request) {
     }));
 
     const pdfBuffer = await generateInvoicePdf({
-      orderId: order.orderId,
-      customerName: order.customerName,
-      email: order.email,
+      orderId,
+      customerName,
+      email,
       items,
-      amount: order.amount,
+      amount,
     });
 
     return new NextResponse(pdfBuffer as any, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Invoice_${order.orderId}.pdf"`,
+        "Content-Disposition": `attachment; filename="Invoice_${orderId}.pdf"`,
       },
     });
   } catch (err) {

@@ -53,12 +53,12 @@ export default function ContactClient() {
   }
 
   return (
-    <div id="contact" style={{ minHeight: "100vh", paddingTop: 160, paddingBottom: 80 }}>
+    <div id="contact" className="contact-page-wrap" style={{ minHeight: "100vh", paddingTop: 160, paddingBottom: 80 }}>
       <div className="W">
         <div className="contact-layout" style={{ display: "grid", gridTemplateColumns: "1fr 1.8fr", gap: 80, alignItems: "start" }}>
 
           {/* Left — Info */}
-          <div style={{ position: "sticky", top: 104 }}>
+          <div className="contact-info-col" style={{ position: "sticky", top: 104 }}>
             <div className="lbl" style={{ marginBottom: 16 }}>GET IN TOUCH</div>
             <h1 className="D2" style={{ marginBottom: 24, lineHeight: 1.1 }}>Let&apos;s build something together.</h1>
             <p className="Bd" style={{ marginBottom: 40, color: "var(--text2)" }}>

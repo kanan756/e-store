@@ -1565,6 +1565,8 @@ button {
 
   /* ── Contact ──────────────────────────────────────────── */
   .contact-layout { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .contact-info-col { position: static !important; }
+  .contact-page-wrap { padding-top: 100px !important; }
 
   /* ── About page ───────────────────────────────────────── */
   .about-services-grid { grid-template-columns: 1fr !important; }
