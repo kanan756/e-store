@@ -90,20 +90,50 @@ function IcoChevron({ style }: { style?: React.CSSProperties } = {}) {
 
 const PRODUCTS_WIRE = [
   { label: "Custom Wire Harness", href: "/products/custom-wire-harness" },
-  { label: "Waterproof Harness", href: "/products/waterproof-harness" },
+  { label: "Multi-Branch Wire Harnesses", href: "/products/multi-branch-harness" },
+  { label: "Battery Cable Assemblies", href: "/products/power-battery" },
+  { label: "High-Flex Robotic Harnesses", href: "/products/high-flex-robotic-harness" },
+  { label: "Control Panel Wiring", href: "/products/control-panel-wiring" },
   { label: "High Voltage Harness", href: "/products/high-voltage-harness" },
-  { label: "Overmolded Harness", href: "/products/overmolded-harness" },
-  { label: "Prototype / NPI", href: "/products/prototype-npi" },
+  { label: "Waterproof Harness", href: "/products/waterproof-harness" },
+]
+
+const PRODUCTS_OVERMOLDED = [
+  { label: "Overmolded Harness Overview", href: "/products/overmolded-harness" },
+  { label: "USB Overmolded Assemblies", href: "/products/usb-overmolded" },
+  { label: "Circular Connector Assemblies", href: "/products/circular-connector" },
+  { label: "Custom Strain Relief Molding", href: "/products/strain-relief-molding" },
+  { label: "Multi-Shot Molded Cable", href: "/products/multi-shot-molded" },
+  { label: "Connector Molding Services", href: "/products/connector-molding" },
+]
+
+const PRODUCTS_COIL = [
+  { label: "Coil / Spiral Cable Overview", href: "/products/coil-spiral-cable" },
+  { label: "Industrial Coil Cables", href: "/products/industrial-coil-cable" },
+  { label: "Medical Coiled Cable Assembly", href: "/products/medical-coil-cable" },
+  { label: "Hi-Flex Robotic Coil Cable", href: "/products/hi-flex-robotic-coil-cable" },
+  { label: "Trailer & Vehicle Coil Cable", href: "/products/trailer-vehicle-coil-cable" },
+  { label: "Custom OEM Coil Assemblies", href: "/products/custom-oem-coil-cable" },
+  { label: "Overmolded Coil Cable", href: "/products/overmolded-coil-cable" },
+  { label: "Signal Coil Cable", href: "/products/signal-coil-cable" },
+  { label: "Aviation Coil Cables", href: "/products/aviation-coil-cable" },
 ]
 
 const PRODUCTS_CABLE = [
   { label: "Cable Assembly Overview", href: "/products/cable-assembly" },
   { label: "Medical Cable Assemblies", href: "/products/medical-cable-assemblies" },
   { label: "Coaxial / RF / Microwave", href: "/products/coaxial-rf-microwave" },
-  { label: "Power & Battery", href: "/products/power-battery" },
   { label: "Ethernet & USB", href: "/products/ethernet-usb" },
   { label: "Fiber Optic & Twinax", href: "/products/fiber-optic-twinax" },
   { label: "Shielded / Hermetic", href: "/products/shielded-hermetic" },
+]
+
+const PRODUCTS_ADVANCED = [
+  { label: "PCB Assemblies", href: "/products/pcb-assemblies" },
+  { label: "Electromechanical Assemblies", href: "/products/electromechanical" },
+  { label: "Robotics & Automation Solutions", href: "/products/robotics-automation" },
+  { label: "EV & Renewable Energy Solutions", href: "/products/ev-renewable-energy" },
+  { label: "Prototype Engineering Services", href: "/products/prototype-npi" },
 ]
 
 const INDUSTRIES_DD = [
@@ -432,6 +462,8 @@ export default function Header() {
 
           {/* Desktop navigation */}
           <nav className="hdr__nav">
+            <Link href="/" data-active={pathname === "/" ? "true" : undefined}>Home</Link>
+
             {/* Products — mega dropdown */}
             <div className="hdr__mega-wrap" ref={productsDDRef} data-open={productsOpen ? "true" : undefined}>
               <button
@@ -442,7 +474,7 @@ export default function Header() {
               >
                 Products <IcoChevron />
               </button>
-              <div className="hdr__mega">
+              <div className="hdr__mega hdr__mega--wide">
                 <div className="hdr__mega-col">
                   <div className="hdr__mega-section-title">
                     <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
@@ -455,9 +487,36 @@ export default function Header() {
                 <div className="hdr__mega-col">
                   <div className="hdr__mega-section-title">
                     <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
+                    Overmolded Cable Assembly
+                  </div>
+                  {PRODUCTS_OVERMOLDED.map(item => (
+                    <Link key={item.href} href={item.href}>{item.label}</Link>
+                  ))}
+                </div>
+                <div className="hdr__mega-col">
+                  <div className="hdr__mega-section-title">
+                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
+                    Coil / Spiral Cable
+                  </div>
+                  {PRODUCTS_COIL.map(item => (
+                    <Link key={item.href} href={item.href}>{item.label}</Link>
+                  ))}
+                </div>
+                <div className="hdr__mega-col">
+                  <div className="hdr__mega-section-title">
+                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
                     Cable Assembly
                   </div>
                   {PRODUCTS_CABLE.map(item => (
+                    <Link key={item.href} href={item.href}>{item.label}</Link>
+                  ))}
+                </div>
+                <div className="hdr__mega-col">
+                  <div className="hdr__mega-section-title">
+                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
+                    Advanced Solutions
+                  </div>
+                  {PRODUCTS_ADVANCED.map(item => (
                     <Link key={item.href} href={item.href}>{item.label}</Link>
                   ))}
                 </div>
@@ -491,14 +550,14 @@ export default function Header() {
 
           {/* Right icons */}
           <div className="hdr__icons" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            {/* Shop Online */}
+            <Link href="/shop" className="hdr--desk hdr-shop-btn">
+              Shop Online
+            </Link>
+
             {/* Track Order */}
             <Link href="/track-order" className="hdr--desk" style={{ fontFamily: "var(--font-sora), sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.09em", color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
               Track Order
-            </Link>
-
-            {/* Shop */}
-            <Link href="/shop" className="hdr--desk hdr-shop-btn">
-              Shop
             </Link>
 
             {/* Cart */}
@@ -549,8 +608,20 @@ export default function Header() {
                 {PRODUCTS_WIRE.map(item => (
                   <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
                 ))}
+                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Overmolded Cable Assembly</div>
+                {PRODUCTS_OVERMOLDED.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
+                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Coil / Spiral Cable</div>
+                {PRODUCTS_COIL.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
                 <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Cable Assembly</div>
                 {PRODUCTS_CABLE.map(item => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
+                ))}
+                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Advanced Solutions</div>
+                {PRODUCTS_ADVANCED.map(item => (
                   <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
                 ))}
               </div>
@@ -597,10 +668,10 @@ export default function Header() {
 
           {/* Static Links */}
           {[
+            { href: "/shop", label: "Shop Online" },
             { href: "/track-order", label: "Track Order" },
             { href: "/about", label: "About" },
             { href: "/contact", label: "Contact" },
-            { href: "/shop", label: "Shop" },
           ].map(({ href, label }, i) => (
             <Link
               key={href}

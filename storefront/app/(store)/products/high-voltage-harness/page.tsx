@@ -74,7 +74,7 @@ export default function HighVoltageHarnessPage() {
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">
-                <img src="/images/high-voltage-wiring-harness.jpg" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                <img src="/images/high-voltage-wiring-harness.webp" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
               </div>
               <div className="pp-hero__stats-grid">
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">1000V</div><div className="pp-hero__stat-lbl">Max DC Rating</div></div>
@@ -99,9 +99,9 @@ export default function HighVoltageHarnessPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/hv-orange-harness.png" alt="High voltage orange harness" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/hipot-test-setup.png" alt="Hipot dielectric withstand test" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/hv-battery-interconnect.png" alt="HV battery interconnect cables" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/hv-orange-harness.webp" alt="High voltage orange harness" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/hipot-test-setup.webp" alt="Hipot dielectric withstand test" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/hv-battery-interconnect.webp" alt="HV battery interconnect cables" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

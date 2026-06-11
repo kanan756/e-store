@@ -97,9 +97,9 @@ export default function ShieldedHermeticPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/hermetic-connector-glass.png" alt="Hermetic glass-to-metal sealed connector" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/braided-shield-termination.png" alt="Braided shield termination" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/mil-spec-circular-connector.png" alt="MIL-spec circular connector" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/hermetic-connector-glass.webp" alt="Hermetic glass-to-metal sealed connector" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/braided-shield-termination.webp" alt="Braided shield termination" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/mil-spec-circular-connector.webp" alt="MIL-spec circular connector" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

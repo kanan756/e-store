@@ -74,7 +74,7 @@ export default function PrototypeNPIPage() {
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">
-                <img src="/images/automatic-cut-and-strip.png" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                <img src="/images/automatic-cut-and-strip.webp" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
               </div>
               <div className="pp-hero__stats-grid">
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">1 Pc</div><div className="pp-hero__stat-lbl">Min. Order</div></div>
@@ -99,9 +99,9 @@ export default function PrototypeNPIPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/prototype-harness-bench.png" alt="Prototype harness on workbench" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/first-article-measurement.png" alt="First article inspection measurement" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/npi-drawing-review.png" alt="NPI drawing review" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/prototype-harness-bench.webp" alt="Prototype harness on workbench" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/first-article-measurement.webp" alt="First article inspection measurement" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/npi-drawing-review.webp" alt="NPI drawing review" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

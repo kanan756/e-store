@@ -73,7 +73,7 @@ export default function MedicalCableAssembliesPage() {
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">
-                <img src="/images/medical-cable.png" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                <img src="/images/medical-cable.webp" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
               </div>
               <div className="pp-hero__stats-grid">
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">IEC 60601</div><div className="pp-hero__stat-lbl">Compliance Aware</div></div>
@@ -98,9 +98,9 @@ export default function MedicalCableAssembliesPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/medical-device-cable.png" alt="Medical device cable assembly" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/cleanroom-cable-assembly.png" alt="Cleanroom cable assembly" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/biocompatible-cable-coil.png" alt="Biocompatible cable coil" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/medical-device-cable.webp" alt="Medical device cable assembly" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/cleanroom-cable-assembly.webp" alt="Cleanroom cable assembly" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/biocompatible-cable-coil.webp" alt="Biocompatible cable coil" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

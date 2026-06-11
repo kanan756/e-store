@@ -74,7 +74,7 @@ export default function OvermoldedHarnessPage() {
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">
-                <img src="/images/over-molding.png" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                <img src="/images/over-molding.webp" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
               </div>
               <div className="pp-hero__stats-grid">
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">IP68</div><div className="pp-hero__stat-lbl">Top Seal Rating</div></div>
@@ -99,9 +99,9 @@ export default function OvermoldedHarnessPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/overmold-tpe-closeup.png" alt="TPE overmold strain relief closeup" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/overmold-tooling.png" alt="Aluminum overmold tooling" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/ip68-water-immersion.png" alt="IP68 water immersion validation" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/overmold-tpe-closeup.webp" alt="TPE overmold strain relief closeup" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/overmold-tooling.webp" alt="Aluminum overmold tooling" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/ip68-water-immersion.webp" alt="IP68 water immersion validation" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

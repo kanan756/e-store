@@ -99,9 +99,9 @@ export default function FiberOpticTwinaxPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/fiber-optic-lc-connectors.png" alt="LC fiber optic connectors" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/twinax-dac-cable.png" alt="Twinax DAC cable with SFP+" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/fiber-optic-bundle.png" alt="Fiber optic cable bundle" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/fiber-optic-lc-connectors.webp" alt="LC fiber optic connectors" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/twinax-dac-cable.webp" alt="Twinax DAC cable with SFP+" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/fiber-optic-bundle.webp" alt="Fiber optic cable bundle" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

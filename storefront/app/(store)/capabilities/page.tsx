@@ -13,7 +13,7 @@ const CAPS = [
   {
     n: "01",
     title: "Automatic Cut & Strip",
-    img: "/images/automatic-cut-and-strip.png",
+    img: "/images/automatic-cut-and-strip.webp",
     desc: "Computerized wire cutting and stripping machines deliver precise lengths and clean insulation removal for repeatable, high-quality terminations at production volume. Our equipment handles wire gauges from 28 AWG through 2/0 AWG.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -26,7 +26,7 @@ const CAPS = [
   {
     n: "02",
     title: "Terminal Application & Crimping",
-    img: "/images/terminal-application.png",
+    img: "/images/terminal-application.webp",
     desc: "High-precision presses and applicators ensure strong, reliable electrical connections. Every crimp profile is validated with pull testing to IPC/WHMA-A-620 acceptance criteria. We run over 400 terminal configurations in-house.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -37,7 +37,7 @@ const CAPS = [
   {
     n: "03",
     title: "Ultrasonic Splicing",
-    img: "/images/ultrasonic-splicing.png",
+    img: "/images/ultrasonic-splicing.webp",
     desc: "Ultrasonic welding creates strong, reliable wire splices without soldering — delivering excellent conductivity, reduced resistance, and long-lasting performance. Ideal for high-current and high-vibration applications.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -48,7 +48,7 @@ const CAPS = [
   {
     n: "04",
     title: "Overmolding & Potting",
-    img: "/images/over-molding.png",
+    img: "/images/over-molding.webp",
     desc: "Custom mold design for your connector geometry adds protection against harsh environments, providing strain relief and enhanced durability for finished assemblies. IP67/IP68-rated configurations available.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -59,7 +59,7 @@ const CAPS = [
   {
     n: "05",
     title: "In-House Testing",
-    img: "/images/in-house-testing.png",
+    img: "/images/in-house-testing.webp",
     desc: "Every assembly undergoes rigorous in-house testing before leaving our floor. Our testing methods include Pull Force Testing to validate crimp integrity, and Resistance Testing to verify low-resistance, high-conductivity connections throughout every harness.",
     highlights: ["Pull Force Testing", "Resistance Testing", "Continuity Testing", "Visual Inspection"],
     icon: (
@@ -71,7 +71,7 @@ const CAPS = [
   {
     n: "06",
     title: "Kitting & JIT Delivery",
-    img: "/images/kitting-and-jit.png",
+    img: "/images/kitting-and-jit.webp",
     desc: "Managed inventory, component kitting, kanban programs, and just-in-time delivery keep your production line running without interruption. We maintain safety stock for high-runners and can ship same-day on emergency orders.",
     icon: (
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

@@ -98,9 +98,9 @@ export default function CableAssemblyPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/cable-assembly-variety.png" alt="Cable assembly variety" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/cable-assembly-test-fixture.png" alt="Cable assembly test fixture" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/connector-types-lineup.png" alt="Connector types lineup" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/cable-assembly-variety.webp" alt="Cable assembly variety" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/cable-assembly-test-fixture.webp" alt="Cable assembly test fixture" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/connector-types-lineup.webp" alt="Connector types lineup" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

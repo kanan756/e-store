@@ -6,25 +6,25 @@ const CAPS = [
     n: "01",
     title: "Automatic Cut and Strip",
     desc: "We utilize automated wire cutting and stripping machines to ensure precise lengths and clean stripping of insulation. This process improves consistency, reduces errors, and increases production efficiency.",
-    img: "/images/automatic-cut-and-strip.png",
+    img: "/images/automatic-cut-and-strip.webp",
   },
   {
     n: "02",
     title: "Crimping with Press and Terminal Applicators",
     desc: "Our crimping process uses high-precision presses and applicators to ensure strong, reliable electrical connections. This guarantees consistent quality and long-term durability in every wire harness.",
-    img: "/images/terminal-application.png",
+    img: "/images/terminal-application.webp",
   },
   {
     n: "03",
     title: "Ultrasonic Splicing",
     desc: "We use ultrasonic welding technology to create strong, reliable wire splices without the need for soldering. This method ensures excellent conductivity, reduced resistance, and long-lasting performance.",
-    img: "/images/ultrasonic-splicing.png",
+    img: "/images/ultrasonic-splicing.webp",
   },
   {
     n: "04",
     title: "Over Molding",
     desc: "Custom mold design for your connector and cable geometry, to add protective layer of material around connectors and cable assemblies, providing relief from harsh environmental conditions and enhanced durabilities.",
-    img: "/images/over-molding.png",
+    img: "/images/over-molding.webp",
   },
 ]
 

@@ -99,9 +99,9 @@ export default function PowerBatteryPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/battery-cable-ring-terminals.png" alt="Battery cable with ring terminals" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/power-cable-large-gauge.png" alt="Large gauge power cable cross section" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/ev-charging-handle-cable.png" alt="EV charging handle cable" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/battery-cable-ring-terminals.webp" alt="Battery cable with ring terminals" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/power-cable-large-gauge.webp" alt="Large gauge power cable cross section" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/ev-charging-handle-cable.webp" alt="EV charging handle cable" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

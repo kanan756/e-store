@@ -99,9 +99,9 @@ export default function EthernetUSBPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/cat8-cable-rj45.png" alt="Cat8 ethernet cable with RJ45" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/usb-c-cable-assembly.png" alt="USB-C cable assembly" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/patch-panel-neat.png" alt="Patch panel cable management" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/cat8-cable-rj45.webp" alt="Cat8 ethernet cable with RJ45" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/usb-c-cable-assembly.webp" alt="USB-C cable assembly" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/patch-panel-neat.webp" alt="Patch panel cable management" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

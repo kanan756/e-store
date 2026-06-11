@@ -99,9 +99,9 @@ export default function WaterproofHarnessPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/waterproof-deutsch-dt.png" alt="Waterproof Deutsch DT connector" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/ip67-spray-test.png" alt="IP67 water spray test" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/outdoor-harness-installed.png" alt="Outdoor waterproof harness installed" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/waterproof-deutsch-dt.webp" alt="Waterproof Deutsch DT connector" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/ip67-spray-test.webp" alt="IP67 water spray test" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/outdoor-harness-installed.webp" alt="Outdoor waterproof harness installed" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>

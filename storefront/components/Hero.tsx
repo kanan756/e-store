@@ -5,9 +5,9 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 
 const SLIDES = [
-  { src: "/images/carousel-1.png", alt: "Wire harness manufacturing" },
-  { src: "/images/carousel-2.png", alt: "Cable assembly production" },
-  { src: "/images/carousel-3.png", alt: "Precision electrical assembly" },
+  { src: "/images/carousel-1.webp", alt: "Wire harness manufacturing" },
+  { src: "/images/carousel-2.webp", alt: "Cable assembly production" },
+  { src: "/images/carousel-3.webp", alt: "Precision electrical assembly" },
 ]
 
 function ArrowRight() {

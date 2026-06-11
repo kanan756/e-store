@@ -111,9 +111,9 @@ export default function CustomWireHarnessPage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/wire-harness-multi-branch.png" alt="Multi-branch wire harness" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/crimp-terminal-closeup.png" alt="Precision crimp terminals" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/harness-routing-board.png" alt="Harness routing board" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/wire-harness-multi-branch.webp" alt="Multi-branch wire harness" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/crimp-terminal-closeup.webp" alt="Precision crimp terminals" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/harness-routing-board.webp" alt="Harness routing board" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>
@@ -250,13 +250,13 @@ export default function CustomWireHarnessPage() {
           <h2 className="pp-specs__h">Precision Equipment.</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24, marginTop: 40 }}>
             <div style={{ position: "relative", height: 280, borderRadius: 8, overflow: "hidden" }}>
-              <img src="/images/automatic-cut-and-strip.png" alt="Automatic Cut and Strip" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+              <img src="/images/automatic-cut-and-strip.webp" alt="Automatic Cut and Strip" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
             </div>
             <div style={{ position: "relative", height: 280, borderRadius: 8, overflow: "hidden" }}>
-              <img src="/images/terminal-application.png" alt="Terminal Application" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+              <img src="/images/terminal-application.webp" alt="Terminal Application" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
             </div>
             <div style={{ position: "relative", height: 280, borderRadius: 8, overflow: "hidden" }}>
-              <img src="/images/in-house-testing.png" alt="In-House Testing" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+              <img src="/images/in-house-testing.webp" alt="In-House Testing" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
             </div>
           </div>
         </div>

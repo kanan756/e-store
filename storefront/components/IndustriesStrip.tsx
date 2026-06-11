@@ -49,7 +49,7 @@ export default function IndustriesStrip() {
                   src={ind.img}
                   alt={ind.name}
                   fill
-                  sizes="240px"
+                  sizes="400px"
                   style={{ objectFit: "contain" }}
                   loading="lazy"
                 />

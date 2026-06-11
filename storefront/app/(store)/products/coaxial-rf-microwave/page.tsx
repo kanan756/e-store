@@ -99,9 +99,9 @@ export default function CoaxialRFMicrowavePage() {
         
       
       <div className="pp-ov-gallery">
-        <img src="/images/coaxial-hero.png" alt="Coaxial RF cable assemblies" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/rf-cable-sma-bnc.png" alt="SMA and BNC RF connectors" className="pp-ov-gallery__img" loading="lazy" />
-        <img src="/images/coaxial-cross-section.png" alt="Coaxial cable cross section" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/coaxial-hero.webp" alt="Coaxial RF cable assemblies" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/rf-cable-sma-bnc.webp" alt="SMA and BNC RF connectors" className="pp-ov-gallery__img" loading="lazy" />
+        <img src="/images/coaxial-cross-section.webp" alt="Coaxial cable cross section" className="pp-ov-gallery__img" loading="lazy" />
       </div>
       <div className="pp-ov-divider" />
       <div className="pp-ov-section-label">Key Specifications</div>
