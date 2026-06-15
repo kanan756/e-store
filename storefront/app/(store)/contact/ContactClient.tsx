@@ -19,7 +19,7 @@ const s = {
 }
 
 export default function ContactClient() {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "", honeypot: "" })
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "", honeypot: "" })
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle")
   const isSubmitting = useRef(false)
   const [errorMsg, setErrorMsg] = useState("")
@@ -43,7 +43,7 @@ export default function ContactClient() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setStatus("success")
-      setForm({ name: "", email: "", subject: "", message: "", honeypot: "" })
+      setForm({ name: "", email: "", phone: "", subject: "", message: "", honeypot: "" })
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong")
       setStatus("error")
@@ -143,8 +143,8 @@ export default function ContactClient() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                   <div>
-                    <label style={s.label}>Phone Number</label>
-                    <input style={s.input} type="tel" placeholder="+1 (000) 000-0000" />
+                    <label style={s.label}>Phone Number *</label>
+                    <input style={s.input} type="tel" name="phone" value={form.phone} onChange={set("phone")} required placeholder="+1 (000) 000-0000" />
                   </div>
                   <div>
                     <label style={s.label}>Subject *</label>

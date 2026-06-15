@@ -17,7 +17,7 @@ export default function HomePage() {
     <>
       <Hero />
       <About />
-      <IndustriesStrip />
+<IndustriesStrip />
       <Capabilities />
       <WhyUs />
       <Cta />

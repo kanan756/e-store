@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 import FAQAccordion from "@/components/FAQAccordion"
 import ProductPageTabs from "@/components/ProductPageTabs"
@@ -83,6 +83,7 @@ export default function Page() {
               </div>
             </div>
             <div className="pp-hero__right">
+                            <div className="pp-hero__img"><img src="/images/servo-encoder-cable-assembly.webp" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "contain" }} /></div>
               <div className="pp-hero__stats-grid">
                 <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">10M+</div><div className="pp-hero__stat-lbl">Flex Cycles</div></div>
                 <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">EMI Shielded</div><div className="pp-hero__stat-lbl">Available</div></div>

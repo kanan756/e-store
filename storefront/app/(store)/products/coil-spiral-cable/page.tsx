@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 import FAQAccordion from "@/components/FAQAccordion"
 import ProductPageTabs from "@/components/ProductPageTabs"
@@ -83,6 +83,7 @@ export default function Page() {
               </div>
             </div>
             <div className="pp-hero__right">
+                            <div className="pp-hero__img"><img src="/images/ur-coiled-cable-extended.webp" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "contain" }} /></div>
               <div className="pp-hero__stats-grid">
                 <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">Custom Ratio</div><div className="pp-hero__stat-lbl">Retract/Extend</div></div>
                 <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">PUR/TPE/PVC</div><div className="pp-hero__stat-lbl">Materials</div></div>

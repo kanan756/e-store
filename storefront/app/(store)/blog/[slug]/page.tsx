@@ -89,7 +89,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026") }}
       />
-    <div style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80 }}>
+    <div style={{ minHeight: "100vh", paddingTop: 160, paddingBottom: 80 }}>
       <div className="W" style={{ maxWidth: 780 }}>
 
         {/* Breadcrumb */}
@@ -115,7 +115,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         )}
 
         {/* Title */}
-        <h1 className="D2" style={{ marginBottom: 16, lineHeight: 1.2 }}>{blog.title}</h1>
+        <h1 style={{ fontFamily: "var(--font-sora)", fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.15, marginBottom: 16 }}>{blog.title}</h1>
 
         {/* Meta */}
         {blog.publishDate && (

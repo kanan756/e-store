@@ -74,7 +74,7 @@ export default function WaterproofHarnessPage() {
             </div>
             <div className="pp-hero__right">
               <div className="pp-hero__img">
-                <img src="/images/environmental.webp" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                <img src="/images/waterproof-deutsch-dt.webp" alt="" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
               </div>
               <div className="pp-hero__stats-grid">
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">IP68</div><div className="pp-hero__stat-lbl">Top Rating</div></div>

@@ -65,7 +65,7 @@ export default function IndustriesStrip() {
 
       {/* CTA */}
       <div className="W" style={{ marginTop: 48, textAlign: "center" }}>
-        <Link href="/industries" className="btn">
+        <Link href="/industries" className="btn bod">
           View All Industries →
         </Link>
       </div>

@@ -50,11 +50,33 @@ function IcoArrow() {
   )
 }
 
+const IND_COL1 = [
+  { label: "Automotive", href: "/industries" },
+  { label: "Broadcast", href: "/industries" },
+  { label: "Computer Wiring", href: "/industries" },
+  { label: "Electronics", href: "/industries" },
+  { label: "OEM Appliances", href: "/industries" },
+  { label: "Robotics", href: "/industries/robotics-automation" },
+  { label: "Environmental", href: "/industries" },
+  { label: "Solar Energy", href: "/industries/solar-energy" },
+]
+
+const IND_COL2 = [
+  { label: "Electric Vehicles", href: "/industries/automotive-ev" },
+  { label: "Telecommunication", href: "/industries" },
+  { label: "Medical", href: "/industries/medical-devices" },
+  { label: "Aerospace", href: "/industries/aerospace-defense" },
+  { label: "Construction", href: "/industries" },
+  { label: "Agricultural", href: "/industries" },
+  { label: "Lighting Cables", href: "/industries" },
+  { label: "Marine", href: "/industries" },
+]
+
 export default function Footer() {
   return (
     <footer className="ft">
       <div className="W">
-        <div className="ft__g">
+        <div className="ft__g" style={{ gridTemplateColumns: "2fr 0.8fr 1.8fr 1.2fr" }}>
           {/* Brand */}
           <div>
             <div className="ft__brand">SUPERIOR HARNESS &amp; ASSEMBLY LLC</div>
@@ -80,15 +102,20 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Products */}
+          {/* Industries — both columns under one centered heading */}
           <div>
-            <div className="ft__ch">Products</div>
-            <div className="ft__lks">
-              <Link href="/products/custom-wire-harness">Wire Harnesses</Link>
-              <Link href="/products/cable-assembly">Cable Assemblies</Link>
-              <Link href="/products/high-voltage-harness">High Voltage Harness</Link>
-              <Link href="/products/overmolded-harness">Overmolded Harness</Link>
-              <Link href="/track-order">Track Order</Link>
+            <div className="ft__ch" style={{ textAlign: "center" }}>Industries</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 8px" }}>
+              <div className="ft__lks">
+                {IND_COL1.map(({ label, href }) => (
+                  <Link key={label} href={href}>{label}</Link>
+                ))}
+              </div>
+              <div className="ft__lks">
+                {IND_COL2.map(({ label, href }) => (
+                  <Link key={label} href={href}>{label}</Link>
+                ))}
+              </div>
             </div>
           </div>
 

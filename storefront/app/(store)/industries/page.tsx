@@ -114,6 +114,13 @@ const INDUSTRIES = [
     desc: "We manufacture cable assemblies for lighting systems including commercial, industrial, and architectural applications. Our solutions ensure safe and efficient power distribution.",
     specs: ["UL Listed wiring", "Commercial & industrial", "Architectural lighting", "LED driver wiring"],
   },
+  {
+    name: "Marine",
+    img: "/images/marine.webp",
+    eyebrow: "Waterproof & Saltwater Rated",
+    desc: "We manufacture wire harnesses and cable assemblies built for the demanding marine environment. Our solutions resist saltwater corrosion, moisture, and UV exposure while meeting ABYC standards for onboard electrical safety.",
+    specs: ["Tinned copper conductors", "Saltwater & UV resistant", "ABYC E-11 compliant", "IP68 sealed connectors"],
+  },
 ]
 
 
