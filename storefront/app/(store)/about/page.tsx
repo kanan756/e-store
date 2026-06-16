@@ -88,7 +88,7 @@ export default function AboutPage() {
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/contact" className="rv d2" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              background: "#fff", color: "#0A0A0A", borderRadius: "9999px",
+              background: "#fff", color: "#0A0A0A", borderRadius: "8px",
               padding: "14px 32px", fontWeight: 700, fontSize: 13,
               letterSpacing: "0.04em", textTransform: "uppercase",
               fontFamily: "var(--font-sora)",
@@ -98,7 +98,7 @@ export default function AboutPage() {
             <Link href="/industries" className="rv d3" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               background: "rgba(255,255,255,0.1)", color: "#fff",
-              border: "1.5px solid rgba(255,255,255,0.22)", borderRadius: "9999px",
+              border: "1.5px solid rgba(255,255,255,0.22)", borderRadius: "8px",
               padding: "14px 32px", fontWeight: 700, fontSize: 13,
               letterSpacing: "0.04em", textTransform: "uppercase",
               fontFamily: "var(--font-sora)",

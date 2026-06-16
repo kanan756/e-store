@@ -2002,8 +2002,8 @@ button {
   color: #000000;
 }
 .cta .bp:hover {
-  background: #e5e5e5;
-  color: #000000;
+  color: #ffffff;
+  transition: color 0.35s ease-out;
 }
 
 /* ── BANNER SECTION (dark stripe) ───────────────────────────────────────── */
