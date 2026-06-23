@@ -607,7 +607,7 @@ export default function Header() {
 
             {/* Request Quote */}
             <button
-              className="hdr-quote-btn hdr--desk"
+              className="btn bp hdr--desk"
               style={{ marginLeft: 12 }}
               onClick={() => setQuoteOpen(true)}
               aria-label="Request a Quote"

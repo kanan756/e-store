@@ -1,4 +1,5 @@
 import Link from "next/link"
+import NewsletterButton from "@/components/NewsletterButton"
 
 function IcoPin() {
   return (
@@ -76,7 +77,7 @@ export default function Footer() {
   return (
     <footer className="ft">
       <div className="W">
-        <div className="ft__g" style={{ gridTemplateColumns: "2fr 0.8fr 1.8fr 1.2fr" }}>
+        <div className="ft__g" style={{ gridTemplateColumns: "2fr 0.8fr 1.8fr 1.2fr", marginBottom: 48 }}>
           {/* Brand */}
           <div>
             <div className="ft__brand">SUPERIOR HARNESS &amp; ASSEMBLY LLC</div>
@@ -102,10 +103,10 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Industries — both columns under one centered heading */}
+          {/* Industries — both columns under one heading */}
           <div>
-            <div className="ft__ch" style={{ textAlign: "center" }}>Industries</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 8px" }}>
+            <div className="ft__ch">Industries We Serve</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 32px" }}>
               <div className="ft__lks">
                 {IND_COL1.map(({ label, href }) => (
                   <Link key={label} href={href}>{label}</Link>
@@ -139,6 +140,7 @@ export default function Footer() {
             <Link href="#quote" className="ft__quote-btn">
               Request a Quote <IcoArrow />
             </Link>
+            <NewsletterButton />
           </div>
         </div>
 

@@ -24,7 +24,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import type { Product, Order, Blog, Inquiry, Quote } from "@/lib/sheets"
+import type { Product, Order, Blog, Inquiry, Quote, Subscriber } from "@/lib/sheets"
 import { formatPrice } from "@/lib/format"
 
 // ── Styles ────────────────────────────────────────────────────────────────────
@@ -1063,6 +1063,70 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
 }
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
+function SubscribersTab() {
+  const [subscribers, setSubscribers] = useState<(Subscriber & { rowIndex: number })[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchSubscribers = useCallback(async () => {
+    setLoading(true)
+    const res = await fetch("/api/admin/subscribers")
+    const data = await res.json()
+    setSubscribers(data.subscribers ?? [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchSubscribers() }, [fetchSubscribers])
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Newsletter Subscribers</h2>
+        <button onClick={fetchSubscribers} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)" }}>↻ Refresh</button>
+      </div>
+      <div style={s.card}>
+        {loading ? (
+          <TableSkeleton columns={4} />
+        ) : subscribers.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#666" }}>No subscribers yet.</div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--bd)", textAlign: "left" }}>
+                  <th style={{ padding: "10px 12px", color: "var(--text2)", fontWeight: 600 }}>Email</th>
+                  <th style={{ padding: "10px 12px", color: "var(--text2)", fontWeight: 600 }}>Source</th>
+                  <th style={{ padding: "10px 12px", color: "var(--text2)", fontWeight: 600 }}>Subscribed</th>
+                  <th style={{ padding: "10px 12px", color: "var(--text2)", fontWeight: 600 }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...subscribers].reverse().map((sub) => (
+                  <tr key={sub.id} style={{ borderBottom: "1px solid var(--bd)" }}>
+                    <td style={{ padding: "12px" }}>
+                      <a href={`mailto:${sub.email}`} style={{ color: "var(--text)" }}>{sub.email}</a>
+                    </td>
+                    <td style={{ padding: "12px", color: "var(--text2)", textTransform: "capitalize" }}>{sub.source}</td>
+                    <td style={{ padding: "12px", color: "var(--text2)", fontSize: 13 }}>{sub.submittedAt}</td>
+                    <td style={{ padding: "12px" }}>
+                      <span style={{
+                        padding: "3px 10px", borderRadius: 999, fontSize: 12, fontWeight: 600,
+                        background: sub.status === "Active" ? "rgba(16,185,129,0.12)" : "rgba(136,136,136,0.12)",
+                        color: sub.status === "Active" ? "#10b981" : "#888",
+                      }}>
+                        {sub.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function AdminDashboard({ role }: { role: string }) {
   // Determine default tab based on role
   const getDefaultTab = () => {
@@ -1071,7 +1135,7 @@ export default function AdminDashboard({ role }: { role: string }) {
     return "orders" // shipping, packaging, payment default to orders
   }
 
-  const [tab, setTab] = useState<"overview" | "products" | "orders" | "blogs" | "inquiries" | "quotes">(getDefaultTab())
+  const [tab, setTab] = useState<"overview" | "products" | "orders" | "blogs" | "inquiries" | "quotes" | "subscribers">(getDefaultTab())
   const [mobileMenu, setMobileMenu] = useState(false)
   const router = useRouter()
 
@@ -1087,6 +1151,7 @@ export default function AdminDashboard({ role }: { role: string }) {
   const canSeeOrders = role === "admin" || role === "shipping" || role === "packaging" || role === "payment"
   const canSeeQuotes = role === "admin" || role === "payment" || role === "support"
   const canSeeInquiries = role === "admin" || role === "support"
+  const canSeeSubscribers = role === "admin" || role === "support"
 
   return (
     <div style={s.page}>
@@ -1156,6 +1221,7 @@ export default function AdminDashboard({ role }: { role: string }) {
           {canSeeBlogs && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => { setTab("blogs"); setMobileMenu(false); }} />}
           {canSeeInquiries && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => { setTab("inquiries"); setMobileMenu(false); }} />}
           {canSeeQuotes && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} label="Quotes" active={tab === "quotes"} onClick={() => { setTab("quotes"); setMobileMenu(false); }} />}
+          {canSeeSubscribers && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} label="Subscribers" active={tab === "subscribers"} onClick={() => { setTab("subscribers"); setMobileMenu(false); }} />}
         </nav>
 
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bd)" }}>
@@ -1177,6 +1243,7 @@ export default function AdminDashboard({ role }: { role: string }) {
         {canSeeBlogs && tab === "blogs"      && <BlogsTab />}
         {canSeeInquiries && tab === "inquiries"  && <InquiriesTab />}
         {canSeeQuotes && tab === "quotes"     && <QuotesTab />}
+        {canSeeSubscribers && tab === "subscribers" && <SubscribersTab />}
       </main>
     </div>
   )

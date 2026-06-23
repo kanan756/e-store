@@ -90,8 +90,7 @@ export default function Hero() {
             </h1>
 
             <p className="hero-v2__desc">
-              Precision-driven custom wire harness and cable assembly manufacturer with 30+ <br /> years of combined experience.
-              From low-volume prototyping to high-volume production <br />— consistent, durable, and built to your exact specifications across a wide range of industries.
+              We are a precision-driven custom wire harness and cable assembly manufacturer delivering high-performance solutions across a wide range of industries. With over 30 years of combined industry experience, our team specializes in designing and manufacturing reliable, cost-effective wiring systems tailored to your exact specifications. From low-volume prototyping to high-volume production, we support our customers at every stage — ensuring consistency, durability, and performance in every assembly we produce. Our focus on quality, fast turnaround, and flexible manufacturing allows us to meet the evolving demands of modern industries. Whether you require complex multi-branch harnesses or simple cable assemblies, we provide fully customized solutions built to your drawings, specifications, and application requirements.
             </p>
 
             <div className="hero-v2__stats">

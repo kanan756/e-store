@@ -57,8 +57,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <link rel="preconnect" href="https://images.unsplash.com" />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG1DPLRRCB"></script>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-VG1DPLRRCB');
+          `
+        }} />
       </head>
-      <body className={`${hanken.variable} ${inter.variable} ${mono.variable}`}>
+      <body suppressHydrationWarning className={`${hanken.variable} ${inter.variable} ${mono.variable}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

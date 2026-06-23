@@ -10,7 +10,9 @@
  *     - Products  : getProducts, getProductByHandle, appendProduct, updateProduct, deleteProduct
  *     - Orders    : appendOrder, getOrdersByEmail, getAllOrders, updateOrderStatus
  *     - Blogs     : getBlogs, getBlogBySlug, appendBlog, deleteBlog, updateBlogPublished
- *     - Inquiries : appendInquiry, getAllInquiries, updateInquiryStatus
+ *     - Inquiries   : appendInquiry, getAllInquiries, updateInquiryStatus
+ *     - Subscribers : appendSubscriber, getAllSubscribers
+ *     - VisitorEvents: appendVisitorEvent
  *
  * @owner Heet-P
  * @lastModified May 16, 2026
@@ -163,7 +165,7 @@ export async function appendOrder(order: {
   const sheets = google.sheets({ version: "v4", auth })
 
   const orderId = `ORD-${Date.now()}`
-  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
@@ -351,7 +353,7 @@ export const getAllOrders = withTTL(async (): Promise<(Order & { rowIndex: numbe
 export async function updateOrderStatus(rowIndex: number, status: string, comments: string): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
     range: `Orders!F${rowIndex}:H${rowIndex}`,
@@ -432,7 +434,7 @@ export async function updateBlogPublished(rowIndex: number, published: boolean):
 export async function appendInquiry(inq: Omit<Inquiry, "id" | "submittedAt" | "status">): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Inquiries!A:F",
@@ -503,7 +505,7 @@ export interface Quote {
 export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status">): Promise<void> {
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-US", { timeZone: "UTC" })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: "Quotes!A:K",
@@ -560,6 +562,87 @@ export async function updateQuoteStatus(rowIndex: number, status: string): Promi
     range: `Quotes!J${rowIndex}`,
     valueInputOption: "RAW",
     requestBody: { values: [[status]] },
+  })
+}
+
+// ── Subscribers ───────────────────────────────────────────────────────────────
+export interface Subscriber {
+  rowIndex?: number
+  id: string
+  email: string
+  source: string
+  submittedAt: string
+  status: string
+}
+
+export async function appendSubscriber(sub: Omit<Subscriber, "id" | "submittedAt" | "status">): Promise<void> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: "Subscribers!A:E",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[
+        `SUB-${Date.now()}`,
+        sub.email,
+        sub.source,
+        now,
+        "Active",
+      ]],
+    },
+  })
+}
+
+export const getAllSubscribers = withTTL(async (): Promise<(Subscriber & { rowIndex: number })[]> => {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: SHEET_ID,
+    range: "Subscribers!A2:E",
+  })
+  const rows = res.data.values ?? []
+  return rows
+    .map((r, i) => ({
+      rowIndex: i + 2,
+      id: r[0] ?? "",
+      email: r[1] ?? "",
+      source: r[2] ?? "",
+      submittedAt: r[3] ?? "",
+      status: r[4] ?? "Active",
+    }))
+    .filter((r) => r.id !== "")
+})
+
+// ── Visitor Events ────────────────────────────────────────────────────────────
+export interface VisitorEvent {
+  page: string
+  referrer: string
+  utmSource: string
+  utmMedium: string
+  utmCampaign: string
+}
+
+export async function appendVisitorEvent(event: VisitorEvent): Promise<void> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: SHEET_ID,
+    range: "VisitorEvents!A:G",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[
+        `EVT-${Date.now()}`,
+        event.page,
+        event.referrer,
+        event.utmSource,
+        event.utmMedium,
+        event.utmCampaign,
+        now,
+      ]],
+    },
   })
 }
 

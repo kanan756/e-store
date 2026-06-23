@@ -421,3 +421,64 @@ export async function sendInquiryReplyEmail({
     html,
   })
 }
+
+export async function sendNewsletterWelcomeEmail({ to }: { to: string }) {
+  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
+
+  const eFromName = escapeHtml(fromName)
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Welcome to the Newsletter</title></head>
+<body style="margin:0;padding:0;background:#131310;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#131310;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#1c1c18;border-radius:16px;overflow:hidden;border:1px solid #2a2a24;">
+
+        <!-- Header -->
+        <tr><td style="background:#1c1c18;padding:36px 40px;text-align:center;border-bottom:1px solid #2a2a24;">
+          <div style="font-size:40px;margin-bottom:12px;">✉️</div>
+          <h1 style="margin:0;color:#fcf9f2;font-size:22px;font-weight:800;letter-spacing:-0.02em;">Welcome!</h1>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="padding:36px 40px;text-align:center;">
+          <p style="color:#e5e2db;font-size:16px;margin:0 0 24px;line-height:1.6;">
+            Thank you for subscribing to the <strong>${eFromName}</strong> newsletter!
+          </p>
+          <p style="color:#737874;font-size:14px;margin:0 0 24px;line-height:1.6;">
+            We're excited to share our latest products, offers, and news with you. 
+            Stay tuned for our upcoming updates!
+          </p>
+
+          <div style="text-align:center;margin-top:32px;">
+            <a href="${storeUrl}" style="display:inline-block;padding:12px 24px;background:#4ae183;color:#131310;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;">
+              Visit Our Store
+            </a>
+          </div>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
+          <p style="margin:0;color:#737874;font-size:12px;">
+            ${eFromName}<br>
+            Canton, Michigan, 48187
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+`
+
+  await transporter.sendMail({
+    from: `"${fromName}" <${process.env.GMAIL_USER}>`,
+    to,
+    subject: `Welcome to the ${fromName} Newsletter!`,
+    html,
+  })
+}

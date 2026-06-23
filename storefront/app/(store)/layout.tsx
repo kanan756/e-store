@@ -1,6 +1,7 @@
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import RevealObserver from "@/components/RevealObserver"
+import NewsletterPopup from "@/components/NewsletterPopup"
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <Header />
       <main>{children}</main>
       <Footer />
+      <NewsletterPopup />
       <RevealObserver />
     </>
   )
