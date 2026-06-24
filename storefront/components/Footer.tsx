@@ -77,7 +77,7 @@ export default function Footer() {
   return (
     <footer className="ft">
       <div className="W">
-        <div className="ft__g" style={{ gridTemplateColumns: "2fr 0.8fr 1.8fr 1.2fr", marginBottom: 48 }}>
+        <div className="ft__g">
           {/* Brand */}
           <div>
             <div className="ft__brand">SUPERIOR HARNESS &amp; ASSEMBLY LLC</div>
@@ -106,11 +106,12 @@ export default function Footer() {
           {/* Industries — both columns under one heading */}
           <div>
             <div className="ft__ch">Industries We Serve</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 32px" }}>
+            <div className="ft__ind-grid">
               <div className="ft__lks">
                 {IND_COL1.map(({ label, href }) => (
                   <Link key={label} href={href}>{label}</Link>
                 ))}
+                <Link href="/industries" className="ft__view-all-mob">View all industries &rarr;</Link>
               </div>
               <div className="ft__lks">
                 {IND_COL2.map(({ label, href }) => (
@@ -137,10 +138,12 @@ export default function Footer() {
                 <span>pateltushar1987@gmail.com</span>
               </div>
             </div>
-            <Link href="#quote" className="ft__quote-btn">
-              Request a Quote <IcoArrow />
-            </Link>
-            <NewsletterButton />
+            <div className="ft__actions">
+              <Link href="#quote" className="ft__quote-btn">
+                Request a Quote <IcoArrow />
+              </Link>
+              <NewsletterButton />
+            </div>
           </div>
         </div>
 

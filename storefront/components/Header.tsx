@@ -707,6 +707,7 @@ export default function Header() {
 
           {/* Static Links */}
           {[
+            { href: "/", label: "Home" },
             { href: "/shop", label: "Shop Online" },
             { href: "/track-order", label: "Track Order" },
             { href: "/about", label: "About" },
