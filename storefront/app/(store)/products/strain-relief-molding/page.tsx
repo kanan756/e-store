@@ -10,7 +10,8 @@ export const metadata: Metadata = {
 
 const CAPS = [
   { title: "Material Engineering", desc: "TPE, PUR, silicone, and PVC overmold materials. Durometer selected per flex requirement — 40A for soft strain relief, 85A for rigid protection." },
-  { title: "Rapid Prototype Tooling", desc: "Aluminum prototype tools deliver first molded samples in 5–7 business days. Tool path machined directly from your 3D model." },
+  // Old: { title: "Rapid Prototype Tooling", desc: "Aluminum prototype tools deliver first molded samples in 5–7 business days. Tool path machined directly from your 3D model." },
+  { title: "Rapid Prototype Tooling", desc: "Aluminum prototype tools deliver first molded samples in 2–3 weeks. Tool path machined directly from your 3D model." },
   { title: "Production Tooling", desc: "Steel production molds for high-volume programs. Multi-cavity tools available for cost reduction at volume." },
   { title: "Custom Color Matching", desc: "Overmold color matched to Pantone, RAL, or physical sample. Color consistency maintained within ΔE 2.0 run-to-run." },
   { title: "Insert Molding", desc: "Metal inserts, threaded bushings, and locating features molded directly into the strain relief body." },
@@ -24,7 +25,8 @@ const SPECS = [
   { k: "Min. Wall Thickness", v: "1.5 mm" },
   { k: "Cable OD Range", v: "2 mm to 30 mm" },
   { k: "Insert Types", v: "Brass inserts, stainless bushings, locating pins" },
-  { k: "Prototype Lead Time", v: "5–7 business days (aluminum tool)" },
+  // Old: { k: "Prototype Lead Time", v: "5–7 business days (aluminum tool)" },
+  { k: "Prototype Lead Time", v: "2–3 weeks (aluminum tool)" },
   { k: "Production MOQ", v: "250 units with production tooling" },
 ]
 
@@ -48,7 +50,7 @@ const USECASES = [
 
 const FAQS = [
   { q: "What is the minimum order quantity?", a: "One unit for prototype and NPI programs. Production orders have no volume minimum — pricing reflects quantity. Prototypes typically ship within 5–10 business days." },
-  { q: "How do I submit a drawing for quote?", a: "Email drawings, schematics, or sample parts to sales@superiorharness.com, or use the quote form on this site. We accept PDF, DXF, and native CAD formats. Quotes issued within 24 hours." },
+  { q: "How do I submit a drawing for quote?", a: "Email drawings, schematics, or sample parts to info@superiorharness.com, or use the quote form on this site. We accept PDF, DXF, and native CAD formats. Quotes issued within 24 hours." },
   { q: "What quality standards do you work to?", a: "IPC/WHMA-A-620 Class 2 and Class 3 for wire harnesses. IPC-A-610 for PCB assemblies. All assemblies electrically tested 100% before shipment. FAI and COC available on all programs." },
   { q: "Can you reverse-engineer from a sample?", a: "Yes. Send a sample assembly and we generate a wire list or drawing for your approval before production. This is our most common NPI scenario." },
   { q: "Do you offer design-for-manufacture review?", a: "Yes — DFM review is included at no charge with every quote. We flag issues with routing, gauge sizing, connector selection, and testability before any tooling is committed." },
@@ -103,7 +105,8 @@ export default function Page() {
               <h2 className="pp-meaning__h">The Transition Zone Is Where Cables Fail.</h2>
               <div className="pp-meaning__cols">
                 <p className="pp-meaning__text">The cable-to-connector interface is the highest mechanical stress point in any cable assembly. Without adequate strain relief, repeated bending concentrates at that point and causes conductor fatigue, insulation cracking, and connector body fracture. A properly designed overmolded strain relief distributes the bend radius across a graduated taper, protecting the cable for the full design life of the product.</p>
-                <p className="pp-meaning__text">We design and produce custom strain relief overmolds to your dimensional and material specification. Rapid prototype tooling delivers first parts in 5–7 business days. Production tooling amortizes over volume runs. Material selection — TPE durometer, PUR hardness, or silicone grade — is matched to your flex requirement, operating temperature, and chemical exposure.</p>
+                // Old: <p className="pp-meaning__text">We design and produce custom strain relief overmolds to your dimensional and material specification. Rapid prototype tooling delivers first parts in 5–7 business days. Production tooling amortizes over volume runs. Material selection — TPE durometer, PUR hardness, or silicone grade — is matched to your flex requirement, operating temperature, and chemical exposure.</p>
+                <p className="pp-meaning__text">We design and produce custom strain relief overmolds to your dimensional and material specification. Rapid prototype tooling delivers first parts in 2–3 weeks. Production tooling amortizes over volume runs. Material selection — TPE durometer, PUR hardness, or silicone grade — is matched to your flex requirement, operating temperature, and chemical exposure.</p>
               </div>
               
               <div className="pp-ov-gallery">

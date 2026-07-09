@@ -127,15 +127,18 @@ export default function Footer() {
             <div className="ft__contact-info" style={{ color: "rgba(255,255,255,0.48)" }}>
               <div>
                 <IcoPin />
-                <span>Canton, Michigan 48187</span>
+                {/* Old: <span>Canton, Michigan 48187</span> */}
+                <span>3179 Black Gap Rd, Chambersburg, PA 17202</span>
               </div>
               <div>
                 <IcoPhone />
-                <span>+91 7348910249</span>
+                {/* Old: <span>+91 7348910249</span> */}
+                <span>+1 734 891 0248</span>
               </div>
               <div>
                 <IcoMail />
-                <span>pateltushar1987@gmail.com</span>
+                {/* Old: <span>pateltushar1987@gmail.com</span> */}
+                <span>info@superiorharness.com</span>
               </div>
             </div>
             <div className="ft__actions">

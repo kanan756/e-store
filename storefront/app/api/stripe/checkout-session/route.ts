@@ -113,6 +113,16 @@ export async function POST(request: Request) {
           },
           quantity: 1,
         },
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Shipping (Flat Rate)",
+            },
+            unit_amount: 1500, // $15.00
+          },
+          quantity: 1,
+        },
       ],
       mode: "payment",
       success_url: successUrl,
@@ -122,7 +132,7 @@ export async function POST(request: Request) {
         customerName,
         email,
         productSummary,
-        amount: serverAmount.toString(), // server-computed, stored for reference only
+        amount: (serverAmount + 15).toString(), // server-computed, stored for reference only
       },
     })
 

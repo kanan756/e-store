@@ -403,7 +403,8 @@ export async function sendInquiryReplyEmail({
         <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
           <p style="margin:0;color:#737874;font-size:12px;">
             ${eFromName}<br>
-            Canton, Michigan, 48187
+            <!-- Old: Canton, Michigan 48187 -->
+            3179 Black Gap Rd, Chambersburg, PA 17202
           </p>
         </td></tr>
 
@@ -464,7 +465,8 @@ export async function sendNewsletterWelcomeEmail({ to }: { to: string }) {
         <tr><td style="padding:24px 40px;border-top:1px solid #2a2a24;text-align:center;">
           <p style="margin:0;color:#737874;font-size:12px;">
             ${eFromName}<br>
-            Canton, Michigan, 48187
+            <!-- Old: Canton, Michigan 48187 -->
+            3179 Black Gap Rd, Chambersburg, PA 17202
           </p>
         </td></tr>
 

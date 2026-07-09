@@ -55,10 +55,13 @@ export default function PrivacyPage() {
             <p style={{ color: "var(--text2)" }}>
               If you have any questions about this privacy policy or our privacy practices, please contact us at:
               <br /><br />
-              Superior Harness & Assembly LLC<br />
-              Canton, Michigan, 48187<br />
-              Email: pateltushar1987@gmail.com<br />
-              Phone: +91 7348910249
+              Superior Harness &amp; Assembly LLC<br />
+              {/* Old: Canton, Michigan 48187 */}
+              3179 Black Gap Rd, Chambersburg, PA 17202<br />
+              {/* Old: Email: pateltushar1987@gmail.com */}
+              Email: info@superiorharness.com<br />
+              {/* Old: Phone: +91 7348910249 */}
+              Phone: +1 734 891 0248
             </p>
           </section>
         </div>

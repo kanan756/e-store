@@ -26,14 +26,15 @@ const SPECS = [
   { k: "Color Options", v: "Black standard · Custom RAL / Pantone on tooled runs of 500+ units" },
   { k: "Pull-Force Test", v: "IPC/WHMA-A-620 conductor retention — 100% of overmolded units" },
   { k: "IP Validation", v: "Immersion 1 m / 30 min on first article · AQL sampling on production" },
-  { k: "Tooling Lead Time", v: "New tool: 5–7 business days · Modification: 2–3 business days" },
+  // Old: { k: "Tooling Lead Time", v: "New tool: 5–7 business days · Modification: 2–3 business days" },
+  { k: "Tooling Lead Time", v: "New tool: 2–3 weeks · Modification: 1–2 weeks" },
   { k: "Production Lead Time", v: "10–15 business days after first-article approval" },
   { k: "MOQ", v: "25 units with existing tooling · 50 units for new tooling" },
 ]
 
 const PROCESS = [
   { n: "01", title: "Geometry Submission", desc: "Submit your connector housing, cable OD, and strain relief angle. Engineering generates mold concept in 24 hours for review before steel is cut." },
-  { n: "02", title: "Tooling Fabrication", desc: "Mold cut from aluminum tooling block in-house. 5–7 day lead time from approved drawing to first shot, with no external fabrication dependency." },
+  { n: "02", title: "Tooling Fabrication", desc: "Mold cut from aluminum tooling block in-house. {/* Old: 5–7 day lead time */}2–3 week lead time from approved drawing to first shot, with no external fabrication dependency." },
   { n: "03", title: "First Article Shot", desc: "Initial overmold applied to production harness. Dimensions, Shore-A hardness, and adhesion to jacket verified before first-article approval." },
   { n: "04", title: "IP & Pull Validation", desc: "First article: immersion 1 m / 30 min, then pull-force test on every conductor. Material adhesion check at 3× expected service temperature." },
   { n: "05", title: "Production Run", desc: "Overmold applied on 50T press with calibrated temperature and pressure. Each unit pull-tested before moving to final inspection and label." },
@@ -50,7 +51,8 @@ const USECASES = [
 ]
 
 const FAQS = [
-  { q: "How long does tooling take?", a: "New aluminum tooling cut in-house: 5–7 business days from drawing approval to first shot. Tooling modifications: 2–3 business days. We own the tooling and store it at no charge for active programs — you are not paying a tooling shop lead time or markup." },
+  // Old: { q: "How long does tooling take?", a: "New aluminum tooling cut in-house: 5–7 business days from drawing approval to first shot. Tooling modifications: 2–3 business days. We own the tooling and store it at no charge for active programs — you are not paying a tooling shop lead time or markup." },
+  { q: "How long does tooling take?", a: "New aluminum tooling cut in-house: 2–3 weeks from drawing approval to first shot. Tooling modifications: 1–2 weeks. We own the tooling and store it at no charge for active programs — you are not paying a tooling shop lead time or markup." },
   { q: "What is the minimum run size for overmolded assemblies?", a: "25 units for programs with existing compatible tooling. 50 units for new tooling to amortize the first-article validation cost. Below 25 units, we recommend a boot and adhesive approach — same IP rating without the tooling investment. We will recommend the best approach for your volume when you submit the RFQ." },
   { q: "What Shore-A hardness do you overmold at?", a: "Standard TPE overmold is 65–95 Shore-A depending on the flex requirement. Softer hardness (65–75A) for handpiece and consumer cable applications where tactile feel matters. Harder (85–95A) for industrial and automotive where abrasion resistance and dimensional stability take priority. We select the hardness based on your service profile, not a catalog default." },
   { q: "Can you match an existing overmold geometry from a sample?", a: "Yes. Send a sample part and we will reverse-engineer the overmold geometry, measure the hardness, and identify the material compound. We then design a compatible mold and produce a first-article sample for your approval before production. This is the fastest path when a competitor part needs to be reproduced without drawings." },
@@ -64,7 +66,7 @@ export default function OvermoldedHarnessPage() {
       <section className="pp-hero">
         <div className="pp-hero__inner">
           <div className="pp-hero__crumb"><Link href="/">Home</Link><span>/</span><Link href="/products">Products</Link><span>/</span>Overmolded Harness</div>
-          <div className="pp-hero__qa"><div className="pp-hero__qa-label">Quick Answer</div><div className="pp-hero__qa-text">Custom TPE/PUR overmolded wire harnesses with in-house aluminum tooling. IP67/IP68 sealed strain relief. Pull-force validated per IPC/WHMA-A-620. New tooling in 5–7 days.</div></div>
+          <div className="pp-hero__qa"><div className="pp-hero__qa-label">Quick Answer</div><div className="pp-hero__qa-text">Custom TPE/PUR overmolded wire harnesses with in-house aluminum tooling. IP67/IP68 sealed strain relief. Pull-force validated per IPC/WHMA-A-620. {/* Old: New tooling in 5–7 days. */}New tooling in 2–3 weeks.</div></div>
           <div className="pp-hero__split">
             <div>
               <div className="pp-hero__cat">Overmolded Wire Harness</div>
@@ -78,7 +80,7 @@ export default function OvermoldedHarnessPage() {
               </div>
               <div className="pp-hero__stats-grid">
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">IP68</div><div className="pp-hero__stat-lbl">Top Seal Rating</div></div>
-              <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">5–7 Days</div><div className="pp-hero__stat-lbl">New Tooling</div></div>
+              <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">{/* Old: 5–7 Days */}2–3 Weeks</div><div className="pp-hero__stat-lbl">New Tooling</div></div>
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">100%</div><div className="pp-hero__stat-lbl">Pull-Force Tested</div></div>
               <div className="pp-hero__stat-box"><div className="pp-hero__stat-val">In-House</div><div className="pp-hero__stat-lbl">Mold Tooling</div></div>
             </div>

@@ -55,9 +55,12 @@ export async function generateInvoicePdf({
 
       doc.fillColor(TEXT_MAIN).font("Helvetica-Bold").fontSize(12).text("Superior Harness & Assembly LLC", 300, 50, { align: "right", width: 245 });
       doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10)
-        .text("Canton, Michigan, 48187", { align: "right", width: 245 })
-        .text("pateltushar1987@gmail.com", { align: "right", width: 245 })
-        .text("+91 7348910249", { align: "right", width: 245 });
+        // Old: .text("Canton, Michigan 48187", { align: "right", width: 245 })
+        .text("3179 Black Gap Rd, Chambersburg, PA 17202", { align: "right", width: 245 })
+        // Old: .text("pateltushar1987@gmail.com", { align: "right", width: 245 })
+        .text("info@superiorharness.com", { align: "right", width: 245 })
+        // Old: .text("+91 7348910249", { align: "right", width: 245 })
+        .text("+1 734 891 0248", { align: "right", width: 245 });
 
       doc.moveDown(3);
 

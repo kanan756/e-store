@@ -60,7 +60,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(CART_KEY, JSON.stringify(items))
   }, [items])
 
-  const addItem = useCallback((product: Omit<CartItem, "quantity">, quantity = 1) => {
+  const addItem = useCallback((product: Omit<CartItem, "quantity">, quantity = 5) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === product.id)
       if (existing) {

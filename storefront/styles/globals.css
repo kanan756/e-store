@@ -1629,8 +1629,8 @@ button {
   .ft__lks { gap: 8px; }
   .ft__desc { margin-bottom: 16px; }
   .ft__brand { margin-bottom: 8px; }
-  .ft__actions { gap: 12px; }
-  .ft__quote-btn { margin-top: 8px; }
+  .ft__actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .ft__quote-btn { margin-top: 0; }
   .ft__btm { padding-top: 16px; margin-top: 0; }
   .prod-det-grid { grid-template-columns: 1fr; gap: 40px; }
 
@@ -2358,7 +2358,7 @@ button {
 
 @media (max-width: 1100px) {
   .hero-v2__inner { grid-template-columns: 1fr; padding: 0 32px; }
-  .hero-v2__left { padding: 160px 0 32px; }
+  .hero-v2__left { padding: 32px 0 32px; }
   .hero-v2__right { padding: 0 0 48px; }
   .hero-v2__carousel { border-radius: 12px; }
   .pp-hero__split { grid-template-columns: 1fr; }
@@ -2681,7 +2681,7 @@ button {
 /* ══ Responsive ══════════════════════════════════════════════ */
 
 /* Tablet: collapse sidebar into top tab bar */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .pd-layout {
     grid-template-columns: 1fr;
   }
@@ -2694,23 +2694,30 @@ button {
     overflow-y: visible;
     border-right: none;
     border-bottom: 1px solid var(--bd);
-    padding: 0;
+    padding: 16px 20px;
     gap: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+  .pd-sidebar::-webkit-scrollbar {
+    display: none;
+  }
 
   .pd-tab-btn {
-    border-left: none;
-    border-bottom: 2px solid transparent;
-    padding: 14px 20px;
+    border: 1px solid var(--bd);
+    border-radius: 40px;
+    padding: 10px 20px;
     white-space: nowrap;
     flex-shrink: 0;
+    width: auto;
+    margin-right: 8px;
+    text-align: center;
   }
 
   .pd-tab-btn.active {
-    border-left: none;
-    border-bottom-color: var(--acc);
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
   }
 
   .pd-panel {
@@ -2925,24 +2932,63 @@ button {
 }
 
 /* ══ Responsive ════════════════════════════════════════════════ */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .ppt-layout {
     display: block;
   }
 
-  /* Hide the desktop sidebar */
+  /* Show the desktop sidebar, but as a horizontal scrollable row! */
   .ppt-sidebar {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 16px 20px;
+    border-right: none;
+    border-bottom: 1px solid var(--bd);
+    position: sticky;
+    top: 64px;
+    height: auto;
+    background: var(--bg);
+    z-index: 40;
+    -webkit-overflow-scrolling: touch;
+    perspective: none;
+  }
+
+  .ppt-sidebar::-webkit-scrollbar {
     display: none;
   }
 
-  /* Show the hamburger nav */
+  /* Make buttons look like pills */
+  .ppt-btn {
+    flex-shrink: 0;
+    width: auto;
+    margin: 0 8px 0 0;
+    padding: 10px 20px;
+    border-radius: 40px; /* pill shape */
+    border: 1px solid var(--bd);
+    border-left: 1px solid var(--bd);
+    white-space: nowrap;
+    text-align: center;
+  }
+  
+  .ppt-btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  
+  /* Hide the arrow and action text on mobile pill */
+  .ppt-btn__arrow, .ppt-btn__action {
+    display: none !important;
+  }
+  
+  .ppt-btn__label {
+    transform: none !important;
+  }
+
+  /* Hide the hamburger nav completely! */
   .ppt-mobile-nav {
-    display: block;
-    position: sticky;
-    top: 64px;
-    z-index: 40;
-    background: var(--bg);
-    border-bottom: 1px solid var(--bd);
+    display: none !important;
   }
 
   /* Trigger bar: current tab name + chevron */

@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next"
+import type { Metadata } from "next"
 import Link from "next/link"
 import FAQAccordion from "@/components/FAQAccordion"
 import ProductPageTabs from "@/components/ProductPageTabs"
@@ -12,7 +12,8 @@ const CAPS = [
   { title: "Over-Connector Overmolding", desc: "TPE, PUR, and silicone overmolding directly over any connector body — circular, rectangular, D-sub, or custom — with cable transition." },
   { title: "Insert Molding", desc: "Brass and stainless steel inserts, threaded bushings, and locking features molded directly into connector overmold bodies." },
   { title: "Potting & Backfill", desc: "Two-part epoxy, polyurethane, and silicone potting of connector enclosures for environmental sealing and vibration resistance." },
-  { title: "In-House Tooling", desc: "Aluminum prototype tools machined in-house for 5–7 day first-article turnaround. Steel production tools for volume programs." },
+  // Old: { title: "In-House Tooling", desc: "Aluminum prototype tools machined in-house for 5–7 day first-article turnaround. Steel production tools for volume programs." },
+  { title: "In-House Tooling", desc: "Aluminum prototype tools machined in-house for 2–3 week first-article turnaround. Steel production tools for volume programs." },
   { title: "IP67/IP68 Overmold Design", desc: "Overmold geometry designed to achieve specified IP rating. O-ring grooves, face seals, and wire entry seals integrated into overmold." },
   { title: "High-Volume Production", desc: "Multi-cavity production tools for high-volume connector overmolding. Cycle time optimized for unit cost targets." },
 ]
@@ -23,7 +24,8 @@ const SPECS = [
   { k: "IP Rating Achievable", v: "IP54 to IP68 depending on connector and overmold design" },
   { k: "Insert Types", v: "Brass inserts M2–M12, stainless bushings, custom" },
   { k: "Color Options", v: "Any Pantone or RAL" },
-  { k: "Prototype Lead Time", v: "5–7 business days (aluminum tool)" },
+  // Old: { k: "Prototype Lead Time", v: "5–7 business days (aluminum tool)" },
+  { k: "Prototype Lead Time", v: "2–3 weeks (aluminum tool)" },
   { k: "Production MOQ", v: "100 units with production tooling" },
   { k: "Tooling MOQ", v: "500 units to justify production steel tool" },
 ]
@@ -48,7 +50,7 @@ const USECASES = [
 
 const FAQS = [
   { q: "What is the minimum order quantity?", a: "One unit for prototype and NPI programs. Production orders have no volume minimum — pricing reflects quantity. Prototypes typically ship within 5–10 business days." },
-  { q: "How do I submit a drawing for quote?", a: "Email drawings, schematics, or sample parts to sales@superiorharness.com, or use the quote form on this site. We accept PDF, DXF, and native CAD formats. Quotes issued within 24 hours." },
+  { q: "How do I submit a drawing for quote?", a: "Email drawings, schematics, or sample parts to info@superiorharness.com, or use the quote form on this site. We accept PDF, DXF, and native CAD formats. Quotes issued within 24 hours." },
   { q: "What quality standards do you work to?", a: "IPC/WHMA-A-620 Class 2 and Class 3 for wire harnesses. IPC-A-610 for PCB assemblies. All assemblies electrically tested 100% before shipment. FAI and COC available on all programs." },
   { q: "Can you reverse-engineer from a sample?", a: "Yes. Send a sample assembly and we generate a wire list or drawing for your approval before production. This is our most common NPI scenario." },
   { q: "Do you offer design-for-manufacture review?", a: "Yes — DFM review is included at no charge with every quote. We flag issues with routing, gauge sizing, connector selection, and testability before any tooling is committed." },

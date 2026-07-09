@@ -70,7 +70,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const outOfStock = product.inStock === false
 
   return (
-    <div className="prodC rv" style={{ transitionDelay: `${index * 0.07}s`, opacity: outOfStock ? 0.55 : 1 }}>
+    <div suppressHydrationWarning className="prodC rv" style={{ transitionDelay: `${index * 0.07}s`, opacity: outOfStock ? 0.55 : 1 }}>
       <div className="prodC__img" style={{ position: "relative" }}>
         {primaryImage ? (
           <Image

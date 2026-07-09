@@ -87,7 +87,7 @@ export default function CartClient() {
                   {/* Qty controls */}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1.5px solid var(--bd)", borderRadius: 9999, padding: "4px 12px" }}>
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.id, Math.max(5, item.quantity - 1))}
                       disabled={loading}
                       style={{ color: "var(--text2)", display: "flex", padding: 4 }}
                     >
@@ -133,14 +133,14 @@ export default function CartClient() {
                 <span style={{ fontWeight: 700 }}>{formatPrice(subtotal)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, fontSize: 13, color: "var(--text2)" }}>
-                <span>Shipping</span>
-                <span>Calculated at checkout</span>
+                <span>Shipping (Flat Rate)</span>
+                <span>$15.00</span>
               </div>
 
               <div style={{ borderTop: "1px solid var(--bd)", paddingTop: 20, marginBottom: 24, display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 22, color: "var(--acc)" }}>
-                  {formatPrice(subtotal)}
+                  {formatPrice(subtotal + 15)}
                 </span>
               </div>
 

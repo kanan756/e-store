@@ -27,7 +27,7 @@ export default function NewsletterButton() {
       <button
         onClick={() => setOpen(true)}
         className="ft__quote-btn"
-        style={{ marginTop: 14, cursor: "pointer", whiteSpace: "nowrap" }}
+        style={{ cursor: "pointer", whiteSpace: "nowrap" }}
       >
         Newsletter <IcoArrow />
       </button>

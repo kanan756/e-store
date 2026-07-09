@@ -170,7 +170,7 @@ function ProductForm({
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grid">
         <div>
           <label style={s.label}>Product Name *</label>
           <input style={s.input} value={form.name} onChange={set("name")} required placeholder="Winter Jacket" />
@@ -187,7 +187,7 @@ function ProductForm({
           style={{ ...s.input, minHeight: 80, resize: "vertical" }}
         />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="admin-grid">
         <div>
           <label style={s.label}>Image URL</label>
           <input style={s.input} value={form.imageUrl} onChange={set("imageUrl")} placeholder="https://..." />
@@ -294,37 +294,37 @@ function ProductsTab() {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
               <thead>
-              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
-                {["Name", "Category", "Price", "Stock", "Handle", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[...products].reverse().map((p) => (
-                <tr key={p.id} style={{ borderBottom: "1px solid var(--bd)" }}>
-                  <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
-                  <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{p.category || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "var(--text)" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <span style={{
-                      display: "inline-block", padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: p.inStock ? "rgba(74,225,131,0.12)" : "rgba(239,68,68,0.1)",
-                      color: p.inStock ? "var(--acc)" : "#ef4444",
-                    }}>
-                      {p.inStock ? "In Stock" : "Out of Stock"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{p.handle}</td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)", padding: "6px 12px" }}>Edit</button>
-                      <button onClick={() => handleDelete(p.rowIndex, p.name)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
-                    </div>
-                  </td>
+                <tr style={{ borderBottom: "1px solid var(--bd)" }}>
+                  {["Name", "Category", "Price", "Stock", "Handle", "Actions"].map((h) => (
+                    <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
+              </thead>
+              <tbody>
+                {[...products].reverse().map((p) => (
+                  <tr key={p.id} style={{ borderBottom: "1px solid var(--bd)" }}>
+                    <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
+                    <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{p.category || "—"}</td>
+                    <td style={{ padding: "14px 12px", color: "var(--text)" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <span style={{
+                        display: "inline-block", padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        background: p.inStock ? "rgba(74,225,131,0.12)" : "rgba(239,68,68,0.1)",
+                        color: p.inStock ? "var(--acc)" : "#ef4444",
+                      }}>
+                        {p.inStock ? "In Stock" : "Out of Stock"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{p.handle}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => setEditing(p)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)", padding: "6px 12px" }}>Edit</button>
+                        <button onClick={() => handleDelete(p.rowIndex, p.name)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         )}
@@ -394,7 +394,7 @@ function OrdersTab() {
       {editing && (
         <div style={{ ...s.card, marginBottom: 24 }}>
           <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700 }}>Update Order — {editing.orderId}</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+          <div className="admin-grid" style={{ marginBottom: 16 }}>
             <div>
               <label style={s.label}>Status</label>
               <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)} style={{ ...s.input }}>
@@ -434,38 +434,38 @@ function OrdersTab() {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 900 }}>
               <thead>
-              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
-                {["Order ID", "Customer", "Product", "Amount", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[...orders].reverse().map((o) => (
-                <tr key={o.orderId} style={{ borderBottom: "1px solid var(--bd)" }}>
-                  <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "var(--text)" }}>{o.orderId}</td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <div style={{ fontWeight: 600 }}>{o.customerName}</div>
-                    <div style={{ fontSize: 12, color: "#666" }}>{o.email}</div>
-                  </td>
-                  <td style={{ padding: "14px 12px", color: "var(--text2)", fontSize: 13, maxWidth: 200 }}>{o.product}</td>
-                  <td style={{ padding: "14px 12px", fontWeight: 700 }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <span style={{
-                      padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: `${statusColor[o.status] ?? "#888"}20`,
-                      color: statusColor[o.status] ?? "#888",
-                    }}>{o.status}</span>
-                  </td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)", padding: "6px 12px" }}>
-                      Update
-                    </button>
-                  </td>
+                <tr style={{ borderBottom: "1px solid var(--bd)" }}>
+                  {["Order ID", "Customer", "Product", "Amount", "Status", "Actions"].map((h) => (
+                    <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {[...orders].reverse().map((o) => (
+                  <tr key={o.orderId} style={{ borderBottom: "1px solid var(--bd)" }}>
+                    <td style={{ padding: "14px 12px", fontFamily: "monospace", fontSize: 12, color: "var(--text)" }}>{o.orderId}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <div style={{ fontWeight: 600 }}>{o.customerName}</div>
+                      <div style={{ fontSize: 12, color: "#666" }}>{o.email}</div>
+                    </td>
+                    <td style={{ padding: "14px 12px", color: "var(--text2)", fontSize: 13, maxWidth: 200 }}>{o.product}</td>
+                    <td style={{ padding: "14px 12px", fontWeight: 700 }}>{o.amount > 0 ? formatPrice(o.amount) : "—"}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <span style={{
+                        padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        background: `${statusColor[o.status] ?? "#888"}20`,
+                        color: statusColor[o.status] ?? "#888",
+                      }}>{o.status}</span>
+                    </td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <button onClick={() => startEdit(o)} style={{ ...s.btn, background: "var(--bg2)", color: "var(--text2)", padding: "6px 12px" }}>
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -529,7 +529,7 @@ function BlogsTab() {
         <div style={{ ...s.card, marginBottom: 24 }}>
           <h3 style={{ margin: "0 0 20px", fontSize: 16, fontWeight: 700 }}>New Blog Post</h3>
           <form onSubmit={handleAdd} style={{ display: "grid", gap: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="admin-grid">
               <div>
                 <label style={s.label}>Title *</label>
                 <input style={s.input} value={form.title} onChange={set("title")} required placeholder="5 Ways to..." />
@@ -539,7 +539,7 @@ function BlogsTab() {
                 <input style={s.input} value={form.slug} onChange={set("slug")} placeholder="5-ways-to..." />
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="admin-grid">
               <div>
                 <label style={s.label}>Keywords (comma-separated)</label>
                 <input style={s.input} value={form.keywords} onChange={set("keywords")} placeholder="seo, product, tips" />
@@ -579,32 +579,33 @@ function BlogsTab() {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
               <thead>
-              <tr style={{ borderBottom: "1px solid var(--bd)" }}>
-                {["Title", "Slug", "Publish Date", "Keywords", "Status", "Actions"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[...blogs].reverse().map((b) => (
-                <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid var(--bd)" }}>
-                  <td style={{ padding: "14px 12px", fontWeight: 600 }}>{b.title}</td>
-                  <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{b.slug}</td>
-                  <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{b.publishDate || "—"}</td>
-                  <td style={{ padding: "14px 12px", color: "var(--text2)", fontSize: 12 }}>{b.keywords || "—"}</td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                      background: b.published ? "rgba(0,0,0,0.15)" : "rgba(136,136,136,0.12)",
-                      color: b.published ? "var(--text)" : "#888",
-                    }}>{b.published ? "Published" : "Draft"}</span>
-                  </td>
-                  <td style={{ padding: "14px 12px" }}>
-                    <button onClick={() => handleDelete(b.rowIndex, b.title)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
-                  </td>
+                <tr style={{ borderBottom: "1px solid var(--bd)" }}>
+                  {["Title", "Slug", "Publish Date", "Keywords", "Status", "Actions"].map((h) => (
+                    <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {[...blogs].reverse().map((b) => (
+                  <tr key={b.slug + b.rowIndex} style={{ borderBottom: "1px solid var(--bd)" }}>
+                    <td style={{ padding: "14px 12px", fontWeight: 600 }}>{b.title}</td>
+                    <td style={{ padding: "14px 12px", color: "#666", fontFamily: "monospace", fontSize: 12 }}>{b.slug}</td>
+                    <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{b.publishDate || "—"}</td>
+                    <td style={{ padding: "14px 12px", color: "var(--text2)", fontSize: 12 }}>{b.keywords || "—"}</td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <span style={{
+                        padding: "3px 10px", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                        background: b.published ? "rgba(0,0,0,0.15)" : "rgba(136,136,136,0.12)",
+                        color: b.published ? "var(--text)" : "#888",
+                      }}>{b.published ? "Published" : "Draft"}</span>
+                    </td>
+                    <td style={{ padding: "14px 12px" }}>
+                      <button onClick={() => handleDelete(b.rowIndex, b.title)} style={{ ...s.btn, background: "rgba(239,68,68,0.1)", color: "#ef4444", padding: "6px 12px" }}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -624,7 +625,7 @@ function InquiriesTab() {
   const [inquiries, setInquiries] = useState<(Inquiry & { rowIndex: number })[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
-  
+
   // Reply states for composing emails directly from the dashboard
   const [replyText, setReplyText] = useState("")
   const [isReplying, setIsReplying] = useState(false)
@@ -728,7 +729,7 @@ function InquiriesTab() {
                     <div style={{ padding: "14px 16px", background: "var(--bg2)", borderRadius: 10, margin: "16px 0", lineHeight: 1.7, color: "var(--text2)", fontSize: 14 }}>
                       {inq.message}
                     </div>
-                    
+
                     {/* Status Dropdown */}
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
                       <label style={{ ...s.label, margin: 0 }}>Status:</label>
@@ -850,7 +851,7 @@ function QuotesTab() {
                 </div>
                 {expanded === q.id && (
                   <div style={{ padding: "0 20px 20px", borderTop: "1px solid var(--bd)" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "16px 0" }}>
+                    <div className="admin-grid" style={{ margin: "16px 0", gap: 12 }}>
                       {[
                         { label: "Email", value: q.email },
                         { label: "Phone", value: q.phone || "—" },
@@ -937,7 +938,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       value: stats.products,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
         </svg>
       ),
     },
@@ -946,8 +947,8 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       value: stats.orders,
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
-          <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-          <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          <rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+          <circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" />
         </svg>
       ),
     },
@@ -956,7 +957,7 @@ function StatsTab({ orders: recentOrders }: { orders: Order[] }) {
       value: stats.revenue > 0 ? formatPrice(stats.revenue) : "$0",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="22" height="22">
-          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       ),
     },
@@ -1171,6 +1172,14 @@ export default function AdminDashboard({ role }: { role: string }) {
           .admin-hamburger {
             display: flex !important;
           }
+          .admin-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        .admin-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
         }
         .admin-hamburger {
           display: none;
@@ -1193,9 +1202,9 @@ export default function AdminDashboard({ role }: { role: string }) {
       <button className="admin-hamburger" onClick={() => setMobileMenu(!mobileMenu)}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           {mobileMenu ? (
-            <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+            <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
           ) : (
-            <><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></>
+            <><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></>
           )}
         </svg>
       </button>
@@ -1215,13 +1224,13 @@ export default function AdminDashboard({ role }: { role: string }) {
         </div>
 
         <nav style={{ flex: 1, padding: "12px 0" }}>
-          {canSeeOverview && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>} label="Overview" active={tab === "overview"} onClick={() => { setTab("overview"); setMobileMenu(false); }} />}
-          {canSeeProducts && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>} label="Products" active={tab === "products"} onClick={() => { setTab("products"); setMobileMenu(false); }} />}
-          {canSeeOrders && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} label="Orders" active={tab === "orders"} onClick={() => { setTab("orders"); setMobileMenu(false); }} />}
-          {canSeeBlogs && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => { setTab("blogs"); setMobileMenu(false); }} />}
-          {canSeeInquiries && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => { setTab("inquiries"); setMobileMenu(false); }} />}
-          {canSeeQuotes && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} label="Quotes" active={tab === "quotes"} onClick={() => { setTab("quotes"); setMobileMenu(false); }} />}
-          {canSeeSubscribers && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>} label="Subscribers" active={tab === "subscribers"} onClick={() => { setTab("subscribers"); setMobileMenu(false); }} />}
+          {canSeeOverview && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>} label="Overview" active={tab === "overview"} onClick={() => { setTab("overview"); setMobileMenu(false); }} />}
+          {canSeeProducts && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>} label="Products" active={tab === "products"} onClick={() => { setTab("products"); setMobileMenu(false); }} />}
+          {canSeeOrders && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>} label="Orders" active={tab === "orders"} onClick={() => { setTab("orders"); setMobileMenu(false); }} />}
+          {canSeeBlogs && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>} label="Blog Posts" active={tab === "blogs"} onClick={() => { setTab("blogs"); setMobileMenu(false); }} />}
+          {canSeeInquiries && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>} label="Inquiries" active={tab === "inquiries"} onClick={() => { setTab("inquiries"); setMobileMenu(false); }} />}
+          {canSeeQuotes && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>} label="Quotes" active={tab === "quotes"} onClick={() => { setTab("quotes"); setMobileMenu(false); }} />}
+          {canSeeSubscribers && <NavItem icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>} label="Subscribers" active={tab === "subscribers"} onClick={() => { setTab("subscribers"); setMobileMenu(false); }} />}
         </nav>
 
         <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bd)" }}>
@@ -1237,12 +1246,12 @@ export default function AdminDashboard({ role }: { role: string }) {
 
       {/* Main Content */}
       <main style={s.main} className="admin-main">
-        {canSeeOverview && tab === "overview"   && <StatsTab orders={[]} />}
-        {canSeeProducts && tab === "products"   && <ProductsTab />}
-        {canSeeOrders && tab === "orders"     && <OrdersTab />}
-        {canSeeBlogs && tab === "blogs"      && <BlogsTab />}
-        {canSeeInquiries && tab === "inquiries"  && <InquiriesTab />}
-        {canSeeQuotes && tab === "quotes"     && <QuotesTab />}
+        {canSeeOverview && tab === "overview" && <StatsTab orders={[]} />}
+        {canSeeProducts && tab === "products" && <ProductsTab />}
+        {canSeeOrders && tab === "orders" && <OrdersTab />}
+        {canSeeBlogs && tab === "blogs" && <BlogsTab />}
+        {canSeeInquiries && tab === "inquiries" && <InquiriesTab />}
+        {canSeeQuotes && tab === "quotes" && <QuotesTab />}
         {canSeeSubscribers && tab === "subscribers" && <SubscribersTab />}
       </main>
     </div>

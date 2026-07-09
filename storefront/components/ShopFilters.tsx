@@ -295,6 +295,19 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
           {categories.length > 0 && (
             <div className="filter-section">
               <div className="filter-title">Categories</div>
+              {['Connectors / Parts', 'Cables'].map(cat => (
+                <label key={cat} className="filter-label">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedCategories.includes(cat)}
+                    onChange={() => toggleCategory(cat)}
+                    style={{ accentColor: "var(--acc)", width: 16, height: 16 }}
+                  />
+                  {cat}
+                </label>
+              ))}
+
+              {/* Old dynamic categories logic (Hide all other categories):
               {categories.map(cat => (
                 <label key={cat} className="filter-label">
                   <input 
@@ -306,9 +319,24 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
                   {cat}
                 </label>
               ))}
+
+              Hidden Categories:
+              ❌ Accessories
+              ❌ Cable Assemblies
+              ❌ Connectors
+              ❌ Control Systems
+              ❌ Industrial Electronics
+              ❌ Power Management
+              ❌ Relay & Switching
+              ❌ Signal & Sensor
+              ❌ Wire Harnesses
+              ❌ EMI
+              ❌ Any other category
+              */}
             </div>
           )}
 
+          {/* Price Range Filter Hidden
           <div className="filter-section">
             <div className="filter-title">Price Range</div>
             <div style={{ marginBottom: 16 }}>
@@ -340,6 +368,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
               />
             </div>
           </div>
+          */}
 
           <div className="filter-section">
             <div className="filter-title">Sort By</div>
