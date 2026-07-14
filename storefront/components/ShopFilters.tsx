@@ -9,6 +9,14 @@ interface ShopFiltersProps {
   initialQuery?: string
 }
 
+function getNormalizedCategory(rawCat: string): string {
+  if (!rawCat) return ""
+  const lower = rawCat.toLowerCase()
+  if (lower.includes("connector") || lower.includes("part")) return "Connectors / Parts"
+  if (lower.includes("cable") || lower.includes("wire")) return "Cables"
+  return rawCat.trim()
+}
+
 export default function ShopFilters({ initialProducts, initialQuery = "" }: ShopFiltersProps) {
   const [search, setSearch] = useState(initialQuery)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -17,6 +25,8 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
   const [inStockOnly, setInStockOnly] = useState(false)
   const [sortOrder, setSortOrder] = useState<"" | "low-high" | "high-low">("")
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const PRODUCTS_PER_PAGE = 6
 
   // Disable body scroll when mobile filter is open
   useEffect(() => {
@@ -34,11 +44,18 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
   }, [initialProducts])
 
   const categories = useMemo(() => {
-    const cats = new Set<string>()
+    const catsMap = new Map<string, string>() // stores lowercase -> original
     initialProducts.forEach(p => {
-      if (p.category) cats.add(p.category)
+      if (p.category) {
+        const normalized = getNormalizedCategory(p.category)
+        const lower = normalized.toLowerCase()
+        // If we haven't seen this category yet, or if the current one has better casing (starts with uppercase)
+        if (!catsMap.has(lower) || (normalized[0] === normalized[0].toUpperCase() && catsMap.get(lower)![0] !== catsMap.get(lower)![0].toUpperCase())) {
+          catsMap.set(lower, normalized)
+        }
+      }
     })
-    return Array.from(cats).sort()
+    return Array.from(catsMap.values()).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
   }, [initialProducts])
 
   const toggleCategory = (cat: string) => {
@@ -59,9 +76,8 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
       
       // Category
       if (selectedCategories.length > 0) {
-        if (!selectedCategories.includes(p.category)) {
-          return false
-        }
+        const pNormalizedCat = getNormalizedCategory(p.category || "")
+        if (!selectedCategories.includes(pNormalizedCat)) return false
       }
 
       // Price
@@ -78,6 +94,17 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
       return 0
     })
   }, [initialProducts, search, selectedCategories, minPrice, maxPrice, inStockOnly, sortOrder])
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, selectedCategories, minPrice, maxPrice, inStockOnly, sortOrder])
+
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE)
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  )
 
   // Re-trigger reveal animation when filtered products change.
   // io is declared outside the timeout so cleanup can disconnect it whether
@@ -250,9 +277,17 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
 
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <div className="lbl" style={{ marginBottom: 16 }}>ALL PRODUCTS</div>
+        <div className="lbl" style={{ marginBottom: 16 }}>
+          {selectedCategories.length > 0 ? "CATEGORY" : "ALL PRODUCTS"}
+        </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-          <h1 className="D2">{search ? `Search: "${search}"` : "Shop Everything"}</h1>
+          <h1 className="D2">
+            {search 
+              ? `Search: "${search}"` 
+              : selectedCategories.length > 0 
+                ? selectedCategories.join(" & ") 
+                : "Shop Everything"}
+          </h1>
           <div style={{ color: "var(--text2)", fontSize: 15 }}>
             Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
           </div>
@@ -295,19 +330,6 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
           {categories.length > 0 && (
             <div className="filter-section">
               <div className="filter-title">Categories</div>
-              {['Connectors / Parts', 'Cables'].map(cat => (
-                <label key={cat} className="filter-label">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedCategories.includes(cat)}
-                    onChange={() => toggleCategory(cat)}
-                    style={{ accentColor: "var(--acc)", width: 16, height: 16 }}
-                  />
-                  {cat}
-                </label>
-              ))}
-
-              {/* Old dynamic categories logic (Hide all other categories):
               {categories.map(cat => (
                 <label key={cat} className="filter-label">
                   <input 
@@ -319,20 +341,6 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
                   {cat}
                 </label>
               ))}
-
-              Hidden Categories:
-              ❌ Accessories
-              ❌ Cable Assemblies
-              ❌ Connectors
-              ❌ Control Systems
-              ❌ Industrial Electronics
-              ❌ Power Management
-              ❌ Relay & Switching
-              ❌ Signal & Sensor
-              ❌ Wire Harnesses
-              ❌ EMI
-              ❌ Any other category
-              */}
             </div>
           )}
 
@@ -442,10 +450,66 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
               </button>
             </div>
           ) : (
-            <div className="prodG">
-              {filteredProducts.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
-              ))}
+            <div>
+              <div className="prodG">
+                {paginatedProducts.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 16, marginTop: 64, paddingBottom: 32 }}>
+                  <button 
+                    onClick={() => {
+                      setCurrentPage(p => Math.max(1, p - 1))
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    disabled={currentPage === 1}
+                    className="btn bod"
+                    style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", minWidth: 100, opacity: currentPage === 1 ? 0.3 : 1, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    Prev
+                  </button>
+                  
+                  <div style={{ display: "flex", gap: 8, fontFamily: "var(--font-sora)", fontWeight: 600, fontSize: 14 }}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+                      <button
+                        key={num}
+                        onClick={() => {
+                          setCurrentPage(num)
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }}
+                        style={{
+                          width: 36, height: 36,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          borderRadius: 8,
+                          border: num === currentPage ? "2px solid var(--text)" : "1px solid var(--bd)",
+                          background: num === currentPage ? "var(--text)" : "transparent",
+                          color: num === currentPage ? "var(--bg)" : "var(--text)",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={() => {
+                      setCurrentPage(p => Math.min(totalPages, p + 1))
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    disabled={currentPage === totalPages}
+                    className="btn bod"
+                    style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", minWidth: 100, opacity: currentPage === totalPages ? 0.3 : 1, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+                  >
+                    Next
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

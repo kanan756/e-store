@@ -8,6 +8,9 @@ const SLIDES = [
   { src: "/images/trailer-7way-coil-cable.webp", alt: "Wire harness manufacturing" },
   { src: "/images/encoder-coil-cable-servo.webp", alt: "Cable assembly production" },
   { src: "/images/trailer-coil-cable-truck.webp", alt: "Precision electrical assembly" },
+  { src: "/images/carousel-1.webp", alt: "Wire harness manufacturing" },
+  { src: "/images/carousel-2.webp", alt: "Cable assembly production" },
+  { src: "/images/carousel-3.webp", alt: "Precision electrical assembly" },
 ]
 
 function ArrowRight() {

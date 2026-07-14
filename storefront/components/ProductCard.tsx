@@ -64,11 +64,15 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     try { new URL(url); return true } catch { return false }
   }
 
-  const images = product.imageUrl ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl) : []
+  const images = product.imageUrl 
+    ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl)
+    : []
   const primaryImage = images.length > 0 ? images[0] : null
 
   const outOfStock = product.inStock === false
 
+  const isWireOrCable = product.category?.toLowerCase().includes("wire") || product.category?.toLowerCase().includes("cable")
+  
   return (
     <div suppressHydrationWarning className="prodC rv" style={{ transitionDelay: `${index * 0.07}s`, opacity: outOfStock ? 0.55 : 1 }}>
       <div className="prodC__img" style={{ position: "relative" }}>
@@ -77,6 +81,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             src={primaryImage}
             alt={product.name}
             fill
+            unoptimized={true}
             sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
             style={{ objectFit: "contain", padding: "8px", filter: outOfStock ? "grayscale(70%)" : "none" }}
           />
@@ -101,7 +106,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         <div className="prodC__cat">{product.category || "Product"}</div>
         <div className="prodC__nm">{product.name}</div>
         <div className="prodC__pr">
-          {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
+          {product.price > 0 ? `${formatPrice(product.price)}${isWireOrCable ? ' / FT' : ''}` : "Contact for price"}
         </div>
         <div className="prodC__row">
           <button

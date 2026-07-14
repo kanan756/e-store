@@ -59,6 +59,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const tabs = hasImages ? ALL_TABS : ALL_TABS.filter(t => t.id !== "gallery")
 
+  const isWireOrCable = product.category?.toLowerCase().includes("wire") || product.category?.toLowerCase().includes("cable")
+
   return (
     <div className="pd-shell">
 
@@ -140,7 +142,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 </p>
 
                 <div className="pd-price">
-                  {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
+                  {product.price > 0 ? `${formatPrice(product.price)}${isWireOrCable ? ' / FT' : ''}` : "Contact for price"}
                 </div>
 
                 <button
