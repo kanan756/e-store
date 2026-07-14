@@ -131,7 +131,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
   }, [filteredProducts])
 
   return (
-    <div className="shop-layout" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 32 }}>
+    <div className="shop-layout" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: 32, maxWidth: "100%" }}>
       
       {/* Mobile/Desktop responsive layout: we'll use CSS grid. 
           On desktop: 280px 1fr
@@ -139,9 +139,10 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
       <style dangerouslySetInnerHTML={{__html: `
         .shop-container {
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
           gap: 32px;
           align-items: start;
+          max-width: 100%;
         }
         
         .mobile-filter-btn {
@@ -209,7 +210,7 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
 
         @media (min-width: 900px) {
           .shop-container {
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 280px minmax(0, 1fr);
             gap: 64px;
           }
           .mobile-filter-btn {

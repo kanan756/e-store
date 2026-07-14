@@ -108,7 +108,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         <div className="prodC__pr">
           {product.price > 0 ? `${formatPrice(product.price)}${isWireOrCable ? ' / FT' : ''}` : "Contact for price"}
         </div>
-        <div className="prodC__row">
+        <div className="prodC__row" style={{ flexWrap: "wrap" }}>
           <button
             className="btn bp bsm no-fill"
             onClick={handleAddToCart}

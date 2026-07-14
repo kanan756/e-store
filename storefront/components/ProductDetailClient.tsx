@@ -68,7 +68,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       <div className="pd-hdr">
         <div className="W">
           <div className="lbl" style={{ marginBottom: 12 }}>{product.category || "Product"}</div>
-          <h1 className="D2">{product.name}</h1>
+          <h1 className="D3" style={{ fontSize: "clamp(32px, 5vw, 64px)" }}>{product.name}</h1>
         </div>
       </div>
 
