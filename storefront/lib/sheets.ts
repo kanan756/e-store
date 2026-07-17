@@ -82,6 +82,7 @@ export interface Product {
   price: number
   handle: string
   inStock: boolean
+  partNumber?: string
 }
 
 export interface Order {
@@ -129,7 +130,7 @@ export const getProducts = cache(withTTL(async (): Promise<Product[]> => {
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
-    range: "Products!A2:G",
+    range: "Products!A2:H",
   })
 
   const rows = res.data.values ?? []
@@ -144,6 +145,7 @@ export const getProducts = cache(withTTL(async (): Promise<Product[]> => {
       price: Number(r[4]) || 0,
       handle: r[5] ?? slugify(r[0] ?? ""),
       inStock: (r[6] ?? "true").toLowerCase() !== "false",
+      partNumber: r[7] ?? "",
     }))
     .filter((p) => p.name !== "") // skip empty rows
 }))
@@ -257,7 +259,7 @@ export async function appendProduct(product: Omit<Product, "id">): Promise<void>
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
-    range: "Products!A:G",
+    range: "Products!A:H",
     valueInputOption: "RAW",
     requestBody: {
       values: [[
@@ -268,6 +270,7 @@ export async function appendProduct(product: Omit<Product, "id">): Promise<void>
         product.price,
         product.handle || slugify(product.name),
         product.inStock !== false ? "true" : "false",
+        product.partNumber || "",
       ]],
     },
   })
@@ -278,7 +281,7 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
   const sheets = google.sheets({ version: "v4", auth })
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
-    range: `Products!A${rowIndex}:G${rowIndex}`,
+    range: `Products!A${rowIndex}:H${rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
       values: [[
@@ -289,6 +292,7 @@ export async function updateProduct(rowIndex: number, product: Omit<Product, "id
         product.price,
         product.handle || slugify(product.name),
         product.inStock !== false ? "true" : "false",
+        product.partNumber || "",
       ]],
     },
   })

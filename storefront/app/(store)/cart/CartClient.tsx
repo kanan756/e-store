@@ -1,5 +1,16 @@
 "use client"
 
+/**
+ * @file CartClient.tsx
+ * @description Manages the shopping cart user interface.
+ * 
+ * Logic Highlights:
+ * 1. Global State: Uses the `useCart` context to read and modify cart items.
+ * 2. MOQ (Minimum Order Quantity): Wires and Cables have a strict MOQ of 5 items. 
+ *    The `updateQuantity` function intercepts reductions below 5 and alerts the user.
+ * 3. Shipping Calculation: Adds a flat $15.00 shipping rate to the subtotal.
+ */
+
 import Image from "next/image"
 import Link from "next/link"
 import { useCart } from "@/context/cart-context"
@@ -39,7 +50,27 @@ export default function CartClient() {
           <h1 className="D3">Shopping Cart</h1>
         </div>
 
-
+        {/* Note Banner for Wires & Cables in Cart */}
+        {items.some(item => item.category?.toLowerCase().includes("cable") || item.category?.toLowerCase().includes("wire")) && (
+          <div style={{
+            background: "var(--bg2)",
+            border: "1px solid var(--bd)",
+            borderRadius: "var(--r)",
+            padding: "16px 20px",
+            marginBottom: "32px",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px"
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <strong style={{ display: "block", marginBottom: "4px", color: "var(--text)" }}>Important Note Regarding Wires & Cables</strong>
+              <p style={{ color: "var(--text2)", fontSize: "14px", lineHeight: 1.5, margin: 0 }}>
+                The quantity for all wire and cable products in your cart represents the total length in feet (FT).
+              </p>
+            </div>
+          </div>
+        )}
 
         {isEmpty ? (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
@@ -147,7 +178,7 @@ export default function CartClient() {
               <Link href="/checkout" className="btn bp" style={{ width: "100%", justifyContent: "center" }}>
                 Proceed to Checkout <ArrowIcon />
               </Link>
-              <Link href="/products" style={{ display: "block", textAlign: "center", marginTop: 16, fontSize: 13, color: "var(--text2)" }}>
+              <Link href="/shop" style={{ display: "block", textAlign: "center", marginTop: 16, fontSize: 13, color: "var(--text2)" }}>
                 Continue Shopping
               </Link>
             </div>

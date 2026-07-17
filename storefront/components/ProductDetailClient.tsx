@@ -1,5 +1,15 @@
 "use client"
 
+/**
+ * @file ProductDetailClient.tsx
+ * @description Renders the individual product details, image gallery, and tabbed information.
+ * 
+ * Logic Highlights:
+ * 1. Image Gallery: Splits the comma-separated `imageUrl` string and renders a main image with thumbnails.
+ * 2. Tabs State: Uses React `useState` to switch between Overview, Features, Services, Gallery, and Customize tabs without reloading the page.
+ * 3. Add to Cart: Integrates with `useCart` context. Also temporarily shows a "Added to Cart!" success state.
+ */
+
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/context/cart-context"
@@ -67,7 +77,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {/* ── Product name header ── */}
       <div className="pd-hdr">
         <div className="W">
-          <div className="lbl" style={{ marginBottom: 12 }}>{product.category || "Product"}</div>
+          <div className="lbl" style={{ marginBottom: 12 }}>
+            {product.category || "Product"}
+            {product.partNumber && (
+              <span style={{ marginLeft: 16, fontFamily: "monospace", color: "var(--text2)" }}>
+                PN: {product.partNumber}
+              </span>
+            )}
+          </div>
           <h1 className="D3" style={{ fontSize: "clamp(32px, 5vw, 64px)" }}>{product.name}</h1>
         </div>
       </div>
@@ -142,13 +159,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 </p>
 
                 <div className="pd-price">
-                  {product.price > 0 ? `${formatPrice(product.price)}${isWireOrCable ? ' / FT' : ''}` : "Contact for price"}
+                  {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
                 </div>
 
                 <button
                   className="btn bp no-fill"
                   onClick={handleAddToCart}
-                  disabled={adding || !product.inStock}
+                  disabled={adding || added || !product.inStock}
                   style={{
                     width: "100%",
                     background: added ? "#16a34a" : (!product.inStock ? "var(--bg3)" : undefined),

@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       productSummaryParts.push(`${product.name} x${item.quantity}`)
     }
 
-    if (serverAmount <= 0) {
+    if (serverAmount < 0) {
       return NextResponse.json({ error: "Invalid order amount" }, { status: 400 })
     }
 
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Superior Harness & Assembly LLC Order",
+              name: "Superior Harness & Assembly Order",
               description: productSummary,
             },
             unit_amount: Math.round(serverAmount * 100),

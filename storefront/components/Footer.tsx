@@ -87,7 +87,7 @@ export default function Footer() {
         <div className="ft__g">
           {/* Brand */}
           <div>
-            <div className="ft__brand">SUPERIOR HARNESS &amp; ASSEMBLY LLC</div>
+            <div className="ft__brand">SUPERIOR HARNESS &amp; ASSEMBLY</div>
             <p className="ft__desc">
               Precision wire harness and cable assembly manufacturing for the automotive, medical, robotics, EV, and industrial sectors — built to your exact specifications since day one.
             </p>
@@ -159,7 +159,7 @@ export default function Footer() {
         </div>
 
         <div className="ft__btm">
-          <div className="ft__copy">© {new Date().getFullYear()} Superior Harness &amp; Assembly LLC. All rights reserved.</div>
+          <div className="ft__copy">© {new Date().getFullYear()} Superior Harness &amp; Assembly. All rights reserved.</div>
           <div className="ft__bls">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>

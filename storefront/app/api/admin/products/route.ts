@@ -45,6 +45,7 @@ const productSchema = z.object({
   price:       z.number().min(0),
   handle:      z.string().default("").transform(stripEmoji),
   inStock:     z.boolean().default(true),
+  partNumber:  z.string().optional().default("").transform(stripEmoji),
 })
 
 export async function GET() {

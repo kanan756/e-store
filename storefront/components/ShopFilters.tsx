@@ -1,5 +1,17 @@
 "use client"
 
+/**
+ * @file ShopFilters.tsx
+ * @description Renders the shop page with a sidebar for filters and a grid for products.
+ * 
+ * Logic Highlights:
+ * 1. Filtering logic (search, category, inStock): Handled via a single useMemo (`filteredProducts`)
+ *    which recalculates whenever any state changes. This is highly performant.
+ * 2. Search matches across Name, Category, AND Part Number.
+ * 3. Mobile responsiveness: The filter sidebar transforms into a slide-out drawer on small screens.
+ * 4. Pagination: Slices the filtered array into pages of 6 items.
+ */
+
 import { useState, useMemo, useEffect } from "react"
 import type { Product } from "@/lib/sheets"
 import ProductCard from "./ProductCard"
@@ -66,10 +78,13 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
 
   const filteredProducts = useMemo(() => {
     return initialProducts.filter(p => {
-      // Search text
       if (search) {
         const q = search.toLowerCase()
-        if (!p.name.toLowerCase().includes(q) && !p.category.toLowerCase().includes(q)) {
+        const matchName = p.name.toLowerCase().includes(q)
+        const matchCategory = p.category.toLowerCase().includes(q)
+        const matchPartNumber = p.partNumber ? p.partNumber.toLowerCase().includes(q) : false
+
+        if (!matchName && !matchCategory && !matchPartNumber) {
           return false
         }
       }
@@ -432,6 +447,27 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
 
         {/* Grid */}
         <div>
+          {/* Note Banner for Wires & Cables */}
+          {selectedCategories.some(c => c.toLowerCase().includes('cable') || c.toLowerCase().includes('wire')) && (
+            <div style={{
+              background: "var(--bg2)",
+              border: "1px solid var(--bd)",
+              borderRadius: "var(--r)",
+              padding: "16px 20px",
+              marginBottom: "24px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px"
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div>
+                <strong style={{ display: "block", marginBottom: "4px", color: "var(--text)" }}>Important Note</strong>
+                <p style={{ color: "var(--text2)", fontSize: "14px", lineHeight: 1.5, margin: 0 }}>
+                  All wires and cables are priced and sold per foot (FT). Please adjust your quantity accordingly when adding to your cart.
+                </p>
+              </div>
+            </div>
+          )}
           {filteredProducts.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text2)", background: "rgba(0,109,55,0.02)", borderRadius: "var(--rL)", border: "1px dashed var(--bd)" }}>
               <p>No products match your filters.</p>

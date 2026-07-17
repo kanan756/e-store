@@ -105,14 +105,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       <div className="prodC__bd">
         <div className="prodC__cat">{product.category || "Product"}</div>
         <div className="prodC__nm">{product.name}</div>
+        {product.partNumber && (
+          <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8, fontFamily: "monospace" }}>
+            PN: {product.partNumber}
+          </div>
+        )}
         <div className="prodC__pr">
-          {product.price > 0 ? `${formatPrice(product.price)}${isWireOrCable ? ' / FT' : ''}` : "Contact for price"}
+          {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
         </div>
         <div className="prodC__row" style={{ flexWrap: "wrap" }}>
           <button
             className="btn bp bsm no-fill"
             onClick={handleAddToCart}
-            disabled={adding || outOfStock}
+            disabled={adding || added || outOfStock}
             style={outOfStock ? { opacity: 0.4, cursor: "not-allowed" } : added ? { background: "#16a34a" } : {}}
           >
             {outOfStock ? "Out of Stock" : added ? "✓ Added!" : adding ? "Adding…" : "Add to Cart"}

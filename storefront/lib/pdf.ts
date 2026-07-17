@@ -53,7 +53,7 @@ export async function generateInvoicePdf({
         doc.fillColor(PRIMARY_COLOR).font("Helvetica-Bold").fontSize(24).text("Superior Harness", 50, 50);
       }
 
-      doc.fillColor(TEXT_MAIN).font("Helvetica-Bold").fontSize(12).text("Superior Harness & Assembly LLC", 300, 50, { align: "right", width: 245 });
+      doc.fillColor(TEXT_MAIN).font("Helvetica-Bold").fontSize(12).text("Superior Harness & Assembly", 300, 50, { align: "right", width: 245 });
       doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10)
         // Old: .text("Canton, Michigan 48187", { align: "right", width: 245 })
         .text("3179 Black Gap Rd, Chambersburg, PA 17202", { align: "right", width: 245 })
@@ -168,7 +168,7 @@ export async function generateInvoicePdf({
       // ── Footer ──────────────────────────────────────────────────────────────
       const footerY = doc.page.height - 80;
       doc.moveTo(50, footerY - 20).lineTo(545, footerY - 20).lineWidth(1).strokeColor("#E0E0E0").stroke();
-      doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10).text("Thank you for choosing Superior Harness & Assembly LLC.", 50, footerY, { align: "center", width: 495 });
+      doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10).text("Thank you for choosing Superior Harness & Assembly.", 50, footerY, { align: "center", width: 495 });
       doc.fillColor(SECONDARY_COLOR).text("If you have any questions about this invoice, please contact us.", 50, footerY + 15, { align: "center", width: 495 });
 
       doc.end();

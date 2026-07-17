@@ -1,5 +1,17 @@
 "use client"
 
+/**
+ * @file CheckoutClient.tsx
+ * @description Manages the checkout form, user input validation, and Stripe payment integration.
+ * 
+ * Logic Highlights:
+ * 1. Zod Validation: Ensures all fields (firstName, email, etc.) are properly filled before submission.
+ * 2. Local Storage (Save Info): Allows users to save their address for future checkouts via localStorage.
+ * 3. Stripe Integration: Instead of trusting the cart prices from the frontend (which can be manipulated), 
+ *    it sends only the product IDs (handles) and quantities to the server. The server fetches the real 
+ *    prices from Google Sheets and creates a secure Stripe session.
+ */
+
 import { useState, useCallback, useEffect, useRef } from "react"
 import type { ChangeEvent, FormEvent } from "react"
 import { useRouter } from "next/navigation"
@@ -224,11 +236,16 @@ export default function CheckoutClient() {
                 </div>
               ))}
 
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, fontSize: 13, color: "var(--text2)", marginTop: 12 }}>
+                <span>Shipping (Flat Rate)</span>
+                <span>$15.00</span>
+              </div>
+
               <div style={{ borderTop: "1px solid var(--bd)", marginTop: 16, paddingTop: 16, display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
-                <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 22, color: "var(--acc)" }}>
-                  {formatPrice(subtotal)}
-                </span>
+                  <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 20 }}>
+                    {formatPrice(subtotal + 15)}
+                  </span>
               </div>
 
               <button

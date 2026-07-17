@@ -22,7 +22,7 @@ const SPECS = [
   { k: "Boot Entry Angle", v: "Straight, 45°, 90° available" },
   { k: "IP Rating", v: "IP67 through-molded standard" },
   { k: "Color Options", v: "Standard colors or Pantone-matched" },
-  { k: "Tooling Lead Time", v: "New tool: 3–5 weeks; repeat orders from stock tooling" },
+  { k: "Tooling Lead Time", v: "New tool: 2–3 weeks; repeat orders from stock tooling" },
   { k: "Production MOQ", v: "100 units with tooling; lower quantities at prototype rate" },
   { k: "Coil Integration", v: "All coil OD and retracted/extended lengths" },
   { k: "Certification", v: "COC standard; UL or VDE recognized on request" },

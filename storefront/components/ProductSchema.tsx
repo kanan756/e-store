@@ -12,7 +12,7 @@ export function ProductSchema({ product }: { product: Product }) {
     brand: {
       "@type": "Brand",
       // Fixed: was hardcoded "Client Store" (template placeholder)
-      name: "Superior Harness & Assembly LLC",
+      name: "Superior Harness & Assembly",
     },
     offers: {
       "@type": "Offer",

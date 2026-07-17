@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for Superior Harness & Assembly LLC.",
+  description: "Privacy Policy for Superior Harness & Assembly.",
 }
 
 export default function PrivacyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
           <section>
             <h2 style={{ fontSize: 20, marginBottom: 12 }}>1. Introduction</h2>
             <p style={{ color: "var(--text2)" }}>
-              Superior Harness & Assembly LLC ("we," "us," or "our") respects your privacy and is committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.
+              Superior Harness & Assembly ("we," "us," or "our") respects your privacy and is committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.
             </p>
           </section>
 
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
             <p style={{ color: "var(--text2)" }}>
               If you have any questions about this privacy policy or our privacy practices, please contact us at:
               <br /><br />
-              Superior Harness &amp; Assembly LLC<br />
+              Superior Harness &amp; Assembly<br />
               {/* Old: Canton, Michigan 48187 */}
               3179 Black Gap Rd, Chambersburg, PA 17202<br />
               {/* Old: Email: pateltushar1987@gmail.com */}

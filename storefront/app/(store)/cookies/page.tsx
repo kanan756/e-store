@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
-  description: "Cookie Policy for Superior Harness & Assembly LLC.",
+  description: "Cookie Policy for Superior Harness & Assembly.",
 }
 
 export default function CookiesPage() {

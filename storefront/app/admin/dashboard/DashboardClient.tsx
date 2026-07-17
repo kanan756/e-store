@@ -142,6 +142,7 @@ function ProductForm({
     price: initial?.price ?? 0,
     handle: initial?.handle ?? "",
     inStock: initial?.inStock ?? true,
+    partNumber: initial?.partNumber ?? "",
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -178,6 +179,10 @@ function ProductForm({
         <div>
           <label style={s.label}>Category</label>
           <input style={s.input} value={form.category} onChange={set("category")} placeholder="Apparel" />
+        </div>
+        <div>
+          <label style={s.label}>Part Number</label>
+          <input style={s.input} value={form.partNumber} onChange={set("partNumber")} placeholder="e.g. 12015199" />
         </div>
       </div>
       <div>
@@ -295,7 +300,7 @@ function ProductsTab() {
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 800 }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--bd)" }}>
-                  {["Name", "Category", "Price", "Stock", "Handle", "Actions"].map((h) => (
+                  {["Name", "Part No.", "Category", "Price", "Stock", "Handle", "Actions"].map((h) => (
                     <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "var(--text2)", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                   ))}
                 </tr>
@@ -304,6 +309,7 @@ function ProductsTab() {
                 {[...products].reverse().map((p) => (
                   <tr key={p.id} style={{ borderBottom: "1px solid var(--bd)" }}>
                     <td style={{ padding: "14px 12px", fontWeight: 600 }}>{p.name}</td>
+                    <td style={{ padding: "14px 12px", color: "var(--text2)", fontFamily: "monospace" }}>{p.partNumber || "—"}</td>
                     <td style={{ padding: "14px 12px", color: "var(--text2)" }}>{p.category || "—"}</td>
                     <td style={{ padding: "14px 12px", color: "var(--text)" }}>{p.price > 0 ? formatPrice(p.price) : "—"}</td>
                     <td style={{ padding: "14px 12px" }}>
