@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function About() {
   return (
-    <section id="about" className="sec" style={{ background: "#FFFFFF", padding: "80px 0" }}>
+    <section id="about" className="sec" style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
       <div className="W">
         <div style={{ maxWidth: 880, margin: "0 auto", textAlign: "center" }}>
           <div
@@ -10,14 +10,15 @@ export default function About() {
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              background: "var(--claspo-lavender)",
-              color: "var(--claspo-purple)",
+              background: "#F5F5F5",
+              color: "#111111",
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
-              borderRadius: 9999,
+              borderRadius: "4px",
+              border: "1px solid #DADADA",
               marginBottom: 16,
             }}
           >
@@ -28,24 +29,24 @@ export default function About() {
             style={{
               fontSize: "clamp(28px, 3.8vw, 42px)",
               fontWeight: 800,
-              color: "var(--claspo-text)",
+              color: "#111111",
               letterSpacing: "-0.02em",
               lineHeight: 1.25,
               marginBottom: 24,
             }}
           >
-            Your Trusted Partner in Custom Wire Harnesses &amp; Interconnect Solutions
+            Making Everyday Living Smarter, Simpler, and Better.
           </h2>
 
-          <p style={{ fontSize: 16, color: "var(--claspo-muted)", lineHeight: 1.7, marginBottom: 20 }}>
-            CLASPO is a specialized wire harness and cable assembly manufacturer committed to delivering high-quality, reliable, and fully customized wiring solutions. Backed by a team with over 30 years of combined industry experience, we understand the critical balance between mechanical durability, electrical precision, and on-time delivery.
+          <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.7, marginBottom: 20 }}>
+            At <strong>CLASPO</strong>, we believe that everyday life should be easier, more organized, and more convenient. We are a modern home solutions brand dedicated to bringing smart, practical, and stylish products into your everyday routine.
           </p>
 
-          <p style={{ fontSize: 16, color: "var(--claspo-muted)", lineHeight: 1.7, marginBottom: 36 }}>
-            We specialize in low to high volume manufacturing with flexible minimum order quantities. From early-stage engineering prototypes to full-rate production runs, we work directly alongside startups, OEMs, and Tier-1 suppliers across automotive, medical, robotics, and industrial automation sectors.
+          <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.7, marginBottom: 36 }}>
+            From innovative kitchen tools and space-saving storage solutions to cleaning essentials, adhesive accessories, and household utilities, we carefully curate products that solve real-life problems. Our philosophy is simple: useful innovation should make everyday tasks effortless.
           </p>
 
-          {/* 3 Metric Badges */}
+          {/* 3 Metric / Value Badges */}
           <div
             style={{
               display: "grid",
@@ -56,58 +57,58 @@ export default function About() {
           >
             <div
               style={{
-                background: "#F7F7F9",
-                borderRadius: 16,
+                background: "#F5F5F5",
+                borderRadius: 10,
                 padding: "24px 20px",
-                border: "1px solid #EBE9F2",
+                border: "1px solid #DADADA",
               }}
             >
-              <div style={{ fontSize: 32, fontWeight: 800, color: "var(--claspo-purple)", marginBottom: 4 }}>
-                30+ Years
+              <div style={{ fontSize: 24, fontWeight: 900, color: "#111111", marginBottom: 4 }}>
+                Smart Design
               </div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--claspo-text)" }}>
-                Combined Experience
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#111111" }}>
+                Practical Innovation
               </div>
-              <div style={{ fontSize: 12.5, color: "var(--claspo-muted)", marginTop: 4 }}>
-                Wire harness &amp; cable assembly mastery
+              <div style={{ fontSize: 12.5, color: "#777777", marginTop: 4 }}>
+                Tools designed to solve daily household pain points
               </div>
             </div>
 
             <div
               style={{
-                background: "#F7F7F9",
-                borderRadius: 16,
+                background: "#F5F5F5",
+                borderRadius: 10,
                 padding: "24px 20px",
-                border: "1px solid #EBE9F2",
+                border: "1px solid #DADADA",
               }}
             >
-              <div style={{ fontSize: 32, fontWeight: 800, color: "var(--claspo-purple)", marginBottom: 4 }}>
-                100% Tested
+              <div style={{ fontSize: 24, fontWeight: 900, color: "#111111", marginBottom: 4 }}>
+                100% Vetted
               </div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--claspo-text)" }}>
-                IPC/WHMA-A-620
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#111111" }}>
+                Quality Selection
               </div>
-              <div style={{ fontSize: 12.5, color: "var(--claspo-muted)", marginTop: 4 }}>
-                Electrical continuity &amp; pull-force verified
+              <div style={{ fontSize: 12.5, color: "#777777", marginTop: 4 }}>
+                Sturdy, safe, and durable materials built to last
               </div>
             </div>
 
             <div
               style={{
-                background: "#F7F7F9",
-                borderRadius: 16,
+                background: "#F5F5F5",
+                borderRadius: 10,
                 padding: "24px 20px",
-                border: "1px solid #EBE9F2",
+                border: "1px solid #DADADA",
               }}
             >
-              <div style={{ fontSize: 32, fontWeight: 800, color: "var(--claspo-purple)", marginBottom: 4 }}>
-                Flexible MOQs
+              <div style={{ fontSize: 24, fontWeight: 900, color: "#111111", marginBottom: 4 }}>
+                Accessible
               </div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--claspo-text)" }}>
-                From 1 to 50k+ Units
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#111111" }}>
+                Affordable Value
               </div>
-              <div style={{ fontSize: 12.5, color: "var(--claspo-muted)", marginTop: 4 }}>
-                Prototypes through mass production
+              <div style={{ fontSize: 12.5, color: "#777777", marginTop: 4 }}>
+                High-utility products at honest, direct prices
               </div>
             </div>
           </div>
@@ -118,15 +119,15 @@ export default function About() {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "var(--claspo-purple)",
+              background: "#111111",
               color: "#FFFFFF",
               fontSize: 14,
               fontWeight: 700,
-              padding: "14px 32px",
-              borderRadius: 9999,
+              padding: "13px 30px",
+              borderRadius: "6px",
               textDecoration: "none",
-              boxShadow: "0 4px 16px rgba(84, 32, 200, 0.25)",
-              transition: "transform 0.15s ease",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+              transition: "background 0.2s, transform 0.15s",
             }}
           >
             Learn More About CLASPO

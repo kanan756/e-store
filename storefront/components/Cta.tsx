@@ -36,7 +36,7 @@ export default function Cta() {
   }
 
   return (
-    <section id="cta" className="sec" style={{ background: "#F7F7F9", padding: "80px 0" }}>
+    <section id="cta" className="sec" style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
       <div className="W">
         <div
           style={{
@@ -45,17 +45,18 @@ export default function Cta() {
             gap: 32,
           }}
         >
-          {/* Left: Project Quote / Direct Contact */}
+          {/* Left: Customer Care & Direct Contact */}
           <div
             style={{
-              background: "linear-gradient(135deg, #5420C8 0%, #3B1299 100%)",
-              borderRadius: 24,
+              background: "#303638",
+              borderRadius: 14,
               padding: "44px 36px",
               color: "#FFFFFF",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              boxShadow: "0 10px 32px rgba(84, 32, 200, 0.22)",
+              boxShadow: "0 4px 18px rgba(0, 0, 0, 0.12)",
+              border: "1px solid #454C4F",
             }}
           >
             <div>
@@ -64,18 +65,19 @@ export default function Cta() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  background: "rgba(255, 255, 255, 0.16)",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
                   color: "#FFFFFF",
                   fontSize: 11,
-                  fontWeight: 800,
+                  fontWeight: 700,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   padding: "6px 14px",
-                  borderRadius: 9999,
+                  borderRadius: "4px",
                   marginBottom: 20,
                 }}
               >
-                Fast 24-48h Quote Turnaround
+                Customer Support
               </div>
 
               <h2
@@ -88,33 +90,34 @@ export default function Cta() {
                   color: "#FFFFFF",
                 }}
               >
-                Ready to Put Your Next Program in Reliable Hands?
+                Need Assistance or Product Advice?
               </h2>
 
               <p
                 style={{
                   fontSize: 15,
-                  color: "rgba(255, 255, 255, 0.85)",
+                  color: "rgba(255, 255, 255, 0.8)",
                   lineHeight: 1.65,
                   marginBottom: 28,
                 }}
               >
-                Send us your wire list, CAD prints, or BOM specifications. Our engineering team reviews your design for manufacturability (DFM) and delivers an itemized quote within two business days.
+                Whether you have questions about our kitchen gadgets, space-saving storage systems, or an ongoing order, our customer support team is always ready to assist you.
               </p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28, fontSize: 14 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, color: "rgba(255, 255, 255, 0.9)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28, fontSize: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#FFFFFF" }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="4" width="20" height="16" rx="2" />
                     <path d="m22 7-10 6L2 7" />
                   </svg>
-                  <span>Official Inquiry: <strong>info@claspo.store</strong></span>
+                  <span>Official Email: <strong>info@claspo.store</strong></span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, color: "rgba(255, 255, 255, 0.9)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, color: "#FFFFFF" }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
                   </svg>
-                  <span>Direct Line: <strong>+1 734 891 0248</strong></span>
+                  <span>Address: <strong>306, Radhe Kishan Arista, Maninagar, Ahmedabad</strong></span>
                 </div>
               </div>
             </div>
@@ -124,20 +127,26 @@ export default function Cta() {
                 href="/contact"
                 style={{
                   background: "#FFFFFF",
-                  color: "var(--claspo-purple)",
+                  color: "#111111",
                   fontSize: 14,
-                  fontWeight: 800,
-                  padding: "14px 28px",
-                  borderRadius: 9999,
+                  fontWeight: 700,
+                  padding: "13px 28px",
+                  borderRadius: "6px",
                   textDecoration: "none",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.15)",
-                  transition: "transform 0.15s ease",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  transition: "background 0.2s ease, transform 0.15s ease",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "#F5F5F5"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "#FFFFFF"
                 }}
               >
-                Request a Custom Quote
+                Contact Us
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12,5 19,12 12,19" />
@@ -146,14 +155,14 @@ export default function Cta() {
             </div>
           </div>
 
-          {/* Right: Newsletter & Special Updates */}
+          {/* Right: Stay Connected with CLASPO */}
           <div
             style={{
               background: "#FFFFFF",
-              borderRadius: 24,
+              borderRadius: 14,
               padding: "44px 36px",
-              border: "1px solid #EBE9F2",
-              boxShadow: "0 8px 30px rgba(0,0,0,0.04)",
+              border: "1px solid #DADADA",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
@@ -165,14 +174,15 @@ export default function Cta() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 6,
-                  background: "var(--claspo-lavender)",
-                  color: "var(--claspo-purple)",
-                  fontSize: 12,
+                  background: "#F5F5F5",
+                  color: "#111111",
+                  fontSize: 11,
                   fontWeight: 700,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   padding: "6px 14px",
-                  borderRadius: 9999,
+                  borderRadius: "4px",
+                  border: "1px solid #DADADA",
                   marginBottom: 20,
                 }}
               >
@@ -183,24 +193,24 @@ export default function Cta() {
                 style={{
                   fontSize: "clamp(24px, 3vw, 32px)",
                   fontWeight: 800,
-                  color: "var(--claspo-text)",
+                  color: "#111111",
                   lineHeight: 1.25,
                   letterSpacing: "-0.02em",
                   marginBottom: 14,
                 }}
               >
-                Stay Updated with CLASPO
+                Stay Connected with CLASPO
               </h2>
 
               <p
                 style={{
                   fontSize: 15,
-                  color: "var(--claspo-muted)",
+                  color: "#777777",
                   lineHeight: 1.6,
                   marginBottom: 26,
                 }}
               >
-                Subscribe for exclusive discounts, new product releases, technical manufacturing guides, and special promotional announcements.
+                Be the first to discover new arrivals, useful home solutions, product updates, and special offers.
               </p>
 
               {/* Newsletter Form */}
@@ -209,47 +219,57 @@ export default function Cta() {
                   <input
                     type="email"
                     required
-                    placeholder="Enter your corporate email address"
+                    placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={status === "loading" || status === "success"}
                     style={{
                       width: "100%",
-                      padding: "14px 18px",
-                      borderRadius: 12,
-                      border: "1.5px solid #E5E5EB",
+                      padding: "13px 16px",
+                      borderRadius: 6,
+                      border: "1px solid #DADADA",
                       fontSize: 14,
                       outline: "none",
-                      color: "var(--claspo-text)",
+                      color: "#111111",
                       background: "#FFFFFF",
                       transition: "border-color 0.2s ease",
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = "var(--claspo-purple)")}
-                    onBlur={(e) => (e.target.style.borderColor = "#E5E5EB")}
+                    onFocus={(e) => (e.target.style.borderColor = "#111111")}
+                    onBlur={(e) => (e.target.style.borderColor = "#DADADA")}
                   />
                   <button
                     type="submit"
                     disabled={status === "loading" || status === "success"}
                     style={{
-                      background: "var(--claspo-purple)",
+                      background: "#111111",
                       color: "#FFFFFF",
-                      fontWeight: 800,
+                      fontWeight: 700,
                       fontSize: 14,
-                      padding: "14px 28px",
-                      borderRadius: 9999,
+                      padding: "13px 28px",
+                      borderRadius: 6,
                       border: "none",
                       cursor: status === "loading" || status === "success" ? "default" : "pointer",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: 8,
-                      boxShadow: "0 4px 14px rgba(84, 32, 200, 0.25)",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
                       opacity: status === "loading" ? 0.7 : 1,
-                      transition: "transform 0.15s ease",
+                      transition: "background 0.2s ease",
                       marginTop: 4,
                     }}
+                    onMouseEnter={e => {
+                      if (status !== "loading" && status !== "success") {
+                        e.currentTarget.style.background = "#303638"
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (status !== "loading" && status !== "success") {
+                        e.currentTarget.style.background = "#111111"
+                      }
+                    }}
                   >
-                    {status === "loading" ? "Subscribing..." : status === "success" ? "Subscribed ✓" : "Subscribe"}
+                    {status === "loading" ? "Subscribing..." : status === "success" ? "Subscribed ✓" : "Subscribe Now"}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="5" y1="12" x2="19" y2="12" />
                       <polyline points="12,5 19,12 12,19" />
@@ -261,7 +281,7 @@ export default function Cta() {
                     style={{
                       marginTop: 10,
                       fontSize: 13,
-                      color: status === "error" ? "#EF4444" : "#10B981",
+                      color: status === "error" ? "#EF4444" : "#111111",
                       fontWeight: 600,
                     }}
                   >
@@ -271,10 +291,10 @@ export default function Cta() {
               </form>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12.5, color: "var(--claspo-muted)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12.5, color: "#777777" }}>
               <span>✓ No spam guarantee</span>
               <span>✓ Instant unsubscribe</span>
-              <span>✓ GDPR compliant</span>
+              <span>✓ Exclusive savings</span>
             </div>
           </div>
         </div>

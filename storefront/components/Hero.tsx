@@ -6,28 +6,22 @@ import { useState, useEffect } from "react"
 
 const HERO_SLIDES = [
   {
-    title: "High-Voltage EV & Battery Harnesses",
-    category: "Automotive & Clean Energy",
-    img: "/images/high-voltage-wiring-harness.webp",
-    tag: "Best Seller",
+    title: "Smart Kitchen & Prep Tools",
+    category: "Kitchen Essentials",
+    img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=1200",
+    tag: "Popular Pick",
   },
   {
-    title: "Precision Custom Wire Harnessing",
-    category: "Aerospace & Industrial",
-    img: "/images/custom-wire-harness.webp",
-    tag: "ISO Certified",
+    title: "Space-Saving Organization & Storage",
+    category: "Home Organization",
+    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1200",
+    tag: "Smart Living",
   },
   {
-    title: "High-Flex Robotic & Coil Solutions",
-    category: "Robotics & Automation",
-    img: "/images/cobot-coil-cable-ur5.webp",
-    tag: "10M+ Cycles",
-  },
-  {
-    title: "Medical Device Cable Assemblies",
-    category: "Life Sciences & Diagnostics",
-    img: "/images/cleanroom-cable-assembly.webp",
-    tag: "Class III Standard",
+    title: "Adhesive Mounts & Household Utilities",
+    category: "Adhesive Solutions",
+    img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200",
+    tag: "Damage-Free",
   },
 ]
 
@@ -46,14 +40,14 @@ export default function Hero() {
   return (
     <section
       style={{
-        background: "linear-gradient(135deg, #FFFFFF 0%, #FAF8FF 50%, #F1EBFF 100%)",
+        background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)",
         position: "relative",
         overflow: "hidden",
-        padding: "60px 0 80px",
-        borderBottom: "1px solid #EDE9F6",
+        padding: "64px 0 84px",
+        borderBottom: "1px solid #DADADA",
       }}
     >
-      {/* Decorative background blurs */}
+      {/* Decorative subtle ambient lights */}
       <div
         style={{
           position: "absolute",
@@ -62,19 +56,7 @@ export default function Hero() {
           width: "500px",
           height: "500px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(84,32,200,0.08) 0%, rgba(241,235,255,0) 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-50px",
-          left: "10%",
-          width: "400px",
-          height: "400px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(84,32,200,0.05) 0%, rgba(241,235,255,0) 70%)",
+          background: "radial-gradient(circle, rgba(0,0,0,0.03) 0%, rgba(255,255,255,0) 70%)",
           pointerEvents: "none",
         }}
       />
@@ -85,7 +67,7 @@ export default function Hero() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
             alignItems: "center",
-            gap: "48px",
+            gap: "56px",
           }}
         >
           {/* ── Left Content ── */}
@@ -96,20 +78,20 @@ export default function Hero() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "8px 18px",
-                borderRadius: "9999px",
-                background: "#F1EBFF",
-                border: "1px solid rgba(84, 32, 200, 0.18)",
-                color: "#5420C8",
-                fontSize: "13px",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                background: "#F5F5F5",
+                border: "1px solid #DADADA",
+                color: "#111111",
+                fontSize: "12px",
                 fontWeight: 700,
-                letterSpacing: "0.02em",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
                 marginBottom: "24px",
-                boxShadow: "0 2px 10px rgba(84, 32, 200, 0.08)",
               }}
             >
-              <span style={{ fontSize: "14px" }}>✨</span>
-              <span>Welcome to CLASPO &middot; CLICK. PICK. DONE.</span>
+              <span>✨</span>
+              <span>WELCOME TO CLASPO</span>
             </div>
 
             {/* Main Heading */}
@@ -124,8 +106,8 @@ export default function Hero() {
                 marginBottom: "20px",
               }}
             >
-              Shop Your Way –<br />
-              <span style={{ color: "#5420C8" }}>Smart. Simple. Better.</span>
+              Smart Solutions for a<br />
+              <span style={{ color: "#303638" }}>Better Everyday.</span>
             </h1>
 
             {/* Supporting Description */}
@@ -133,57 +115,55 @@ export default function Hero() {
               style={{
                 fontSize: "17px",
                 lineHeight: 1.65,
-                color: "#707070",
+                color: "#777777",
                 maxWidth: "520px",
                 marginBottom: "36px",
                 fontFamily: "var(--font-dm-sans), sans-serif",
               }}
             >
-              Discover premium products, amazing deals and a seamless shopping experience. Custom wire harnesses, cable assemblies, and precision OEM interconnects built to your exact specifications.
+              Discover practical home essentials, smart storage solutions, and everyday products designed to make your life simpler, smarter, and more convenient.
             </p>
 
             {/* CTAs */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", marginBottom: "36px" }}>
               <Link
-                href="/shop"
+                href="/products"
                 style={{
-                  background: "#5420C8",
+                  background: "#111111",
                   color: "#FFFFFF",
-                  padding: "16px 36px",
-                  borderRadius: "9999px",
+                  padding: "15px 34px",
+                  borderRadius: "8px",
                   fontWeight: 700,
                   fontSize: "14.5px",
-                  letterSpacing: "0.03em",
+                  letterSpacing: "0.02em",
                   textDecoration: "none",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "10px",
-                  boxShadow: "0 6px 22px rgba(84, 32, 200, 0.32)",
-                  transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.12)",
+                  transition: "all 0.2s ease",
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.background = "#4317A8"
-                  e.currentTarget.style.transform = "translateY(-2px)"
-                  e.currentTarget.style.boxShadow = "0 10px 28px rgba(84, 32, 200, 0.42)"
+                  e.currentTarget.style.background = "#303638"
+                  e.currentTarget.style.transform = "translateY(-1px)"
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.background = "#5420C8"
+                  e.currentTarget.style.background = "#111111"
                   e.currentTarget.style.transform = "translateY(0)"
-                  e.currentTarget.style.boxShadow = "0 6px 22px rgba(84, 32, 200, 0.32)"
                 }}
               >
-                <span>Shop Now</span>
+                <span>Explore Products</span>
                 <span style={{ fontSize: "16px" }}>&rarr;</span>
               </Link>
 
               <Link
-                href="/products"
+                href="/shop"
                 style={{
                   background: "#FFFFFF",
                   color: "#111111",
-                  border: "1.5px solid #E5E5EB",
-                  padding: "15px 32px",
-                  borderRadius: "9999px",
+                  border: "1.5px solid #DADADA",
+                  padding: "14px 30px",
+                  borderRadius: "8px",
                   fontWeight: 700,
                   fontSize: "14.5px",
                   letterSpacing: "0.02em",
@@ -191,31 +171,29 @@ export default function Hero() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  transition: "all 0.2s",
+                  transition: "all 0.2s ease",
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = "#5420C8"
-                  e.currentTarget.style.color = "#5420C8"
-                  e.currentTarget.style.background = "#F1EBFF"
-                  e.currentTarget.style.transform = "translateY(-2px)"
+                  e.currentTarget.style.borderColor = "#111111"
+                  e.currentTarget.style.background = "#F5F5F5"
+                  e.currentTarget.style.transform = "translateY(-1px)"
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = "#E5E5EB"
-                  e.currentTarget.style.color = "#111111"
+                  e.currentTarget.style.borderColor = "#DADADA"
                   e.currentTarget.style.background = "#FFFFFF"
                   e.currentTarget.style.transform = "translateY(0)"
                 }}
               >
-                <span>Explore Products</span>
+                <span>Shop Now</span>
               </Link>
             </div>
 
             {/* Feature Pills */}
-            <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap", paddingTop: "12px", borderTop: "1px solid rgba(84,32,200,0.12)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap", paddingTop: "16px", borderTop: "1px solid #DADADA" }}>
               {[
-                { icon: "🛡️", text: "IPC/WHMA-A-620 Standards" },
-                { icon: "⚡", text: "Fast 24-48h Quote Turnaround" },
-                { icon: "📦", text: "Low Flexible MOQs" },
+                { icon: "🏠", text: "Smart Home Solutions" },
+                { icon: "✨", text: "Practical Innovation" },
+                { icon: "📦", text: "Quality Guaranteed" },
               ].map(item => (
                 <div key={item.text} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", fontWeight: 600, color: "#111111" }}>
                   <span>{item.icon}</span>
@@ -231,26 +209,26 @@ export default function Hero() {
             <div
               style={{
                 background: "#FFFFFF",
-                borderRadius: "24px",
-                border: "1px solid #E5E5EB",
-                boxShadow: "0 20px 50px rgba(84, 32, 200, 0.12)",
+                borderRadius: "16px",
+                border: "1px solid #DADADA",
+                boxShadow: "0 12px 36px rgba(0, 0, 0, 0.06)",
                 padding: "24px",
                 position: "relative",
               }}
             >
               {/* Product Category Tag */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#5420C8", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#777777", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   {current.category}
                 </span>
                 <span
                   style={{
-                    background: "#5420C8",
+                    background: "#111111",
                     color: "#FFFFFF",
                     fontSize: "11px",
-                    fontWeight: 800,
+                    fontWeight: 700,
                     padding: "4px 10px",
-                    borderRadius: "9999px",
+                    borderRadius: "4px",
                   }}
                 >
                   {current.tag}
@@ -263,8 +241,8 @@ export default function Hero() {
                   position: "relative",
                   width: "100%",
                   height: "340px",
-                  borderRadius: "16px",
-                  background: "#F7F7F9",
+                  borderRadius: "12px",
+                  background: "#F5F5F5",
                   overflow: "hidden",
                   display: "flex",
                   alignItems: "center",
@@ -293,31 +271,34 @@ export default function Hero() {
                   <h3 style={{ fontSize: "17px", fontWeight: 800, color: "#111111", margin: 0 }}>
                     {current.title}
                   </h3>
-                  <div style={{ fontSize: "12px", color: "#707070", marginTop: "4px" }}>
-                    Engineered for high reliability & zero-defect performance
+                  <div style={{ fontSize: "12px", color: "#777777", marginTop: "4px" }}>
+                    Engineered for high reliability & effortless living
                   </div>
                 </div>
 
                 <Link
                   href="/shop"
                   style={{
-                    background: "#F1EBFF",
-                    color: "#5420C8",
-                    padding: "10px 18px",
-                    borderRadius: "9999px",
+                    background: "#F5F5F5",
+                    color: "#111111",
+                    border: "1px solid #DADADA",
+                    padding: "9px 16px",
+                    borderRadius: "6px",
                     fontSize: "12.5px",
-                    fontWeight: 800,
+                    fontWeight: 700,
                     textDecoration: "none",
                     whiteSpace: "nowrap",
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background = "#5420C8"
+                    e.currentTarget.style.background = "#111111"
                     e.currentTarget.style.color = "#FFFFFF"
+                    e.currentTarget.style.borderColor = "#111111"
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = "#F1EBFF"
-                    e.currentTarget.style.color = "#5420C8"
+                    e.currentTarget.style.background = "#F5F5F5"
+                    e.currentTarget.style.color = "#111111"
+                    e.currentTarget.style.borderColor = "#DADADA"
                   }}
                 >
                   View Details &rarr;
@@ -332,10 +313,10 @@ export default function Hero() {
                     onClick={() => setActiveSlide(idx)}
                     aria-label={`Go to slide ${idx + 1}`}
                     style={{
-                      width: activeSlide === idx ? "28px" : "8px",
+                      width: activeSlide === idx ? "26px" : "8px",
                       height: "8px",
-                      borderRadius: "9999px",
-                      background: activeSlide === idx ? "#5420C8" : "#E5E5EB",
+                      borderRadius: "4px",
+                      background: activeSlide === idx ? "#111111" : "#DADADA",
                       border: "none",
                       cursor: "pointer",
                       padding: 0,
@@ -350,13 +331,13 @@ export default function Hero() {
             <div
               style={{
                 position: "absolute",
-                top: "-20px",
-                left: "-20px",
+                top: "-18px",
+                left: "-18px",
                 background: "#FFFFFF",
-                borderRadius: "14px",
+                borderRadius: "10px",
                 padding: "10px 16px",
-                border: "1px solid #E5E5EB",
-                boxShadow: "0 10px 25px rgba(84, 32, 200, 0.12)",
+                border: "1px solid #DADADA",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)",
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
@@ -367,8 +348,9 @@ export default function Hero() {
                 style={{
                   width: "34px",
                   height: "34px",
-                  borderRadius: "10px",
-                  background: "#F1EBFF",
+                  borderRadius: "8px",
+                  background: "#F5F5F5",
+                  border: "1px solid #DADADA",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -379,7 +361,7 @@ export default function Hero() {
               </div>
               <div>
                 <div style={{ fontSize: "12px", fontWeight: 800, color: "#111111" }}>Free Shipping</div>
-                <div style={{ fontSize: "10px", color: "#707070" }}>On orders over $100</div>
+                <div style={{ fontSize: "10px", color: "#777777" }}>On orders over $100</div>
               </div>
             </div>
 
@@ -390,10 +372,10 @@ export default function Hero() {
                 bottom: "-15px",
                 right: "-15px",
                 background: "#FFFFFF",
-                borderRadius: "14px",
+                borderRadius: "10px",
                 padding: "10px 16px",
-                border: "1px solid #E5E5EB",
-                boxShadow: "0 10px 25px rgba(84, 32, 200, 0.12)",
+                border: "1px solid #DADADA",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)",
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
@@ -404,8 +386,9 @@ export default function Hero() {
                 style={{
                   width: "34px",
                   height: "34px",
-                  borderRadius: "10px",
-                  background: "#F1EBFF",
+                  borderRadius: "8px",
+                  background: "#F5F5F5",
+                  border: "1px solid #DADADA",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -416,7 +399,7 @@ export default function Hero() {
               </div>
               <div>
                 <div style={{ fontSize: "12px", fontWeight: 800, color: "#111111" }}>Secure Payments</div>
-                <div style={{ fontSize: "10px", color: "#707070" }}>256-Bit SSL Encrypted</div>
+                <div style={{ fontSize: "10px", color: "#777777" }}>256-Bit SSL Encrypted</div>
               </div>
             </div>
           </div>

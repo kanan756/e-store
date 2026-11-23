@@ -5,52 +5,52 @@ import Image from "next/image"
 
 const CATEGORIES = [
   {
-    name: "Custom Wire Harnesses",
-    sub: "Multi-branch, engine, and control panel wiring systems",
-    href: "/products/custom-wire-harness",
-    img: "/images/custom-wire-harness.webp",
-    badge: "Most Popular",
+    name: "Kitchen Essentials",
+    sub: "Innovative culinary gadgets, ergonomic tools, and smart food prep solutions",
+    href: "/shop?category=Kitchen+Essentials",
+    img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800",
+    badge: "Top Seller",
   },
   {
-    name: "Overmolded Cable Assemblies",
-    sub: "Heavy-duty strain relief & weatherproof IP68 sealing",
-    href: "/products/overmolded-harness",
-    img: "/images/over-molding.webp",
-    badge: "Industrial Grade",
+    name: "Home Organization",
+    sub: "Declutter living spaces with modular organizers, cable tidies, and neat systems",
+    href: "/shop?category=Home+Organization",
+    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800",
+    badge: "Smart Living",
   },
   {
-    name: "Coil & Spiral Cables",
-    sub: "Retractable cords for robotics, automation & aviation",
-    href: "/products/coil-spiral-cable",
-    img: "/images/coil-cable-m12-connector.webp",
-    badge: "10M+ Cycles",
+    name: "Storage Solutions",
+    sub: "Space-saving collapsible bins, stackable containers, and closet helpers",
+    href: "/shop?category=Storage+Solutions",
+    img: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=800",
+    badge: "Space Saver",
   },
   {
-    name: "High-Voltage & EV Harnesses",
-    sub: "Orange shielded cabling for battery packs & clean energy",
-    href: "/products/high-voltage-harness",
-    img: "/images/hv-orange-harness.webp",
-    badge: "EV Rated",
+    name: "Cleaning Essentials",
+    sub: "Effortless cleaning tools, specialized brushes, and reusable hygiene helpers",
+    href: "/shop?category=Cleaning+Essentials",
+    img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=800",
+    badge: "Daily Utility",
   },
   {
-    name: "PCB Assembly & SMT",
-    sub: "Surface mount, through-hole & complete box builds",
-    href: "/products/pcb-assemblies",
-    img: "/images/pcb.webp",
-    badge: "IPC Class III",
+    name: "Adhesive Solutions",
+    sub: "No-drill wall hooks, heavy-duty mounting strips, and damage-free hanging accessories",
+    href: "/shop?category=Adhesive+Solutions",
+    img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800",
+    badge: "No-Drill",
   },
   {
-    name: "Circular & MIL Connectors",
-    sub: "MIL-DTL-38999, M12, M8, and rugged Deutsch interconnects",
-    href: "/products/circular-connector",
-    img: "/images/circular-connector-pin-insert.webp",
-    badge: "MIL-Spec",
+    name: "Bathroom Accessories",
+    sub: "Rust-resistant shower organizers, draining soap trays, and bath storage caddies",
+    href: "/shop?category=Bathroom+Accessories",
+    img: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?q=80&w=800",
+    badge: "Waterproof",
   },
 ]
 
 export default function Categories() {
   return (
-    <section style={{ background: "#F7F7F9", padding: "80px 0", borderBottom: "1px solid #E5E5EB" }}>
+    <section style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "20px" }}>
@@ -58,18 +58,19 @@ export default function Categories() {
             <div
               style={{
                 display: "inline-block",
-                background: "#F1EBFF",
-                color: "#5420C8",
+                background: "#FFFFFF",
+                color: "#111111",
                 fontSize: "12px",
-                fontWeight: 800,
+                fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
-                borderRadius: "9999px",
+                borderRadius: "4px",
+                border: "1px solid #DADADA",
                 marginBottom: "12px",
               }}
             >
-              Catalog Overview
+              Curated Collections
             </div>
             <h2
               style={{
@@ -81,44 +82,32 @@ export default function Categories() {
                 margin: "0 0 8px",
               }}
             >
-              Explore Product Categories
+              Discover Smarter Living
             </h2>
-            <p style={{ fontSize: "16px", color: "#707070", margin: 0 }}>
-              Tailored interconnect solutions manufactured to your exact engineering prints.
+            <p style={{ fontSize: "16px", color: "#777777", margin: 0, maxWidth: "600px" }}>
+              Explore practical products designed to make every corner of your home more functional.
             </p>
           </div>
 
           <Link
-            href="/products"
+            href="/shop"
             style={{
-              color: "#5420C8",
+              color: "#111111",
               fontSize: "14px",
-              fontWeight: 800,
+              fontWeight: 700,
               textDecoration: "none",
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              padding: "10px 20px",
-              borderRadius: "9999px",
-              background: "#FFFFFF",
-              border: "1px solid #E5E5EB",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "#F1EBFF"
-              e.currentTarget.style.borderColor = "#5420C8"
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "#FFFFFF"
-              e.currentTarget.style.borderColor = "#E5E5EB"
+              transition: "transform 0.15s ease",
             }}
           >
             <span>View All Categories</span>
-            <span>&rarr;</span>
+            <span style={{ fontSize: "16px" }}>&rarr;</span>
           </Link>
         </div>
 
-        {/* Categories Grid */}
+        {/* 6-Card Category Grid */}
         <div
           style={{
             display: "grid",
@@ -132,34 +121,24 @@ export default function Categories() {
               href={cat.href}
               style={{
                 background: "#FFFFFF",
-                borderRadius: "18px",
-                border: "1px solid #E5E5EB",
+                borderRadius: "12px",
+                border: "1px solid #DADADA",
                 overflow: "hidden",
                 textDecoration: "none",
                 display: "flex",
                 flexDirection: "column",
-                position: "relative",
-                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
                 boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = "#5420C8"
-                e.currentTarget.style.transform = "translateY(-4px)"
-                e.currentTarget.style.boxShadow = "0 14px 32px rgba(84, 32, 200, 0.12)"
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = "#E5E5EB"
-                e.currentTarget.style.transform = "translateY(0)"
-                e.currentTarget.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.03)"
-              }}
+              className="claspo-cap-card"
             >
-              {/* Category Image */}
+              {/* Image Preview */}
               <div
                 style={{
                   position: "relative",
                   width: "100%",
-                  height: "200px",
-                  background: "#F7F7F9",
+                  aspectRatio: "16/10",
+                  background: "#F5F5F5",
                   overflow: "hidden",
                 }}
               >
@@ -167,61 +146,70 @@ export default function Categories() {
                   src={cat.img}
                   alt={cat.name}
                   fill
-                  unoptimized={true}
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  style={{
-                    objectFit: "cover",
-                    transition: "transform 0.4s ease",
-                  }}
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
+
                 <div
                   style={{
                     position: "absolute",
                     top: 14,
                     right: 14,
-                    background: "rgba(255,255,255,0.95)",
-                    backdropFilter: "blur(6px)",
-                    color: "#5420C8",
-                    fontSize: "11px",
-                    fontWeight: 800,
+                    background: "#FFFFFF",
+                    color: "#111111",
+                    fontSize: 11,
+                    fontWeight: 700,
                     padding: "4px 10px",
-                    borderRadius: "9999px",
-                    border: "1px solid rgba(84,32,200,0.15)",
+                    borderRadius: "4px",
+                    border: "1px solid #DADADA",
+                    letterSpacing: "0.04em",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
                   }}
                 >
                   {cat.badge}
                 </div>
               </div>
 
-              {/* Card Body */}
-              <div style={{ padding: "20px 22px 24px", display: "flex", flexDirection: "column", flex: 1 }}>
+              {/* Text Body */}
+              <div style={{ padding: "24px 22px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
                 <h3
                   style={{
-                    fontSize: "18px",
+                    fontSize: 19,
                     fontWeight: 800,
                     color: "#111111",
-                    margin: "0 0 6px",
-                    fontFamily: "var(--font-sora), sans-serif",
+                    marginBottom: 8,
+                    letterSpacing: "-0.01em",
                   }}
                 >
                   {cat.name}
                 </h3>
-                <p style={{ fontSize: "14px", color: "#707070", lineHeight: 1.5, margin: "0 0 18px", flex: 1 }}>
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: "#777777",
+                    lineHeight: 1.6,
+                    margin: "0 0 16px 0",
+                    flexGrow: 1,
+                  }}
+                >
                   {cat.sub}
                 </p>
 
                 <div
                   style={{
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    color: "#111111",
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: "6px",
-                    fontSize: "13px",
-                    fontWeight: 800,
-                    color: "#5420C8",
+                    gap: 6,
                   }}
                 >
-                  <span>Explore Series</span>
-                  <span>&rarr;</span>
+                  <span>Explore Collection</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12,5 19,12 12,19" />
+                  </svg>
                 </div>
               </div>
             </Link>

@@ -3,39 +3,51 @@
 @tailwind utilities;
 
 /* ── THEME TOKENS ─────────────────────────────────────────────────────────── */
-/* ── CLASPO GLOBAL — LIGHT (default) ───────────────────────── */
+/* ── CLASPO GLOBAL — MONOCHROME THEME (default) ───────────────────────── */
 :root {
-  --bg: #ffffff;
-  --bg2: #f7f7f9;
-  --bg3: #f1ebff;
-  --bgDk: #ffffff;
-  --bgDk2: #f7f7f9;
+  /* Official CLASPO Colour Palette */
+  --primary-bg: #FFFFFF;
+  --secondary-bg: #F5F5F5;
+  --primary-text: #111111;
+  --secondary-text: #777777;
+  --border-color: #DADADA;
+  --dark-bg: #303638;
+  --muted-bg: #FAFAFA;
+  --button-bg: #111111;
+  --button-text: #FFFFFF;
+
+  /* Standard Application Tokens */
+  --bg: #FFFFFF;
+  --bg2: #F5F5F5;
+  --bg3: #FAFAFA;
+  --bgDk: #303638;
+  --bgDk2: #24292B;
   --hBg: rgba(255, 255, 255, 0.98);
   --text: #111111;
   --text2: #555555;
-  --textM: #707070;
-  --inv: #ffffff;
-  --acc: #5420C8;
-  --accH: #4317a8;
-  --bd: #e5e5eb;
-  --bdM: #ede9f6;
-  --sh: 0 2px 12px rgba(84, 32, 200, 0.04);
-  --shH: 0 12px 32px rgba(84, 32, 200, 0.1);
-  --cBg: #ffffff;
-  --r: 10px;
-  --rL: 16px;
+  --textM: #777777;
+  --inv: #FFFFFF;
+  --acc: #111111;
+  --accH: #303638;
+  --bd: #DADADA;
+  --bdM: #E5E5E5;
+  --sh: 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shH: 0 10px 28px rgba(0, 0, 0, 0.08);
+  --cBg: #FFFFFF;
+  --r: 8px;
+  --rL: 12px;
 
-  /* CLASPO Signature Palette */
-  --claspo-purple: #5420C8;
-  --claspo-purple-hover: #4317a8;
-  --claspo-lavender: #F1EBFF;
-  --claspo-lavender-subtle: #FAF7FF;
+  /* CLASPO Backward Compatibility Aliases */
+  --claspo-purple: #111111;
+  --claspo-purple-hover: #303638;
+  --claspo-lavender: #F5F5F5;
+  --claspo-lavender-subtle: #FAFAFA;
   --claspo-bg: #FFFFFF;
-  --claspo-bg-secondary: #F7F7F9;
+  --claspo-bg-secondary: #F5F5F5;
   --claspo-text: #111111;
-  --claspo-text-secondary: #707070;
-  --claspo-border: #E5E5EB;
-  --claspo-border-subtle: #EDE9F6;
+  --claspo-text-secondary: #777777;
+  --claspo-border: #DADADA;
+  --claspo-border-subtle: #EEEEEE;
 }
 
 [data-theme="dark"] {
@@ -211,33 +223,33 @@ button {
   transform: scale(0.97);
 }
 
-/* Primary: CLASPO Purple */
+/* Primary: CLASPO Monochrome Button */
 .bp {
-  background: var(--claspo-purple, #5420C8);
-  color: #ffffff;
-  border: 1px solid var(--claspo-purple, #5420C8);
-  border-radius: 9999px;
+  background: var(--button-bg, #111111);
+  color: var(--button-text, #ffffff);
+  border: 1px solid var(--button-bg, #111111);
+  border-radius: 8px;
   font-weight: 700;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bp:hover {
-  background: var(--claspo-purple-hover, #4317a8);
+  background: var(--dark-bg, #303638);
   color: #ffffff;
-  border-color: var(--claspo-purple-hover, #4317a8);
-  box-shadow: 0 6px 20px rgba(84, 32, 200, 0.25);
+  border-color: var(--dark-bg, #303638);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   transform: translateY(-1px);
 }
 
 [data-theme="dark"] .bp {
-  background: var(--claspo-purple, #5420C8);
-  color: #ffffff;
-  border-color: var(--claspo-purple, #5420C8);
+  background: #ffffff;
+  color: #111111;
+  border-color: #ffffff;
 }
 
 [data-theme="dark"] .bp:hover {
-  background: var(--claspo-purple-hover, #4317a8);
-  color: #ffffff;
+  background: #e5e5e5;
+  color: #111111;
 }
 
 /* Get a Quote nav button — plain text with underline-draw on hover */
@@ -329,18 +341,18 @@ button {
 
 /* Bordered button */
 .bod {
-  border: 1.5px solid var(--bd, #e5e5eb);
-  color: var(--text, #111111);
-  background: var(--bg, #ffffff);
-  border-radius: 9999px;
+  border: 1.5px solid var(--border-color, #DADADA);
+  color: var(--primary-text, #111111);
+  background: var(--primary-bg, #FFFFFF);
+  border-radius: 8px;
   font-weight: 700;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bod:hover {
-  background: var(--claspo-lavender, #F1EBFF);
-  color: var(--claspo-purple, #5420C8);
-  border-color: var(--claspo-purple, #5420C8);
+  background: var(--secondary-bg, #F5F5F5);
+  color: var(--primary-text, #111111);
+  border-color: var(--dark-bg, #303638);
   transform: translateY(-1px);
 }
 
@@ -1559,24 +1571,23 @@ button {
 
 .form-input {
   width: 100%;
-  padding: 12px 0;
-  border: none;
-  border-bottom: 2px solid var(--bdM);
-  border-radius: 0;
-  background: transparent;
-  color: var(--text);
+  padding: 12px 14px;
+  border: 1px solid var(--border-color, #DADADA);
+  border-radius: 6px;
+  background: var(--primary-bg, #FFFFFF);
+  color: var(--primary-text, #111111);
   font-family: var(--font-dm-sans), "Inter", sans-serif;
-  font-size: 15px;
-  transition: border-color 0.15s;
+  font-size: 14.5px;
+  transition: border-color 0.2s ease;
   outline: none;
 }
 
 .form-input:focus {
-  border-color: var(--acc);
+  border-color: var(--primary-text, #111111);
 }
 
 .form-input::placeholder {
-  color: var(--textM);
+  color: var(--secondary-text, #777777);
 }
 
 .prod-det-grid {
@@ -1987,13 +1998,12 @@ button {
   color: #fff; background: transparent; font-family: var(--font-mono), monospace;
 }
 
-/* ── INNER PAGE BANNER (dark textured) ─────────────────────────────────── */
+/* ── INNER PAGE BANNER (Monochrome Charcoal) ─────────────────────────────────── */
 .inner-banner {
-  background:
-    linear-gradient(rgba(8,8,8,0.55), rgba(8,8,8,0.7)),
-    repeating-linear-gradient(118deg, #2a2a2e 0 32px, #3a3a40 32px 64px, #1f1f23 64px 96px);
-  color: #fff;
+  background: var(--dark-bg, #303638);
+  color: #ffffff;
   padding: 60px 0 70px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .inner-banner__eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: 0.18em;

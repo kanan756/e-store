@@ -60,9 +60,9 @@ export default function ContactClient() {
           {/* Left — Info */}
           <div className="contact-info-col" style={{ position: "sticky", top: 104 }}>
             <div className="lbl" style={{ marginBottom: 16 }}>GET IN TOUCH</div>
-            <h1 className="D2" style={{ marginBottom: 24, lineHeight: 1.1 }}>Let&apos;s build something together.</h1>
+            <h1 className="D2" style={{ marginBottom: 24, lineHeight: 1.1 }}>We&apos;re Here to Help.</h1>
             <p className="Bd" style={{ marginBottom: 40, color: "var(--text2)" }}>
-              Our engineering team is ready to assist with technical reviews, production routing, low MOQ planning, and complete custom quoting.
+              Have a question about our smart home products, kitchen essentials, or an ongoing order? Our friendly customer support team is always ready to assist you.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -76,7 +76,7 @@ export default function ContactClient() {
                   icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.07 6.07l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>),
                 },
                 {
-                  label: "Address", value: "3179 Black Gap Rd, Chambersburg, PA 17202", // Old: "Canton, Michigan, 48187"
+                  label: "Address", value: "306, Radhe Kishan Arista, oppo. Hirabhai Tower, Maninagar, Ahmedabad, Gujarat - 380008",
                   icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>),
                 },
                 {
@@ -87,8 +87,8 @@ export default function ContactClient() {
                 <div key={item.label} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                    background: "rgba(0,109,55,0.08)", border: "1px solid rgba(0,109,55,0.15)",
-                    color: "var(--acc)",
+                    background: "#F5F5F5", border: "1px solid #DADADA",
+                    color: "#111111",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>{item.icon}</div>
                   <div>
@@ -106,7 +106,7 @@ export default function ContactClient() {
             <div style={{ marginBottom: 32, paddingBottom: 28, borderBottom: "1px solid var(--bd)" }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--acc)", marginBottom: 10 }}>Get In Touch</div>
               <h2 style={{ fontFamily: "var(--font-sora)", fontSize: 24, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Send Us a Message</h2>
-              <p style={{ fontSize: 14, color: "var(--text2)", margin: 0, lineHeight: 1.6 }}>For product inquiries, quotes, or technical questions — fill out the form and we'll respond within 1–2 business days.</p>
+              <p style={{ fontSize: 14, color: "var(--text2)", margin: 0, lineHeight: 1.6 }}>For product inquiries, order assistance, or customer care &mdash; fill out the form below and we&apos;ll respond within 1–2 business days.</p>
             </div>
             {status === "success" ? (
               <div style={{ textAlign: "center", padding: "40px 0" }}>

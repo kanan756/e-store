@@ -45,10 +45,10 @@ export default async function BlogListPage() {
       <div className="W">
         {/* Header */}
         <div style={{ marginBottom: 56 }}>
-          <div className="lbl" style={{ marginBottom: 16 }}>INSIGHTS &amp; UPDATES</div>
-          <h1 className="D2">Our Blog</h1>
+          <div className="lbl" style={{ marginBottom: 16 }}>SMART LIVING GUIDES</div>
+          <h1 className="D2">Our Blog &amp; Guides</h1>
           <p className="Bd" style={{ marginTop: 12, maxWidth: 560 }}>
-            Industry knowledge, product guides, and company news — curated for professionals.
+            Smart living guides, home organization tips, and product insights curated by CLASPO.
           </p>
         </div>
 

@@ -447,30 +447,10 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
 
         {/* Grid */}
         <div>
-          {/* Note Banner for Wires & Cables */}
-          {selectedCategories.some(c => c.toLowerCase().includes('cable') || c.toLowerCase().includes('wire')) && (
-            <div style={{
-              background: "var(--bg2)",
-              border: "1px solid var(--bd)",
-              borderRadius: "var(--r)",
-              padding: "16px 20px",
-              marginBottom: "24px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "12px"
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-              <div>
-                <strong style={{ display: "block", marginBottom: "4px", color: "var(--text)" }}>Important Note</strong>
-                <p style={{ color: "var(--text2)", fontSize: "14px", lineHeight: 1.5, margin: 0 }}>
-                  All wires and cables are priced and sold per foot (FT). Please adjust your quantity accordingly when adding to your cart.
-                </p>
-              </div>
-            </div>
-          )}
           {filteredProducts.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text2)", background: "rgba(0,109,55,0.02)", borderRadius: "var(--rL)", border: "1px dashed var(--bd)" }}>
-              <p>No products match your filters.</p>
+            <div style={{ textAlign: "center", padding: "80px 0", color: "#777777", background: "#FAFAFA", borderRadius: "12px", border: "1px dashed #DADADA" }}>
+              <p style={{ fontSize: "16px", marginBottom: "8px", color: "#111111", fontWeight: 600 }}>No products match your filters.</p>
+              <p style={{ fontSize: "14px", color: "#777777" }}>Try clearing some filters or searching for different keywords.</p>
               <button
                 onClick={() => {
                   setSearch("")

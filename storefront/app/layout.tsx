@@ -30,21 +30,25 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CLASPO | Custom Cable Assembly Manufacturer",
+    default: "CLASPO – Smart Home Solutions & Everyday Essentials",
     template: "%s | CLASPO",
   },
   description:
-    "Custom wire harness and cable assembly manufacturer providing engineered wiring solutions for OEMs, medical devices, robotics, EV applications, and more.",
+    "Discover smart home solutions, kitchen essentials, storage products, cleaning accessories, and practical everyday products at CLASPO.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
+    process.env.NEXT_PUBLIC_STORE_URL ?? "https://claspo.store"
   ),
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "CLASPO",
+    title: "CLASPO – Smart Home Solutions & Everyday Essentials",
+    description: "Discover smart home solutions, kitchen essentials, storage products, cleaning accessories, and practical everyday products at CLASPO.",
   },
   twitter: {
     card: "summary_large_image",
+    title: "CLASPO – Smart Home Solutions & Everyday Essentials",
+    description: "Discover smart home solutions, kitchen essentials, storage products, cleaning accessories, and practical everyday products at CLASPO.",
   },
 }
 

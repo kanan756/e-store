@@ -3,66 +3,108 @@ import Link from "next/link"
 import Image from "next/image"
 
 export const metadata: Metadata = {
-  title: "Products | CLASPO",
-  description: "Explore the full range of precision wire harnesses, cable assemblies, battery cables, solar assemblies, PCB assemblies, coil cables, and EV connectors we manufacture.",
+  title: "Products & Collections | CLASPO — Smart Home Solutions",
+  description: "Explore our curated collections of kitchen tools, home organization, space-saving storage, cleaning essentials, and adhesive solutions.",
 }
 
 const PRODUCTS = [
   {
-    id: "wire-harness",
-    title: "Wire Harnessing",
-    img: "/images/custom-wire-harness.webp",
-    desc: "Our custom wire harnesses are built to your exact specifications — from prototype through high-volume production. We support a wide range of gauges, connectors, and environmental ratings to meet the demands of virtually any industry.",
-    capabilities: ["Gauge range: 28 AWG – 2/0 AWG", "Custom lengths & routing", "Multi-conductor bundles", "Loom, braid & conduit protection", "UL & USCAR compliant materials"],
-    href: "/products/custom-wire-harness",
+    id: "kitchen-tools",
+    title: "Kitchen Tools & Gadgets",
+    img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800",
+    desc: "Innovative culinary gadgets, ergonomic meal prep tools, and rotating spice turntables designed to make cooking and kitchen routines effortless.",
+    capabilities: [
+      "Ergonomic food prep tools & slicers",
+      "360° rotating turntable spice organizers",
+      "Food-grade silicone & stainless steel materials",
+      "Compact dishwasher-safe designs",
+      "Smart pantry storage accessories",
+    ],
+    href: "/shop?category=Kitchen+Essentials",
   },
   {
-    id: "cable-assembly",
-    title: "Cable Assembly",
-    img: "/images/cable-loom.webp",
-    desc: "From simple two-wire cables to complex multi-branch assemblies, we build to your prints with precision crimping, overmolding, and full electrical test. All assemblies are tested for continuity and proper termination before shipment.",
-    capabilities: ["Multi-conductor & coaxial", "Custom overmolded ends", "Full continuity testing", "Shielded & unshielded options", "IP-rated configurations"],
-    href: "/products/cable-assembly",
+    id: "home-organization",
+    title: "Home Organization & Storage",
+    img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800",
+    desc: "Modular drawer dividers, closet organizers, and shelf decluttering essentials that bring neat elegance and harmony to your living space.",
+    capabilities: [
+      "Expandable modular drawer dividers",
+      "Closet & wardrobe garment organizers",
+      "Stackable clear storage bins & boxes",
+      "Under-sink 2-tier sliding organizers",
+      "Durable, easy-wipe composite materials",
+    ],
+    href: "/shop?category=Home+Organization",
   },
   {
-    id: "battery-cable",
-    title: "Battery Cable Assemblies",
-    img: "/images/power-db-block.webp",
-    desc: "High-current battery cable assemblies designed for reliability and safety in demanding applications. We manufacture battery interconnects, charging cables, and power distribution harnesses with proper insulation and termination for your voltage and amperage requirements.",
-    capabilities: ["High-current capacity", "Flexible & rigid configurations", "Lug & custom terminal options", "Heat-shrink & boot insulation", "EV & industrial battery systems"],
-    href: "/products/power-battery",
+    id: "cleaning-essentials",
+    title: "Cleaning Essentials",
+    img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=800",
+    desc: "Efficient brushes, microfiber systems, and multi-surface hygiene utilities that make keeping your home spotless, sanitary, and fresh effortless.",
+    capabilities: [
+      "Multi-angle crevice & tile cleaning brushes",
+      "Microfiber absorbent cloth sets",
+      "Ergonomic squeegees for glass & mirrors",
+      "Quick-dry antimicrobial bristles",
+      "Compact hanging storage loops",
+    ],
+    href: "/shop?category=Cleaning+Essentials",
   },
   {
-    id: "solar-cable",
-    title: "Solar Cable Assemblies",
-    img: "/images/solar.webp",
-    desc: "Solar-grade cable assemblies built for long-term outdoor performance. We supply panel-to-panel, panel-to-inverter, and BMS wiring using UV-resistant, weatherproof materials rated for decades of exposure.",
-    capabilities: ["MC4 & custom connector options", "UV & weather resistant", "Low-loss conductor selection", "Inverter & BMS wiring", "Rooftop & ground-mount systems"],
-    href: "/products/fiber-optic-twinax",
+    id: "adhesive-solutions",
+    title: "Adhesive & No-Drill Solutions",
+    img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800",
+    desc: "Heavy-duty damage-free wall hooks, floating racks, and adhesive corner mounts engineered for firm, drill-free installation on tiles, glass, and wood.",
+    capabilities: [
+      "Ultra-strong waterproof acrylic adhesive backing",
+      "Holds up to 15 lbs with zero wall damage",
+      "Clean residue-free removal",
+      "Corrosion-resistant stainless & ABS hooks",
+      "Ideal for rental homes and tile walls",
+    ],
+    href: "/shop?category=Adhesive+Solutions",
   },
   {
-    id: "pcb-assembly",
-    title: "PCB Assembly",
-    img: "/images/pcb.webp",
-    desc: "Precision PCB assembly services for prototype and production volumes. Our team handles component sourcing, soldering (SMT & through-hole), inspection, and functional testing to deliver boards that perform exactly as designed.",
-    capabilities: ["SMT & through-hole", "IPC Class II & III standards", "Component sourcing support", "AOI & functional test", "Prototype through production"],
-    href: "/products/ethernet-usb",
+    id: "space-saving",
+    title: "Space-Saving Products",
+    img: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=800",
+    desc: "Collapsible containers, stackable racks, and multi-tier compact systems maximizing every square inch of your home cabinets and countertops.",
+    capabilities: [
+      "Collapsible food-grade silicone storage",
+      "Tiered corner shelving units",
+      "Vertical hanging organizer racks",
+      "Modular nesting designs",
+      "Maximizes compact apartment spaces",
+    ],
+    href: "/shop?category=Storage+Solutions",
   },
   {
-    id: "coil-cables",
-    title: "Coil Cables",
-    img: "/images/wires.webp",
-    desc: "Coiled cables designed for retractile applications where flexible reach and neat coil-back are essential. Ideal for handsets, tool tethers, and equipment requiring extended reach without cable management issues.",
-    capabilities: ["Custom retraction lengths", "Single & multi-conductor", "Various jacket materials", "Custom connector options", "Tight coil tolerances"],
-    href: "/products/coaxial-rf-microwave",
+    id: "bathroom-accessories",
+    title: "Bathroom Accessories",
+    img: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?q=80&w=800",
+    desc: "Rust-resistant shower caddies, self-draining soap trays, and bath storage mounts blending modern minimalist aesthetics with everyday durability.",
+    capabilities: [
+      "Rustproof aluminum & matte finishes",
+      "Rapid water-draining slotted bases",
+      "Adhesive drill-free wall mounts",
+      "Integrated razor & loofah hooks",
+      "Waterproof & easy to sanitize",
+    ],
+    href: "/shop?category=Bathroom+Accessories",
   },
   {
-    id: "ev-cables",
-    title: "EV Cables & Connectors",
-    img: "/images/ev.webp",
-    desc: "High-voltage cabling and connector assemblies designed specifically for electric vehicle applications. We manufacture BMS interconnects, charging port assemblies, and motor/inverter wiring that meet stringent EV safety and performance requirements.",
-    capabilities: ["HV up to 1000V rated", "SAE J3105 / IEC 62196 compliant", "Thermal management rated", "UL listed materials", "Custom HV connector assemblies"],
-    href: "/products/high-voltage-harness",
+    id: "smart-home",
+    title: "Smart Home Essentials",
+    img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800",
+    desc: "Thoughtful household gadgets, cable tidies, and smart conveniences crafted to elevate comfort, organization, and peace of mind.",
+    capabilities: [
+      "Cable management clips & organizers",
+      "Touchless automatic sensor accessories",
+      "Magnetic wall utensil & tool bars",
+      "Sleek minimalist silhouettes",
+      "Built for modern everyday living",
+    ],
+    href: "/shop",
   },
 ]
 
@@ -73,53 +115,73 @@ export default function ProductsPage() {
       <div style={{ paddingTop: 120 }}>
         <section className="inner-banner">
           <div className="W">
-            <div className="inner-banner__eyebrow">What We Manufacture</div>
-            <h1 className="D2 inner-banner__h">Our Products</h1>
+            <div className="inner-banner__eyebrow">Product Collections</div>
+            <h1 className="D2 inner-banner__h">Smart Home Essentials</h1>
             <p className="inner-banner__p">
-              A complete range of precision interconnect solutions — engineered, manufactured, and tested under one roof in Michigan.
+              Explore our curated range of practical home solutions, space-saving organizers, and everyday utilities &mdash; crafted for a smarter living experience.
             </p>
           </div>
         </section>
       </div>
 
       {/* Products List */}
-      <section className="sec">
+      <section className="sec" style={{ padding: "64px 0" }}>
         <div className="W">
-          <div style={{ display: "flex", flexDirection: "column", gap: 80 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 64 }}>
             {PRODUCTS.map(({ id, title, img, desc, capabilities, href }, idx) => (
               <div
                 key={id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 64,
+                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                  gap: 48,
                   alignItems: "center",
+                  background: "#FFFFFF",
+                  border: "1px solid #DADADA",
+                  borderRadius: 24,
+                  padding: "40px",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
                   direction: idx % 2 === 1 ? "rtl" : "ltr",
                 }}
-                className="prod-showcase-row"
               >
                 {/* Image */}
-                <div style={{ direction: "ltr", position: "relative", height: 360, borderRadius: 12, overflow: "hidden", background: "var(--bg3)" }}>
+                <div style={{ direction: "ltr", position: "relative", height: 320, borderRadius: 16, overflow: "hidden", background: "#F5F5F5" }}>
                   <Image
                     src={img}
                     alt={title}
                     fill
-                    style={{ objectFit: "contain" }}
+                    style={{ objectFit: "cover" }}
                     sizes="(max-width: 900px) 100vw, 50vw"
                   />
                 </div>
 
                 {/* Content */}
                 <div style={{ direction: "ltr" }}>
-                  <div className="lbl" style={{ marginBottom: 16 }}>Manufactured In-House</div>
-                  <h2 className="D3" style={{ marginBottom: 20 }}>{title}</h2>
-                  <p style={{ fontSize: 16, lineHeight: 1.75, color: "var(--text2)", marginBottom: 28 }}>{desc}</p>
+                  <div
+                    style={{
+                      display: "inline-block",
+                      background: "#F5F5F5",
+                      color: "#111111",
+                      border: "1px solid #DADADA",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      padding: "4px 12px",
+                      borderRadius: 9999,
+                      marginBottom: 12,
+                    }}
+                  >
+                    CLASPO Collection
+                  </div>
+                  <h2 style={{ fontSize: 28, fontWeight: 900, color: "#111111", marginBottom: 14, letterSpacing: "-0.02em" }}>{title}</h2>
+                  <p style={{ fontSize: 15.5, lineHeight: 1.7, color: "#666666", marginBottom: 24 }}>{desc}</p>
 
                   {/* Capabilities list */}
-                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 10, marginBottom: 32 }}>
+                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8, marginBottom: 28, padding: 0 }}>
                     {capabilities.map(cap => (
-                      <li key={cap} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "var(--text2)" }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, color: "var(--text)" }}>
+                      <li key={cap} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#444444" }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                           <polyline points="20 6 9 17 4 12"/>
                         </svg>
                         {cap}
@@ -128,8 +190,21 @@ export default function ProductsPage() {
                   </ul>
 
                   <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                    <Link href={href} className="btn bp">Learn More</Link>
-                    <Link href="#quote" className="btn" style={{ background: "transparent", border: "1.5px solid var(--bd)", color: "var(--text)" }}>Request Quote</Link>
+                    <Link
+                      href={href}
+                      style={{
+                        background: "#111111",
+                        color: "#FFFFFF",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        padding: "12px 28px",
+                        borderRadius: 9999,
+                        textDecoration: "none",
+                        boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
+                      }}
+                    >
+                      Shop Collection &rarr;
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -139,13 +214,40 @@ export default function ProductsPage() {
       </section>
 
       {/* CTA */}
-      <section className="cta">
-        <div className="W">
-          <h2 className="D3 cta__h">Don&apos;t See What You Need?</h2>
-          <p className="cta__s">We build to your specs. Share your requirements and we&apos;ll respond with a quote within one business day.</p>
+      <section style={{ padding: "80px 0", background: "#303638", color: "#FFFFFF" }}>
+        <div className="W" style={{ textAlign: "center", maxWidth: 680, margin: "0 auto" }}>
+          <h2 style={{ fontSize: 34, fontWeight: 900, marginBottom: 14, color: "#FFFFFF", letterSpacing: "-0.02em" }}>Making Everyday Living Effortless</h2>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.85)", lineHeight: 1.65, marginBottom: 28 }}>Discover practical, stylish, and durable solutions designed to make your daily routine smarter and simpler.</p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/contact" className="btn bp">Contact Us</Link>
-            <Link href="/shop" className="btn" style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.22)" }}>Browse Online Shop</Link>
+            <Link
+              href="/shop"
+              style={{
+                background: "#FFFFFF",
+                color: "#111111",
+                fontSize: 14,
+                fontWeight: 800,
+                padding: "14px 32px",
+                borderRadius: 9999,
+                textDecoration: "none",
+              }}
+            >
+              Explore Full Catalog &rarr;
+            </Link>
+            <Link
+              href="/contact"
+              style={{
+                background: "rgba(255,255,255,0.12)",
+                color: "#FFFFFF",
+                border: "1.5px solid rgba(255,255,255,0.3)",
+                fontSize: 14,
+                fontWeight: 700,
+                padding: "14px 28px",
+                borderRadius: 9999,
+                textDecoration: "none",
+              }}
+            >
+              Contact Support
+            </Link>
           </div>
         </div>
       </section>

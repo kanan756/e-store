@@ -39,7 +39,7 @@ const PLATFORMS = [
   {
     name: "Flipkart",
     badge: "Official Store",
-    desc: "Browse our consumer & OEM listings directly on Flipkart with fast delivery.",
+    desc: "Browse our curated home solutions and kitchen accessories on Flipkart with fast delivery.",
     href: "https://flipkart.com",
     logo: <FlipkartLogo />,
     accent: "#2874F0",
@@ -47,7 +47,7 @@ const PLATFORMS = [
   {
     name: "Amazon",
     badge: "Prime Storefront",
-    desc: "Order certified cable assemblies and harness components with Amazon logistics.",
+    desc: "Order smart home essentials and storage organizers with seamless delivery.",
     href: "https://amazon.com",
     logo: <AmazonLogo />,
     accent: "#FF9900",
@@ -55,15 +55,15 @@ const PLATFORMS = [
   {
     name: "Instagram",
     badge: "@claspo.store",
-    desc: "Follow behind-the-scenes factory production, new product drops, and direct DM orders.",
-    href: "https://instagram.com",
+    desc: "Discover creative home organization tips, new arrivals, and place direct orders via DM.",
+    href: "https://www.instagram.com/claspo.store/",
     logo: <InstagramLogo />,
     accent: "#E1306C",
   },
   {
     name: "WhatsApp",
     badge: "Instant Support",
-    desc: "Chat directly with our engineering team for instant quote discussions & custom specs.",
+    desc: "Chat directly with our customer team for quick product inquiries and assistance.",
     href: "https://wa.me/17348910248?text=Hello%20CLASPO,%20I%20would%20like%20to%20inquire%20about%20a%20product",
     logo: <WhatsAppLogo />,
     accent: "#25D366",
@@ -72,21 +72,22 @@ const PLATFORMS = [
 
 export default function ShoppingPlatforms() {
   return (
-    <section style={{ background: "#FFFFFF", padding: "64px 0 72px", borderBottom: "1px solid #E5E5EB" }}>
+    <section style={{ background: "#FFFFFF", padding: "64px 0 72px", borderBottom: "1px solid #DADADA" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
         {/* Section Header */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <div
             style={{
               display: "inline-block",
-              background: "#F1EBFF",
-              color: "#5420C8",
+              background: "#F5F5F5",
+              color: "#111111",
               fontSize: "12px",
-              fontWeight: 800,
+              fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
-              borderRadius: "9999px",
+              borderRadius: "4px",
+              border: "1px solid #DADADA",
               marginBottom: "12px",
             }}
           >
@@ -104,8 +105,8 @@ export default function ShoppingPlatforms() {
           >
             Shop Your Way
           </h2>
-          <p style={{ fontSize: "16px", color: "#707070", maxWidth: "540px", margin: "0 auto" }}>
-            Order online through our website or directly with us on your preferred marketplace.
+          <p style={{ fontSize: "16px", color: "#777777", maxWidth: "540px", margin: "0 auto" }}>
+            Find CLASPO products on your favourite shopping platforms.
           </p>
         </div>
 
@@ -125,39 +126,39 @@ export default function ShoppingPlatforms() {
               rel="noopener noreferrer"
               style={{
                 background: "#FFFFFF",
-                borderRadius: "16px",
-                border: "1px solid #E5E5EB",
+                borderRadius: "12px",
+                border: "1px solid #DADADA",
                 padding: "28px 24px",
                 textDecoration: "none",
                 display: "flex",
                 flexDirection: "column",
                 position: "relative",
-                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
+                transition: "all 0.2s ease",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.03)",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor = "#5420C8"
-                e.currentTarget.style.transform = "translateY(-4px)"
-                e.currentTarget.style.boxShadow = "0 12px 30px rgba(84, 32, 200, 0.12)"
+                e.currentTarget.style.borderColor = "#111111"
+                e.currentTarget.style.transform = "translateY(-3px)"
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.08)"
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.borderColor = "#E5E5EB"
+                e.currentTarget.style.borderColor = "#DADADA"
                 e.currentTarget.style.transform = "translateY(0)"
-                e.currentTarget.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.03)"
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.03)"
               }}
             >
               {/* Header with Icon and Badge */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px" }}>
                 <div
                   style={{
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "12px",
-                    background: "#F7F7F9",
+                    width: "52px",
+                    height: "52px",
+                    borderRadius: "8px",
+                    background: "#F5F5F5",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    border: "1px solid #EFEFF4",
+                    border: "1px solid #DADADA",
                   }}
                 >
                   {platform.logo}
@@ -166,11 +167,12 @@ export default function ShoppingPlatforms() {
                 <span
                   style={{
                     fontSize: "11px",
-                    fontWeight: 800,
-                    color: "#5420C8",
-                    background: "#F1EBFF",
+                    fontWeight: 700,
+                    color: "#111111",
+                    background: "#F5F5F5",
+                    border: "1px solid #DADADA",
                     padding: "4px 10px",
-                    borderRadius: "9999px",
+                    borderRadius: "4px",
                   }}
                 >
                   {platform.badge}
@@ -182,7 +184,7 @@ export default function ShoppingPlatforms() {
                 {platform.name}
               </h3>
 
-              <p style={{ fontSize: "13.5px", color: "#707070", lineHeight: 1.55, margin: "0 0 20px", flex: 1 }}>
+              <p style={{ fontSize: "13.5px", color: "#777777", lineHeight: 1.55, margin: "0 0 20px", flex: 1 }}>
                 {platform.desc}
               </p>
 
@@ -193,8 +195,8 @@ export default function ShoppingPlatforms() {
                   alignItems: "center",
                   gap: "6px",
                   fontSize: "13px",
-                  fontWeight: 800,
-                  color: "#5420C8",
+                  fontWeight: 700,
+                  color: "#111111",
                 }}
               >
                 <span>Connect via {platform.name}</span>

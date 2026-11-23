@@ -50,31 +50,10 @@ export default function CartClient() {
           <h1 className="D3">Shopping Cart</h1>
         </div>
 
-        {/* Note Banner for Wires & Cables in Cart */}
-        {items.some(item => item.category?.toLowerCase().includes("cable") || item.category?.toLowerCase().includes("wire")) && (
-          <div style={{
-            background: "var(--bg2)",
-            border: "1px solid var(--bd)",
-            borderRadius: "var(--r)",
-            padding: "16px 20px",
-            marginBottom: "32px",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "12px"
-          }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <div>
-              <strong style={{ display: "block", marginBottom: "4px", color: "var(--text)" }}>Important Note Regarding Wires & Cables</strong>
-              <p style={{ color: "var(--text2)", fontSize: "14px", lineHeight: 1.5, margin: 0 }}>
-                The quantity for all wire and cable products in your cart represents the total length in feet (FT).
-              </p>
-            </div>
-          </div>
-        )}
-
+        {/* Note Banner */}
         {isEmpty ? (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
-            <p style={{ color: "var(--text2)", fontSize: 18, marginBottom: 32 }}>
+            <p style={{ color: "#777777", fontSize: 18, marginBottom: 32 }}>
               Your cart is empty.
             </p>
             <Link href="/shop" className="btn bp">
@@ -89,16 +68,16 @@ export default function CartClient() {
               {items.map((item) => (
                 <div key={item.id} className="cart-item">
                   {/* Thumbnail */}
-                  <div style={{ borderRadius: 12, overflow: "hidden", background: "var(--bg2)", aspectRatio: "1", position: "relative" }}>
+                  <div style={{ borderRadius: 8, overflow: "hidden", background: "#F5F5F5", border: "1px solid #DADADA", aspectRatio: "1", position: "relative" }}>
                     {(() => {
                       const firstUrl = item.imageUrl ? item.imageUrl.split(",")[0].trim() : ""
                       if (!firstUrl || firstUrl === "-") return false
                       if (firstUrl.startsWith("/")) return firstUrl
                       try { new URL(firstUrl); return firstUrl } catch { return false }
                     })() ? (
-                      <img src={item.imageUrl.split(",")[0].trim()} alt={item.name} style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
+                      <img src={item.imageUrl.split(",")[0].trim()} alt={item.name} style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", padding: "8px" }} />
                     ) : (
-                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "var(--textM)", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
+                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#777777", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
                         {item.name}
                       </div>
                     )}
@@ -106,31 +85,31 @@ export default function CartClient() {
 
                   {/* Details */}
                   <div>
-                    <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
+                    <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4, color: "#111111" }}>
                       {item.name}
                     </div>
-                    <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8 }}>{item.category}</div>
-                    <div style={{ fontSize: 14, color: "var(--acc)", fontWeight: 600 }}>
+                    <div style={{ fontSize: 13, color: "#777777", marginBottom: 8 }}>{item.category}</div>
+                    <div style={{ fontSize: 14, color: "#111111", fontWeight: 700 }}>
                       {formatPrice(item.price)}
                     </div>
                   </div>
 
                   {/* Qty controls */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1.5px solid var(--bd)", borderRadius: 9999, padding: "4px 12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid #DADADA", borderRadius: 6, background: "#FFFFFF", padding: "4px 8px" }}>
                     <button
-                      onClick={() => updateQuantity(item.id, Math.max(5, item.quantity - 1))}
+                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                       disabled={loading}
-                      style={{ color: "var(--text2)", display: "flex", padding: 4 }}
+                      style={{ color: "#111111", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
                     >
                       <MinusIcon />
                     </button>
-                    <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 14, minWidth: 20, textAlign: "center" }}>
+                    <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 14, minWidth: 20, textAlign: "center", color: "#111111" }}>
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={loading}
-                      style={{ color: "var(--text2)", display: "flex", padding: 4 }}
+                      style={{ color: "#111111", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
                     >
                       <PlusIcon />
                     </button>

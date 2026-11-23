@@ -8,37 +8,37 @@ interface LatestBlogsProps {
 
 const FALLBACK_BLOGS = [
   {
-    title: "Understanding IPC/WHMA-A-620 Class 3 Requirements for Critical Wire Harnesses",
-    slug: "understanding-ipc-whma-a-620-class-3",
-    publishDate: "2026-04-12",
-    metaDescription: "A deep dive into acceptance criteria, crimp pull forces, and insulation clearance requirements for medical and aerospace grade harnesses.",
-    imageUrl: "/images/custom-wire-harness.webp",
-    keywords: "Engineering, Standards",
+    title: "10 Simple Space-Saving Storage Ideas to Declutter Small Kitchens",
+    slug: "space-saving-storage-ideas-kitchen",
+    publishDate: "2026-05-10",
+    metaDescription: "Practical tips, vertical organizer hacks, and expandable racks to double your pantry and cabinet storage capacity.",
+    imageUrl: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800",
+    keywords: "Kitchen, Organization",
   },
   {
-    title: "Ultrasonic Splicing vs. Traditional Soldering in High-Flex Automotive Applications",
-    slug: "ultrasonic-splicing-vs-soldering-automotive",
-    publishDate: "2026-03-28",
-    metaDescription: "Why solid-state acoustic welding eliminates brittle solder joints, reduces joint resistance, and extends cyclic fatigue life.",
-    imageUrl: "/images/ultrasonic-splicing.webp",
-    keywords: "Manufacturing, Wire Tech",
+    title: "The Ultimate Guide to Damage-Free Wall Mounting with Heavy-Duty Adhesive Hooks",
+    slug: "guide-damage-free-adhesive-wall-hooks",
+    publishDate: "2026-04-28",
+    metaDescription: "How to properly prep wall surfaces, hang heavy caddies without drilling, and remove hooks without leaving marks or peeling paint.",
+    imageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800",
+    keywords: "Home Tips, Adhesive",
   },
   {
-    title: "Selecting Low-Pressure Overmolding Resins for IP67 & IP68 Marine & EV Assemblies",
-    slug: "selecting-overmolding-resins-ip67-marine-ev",
-    publishDate: "2026-03-15",
-    metaDescription: "How thermoplastic polyamide chemistry protects internal electronic sensors and connector pins from water immersion and severe vibration.",
-    imageUrl: "/images/over-molding.webp",
-    keywords: "Design Guide, Overmolding",
+    title: "How to Organize Deep Drawers and Bathroom Cabinets for Daily Efficiency",
+    slug: "organize-drawers-bathroom-cabinets",
+    publishDate: "2026-04-15",
+    metaDescription: "Discover how modular drawer dividers and moisture-resistant organizers make finding essentials effortless every morning.",
+    imageUrl: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?q=80&w=800",
+    keywords: "Smart Living, Storage",
   },
 ]
 
 export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
-  // Use actual blogs from Google Sheets first, fallback to curated technical posts if empty
+  // Use actual blogs from Google Sheets first, fallback to home living articles if empty
   const displayBlogs = blogs && blogs.length > 0 ? blogs.slice(0, 3) : FALLBACK_BLOGS
 
   return (
-    <section className="sec" style={{ background: "#FFFFFF", padding: "80px 0" }}>
+    <section className="sec" style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
       <div className="W">
         {/* Header */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20, marginBottom: 44 }}>
@@ -48,14 +48,15 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                background: "var(--claspo-lavender)",
-                color: "var(--claspo-purple)",
+                background: "#F5F5F5",
+                color: "#111111",
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
-                borderRadius: 9999,
+                borderRadius: "4px",
+                border: "1px solid #DADADA",
                 marginBottom: 14,
               }}
             >
@@ -65,13 +66,13 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               style={{
                 fontSize: "clamp(26px, 3.5vw, 38px)",
                 fontWeight: 800,
-                color: "var(--claspo-text)",
+                color: "#111111",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 margin: 0,
               }}
             >
-              Engineering &amp; Manufacturing Articles
+              Home Ideas &amp; Everyday Guides
             </h2>
           </div>
 
@@ -81,7 +82,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              color: "var(--claspo-purple)",
+              color: "#111111",
               fontWeight: 700,
               fontSize: 14,
               textDecoration: "none",
@@ -108,20 +109,20 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               key={b.slug || i}
               style={{
                 background: "#FFFFFF",
-                borderRadius: 18,
-                border: "1px solid #EBE9F2",
+                borderRadius: 12,
+                border: "1px solid #DADADA",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
-                boxShadow: "0 4px 18px rgba(0,0,0,0.03)",
-                transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
               }}
               className="claspo-blog-card"
             >
               {/* Media */}
-              <Link href={`/blog/${b.slug}`} style={{ position: "relative", width: "100%", aspectRatio: "16/9", display: "block", background: "#EDE9F6", overflow: "hidden" }}>
+              <Link href={`/blog/${b.slug}`} style={{ position: "relative", width: "100%", aspectRatio: "16/9", display: "block", background: "#F5F5F5", overflow: "hidden" }}>
                 <Image
-                  src={b.imageUrl || "/images/custom-wire-harness.webp"}
+                  src={b.imageUrl || "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800"}
                   alt={b.title}
                   fill
                   style={{ objectFit: "cover" }}
@@ -134,19 +135,20 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
                   <span
                     style={{
-                      background: "var(--claspo-lavender)",
-                      color: "var(--claspo-purple)",
+                      background: "#F5F5F5",
+                      color: "#111111",
+                      border: "1px solid #DADADA",
                       fontSize: 11,
                       fontWeight: 700,
                       padding: "4px 8px",
-                      borderRadius: 6,
+                      borderRadius: 4,
                       textTransform: "uppercase",
                       letterSpacing: "0.04em",
                     }}
                   >
-                    {b.keywords?.split(",")[0] || "Article"}
+                    {b.keywords?.split(",")[0] || "Home Guide"}
                   </span>
-                  <span style={{ fontSize: 12, color: "var(--claspo-muted)" }}>
+                  <span style={{ fontSize: 12, color: "#777777" }}>
                     {b.publishDate || "Recent"}
                   </span>
                 </div>
@@ -155,7 +157,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                   style={{
                     fontSize: 18,
                     fontWeight: 800,
-                    color: "var(--claspo-text)",
+                    color: "#111111",
                     lineHeight: 1.35,
                     marginBottom: 10,
                     letterSpacing: "-0.01em",
@@ -169,7 +171,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                 <p
                   style={{
                     fontSize: 14,
-                    color: "var(--claspo-muted)",
+                    color: "#777777",
                     lineHeight: 1.6,
                     margin: "0 0 18px 0",
                     flexGrow: 1,
@@ -179,10 +181,10 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                     overflow: "hidden",
                   }}
                 >
-                  {b.metaDescription || "Read our technical analysis and recommendations from the CLASPO engineering team."}
+                  {b.metaDescription || "Read our practical home organization tips and product recommendations from CLASPO."}
                 </p>
 
-                <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid #F1F1F5" }}>
+                <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid #DADADA" }}>
                   <Link
                     href={`/blog/${b.slug}`}
                     style={{
@@ -191,11 +193,11 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                       gap: 6,
                       fontSize: 13.5,
                       fontWeight: 700,
-                      color: "var(--claspo-purple)",
+                      color: "#111111",
                       textDecoration: "none",
                     }}
                   >
-                    Read Article
+                    Read Guide
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="5" y1="12" x2="19" y2="12" />
                       <polyline points="12,5 19,12 12,19" />

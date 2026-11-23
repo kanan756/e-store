@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 function IcoPin() {
   return (
@@ -50,31 +51,29 @@ function IcoInsta() {
   )
 }
 
-const CATEGORIES = [
-  { label: "Custom Wire Harnesses", href: "/shop?cat=Wire+Harness" },
-  { label: "Cable Assemblies", href: "/shop?cat=Cable+Assembly" },
-  { label: "Overmolded Cables", href: "/shop?cat=Overmolded+Cables" },
-  { label: "Battery Cables", href: "/shop?cat=Battery+Cables" },
-  { label: "Ribbon Cables", href: "/shop?cat=Ribbon+Cables" },
-  { label: "Automotive Connectors", href: "/shop?cat=Automotive+Connectors" },
-]
-
 const QUICK_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Shop Catalog", href: "/shop" },
-  { label: "About CLASPO", href: "/about" },
-  { label: "Capabilities", href: "/capabilities" },
-  { label: "Industries", href: "/industries" },
-  { label: "Engineering Blog", href: "/blog" },
-  { label: "Track Your Order", href: "/track-order" },
+  { label: "Shop", href: "/shop" },
+  { label: "Products", href: "/products" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Blogs", href: "/blog" },
+]
+
+const CUSTOMER_SUPPORT = [
   { label: "Contact Us", href: "/contact" },
+  { label: "Track Order", href: "/track-order" },
+  { label: "Shipping Information", href: "/terms#shipping" },
+  { label: "Return & Refund Policy", href: "/terms#returns" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms & Conditions", href: "/terms" },
 ]
 
 export default function Footer() {
   return (
-    <footer style={{ background: "#0F0C1B", color: "#FFFFFF", paddingTop: 72, paddingBottom: 36, borderTop: "1px solid #1E1835" }}>
+    <footer style={{ background: "#303638", color: "#FFFFFF", paddingTop: 72, paddingBottom: 36, borderTop: "1px solid #454C4F" }}>
       <div className="W">
-        {/* Main 4-Column Footer Grid */}
+        {/* Main Footer Grid */}
         <div
           style={{
             display: "grid",
@@ -83,119 +82,112 @@ export default function Footer() {
             marginBottom: 60,
           }}
         >
-          {/* Col 1: Brand & Tagline */}
+          {/* Col 1: Brand & Description */}
           <div style={{ maxWidth: 320 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 9,
-                  background: "var(--claspo-purple)",
-                  color: "#FFFFFF",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 900,
-                  fontSize: 20,
-                  boxShadow: "0 4px 14px rgba(84, 32, 200, 0.4)",
-                }}
-              >
-                C
-              </div>
-              <span style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", color: "#FFFFFF" }}>
-                CLASPO
-              </span>
-            </div>
+            <Link href="/" style={{ display: "inline-block", position: "relative", width: 146, height: 50, marginBottom: 14 }}>
+              <Image
+                src="/images/claspo-logo-tight.png"
+                alt="CLASPO™ CLICK. PICK. DONE."
+                fill
+                style={{ objectFit: "contain", filter: "brightness(0) invert(1)" }}
+              />
+            </Link>
 
             <div
               style={{
                 fontSize: 12,
-                fontWeight: 800,
-                color: "#A78BFA",
+                fontWeight: 700,
+                color: "#DADADA",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
-                marginBottom: 14,
+                marginBottom: 12,
               }}
             >
-              CLICK. PICK. DONE.
+              CLASPO &ndash; CLICK. PICK. DONE.
             </div>
 
-            <p style={{ fontSize: 13.5, color: "#9CA3AF", lineHeight: 1.65, marginBottom: 20 }}>
-              Premium custom wire harness and cable assembly manufacturing. Engineered for automotive, medical, robotics, and industrial applications with zero defect tolerance.
+            <p style={{ fontSize: 13.5, color: "#DADADA", lineHeight: 1.65, marginBottom: 20 }}>
+              Smart solutions for everyday living. Discover practical, functional, and thoughtfully selected products that make your home and daily routines better.
             </p>
 
-            {/* Social Links */}
+            {/* Social Links — PRESERVED EXACTLY */}
             <div style={{ display: "flex", gap: 10 }}>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61586667457643#"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 8,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 6,
                   background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#D1D5DB",
-                  transition: "background 0.2s ease",
+                  color: "#DADADA",
+                  transition: "background 0.2s ease, color 0.2s ease",
                 }}
               >
                 <IcoFB />
               </a>
               <a
-                href="https://x.com"
+                href="https://x.com/claspostore"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="X"
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 8,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 6,
                   background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#D1D5DB",
+                  color: "#DADADA",
+                  transition: "background 0.2s ease, color 0.2s ease",
                 }}
               >
                 <IcoX />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/company/claspostore/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 8,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 6,
                   background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#D1D5DB",
+                  color: "#DADADA",
+                  transition: "background 0.2s ease, color 0.2s ease",
                 }}
               >
                 <IcoIn />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/claspo.store/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 8,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 6,
                   background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.12)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#D1D5DB",
+                  color: "#DADADA",
+                  transition: "background 0.2s ease, color 0.2s ease",
                 }}
               >
                 <IcoInsta />
@@ -206,7 +198,7 @@ export default function Footer() {
           {/* Col 2: Quick Links */}
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FFFFFF", marginBottom: 18 }}>
-              Company &amp; Navigation
+              Quick Links
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {QUICK_LINKS.map((link) => (
@@ -215,7 +207,7 @@ export default function Footer() {
                   href={link.href}
                   style={{
                     fontSize: 13.5,
-                    color: "#9CA3AF",
+                    color: "#DADADA",
                     textDecoration: "none",
                     transition: "color 0.15s ease",
                   }}
@@ -226,61 +218,61 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Col 3: Categories */}
+          {/* Col 3: Customer Support */}
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FFFFFF", marginBottom: 18 }}>
-              Product Categories
+              Customer Support
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {CATEGORIES.map((cat) => (
+              {CUSTOMER_SUPPORT.map((link) => (
                 <Link
-                  key={cat.label}
-                  href={cat.href}
+                  key={link.label}
+                  href={link.href}
                   style={{
                     fontSize: 13.5,
-                    color: "#9CA3AF",
+                    color: "#DADADA",
                     textDecoration: "none",
                     transition: "color 0.15s ease",
                   }}
                 >
-                  {cat.label}
+                  {link.label}
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Col 4: Contact & Office */}
+          {/* Col 4: Contact & Office — PRESERVED EXACTLY */}
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FFFFFF", marginBottom: 18 }}>
               Contact Information
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 13.5, color: "#9CA3AF" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 13.5, color: "#DADADA" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <div style={{ marginTop: 2, color: "var(--claspo-purple)" }}><IcoPin /></div>
-                <span>3179 Black Gap Rd, Chambersburg, PA 17202, United States</span>
+                <div style={{ marginTop: 2, color: "#DADADA" }}><IcoPin /></div>
+                <span>306, Radhe Kishan Arista, oppo. Hirabhai Tower, Maninagar, Ahmedabad, Gujarat - 380008</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ color: "var(--claspo-purple)" }}><IcoPhone /></div>
+                <div style={{ color: "#DADADA" }}><IcoPhone /></div>
                 <span>+1 734 891 0248</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ color: "var(--claspo-purple)" }}><IcoMail /></div>
-                <a href="mailto:info@claspo.store" style={{ color: "#E0D5FA", textDecoration: "none", fontWeight: 600 }}>
+                <div style={{ color: "#DADADA" }}><IcoMail /></div>
+                <a href="mailto:info@claspo.store" style={{ color: "#FFFFFF", textDecoration: "none", fontWeight: 600 }}>
                   info@claspo.store
                 </a>
               </div>
             </div>
 
-            <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+            <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid rgba(255, 255, 255, 0.12)" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#DADADA", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
                 Secure Payment Partners
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, fontSize: 11, color: "#D1D5DB" }}>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4 }}>Stripe</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4 }}>Visa</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4 }}>Mastercard</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4 }}>Amex</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4 }}>Apple Pay</span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, fontSize: 11, color: "#FFFFFF" }}>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>Stripe</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>Visa</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>Mastercard</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>Amex</span>
+                <span style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,255,255,0.1)" }}>Apple Pay</span>
               </div>
             </div>
           </div>
@@ -290,24 +282,24 @@ export default function Footer() {
         <div
           style={{
             paddingTop: 24,
-            borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+            borderTop: "1px solid rgba(255, 255, 255, 0.12)",
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 16,
             fontSize: 13,
-            color: "#6B7280",
+            color: "#DADADA",
           }}
         >
           <div>
-            &copy; {new Date().getFullYear()} CLASPO. All rights reserved. &middot; <span style={{ color: "#A78BFA", fontWeight: 700 }}>CLICK. PICK. DONE.</span>
+            &copy; {new Date().getFullYear()} CLASPO. All rights reserved. &middot; <span style={{ color: "#FFFFFF", fontWeight: 700 }}>CLICK. PICK. DONE.</span>
           </div>
 
           <div style={{ display: "flex", gap: 20 }}>
-            <Link href="/privacy" style={{ color: "#9CA3AF", textDecoration: "none" }}>Privacy Policy</Link>
-            <Link href="/terms" style={{ color: "#9CA3AF", textDecoration: "none" }}>Terms of Service</Link>
-            <Link href="/cookies" style={{ color: "#9CA3AF", textDecoration: "none" }}>Cookie Preferences</Link>
+            <Link href="/privacy" style={{ color: "#DADADA", textDecoration: "none" }}>Privacy Policy</Link>
+            <Link href="/terms" style={{ color: "#DADADA", textDecoration: "none" }}>Terms of Service</Link>
+            <Link href="/cookies" style={{ color: "#DADADA", textDecoration: "none" }}>Cookie Preferences</Link>
           </div>
         </div>
       </div>

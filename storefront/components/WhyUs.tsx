@@ -10,30 +10,34 @@ function CheckIcon() {
 
 const FEATS = [
   {
-    t: "In-House Engineering Support",
-    d: "Our design-assist engineers optimize wire gauges, shielding, and connector pinouts for manufacturability, cost efficiency, and long-term field reliability.",
+    t: "Practical Innovation",
+    d: "Thoughtful household tools and smart accessories designed to solve everyday problems and save valuable time.",
   },
   {
-    t: "IPC/WHMA-A-620 Class 3 Standards",
-    d: "Every single harness undergoes calibrated pull-force verification, crimp cross-section analysis, and 100% electrical continuity testing.",
+    t: "Quality-Focused Selection",
+    d: "Carefully vetted materials, sturdy build quality, and non-toxic durability built for reliable daily use.",
   },
   {
-    t: "Flexible MOQs & Rapid Prototyping",
-    d: "Whether you need a 5-piece pilot run or 50,000 production assemblies, we provide scalable manufacturing with some of the fastest turnaround times in North America.",
+    t: "Affordable Convenience",
+    d: "Smart living solutions that elevate your home's functionality without expensive custom renovations.",
   },
   {
-    t: "Secure Shopping & Fast Payments",
-    d: "Full Stripe integration with 256-bit SSL encryption, automated order tracking, and transparent purchase receipts for seamless corporate buying.",
+    t: "Everyday Functionality",
+    d: "Intuitive, easy-to-use products with drill-free adhesive mounts and hassle-free setups.",
   },
   {
-    t: "Dedicated Customer Support",
-    d: "Direct access to our engineering and support specialists at info@claspo.store. Fast quote turnarounds within 24 to 48 business hours.",
+    t: "Customer-Centric Approach",
+    d: "Seamless ordering, prompt customer care at info@claspo.store, and secure multi-platform shopping options.",
+  },
+  {
+    t: "Smarter Living",
+    d: "Transforming cluttered drawers, busy kitchens, and compact spaces into organized, peaceful environments.",
   },
 ]
 
 export default function WhyUs() {
   return (
-    <section className="sec" style={{ background: "#F7F7F9", padding: "84px 0" }}>
+    <section className="sec" style={{ background: "#F5F5F5", padding: "84px 0", borderBottom: "1px solid #DADADA" }}>
       <div className="W">
         <div
           style={{
@@ -50,15 +54,15 @@ export default function WhyUs() {
                 position: "relative",
                 width: "100%",
                 aspectRatio: "4/3",
-                borderRadius: 24,
+                borderRadius: 16,
                 overflow: "hidden",
-                boxShadow: "0 12px 36px rgba(0,0,0,0.08)",
-                border: "1px solid #EBE9F2",
+                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.06)",
+                border: "1px solid #DADADA",
               }}
             >
               <Image
-                src="https://images.unsplash.com/photo-1581092335397-9583eb92d232?q=80&w=1200"
-                alt="CLASPO Engineering & Manufacturing"
+                src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1200"
+                alt="CLASPO Organized Modern Home"
                 fill
                 style={{ objectFit: "cover" }}
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -69,13 +73,13 @@ export default function WhyUs() {
             <div
               style={{
                 position: "absolute",
-                top: -20,
+                top: -16,
                 right: -10,
                 background: "#FFFFFF",
-                borderRadius: 14,
+                borderRadius: 10,
                 padding: "14px 20px",
-                boxShadow: "0 8px 24px rgba(84, 32, 200, 0.12)",
-                border: "1px solid var(--claspo-lavender)",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)",
+                border: "1px solid #DADADA",
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -85,9 +89,10 @@ export default function WhyUs() {
                 style={{
                   width: 38,
                   height: 38,
-                  borderRadius: 10,
-                  background: "var(--claspo-lavender)",
-                  color: "var(--claspo-purple)",
+                  borderRadius: 8,
+                  background: "#F5F5F5",
+                  border: "1px solid #DADADA",
+                  color: "#111111",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -98,8 +103,8 @@ export default function WhyUs() {
                 ✓
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--claspo-text)" }}>100% Tested</div>
-                <div style={{ fontSize: 11, color: "var(--claspo-muted)" }}>IPC/WHMA-A-620 Certified</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#111111" }}>Smart Living</div>
+                <div style={{ fontSize: 11, color: "#777777" }}>Designed for Real Homes</div>
               </div>
             </div>
 
@@ -107,13 +112,13 @@ export default function WhyUs() {
             <div
               style={{
                 position: "absolute",
-                bottom: -20,
+                bottom: -16,
                 left: -10,
                 background: "#FFFFFF",
-                borderRadius: 14,
+                borderRadius: 10,
                 padding: "14px 20px",
-                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-                border: "1px solid #EBE9F2",
+                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)",
+                border: "1px solid #DADADA",
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -123,8 +128,8 @@ export default function WhyUs() {
                 style={{
                   width: 38,
                   height: 38,
-                  borderRadius: 10,
-                  background: "var(--claspo-purple)",
+                  borderRadius: 8,
+                  background: "#111111",
                   color: "#FFFFFF",
                   display: "flex",
                   alignItems: "center",
@@ -133,11 +138,11 @@ export default function WhyUs() {
                   fontSize: 14,
                 }}
               >
-                30+
+                ★
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--claspo-text)" }}>30+ Years Combined</div>
-                <div style={{ fontSize: 11, color: "var(--claspo-muted)" }}>Wire Harness Experience</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#111111" }}>Top Rated Utility</div>
+                <div style={{ fontSize: 11, color: "#777777" }}>Click. Pick. Done.</div>
               </div>
             </div>
           </div>
@@ -149,59 +154,61 @@ export default function WhyUs() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                background: "var(--claspo-lavender)",
-                color: "var(--claspo-purple)",
+                background: "#FFFFFF",
+                color: "#111111",
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
-                borderRadius: 9999,
+                borderRadius: "4px",
+                border: "1px solid #DADADA",
                 marginBottom: 16,
               }}
             >
-              Why Choose CLASPO
+              Why CLASPO
             </div>
 
             <h2
               style={{
                 fontSize: "clamp(28px, 3.8vw, 40px)",
                 fontWeight: 800,
-                color: "var(--claspo-text)",
+                color: "#111111",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 marginBottom: 16,
               }}
             >
-              Engineered Quality.<br />Guaranteed Reliability.
+              Small Solutions.<br />Big Difference.
             </h2>
 
-            <p style={{ fontSize: 16, color: "var(--claspo-muted)", lineHeight: 1.6, marginBottom: 32 }}>
-              We simplify sourcing for engineering teams and procurement managers — giving you high-performance interconnects, transparent pricing, and dependable delivery schedules.
+            <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, marginBottom: 28 }}>
+              From smarter storage to everyday household essentials, discover products that bring convenience, functionality, and simplicity into your daily routine.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
               {FEATS.map(({ t, d }) => (
                 <div
                   key={t}
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
-                    gap: 14,
+                    gap: 12,
                     background: "#FFFFFF",
-                    padding: "16px 20px",
-                    borderRadius: 14,
-                    border: "1px solid #EBE9F2",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                    padding: "16px 18px",
+                    borderRadius: 10,
+                    border: "1px solid #DADADA",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
                   }}
                 >
                   <div
                     style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 8,
-                      background: "var(--claspo-lavender)",
-                      color: "var(--claspo-purple)",
+                      width: 26,
+                      height: 26,
+                      borderRadius: 6,
+                      background: "#F5F5F5",
+                      border: "1px solid #DADADA",
+                      color: "#111111",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -212,10 +219,10 @@ export default function WhyUs() {
                     <CheckIcon />
                   </div>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--claspo-text)", marginBottom: 3 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: "#111111", marginBottom: 2 }}>
                       {t}
                     </div>
-                    <div style={{ fontSize: 13.5, color: "var(--claspo-muted)", lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 13, color: "#777777", lineHeight: 1.5 }}>
                       {d}
                     </div>
                   </div>

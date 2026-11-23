@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 import TrackOrderClient from "./TrackOrderClient"
 
 export const metadata: Metadata = {
-  title: "Track Your Order",
+  title: "Track Your Order | CLASPO",
   description:
-    "Log in with Google to view real-time status updates for your wire harness and cable assembly orders.",
+    "Track the status of your CLASPO orders and view real-time shipping updates.",
   robots: { index: false },
 }
 

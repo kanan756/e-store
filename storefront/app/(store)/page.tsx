@@ -5,8 +5,6 @@ import ShoppingPlatforms from "@/components/ShoppingPlatforms"
 import Categories from "@/components/Categories"
 import FeaturedProducts from "@/components/FeaturedProducts"
 import PromotionalBanners from "@/components/PromotionalBanners"
-import Capabilities from "@/components/Capabilities"
-import IndustriesStrip from "@/components/IndustriesStrip"
 import WhyUs from "@/components/WhyUs"
 import About from "@/components/About"
 import Testimonials from "@/components/Testimonials"
@@ -14,12 +12,13 @@ import LatestBlogs from "@/components/LatestBlogs"
 import Cta from "@/components/Cta"
 
 export const metadata: Metadata = {
-  title: "CLASPO — Custom Wire Harnesses & Cable Assemblies | CLICK. PICK. DONE.",
+  title: "CLASPO – Smart Home Solutions & Everyday Essentials",
   description:
-    "CLASPO is a premier custom wire harness and cable assembly manufacturer. Serving automotive, robotics, medical, EV, and industrial OEM programs with IPC/WHMA-A-620 Class 3 certified precision.",
+    "Discover smart home solutions, kitchen essentials, storage products, cleaning accessories, and practical everyday products at CLASPO.",
   openGraph: {
-    title: "CLASPO — Custom Wire Harnesses & Cable Assemblies",
-    description: "CLICK. PICK. DONE. Premium custom wire harness and cable assembly manufacturing.",
+    title: "CLASPO – Smart Home Solutions & Everyday Essentials",
+    description:
+      "Discover smart home solutions, kitchen essentials, storage products, cleaning accessories, and practical everyday products at CLASPO.",
     url: "https://claspo.store",
     siteName: "CLASPO",
     type: "website",
@@ -42,34 +41,28 @@ export default async function HomePage() {
       {/* 2. Shop Your Way - Multi-Platform Ordering (Flipkart, Amazon, Instagram, WhatsApp) */}
       <ShoppingPlatforms />
 
-      {/* 3. Product Categories */}
+      {/* 3. Product Categories (Discover Smarter Living) */}
       <Categories />
 
-      {/* 4. Featured Products & Best Sellers */}
+      {/* 4. Featured Products (Discover Our Popular Picks) */}
       <FeaturedProducts products={products} />
 
       {/* 5. Promotional Banners & Special Deals */}
       <PromotionalBanners />
 
-      {/* 6. Manufacturing Capabilities */}
-      <Capabilities />
-
-      {/* 7. Industries We Serve (Precision Interconnects ticker) */}
-      <IndustriesStrip />
-
-      {/* 8. Why Choose CLASPO (Core Benefits & 100% Tested IPC-620) */}
+      {/* 6. Why CLASPO (Small Solutions. Big Difference.) */}
       <WhyUs />
 
-      {/* 9. About CLASPO (Executive Summary & Key Milestones) */}
+      {/* 7. About CLASPO (Making Everyday Living Smarter, Simpler, and Better) */}
       <About />
 
-      {/* 10. Client Reviews & Engineering Testimonials */}
+      {/* 8. Customer Reviews & Testimonials */}
       <Testimonials />
 
-      {/* 11. Latest Engineering Blogs & Technical Guides */}
+      {/* 9. Latest Blogs & Home Living Guides */}
       <LatestBlogs blogs={blogs} />
 
-      {/* 12. Direct Quote Callout & Newsletter Subscription */}
+      {/* 10. Stay Connected with CLASPO Newsletter & Support */}
       <Cta />
     </>
   )

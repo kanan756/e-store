@@ -1,6 +1,6 @@
 function StarRating() {
   return (
-    <div style={{ display: "flex", gap: 3, color: "#F59E0B" }}>
+    <div style={{ display: "flex", gap: 3, color: "#111111" }}>
       {[...Array(5)].map((_, i) => (
         <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -12,31 +12,31 @@ function StarRating() {
 
 const REVIEWS = [
   {
-    quote: "CLASPO turned around our multi-conductor harness prototypes in 48 hours for our robotic arm trials. Every single termination met IPC-620 Class 3, and their engineering team flagged two pinout optimizations before production.",
-    author: "Senior Systems Engineer",
-    company: "Robotics & Industrial Automation",
-    verified: "Verified Client Partner",
+    quote: "The 360° rotating spice organizer and under-sink sliding rack completely transformed our kitchen. It doubled our usable cabinet space, and the build quality feels super sturdy and smooth.",
+    author: "Priya S.",
+    location: "Home Organization Enthusiast",
+    verified: "Verified Buyer",
     rating: 5,
   },
   {
-    quote: "Finding a manufacturing partner that comfortably supports low-volume custom runs with zero compromise on quality has transformed our development cycle. The overmolded cable assemblies passed all IP67 submersion tests on day one.",
-    author: "Hardware Engineering Lead",
-    company: "EV & Green Energy Solutions",
-    verified: "Verified Client Partner",
+    quote: "The heavy-duty adhesive wall hooks hold securely in our bathroom without any drilling or tile damage. Finally a home solutions brand that delivers reliable, damage-free mounting accessories!",
+    author: "Rahul M.",
+    location: "Apartment Resident",
+    verified: "Verified Buyer",
     rating: 5,
   },
   {
-    quote: "Exceptional responsiveness and transparent pricing. From quick sample builds to scaled production, CLASPO's crimp consistency and ultrasonic splicing give us 100% confidence in our field reliability.",
-    author: "Director of Procurement",
-    company: "Medical & Diagnostic Equipment",
-    verified: "Verified Client Partner",
+    quote: "CLASPO's modular drawer dividers and deep-cleaning brush set are thoughtfully designed. Everything in our kitchen and pantry now has an organized place. Truly click, pick, and done.",
+    author: "Ananya D.",
+    location: "Busy Homemaker",
+    verified: "Verified Buyer",
     rating: 5,
   },
 ]
 
 export default function Testimonials() {
   return (
-    <section className="sec" style={{ background: "#F7F7F9", padding: "80px 0" }}>
+    <section className="sec" style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
       <div className="W">
         {/* Section Header */}
         <div style={{ textAlign: "center", maxWidth: 660, margin: "0 auto 48px auto" }}>
@@ -45,33 +45,34 @@ export default function Testimonials() {
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              background: "var(--claspo-lavender)",
-              color: "var(--claspo-purple)",
+              background: "#FFFFFF",
+              color: "#111111",
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
-              borderRadius: 9999,
+              borderRadius: "4px",
+              border: "1px solid #DADADA",
               marginBottom: 14,
             }}
           >
-            Client Reviews
+            Customer Reviews
           </div>
           <h2
             style={{
               fontSize: "clamp(26px, 3.5vw, 38px)",
               fontWeight: 800,
-              color: "var(--claspo-text)",
+              color: "#111111",
               letterSpacing: "-0.02em",
               lineHeight: 1.2,
               marginBottom: 12,
             }}
           >
-            Trusted by Engineering Leaders
+            Loved by Homes Everywhere
           </h2>
-          <p style={{ fontSize: 16, color: "var(--claspo-muted)", lineHeight: 1.6, margin: 0 }}>
-            Hear from hardware developers, system architects, and procurement managers who rely on CLASPO for mission-critical interconnects.
+          <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, margin: 0 }}>
+            See how CLASPO products help households discover smarter, simpler, and more organized living.
           </p>
         </div>
 
@@ -88,10 +89,10 @@ export default function Testimonials() {
               key={idx}
               style={{
                 background: "#FFFFFF",
-                borderRadius: 18,
+                borderRadius: 12,
                 padding: "32px 28px",
-                border: "1px solid #EBE9F2",
-                boxShadow: "0 4px 18px rgba(0,0,0,0.03)",
+                border: "1px solid #DADADA",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
@@ -103,12 +104,13 @@ export default function Testimonials() {
                   <StarRating />
                   <span
                     style={{
-                      background: "rgba(84, 32, 200, 0.08)",
-                      color: "var(--claspo-purple)",
+                      background: "#F5F5F5",
+                      color: "#111111",
+                      border: "1px solid #DADADA",
                       fontSize: 11,
                       fontWeight: 700,
                       padding: "4px 8px",
-                      borderRadius: 6,
+                      borderRadius: 4,
                     }}
                   >
                     {rev.verified}
@@ -119,7 +121,7 @@ export default function Testimonials() {
                   style={{
                     fontSize: 14.5,
                     lineHeight: 1.65,
-                    color: "var(--claspo-text)",
+                    color: "#111111",
                     margin: 0,
                     fontStyle: "normal",
                   }}
@@ -132,7 +134,7 @@ export default function Testimonials() {
                 style={{
                   marginTop: 24,
                   paddingTop: 18,
-                  borderTop: "1px solid #F1F1F5",
+                  borderTop: "1px solid #DADADA",
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
@@ -140,26 +142,27 @@ export default function Testimonials() {
               >
                 <div
                   style={{
-                    width: 40,
-                    height: 40,
+                    width: 38,
+                    height: 38,
                     borderRadius: 9999,
-                    background: "var(--claspo-lavender)",
-                    color: "var(--claspo-purple)",
+                    background: "#F5F5F5",
+                    border: "1px solid #DADADA",
+                    color: "#111111",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontWeight: 800,
-                    fontSize: 15,
+                    fontSize: 14,
                   }}
                 >
                   {rev.author.charAt(0)}
                 </div>
                 <div>
-                  <div style={{ fontSize: 14.5, fontWeight: 800, color: "var(--claspo-text)" }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: "#111111" }}>
                     {rev.author}
                   </div>
-                  <div style={{ fontSize: 12.5, color: "var(--claspo-muted)", marginTop: 2 }}>
-                    {rev.company}
+                  <div style={{ fontSize: 12.5, color: "#777777", marginTop: 2 }}>
+                    {rev.location}
                   </div>
                 </div>
               </div>

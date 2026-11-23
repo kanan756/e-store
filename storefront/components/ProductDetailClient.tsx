@@ -37,24 +37,40 @@ type TabId = typeof ALL_TABS[number]["id"]
 export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter()
   const { addItem } = useCart()
-  const [adding, setAdding]     = useState(false)
-  const [added, setAdded]       = useState(false)
-  const [activeTab, setActiveTab] = useState<TabId>("overview")
+  const [adding, setAdding]         = useState(false)
+  const [added, setAdded]           = useState(false)
+  const [quantity, setQuantity]     = useState(1)
+  const [activeTab, setActiveTab]   = useState<TabId>("overview")
   const [activeImage, setActiveImage] = useState(0)
 
   const handleAddToCart = useCallback(() => {
     setAdding(true)
-    addItem({
-      id: product.handle || product.id,
-      name: product.name,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      category: product.category,
-    })
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.handle || product.id,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        category: product.category,
+      })
+    }
     setAdding(false)
     setAdded(true)
-    setTimeout(() => { setAdded(false); router.push("/cart") }, 800)
-  }, [addItem, product, router])
+    setTimeout(() => { setAdded(false) }, 2000)
+  }, [addItem, product, quantity])
+
+  const handleBuyNow = useCallback(() => {
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.handle || product.id,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        category: product.category,
+      })
+    }
+    router.push("/checkout")
+  }, [addItem, product, quantity, router])
 
   const isValidUrl = (url: string) => {
     if (!url || url === "-") return false
@@ -154,33 +170,96 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
               {/* Pricing + CTA */}
               <div className="pd-overview-info">
-                <p className="Bd" style={{ marginBottom: 28, color: "var(--text2)" }}>
-                  {product.description || "CLASPO is an ISO certified manufacturer of a wide range of custom products. Known for enduring quality, enhanced structure, and built to exact specifications."}
+                <p className="Bd" style={{ marginBottom: 24, color: "#777777", lineHeight: 1.6 }}>
+                  {product.description || "Thoughtfully designed smart home and utility solution from CLASPO. Built for enduring quality, high reliability, and effortless everyday living."}
                 </p>
 
-                <div className="pd-price">
+                <div className="pd-price" style={{ color: "#111111", fontSize: "32px", fontWeight: 900, marginBottom: "20px" }}>
                   {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
                 </div>
 
-                <button
-                  className="btn bp no-fill"
-                  onClick={handleAddToCart}
-                  disabled={adding || added || !product.inStock}
-                  style={{
-                    width: "100%",
-                    background: added ? "#16a34a" : (!product.inStock ? "var(--bg3)" : undefined),
-                    color: !product.inStock ? "var(--textM)" : undefined,
-                    cursor: !product.inStock ? "not-allowed" : undefined,
-                    borderColor: !product.inStock ? "var(--bd)" : undefined,
-                  }}
-                >
-                  {!product.inStock ? "Out of Stock" : added ? "✓ Added to Cart!" : adding ? "Adding…" : "Add to Cart"}
-                  {product.inStock && !added && <ArrowIcon />}
-                </button>
+                {/* Minimalist Quantity Selector */}
+                {product.inStock && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#111111", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Quantity:
+                    </span>
+                    <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #DADADA", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                        style={{ width: 36, height: 36, background: "#F5F5F5", border: "none", color: "#111111", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                      >
+                        -
+                      </button>
+                      <span style={{ minWidth: 40, textAlign: "center", fontSize: 14, fontWeight: 700, color: "#111111" }}>
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(q => q + 1)}
+                        style={{ width: 36, height: 36, background: "#F5F5F5", border: "none", color: "#111111", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-                <div className="pd-overview-desc">
-                  <p className="Bd">
-                    The {product.name.toLowerCase()} are manufactured to the highest quality standards, offering excellent durability and resistance to temperature and environmental factors. Widely used in automotive, industrial, and defense applications.
+                {/* Primary Action Buttons */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
+                  <button
+                    className="btn bp"
+                    onClick={handleAddToCart}
+                    disabled={adding || added || !product.inStock}
+                    style={{
+                      width: "100%",
+                      padding: "13px 24px",
+                      borderRadius: 6,
+                      background: added ? "#303638" : (!product.inStock ? "#F5F5F5" : "#111111"),
+                      color: !product.inStock ? "#777777" : "#FFFFFF",
+                      cursor: !product.inStock ? "not-allowed" : "pointer",
+                      border: !product.inStock ? "1px solid #DADADA" : "1px solid #111111",
+                      fontWeight: 700,
+                      fontSize: 14,
+                    }}
+                  >
+                    {!product.inStock ? "Out of Stock" : added ? "✓ Added to Bag!" : adding ? "Adding…" : "Add to Cart"}
+                  </button>
+
+                  {product.inStock && (
+                    <button
+                      type="button"
+                      onClick={handleBuyNow}
+                      style={{
+                        width: "100%",
+                        padding: "13px 24px",
+                        borderRadius: 6,
+                        background: "#303638",
+                        color: "#FFFFFF",
+                        cursor: "pointer",
+                        border: "1px solid #303638",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = "#111111"
+                        e.currentTarget.style.borderColor = "#111111"
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = "#303638"
+                        e.currentTarget.style.borderColor = "#303638"
+                      }}
+                    >
+                      Buy Now &rarr;
+                    </button>
+                  )}
+                </div>
+
+                <div className="pd-overview-desc" style={{ borderTop: "1px solid #DADADA", paddingTop: 20 }}>
+                  <p className="Bd" style={{ color: "#777777", fontSize: "14px", lineHeight: 1.6, margin: 0 }}>
+                    Manufactured to rigorous quality benchmarks, offering reliable durability, high daily functionality, and easy maintenance.
                   </p>
                 </div>
               </div>

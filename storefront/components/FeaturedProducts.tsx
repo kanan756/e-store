@@ -5,73 +5,73 @@ import Link from "next/link"
 import ProductCard from "@/components/ProductCard"
 import type { Product } from "@/lib/sheets"
 
-// Fallback products if Google Sheets is not yet populated
+// Fallback home products if Google Sheets is not yet populated
 const FALLBACK_PRODUCTS: Product[] = [
   {
     id: "1",
-    name: "Custom Multi-Branch Wire Harness Assembly",
-    category: "Wire Harness",
-    description: "Industrial grade multi-branch wire harness designed for heavy equipment, automation and automotive.",
-    imageUrl: "/images/custom-wire-harness.webp",
-    price: 185,
-    handle: "custom-wire-harness",
+    name: "360° Rotating Kitchen Spice & Condiment Organizer",
+    category: "Kitchen Essentials",
+    description: "Smooth-glide turntable organizer maximizing cabinet and pantry storage with non-skid surface.",
+    imageUrl: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800",
+    price: 24,
+    handle: "rotating-kitchen-spice-organizer",
     inStock: true,
-    partNumber: "CP-WH-092",
+    partNumber: "CP-KT-101",
   },
   {
     id: "2",
-    name: "High-Flex M12 Coiled Spiral Cable (3m Extended)",
-    category: "Coil Cable",
-    description: "Tough PUR jacketed coiled spiral cable with M12 molded connector for industrial sensors and robotics.",
-    imageUrl: "/images/coil-cable-m12-connector.webp",
-    price: 125,
-    handle: "coil-spiral-cable",
+    name: "Damage-Free Heavy Duty Adhesive Wall Hooks (6-Pack)",
+    category: "Adhesive Solutions",
+    description: "Ultra-strong waterproof adhesive hooks holding up to 15 lbs without drilling or wall marks.",
+    imageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800",
+    price: 16,
+    handle: "damage-free-adhesive-wall-hooks",
     inStock: true,
-    partNumber: "CP-CL-441",
+    partNumber: "CP-AD-204",
   },
   {
     id: "3",
-    name: "High-Voltage Shielded Orange EV Cable Assembly",
-    category: "High Voltage",
-    description: "Multi-shielded high-voltage cable assembly for battery packs, power inverters, and EV applications.",
-    imageUrl: "/images/hv-orange-harness.webp",
-    price: 340,
-    handle: "high-voltage-harness",
+    name: "Under-Sink Expandable 2-Tier Sliding Storage Rack",
+    category: "Storage Solutions",
+    description: "Heavy-duty steel sliding drawers designed to bypass sink plumbing pipes and maximize cabinet storage.",
+    imageUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800",
+    price: 38,
+    handle: "under-sink-expandable-storage-rack",
     inStock: true,
-    partNumber: "CP-EV-710",
+    partNumber: "CP-ST-302",
   },
   {
     id: "4",
-    name: "Overmolded Heavy-Duty Industrial Cable Assembly",
-    category: "Cable Assembly",
-    description: "IP68 waterproof overmolded cable assembly with strain relief and ruggedized connector housing.",
-    imageUrl: "/images/over-molding.webp",
-    price: 95,
-    handle: "overmolded-harness",
+    name: "Multi-Surface Flexible Cleaning Brush & Squeegee Set",
+    category: "Cleaning Essentials",
+    description: "Ergonomic deep-cleaning brush with high-density bristles and silicone wiper for tiles and countertops.",
+    imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=800",
+    price: 19,
+    handle: "multi-surface-cleaning-brush-set",
     inStock: true,
-    partNumber: "CP-CA-108",
+    partNumber: "CP-CL-408",
   },
   {
     id: "5",
-    name: "Automotive CAN-Bus Twisted Pair Harness",
-    category: "Wire Harness",
-    description: "Controlled impedance shielded twisted pair cable for CAN-Bus, LIN, and FlexRay in-vehicle networks.",
-    imageUrl: "/images/automotive.webp",
-    price: 110,
-    handle: "can-bus-harness",
+    name: "Adjustable Modular Drawer Divider Organizers (4-Pack)",
+    category: "Home Organization",
+    description: "Spring-loaded expandable bamboo dividers creating custom compartments in clothes, desk, and kitchen drawers.",
+    imageUrl: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=800",
+    price: 29,
+    handle: "adjustable-modular-drawer-dividers",
     inStock: true,
-    partNumber: "CP-AT-215",
+    partNumber: "CP-OR-512",
   },
   {
     id: "6",
-    name: "Medical Device Ultrasonic Welded Sub-Assembly",
-    category: "Cable Assembly",
-    description: "Low-noise sensor wiring with gold-plated pins and ultrasonic solid-state splices for diagnostic equipment.",
-    imageUrl: "/images/ultrasonic-splicing.webp",
-    price: 215,
-    handle: "medical-ultrasonic-assembly",
+    name: "Wall-Mounted Adhesive Bathroom Caddy & Towel Bar",
+    category: "Bathroom Accessories",
+    description: "Rustproof aluminum shower organizer with rapid drainage slots and razor hanging hooks.",
+    imageUrl: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?q=80&w=800",
+    price: 28,
+    handle: "adhesive-bathroom-shower-caddy",
     inStock: true,
-    partNumber: "CP-MD-530",
+    partNumber: "CP-BA-605",
   },
 ]
 
@@ -79,7 +79,7 @@ interface FeaturedProductsProps {
   products?: Product[]
 }
 
-const TABS = ["All", "Wire Harness", "Cable Assembly", "Coil Cable", "High Voltage"]
+const TABS = ["All", "Kitchen Essentials", "Home Organization", "Storage Solutions", "Cleaning Essentials", "Adhesive Solutions"]
 
 export default function FeaturedProducts({ products = [] }: FeaturedProductsProps) {
   const [activeTab, setActiveTab] = useState("All")
@@ -87,30 +87,31 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
 
   const filteredProducts = activeTab === "All"
     ? sourceProducts.slice(0, 8)
-    : sourceProducts.filter((p) => p.category?.toLowerCase().includes(activeTab.toLowerCase())).slice(0, 8)
+    : sourceProducts.filter((p) => p.category?.toLowerCase().includes(activeTab.toLowerCase().split(" ")[0])).slice(0, 8)
 
   const displayList = filteredProducts.length > 0 ? filteredProducts : sourceProducts.slice(0, 8)
 
   return (
-    <section style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #E5E5EB" }}>
+    <section style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
         {/* Section Header */}
         <div style={{ textAlign: "center", marginBottom: "36px" }}>
           <div
             style={{
               display: "inline-block",
-              background: "#F1EBFF",
-              color: "#5420C8",
+              background: "#F5F5F5",
+              color: "#111111",
               fontSize: "12px",
-              fontWeight: 800,
+              fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
-              borderRadius: "9999px",
+              borderRadius: "4px",
+              border: "1px solid #DADADA",
               marginBottom: "12px",
             }}
           >
-            Best Sellers &amp; Trending
+            Featured Selections
           </div>
           <h2
             style={{
@@ -122,10 +123,10 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
               marginBottom: "10px",
             }}
           >
-            Featured Interconnect Solutions
+            Discover Our Popular Picks
           </h2>
-          <p style={{ fontSize: "16px", color: "#707070", maxWidth: "560px", margin: "0 auto" }}>
-            Precision-manufactured wiring harnesses and cable assemblies built for high durability, zero defects, and immediate ordering.
+          <p style={{ fontSize: "16px", color: "#777777", maxWidth: "560px", margin: "0 auto" }}>
+            Explore practical everyday essentials selected to make life easier.
           </p>
         </div>
 
@@ -148,16 +149,16 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 style={{
-                  padding: "8px 20px",
-                  borderRadius: 9999,
+                  padding: "8px 18px",
+                  borderRadius: "6px",
                   fontSize: 13.5,
                   fontWeight: 700,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
-                  border: isActive ? "1.5px solid #5420C8" : "1.5px solid #E5E5EB",
-                  background: isActive ? "#5420C8" : "#FFFFFF",
-                  color: isActive ? "#FFFFFF" : "#555555",
-                  boxShadow: isActive ? "0 4px 12px rgba(84, 32, 200, 0.2)" : "none",
+                  border: isActive ? "1.5px solid #111111" : "1px solid #DADADA",
+                  background: isActive ? "#111111" : "#FFFFFF",
+                  color: isActive ? "#FFFFFF" : "#777777",
+                  boxShadow: isActive ? "0 2px 8px rgba(0, 0, 0, 0.12)" : "none",
                 }}
               >
                 {tab === "All" ? "All Products" : tab}
@@ -185,18 +186,24 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
           <Link
             href="/shop"
             style={{
-              background: "#5420C8",
+              background: "#111111",
               color: "#FFFFFF",
-              padding: "15px 36px",
-              borderRadius: "9999px",
+              padding: "14px 34px",
+              borderRadius: "8px",
               fontSize: "14px",
               fontWeight: 700,
               textDecoration: "none",
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              boxShadow: "0 4px 18px rgba(84, 32, 200, 0.25)",
+              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
               transition: "all 0.2s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "#303638"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#111111"
             }}
           >
             <span>Browse Full Catalog</span>

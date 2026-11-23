@@ -3,8 +3,8 @@ import { getProducts } from "@/lib/sheets"
 import ShopFilters from "@/components/ShopFilters"
 
 export const metadata: Metadata = {
-  title: "Shop | CLASPO",
-  description: "Browse our full catalog of custom wire harnesses, cable assemblies, PCB assemblies, and OEM solutions.",
+  title: "Shop All Products | CLASPO — Smart Home Solutions",
+  description: "Browse our full catalog of smart home solutions, kitchen essentials, storage products, and everyday utilities.",
 }
 
 export const revalidate = 60
@@ -24,9 +24,9 @@ export default async function ShopPage({
         <section className="inner-banner">
           <div className="W">
             <div className="inner-banner__eyebrow">Online Store</div>
-            <h1 className="D2 inner-banner__h">Shop Our Products</h1>
+            <h1 className="D2 inner-banner__h">Shop CLASPO Products</h1>
             <p className="inner-banner__p">
-              Browse and order from our catalog of wire harnesses, cable assemblies, and electromechanical builds — engineered and manufactured under one roof.
+              Browse and order from our catalog of practical home solutions, kitchen gadgets, and storage organizers &mdash; designed to make your daily routine simpler, smarter, and more convenient.
             </p>
           </div>
         </section>

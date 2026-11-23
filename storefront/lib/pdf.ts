@@ -32,8 +32,8 @@ export async function generateInvoicePdf({
       doc.on("end", () => resolve(Buffer.concat(buffers)));
       doc.on("error", reject);
 
-      const PRIMARY_COLOR = "#006d37";
-      const SECONDARY_COLOR = "#4ae183";
+      const PRIMARY_COLOR = "#111111";
+      const SECONDARY_COLOR = "#303638";
       const TEXT_MAIN = "#111111";
       const TEXT_MUTED = "#666666";
 
@@ -55,7 +55,7 @@ export async function generateInvoicePdf({
 
       doc.fillColor(TEXT_MAIN).font("Helvetica-Bold").fontSize(12).text("CLASPO", 300, 50, { align: "right", width: 245 });
       doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10)
-        .text("3179 Black Gap Rd, Chambersburg, PA 17202", { align: "right", width: 245 })
+        .text("306, Radhe Kishan Arista, oppo. Hirabhai Tower, Maninagar, Ahmedabad, Gujarat - 380008", { align: "right", width: 245 })
         .text("info@claspo.store", { align: "right", width: 245 })
         .text("+1 734 891 0248", { align: "right", width: 245 });
 

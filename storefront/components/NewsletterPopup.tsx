@@ -77,10 +77,10 @@ export default function NewsletterPopup() {
             color: "var(--text)",
           }}
         >
-          Stay in the loop
+          Stay Connected with CLASPO
         </h2>
         <p style={{ margin: "0 0 20px", fontSize: 14, lineHeight: 1.6, color: "var(--text2)" }}>
-          Get product updates, industry insights, and manufacturing tips delivered to your inbox.
+          Be the first to discover new arrivals, useful home solutions, product updates, and special offers.
         </p>
         <NewsletterForm source="popup" compact onSuccess={() => setTimeout(dismiss, 2000)} />
       </div>

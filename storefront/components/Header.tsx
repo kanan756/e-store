@@ -76,22 +76,22 @@ function IcoChevron({ style }: { style?: React.CSSProperties } = {}) {
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 const SHOP_CATEGORIES = [
-  { label: "Custom Wire Harnesses", href: "/products/custom-wire-harness", tag: "Hot" },
-  { label: "Cable Assemblies", href: "/products/cable-assembly", tag: "Popular" },
-  { label: "Coil & Spiral Cables", href: "/products/coil-spiral-cable", tag: "New" },
-  { label: "Overmolded Harnesses", href: "/products/overmolded-harness", tag: "" },
-  { label: "High-Voltage & EV", href: "/products/high-voltage-harness", tag: "EV" },
-  { label: "PCB Assemblies", href: "/products/pcb-assemblies", tag: "" },
-  { label: "Browse All Shop Items", href: "/shop", tag: "View All →" },
+  { label: "Kitchen Essentials", href: "/shop?category=Kitchen+Essentials", tag: "Hot" },
+  { label: "Home Organization", href: "/shop?category=Home+Organization", tag: "Popular" },
+  { label: "Storage Solutions", href: "/shop?category=Storage+Solutions", tag: "New" },
+  { label: "Cleaning Essentials", href: "/shop?category=Cleaning+Essentials", tag: "" },
+  { label: "Adhesive Solutions", href: "/shop?category=Adhesive+Solutions", tag: "No-Drill" },
+  { label: "Bathroom Accessories", href: "/shop?category=Bathroom+Accessories", tag: "" },
+  { label: "Browse All Products", href: "/shop", tag: "View All →" },
 ]
 
 const PRODUCTS_POPULAR = [
-  { label: "Automotive & EV Wire Harness", href: "/products/ev-renewable-energy" },
-  { label: "Medical Grade Assemblies", href: "/products/medical-cable-assemblies" },
-  { label: "Robotic Umbilical & Coil", href: "/products/hi-flex-robotic-coil-cable" },
-  { label: "Circular Connector Assemblies", href: "/products/circular-connector" },
-  { label: "Waterproof IP68 Solutions", href: "/products/waterproof-harness" },
-  { label: "Control Panel & Industrial", href: "/products/control-panel-wiring" },
+  { label: "Kitchen Tools & Gadgets", href: "/shop?category=Kitchen+Essentials" },
+  { label: "Home Organization & Storage", href: "/shop?category=Home+Organization" },
+  { label: "Cleaning Essentials", href: "/shop?category=Cleaning+Essentials" },
+  { label: "Adhesive & No-Drill Solutions", href: "/shop?category=Adhesive+Solutions" },
+  { label: "Space-Saving Products", href: "/shop?category=Storage+Solutions" },
+  { label: "Bathroom Accessories", href: "/shop?category=Bathroom+Accessories" },
 ]
 
 export default function Header() {
@@ -158,20 +158,20 @@ export default function Header() {
           zIndex: 100,
           background: "#FFFFFF",
           transition: "box-shadow 0.25s ease, border-color 0.25s ease",
-          boxShadow: scrolled ? "0 4px 20px rgba(84, 32, 200, 0.08)" : "none",
-          borderBottom: "1px solid #E5E5EB",
+          boxShadow: scrolled ? "0 4px 20px rgba(0, 0, 0, 0.06)" : "none",
+          borderBottom: "1px solid #DADADA",
           width: "100%",
         }}
       >
         {/* ── Top Announcement Bar ── */}
         <div
           style={{
-            background: "#5420C8",
+            background: "#303638",
             color: "#FFFFFF",
             fontSize: "12.5px",
             fontWeight: 500,
             padding: "8px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.12)",
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
           }}
         >
           <div
@@ -188,7 +188,7 @@ export default function Header() {
             {/* Announcement banner */}
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: "14px" }}>⚡</span>
-              <span>Free Shipping on Orders $100+ &middot; Quick 24h Turnaround Quotes</span>
+              <span>Free Shipping on Orders $100+ &middot; Smart Solutions for Everyday Living</span>
             </div>
 
             {/* Email & Track Order */}
@@ -202,17 +202,17 @@ export default function Header() {
                   gap: 6,
                   textDecoration: "none",
                   fontSize: "12px",
-                  opacity: 0.95,
+                  opacity: 0.9,
                   transition: "opacity 0.2s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0.95")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0.9")}
               >
                 <IcoMail />
                 <span>info@claspo.store</span>
               </a>
 
-              <span style={{ opacity: 0.4 }}>|</span>
+              <span style={{ opacity: 0.3 }}>|</span>
 
               <Link
                 href="/track-order"
@@ -222,11 +222,11 @@ export default function Header() {
                   fontSize: "12px",
                   fontWeight: 600,
                   letterSpacing: "0.02em",
-                  opacity: 0.95,
+                  opacity: 0.9,
                   transition: "opacity 0.2s",
                 }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0.95")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0.9")}
               >
                 Track Order
               </Link>
@@ -253,58 +253,18 @@ export default function Header() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
               textDecoration: "none",
               flexShrink: 0,
             }}
           >
-            {/* Icon Mark */}
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: "linear-gradient(135deg, #5420C8 0%, #7B47EE 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#FFFFFF",
-                fontWeight: 900,
-                fontSize: "20px",
-                fontFamily: "var(--font-sora), sans-serif",
-                boxShadow: "0 4px 12px rgba(84, 32, 200, 0.28)",
-              }}
-            >
-              C
-            </div>
-
-            {/* Typography & Tagline */}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 900,
-                  letterSpacing: "-0.03em",
-                  color: "#111111",
-                  fontFamily: "var(--font-sora), sans-serif",
-                  lineHeight: 1,
-                }}
-              >
-                CLASPO
-              </span>
-              <span
-                style={{
-                  fontSize: "9px",
-                  fontWeight: 800,
-                  letterSpacing: "0.18em",
-                  color: "#5420C8",
-                  fontFamily: "var(--font-mono), monospace",
-                  marginTop: "3px",
-                  textTransform: "uppercase",
-                }}
-              >
-                CLICK. PICK. DONE.
-              </span>
+            <div style={{ position: "relative", width: 140, height: 46 }}>
+              <Image
+                src="/images/claspo-logo-tight.png"
+                alt="CLASPO™ - CLICK. PLACE. DONE."
+                fill
+                style={{ objectFit: "contain" }}
+                priority
+              />
             </div>
           </Link>
 
@@ -314,7 +274,7 @@ export default function Header() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "24px",
+              gap: "28px",
               fontFamily: "var(--font-dm-sans), sans-serif",
               fontSize: "14.5px",
               fontWeight: 600,
@@ -325,10 +285,11 @@ export default function Header() {
               href="/"
               style={{
                 textDecoration: "none",
-                color: pathname === "/" ? "#5420C8" : "#111111",
+                color: "#111111",
                 padding: "8px 0",
                 position: "relative",
-                transition: "color 0.2s",
+                borderBottom: pathname === "/" ? "2px solid #111111" : "2px solid transparent",
+                transition: "border-color 0.2s, color 0.2s",
               }}
             >
               Home
@@ -347,8 +308,9 @@ export default function Header() {
                   gap: 5,
                   fontSize: "14.5px",
                   fontWeight: 600,
-                  color: pathname.startsWith("/shop") ? "#5420C8" : "#111111",
+                  color: "#111111",
                   padding: "8px 0",
+                  borderBottom: pathname.startsWith("/shop") ? "2px solid #111111" : "2px solid transparent",
                   fontFamily: "inherit",
                 }}
                 aria-expanded={shopOpen}
@@ -364,15 +326,15 @@ export default function Header() {
                     left: "-20px",
                     width: "280px",
                     background: "#FFFFFF",
-                    borderRadius: "12px",
-                    boxShadow: "0 14px 40px rgba(84, 32, 200, 0.12)",
-                    border: "1px solid #E5E5EB",
+                    borderRadius: "8px",
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+                    border: "1px solid #DADADA",
                     padding: "10px",
                     zIndex: 150,
                   }}
                 >
-                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #F1EBFF" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#5420C8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #DADADA" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#111111", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                       Featured Categories
                     </div>
                   </div>
@@ -387,7 +349,7 @@ export default function Header() {
                           alignItems: "center",
                           justifyContent: "space-between",
                           padding: "9px 12px",
-                          borderRadius: "8px",
+                          borderRadius: "6px",
                           textDecoration: "none",
                           fontSize: "13.5px",
                           color: "#111111",
@@ -395,12 +357,10 @@ export default function Header() {
                           transition: "background 0.15s, color 0.15s",
                         }}
                         onMouseEnter={e => {
-                          e.currentTarget.style.background = "#F1EBFF"
-                          e.currentTarget.style.color = "#5420C8"
+                          e.currentTarget.style.background = "#F5F5F5"
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.background = "transparent"
-                          e.currentTarget.style.color = "#111111"
                         }}
                       >
                         <span>{cat.label}</span>
@@ -409,10 +369,11 @@ export default function Header() {
                             style={{
                               fontSize: "10px",
                               padding: "2px 8px",
-                              borderRadius: "9999px",
-                              background: cat.tag.includes("→") ? "transparent" : "#F1EBFF",
-                              color: "#5420C8",
+                              borderRadius: "4px",
+                              background: cat.tag.includes("→") ? "transparent" : "#F5F5F5",
+                              color: "#111111",
                               fontWeight: 700,
+                              border: cat.tag.includes("→") ? "none" : "1px solid #DADADA",
                             }}
                           >
                             {cat.tag}
@@ -438,8 +399,9 @@ export default function Header() {
                   gap: 5,
                   fontSize: "14.5px",
                   fontWeight: 600,
-                  color: pathname.startsWith("/products") ? "#5420C8" : "#111111",
+                  color: "#111111",
                   padding: "8px 0",
+                  borderBottom: pathname.startsWith("/products") ? "2px solid #111111" : "2px solid transparent",
                   fontFamily: "inherit",
                 }}
                 aria-expanded={productsOpen}
@@ -455,16 +417,16 @@ export default function Header() {
                     left: "-40px",
                     width: "300px",
                     background: "#FFFFFF",
-                    borderRadius: "12px",
-                    boxShadow: "0 14px 40px rgba(84, 32, 200, 0.12)",
-                    border: "1px solid #E5E5EB",
+                    borderRadius: "8px",
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+                    border: "1px solid #DADADA",
                     padding: "10px",
                     zIndex: 150,
                   }}
                 >
-                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #F1EBFF" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#5420C8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                      Engineering Solutions
+                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #DADADA" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#111111", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      Home Solutions
                     </div>
                   </div>
                   <div style={{ padding: "6px 0" }}>
@@ -476,7 +438,7 @@ export default function Header() {
                         style={{
                           display: "block",
                           padding: "9px 12px",
-                          borderRadius: "8px",
+                          borderRadius: "6px",
                           textDecoration: "none",
                           fontSize: "13.5px",
                           color: "#111111",
@@ -484,18 +446,16 @@ export default function Header() {
                           transition: "background 0.15s, color 0.15s",
                         }}
                         onMouseEnter={e => {
-                          e.currentTarget.style.background = "#F1EBFF"
-                          e.currentTarget.style.color = "#5420C8"
+                          e.currentTarget.style.background = "#F5F5F5"
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.background = "transparent"
-                          e.currentTarget.style.color = "#111111"
                         }}
                       >
                         {prod.label}
                       </Link>
                     ))}
-                    <div style={{ marginTop: 6, borderTop: "1px solid #EFEFF4", paddingTop: 6 }}>
+                    <div style={{ marginTop: 6, borderTop: "1px solid #DADADA", paddingTop: 6 }}>
                       <Link
                         href="/products"
                         onClick={() => setProductsOpen(false)}
@@ -503,12 +463,12 @@ export default function Header() {
                           display: "block",
                           padding: "8px 12px",
                           fontSize: "12.5px",
-                          color: "#5420C8",
+                          color: "#111111",
                           fontWeight: 700,
                           textDecoration: "none",
                         }}
                       >
-                        View All 30+ Product Pages &rarr;
+                        View All Collections &rarr;
                       </Link>
                     </div>
                   </div>
@@ -520,9 +480,10 @@ export default function Header() {
               href="/about"
               style={{
                 textDecoration: "none",
-                color: pathname === "/about" ? "#5420C8" : "#111111",
+                color: "#111111",
                 padding: "8px 0",
-                transition: "color 0.2s",
+                borderBottom: pathname === "/about" ? "2px solid #111111" : "2px solid transparent",
+                transition: "border-color 0.2s, color 0.2s",
               }}
             >
               About Us
@@ -532,9 +493,10 @@ export default function Header() {
               href="/contact"
               style={{
                 textDecoration: "none",
-                color: pathname === "/contact" ? "#5420C8" : "#111111",
+                color: "#111111",
                 padding: "8px 0",
-                transition: "color 0.2s",
+                borderBottom: pathname === "/contact" ? "2px solid #111111" : "2px solid transparent",
+                transition: "border-color 0.2s, color 0.2s",
               }}
             >
               Contact
@@ -544,9 +506,10 @@ export default function Header() {
               href="/blog"
               style={{
                 textDecoration: "none",
-                color: pathname.startsWith("/blog") ? "#5420C8" : "#111111",
+                color: "#111111",
                 padding: "8px 0",
-                transition: "color 0.2s",
+                borderBottom: pathname.startsWith("/blog") ? "2px solid #111111" : "2px solid transparent",
+                transition: "border-color 0.2s, color 0.2s",
               }}
             >
               Blogs
@@ -567,20 +530,20 @@ export default function Header() {
             >
               <input
                 type="text"
-                placeholder="Search products, parts..."
+                placeholder="Search products..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 style={{
                   padding: "9px 14px 9px 36px",
-                  borderRadius: "9999px",
-                  border: searchFocused ? "1.5px solid #5420C8" : "1px solid #E5E5EB",
-                  background: searchFocused ? "#FFFFFF" : "#F7F7F9",
+                  borderRadius: "6px",
+                  border: searchFocused ? "1.5px solid #111111" : "1px solid #DADADA",
+                  background: searchFocused ? "#FFFFFF" : "#F5F5F5",
                   fontSize: "13px",
-                  width: searchFocused ? "240px" : "190px",
+                  width: searchFocused ? "230px" : "190px",
                   outline: "none",
-                  transition: "all 0.25s ease",
+                  transition: "all 0.2s ease",
                   fontFamily: "inherit",
                   color: "#111111",
                 }}
@@ -593,7 +556,7 @@ export default function Header() {
                   left: "11px",
                   background: "none",
                   border: "none",
-                  color: searchFocused ? "#5420C8" : "#707070",
+                  color: searchFocused ? "#111111" : "#777777",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -617,20 +580,18 @@ export default function Header() {
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#111111",
-                background: "#F7F7F9",
-                border: "1px solid #E5E5EB",
+                background: "#F5F5F5",
+                border: "1px solid #DADADA",
                 textDecoration: "none",
                 transition: "all 0.2s",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = "#F1EBFF"
-                e.currentTarget.style.color = "#5420C8"
-                e.currentTarget.style.borderColor = "#5420C8"
+                e.currentTarget.style.background = "#FFFFFF"
+                e.currentTarget.style.borderColor = "#111111"
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = "#F7F7F9"
-                e.currentTarget.style.color = "#111111"
-                e.currentTarget.style.borderColor = "#E5E5EB"
+                e.currentTarget.style.background = "#F5F5F5"
+                e.currentTarget.style.borderColor = "#DADADA"
               }}
             >
               <IcoUser />
@@ -649,21 +610,19 @@ export default function Header() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: wishlistCount > 0 ? "#5420C8" : "#111111",
-                background: wishlistCount > 0 ? "#F1EBFF" : "#F7F7F9",
-                border: wishlistCount > 0 ? "1px solid #5420C8" : "1px solid #E5E5EB",
+                color: "#111111",
+                background: "#F5F5F5",
+                border: "1px solid #DADADA",
                 textDecoration: "none",
                 transition: "all 0.2s",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = "#F1EBFF"
-                e.currentTarget.style.color = "#5420C8"
-                e.currentTarget.style.borderColor = "#5420C8"
+                e.currentTarget.style.background = "#FFFFFF"
+                e.currentTarget.style.borderColor = "#111111"
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = wishlistCount > 0 ? "#F1EBFF" : "#F7F7F9"
-                e.currentTarget.style.color = wishlistCount > 0 ? "#5420C8" : "#111111"
-                e.currentTarget.style.borderColor = wishlistCount > 0 ? "#5420C8" : "#E5E5EB"
+                e.currentTarget.style.background = "#F5F5F5"
+                e.currentTarget.style.borderColor = "#DADADA"
               }}
             >
               <IcoHeart />
@@ -673,7 +632,7 @@ export default function Header() {
                     position: "absolute",
                     top: -4,
                     right: -4,
-                    background: "#5420C8",
+                    background: "#111111",
                     color: "#FFFFFF",
                     fontSize: "10.5px",
                     fontWeight: 800,
@@ -684,7 +643,6 @@ export default function Header() {
                     alignItems: "center",
                     justifyContent: "center",
                     padding: "0 4px",
-                    boxShadow: "0 2px 6px rgba(84, 32, 200, 0.4)",
                   }}
                 >
                   {wishlistCount}
@@ -706,24 +664,25 @@ export default function Header() {
                 alignItems: "center",
                 justifyContent: "center",
                 color: totalItems > 0 ? "#FFFFFF" : "#111111",
-                background: totalItems > 0 ? "#5420C8" : "#F7F7F9",
-                border: totalItems > 0 ? "1px solid #5420C8" : "1px solid #E5E5EB",
+                background: totalItems > 0 ? "#111111" : "#F5F5F5",
+                border: totalItems > 0 ? "1px solid #111111" : "1px solid #DADADA",
                 textDecoration: "none",
                 transition: "all 0.2s",
-                boxShadow: totalItems > 0 ? "0 4px 12px rgba(84, 32, 200, 0.3)" : "none",
               }}
               onMouseEnter={e => {
                 if (totalItems === 0) {
-                  e.currentTarget.style.background = "#F1EBFF"
-                  e.currentTarget.style.color = "#5420C8"
-                  e.currentTarget.style.borderColor = "#5420C8"
+                  e.currentTarget.style.background = "#FFFFFF"
+                  e.currentTarget.style.borderColor = "#111111"
+                } else {
+                  e.currentTarget.style.background = "#303638"
                 }
               }}
               onMouseLeave={e => {
                 if (totalItems === 0) {
-                  e.currentTarget.style.background = "#F7F7F9"
-                  e.currentTarget.style.color = "#111111"
-                  e.currentTarget.style.borderColor = "#E5E5EB"
+                  e.currentTarget.style.background = "#F5F5F5"
+                  e.currentTarget.style.borderColor = "#DADADA"
+                } else {
+                  e.currentTarget.style.background = "#111111"
                 }
               }}
             >
@@ -734,7 +693,7 @@ export default function Header() {
                     position: "absolute",
                     top: -4,
                     right: -4,
-                    background: "#111111",
+                    background: "#303638",
                     color: "#FFFFFF",
                     fontSize: "10.5px",
                     fontWeight: 800,
@@ -759,11 +718,11 @@ export default function Header() {
               className="claspo-mobile-toggle"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               style={{
-                background: "#F7F7F9",
-                border: "1px solid #E5E5EB",
+                background: "#F5F5F5",
+                border: "1px solid #DADADA",
                 width: 40,
                 height: 40,
-                borderRadius: "10px",
+                borderRadius: "6px",
                 cursor: "pointer",
                 display: "none",
                 alignItems: "center",
@@ -806,19 +765,18 @@ export default function Header() {
               onClick={e => e.stopPropagation()}
             >
               {/* Header inside drawer */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #E5E5EB" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: "#5420C8", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
-                    C
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: "18px", color: "#111" }}>CLASPO</div>
-                    <div style={{ fontSize: "9px", color: "#5420C8", fontWeight: 700, letterSpacing: "0.1em" }}>CLICK. PICK. DONE.</div>
-                  </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #DADADA" }}>
+                <div style={{ position: "relative", width: 125, height: 42 }}>
+                  <Image
+                    src="/images/claspo-logo-tight.png"
+                    alt="CLASPO™ - CLICK. PLACE. DONE."
+                    fill
+                    style={{ objectFit: "contain" }}
+                  />
                 </div>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  style={{ background: "#F7F7F9", border: "none", width: 32, height: 32, borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  style={{ background: "#F5F5F5", border: "1px solid #DADADA", width: 32, height: 32, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
                   ✕
                 </button>
@@ -835,13 +793,14 @@ export default function Header() {
                     style={{
                       width: "100%",
                       padding: "10px 14px 10px 36px",
-                      borderRadius: "8px",
-                      border: "1px solid #E5E5EB",
-                      background: "#F7F7F9",
+                      borderRadius: "6px",
+                      border: "1px solid #DADADA",
+                      background: "#F5F5F5",
                       fontSize: "13.5px",
+                      color: "#111111",
                     }}
                   />
-                  <span style={{ position: "absolute", left: 12, top: 11, color: "#707070" }}>
+                  <span style={{ position: "absolute", left: 12, top: 11, color: "#777777" }}>
                     <IcoSearch />
                   </span>
                 </div>
@@ -849,19 +808,19 @@ export default function Header() {
 
               {/* Mobile links */}
               <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                <Link href="/" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Home</Link>
-                <Link href="/shop" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Shop Catalog</Link>
-                <Link href="/products" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Products & Categories</Link>
-                <Link href="/about" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
-                <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Contact & Quote</Link>
-                <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
-                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#5420C8", fontWeight: 700, fontSize: "15px" }}>Track Your Order</Link>
+                <Link href="/" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Home</Link>
+                <Link href="/shop" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Shop Catalog</Link>
+                <Link href="/products" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Products & Categories</Link>
+                <Link href="/about" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
+                <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
+                <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
+                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 700, fontSize: "15px" }}>Track Your Order</Link>
               </nav>
 
               {/* Mobile Footer in drawer */}
-              <div style={{ paddingTop: 20, borderTop: "1px solid #E5E5EB", fontSize: "12px", color: "#707070" }}>
-                <div>Email: <a href="mailto:info@claspo.store" style={{ color: "#5420C8", fontWeight: 600 }}>info@claspo.store</a></div>
-                <div style={{ marginTop: 6 }}>Phone: +1 734 891 0248</div>
+              <div style={{ paddingTop: 20, borderTop: "1px solid #DADADA", fontSize: "12px", color: "#777777" }}>
+                <div>Email: <a href="mailto:info@claspo.store" style={{ color: "#111111", fontWeight: 600 }}>info@claspo.store</a></div>
+                <div style={{ marginTop: 6 }}>Address: 306, Radhe Kishan Arista, Maninagar, Ahmedabad</div>
               </div>
             </div>
           </div>
