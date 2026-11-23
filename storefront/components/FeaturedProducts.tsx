@@ -92,22 +92,22 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
   const displayList = filteredProducts.length > 0 ? filteredProducts : sourceProducts.slice(0, 8)
 
   return (
-    <section style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
+    <section style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #E5E5E5" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
         {/* Section Header */}
         <div style={{ textAlign: "center", marginBottom: "36px" }}>
           <div
             style={{
               display: "inline-block",
-              background: "#F5F5F5",
-              color: "#111111",
+              background: "#FFF0E5",
+              color: "#D9570A",
               fontSize: "12px",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
               borderRadius: "4px",
-              border: "1px solid #DADADA",
+              border: "1px solid rgba(243, 107, 18, 0.25)",
               marginBottom: "12px",
             }}
           >
@@ -118,14 +118,14 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
               fontSize: "clamp(26px, 3.5vw, 36px)",
               fontWeight: 900,
               letterSpacing: "-0.02em",
-              color: "#111111",
+              color: "#17191C",
               fontFamily: "var(--font-sora), sans-serif",
               marginBottom: "10px",
             }}
           >
             Discover Our Popular Picks
           </h2>
-          <p style={{ fontSize: "16px", color: "#777777", maxWidth: "560px", margin: "0 auto" }}>
+          <p style={{ fontSize: "16px", color: "#747474", maxWidth: "560px", margin: "0 auto" }}>
             Explore practical everyday essentials selected to make life easier.
           </p>
         </div>
@@ -155,10 +155,24 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
                   fontWeight: 700,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
-                  border: isActive ? "1.5px solid #111111" : "1px solid #DADADA",
-                  background: isActive ? "#111111" : "#FFFFFF",
-                  color: isActive ? "#FFFFFF" : "#777777",
-                  boxShadow: isActive ? "0 2px 8px rgba(0, 0, 0, 0.12)" : "none",
+                  border: isActive ? "1.5px solid #F36B12" : "1px solid #E5E5E5",
+                  background: isActive ? "#F36B12" : "#FFFFFF",
+                  color: isActive ? "#FFFFFF" : "#747474",
+                  boxShadow: isActive ? "0 2px 8px rgba(243, 107, 18, 0.3)" : "none",
+                }}
+                onMouseEnter={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.borderColor = "#F36B12"
+                    e.currentTarget.style.color = "#F36B12"
+                    e.currentTarget.style.background = "#FFF0E5"
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.borderColor = "#E5E5E5"
+                    e.currentTarget.style.color = "#747474"
+                    e.currentTarget.style.background = "#FFFFFF"
+                  }
                 }}
               >
                 {tab === "All" ? "All Products" : tab}
@@ -186,7 +200,7 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
           <Link
             href="/shop"
             style={{
-              background: "#111111",
+              background: "#F36B12",
               color: "#FFFFFF",
               padding: "14px 34px",
               borderRadius: "8px",
@@ -196,14 +210,16 @@ export default function FeaturedProducts({ products = [] }: FeaturedProductsProp
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
+              boxShadow: "0 4px 14px rgba(243, 107, 18, 0.3)",
               transition: "all 0.2s",
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.background = "#303638"
+              e.currentTarget.style.background = "#D9570A"
+              e.currentTarget.style.transform = "translateY(-1px)"
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.background = "#111111"
+              e.currentTarget.style.background = "#F36B12"
+              e.currentTarget.style.transform = "translateY(0)"
             }}
           >
             <span>Browse Full Catalog</span>

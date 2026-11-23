@@ -3,50 +3,63 @@
 @tailwind utilities;
 
 /* ── THEME TOKENS ─────────────────────────────────────────────────────────── */
-/* ── CLASPO GLOBAL — MONOCHROME THEME (default) ───────────────────────── */
+/* ── CLASPO GLOBAL — ORANGE + WHITE + CHARCOAL THEME ─────────────────────── */
 :root {
-  /* Official CLASPO Colour Palette */
-  --primary-bg: #FFFFFF;
-  --secondary-bg: #F5F5F5;
-  --primary-text: #111111;
-  --secondary-text: #777777;
-  --border-color: #DADADA;
-  --dark-bg: #303638;
-  --muted-bg: #FAFAFA;
-  --button-bg: #111111;
+  /* Official CLASPO Design System (Orange + White + Charcoal) */
+  --claspo-orange: #F36B12;
+  --claspo-orange-dark: #D9570A;
+  --claspo-orange-light: #FFF0E5;
+  --background: #FFFFFF;
+  --background-secondary: #F5F5F5;
+  --text-primary: #17191C;
+  --text-secondary: #747474;
+  --charcoal: #303638;
+  --border: #E5E5E5;
+  --button-primary: #F36B12;
+  --button-primary-hover: #D9570A;
   --button-text: #FFFFFF;
 
-  /* Standard Application Tokens */
+  /* Standard Application Tokens mapped to Orange + White + Charcoal */
+  --primary-bg: #FFFFFF;
+  --secondary-bg: #F5F5F5;
+  --primary-text: #17191C;
+  --secondary-text: #747474;
+  --border-color: #E5E5E5;
+  --dark-bg: #303638;
+  --muted-bg: #FFF0E5;
+  --button-bg: #F36B12;
+  --button-text: #FFFFFF;
+
   --bg: #FFFFFF;
   --bg2: #F5F5F5;
-  --bg3: #FAFAFA;
+  --bg3: #FFF0E5;
   --bgDk: #303638;
   --bgDk2: #24292B;
   --hBg: rgba(255, 255, 255, 0.98);
-  --text: #111111;
-  --text2: #555555;
-  --textM: #777777;
+  --text: #17191C;
+  --text2: #747474;
+  --textM: #999999;
   --inv: #FFFFFF;
-  --acc: #111111;
-  --accH: #303638;
-  --bd: #DADADA;
+  --acc: #F36B12;
+  --accH: #D9570A;
+  --bd: #E5E5E5;
   --bdM: #E5E5E5;
   --sh: 0 2px 10px rgba(0, 0, 0, 0.04);
-  --shH: 0 10px 28px rgba(0, 0, 0, 0.08);
+  --shH: 0 10px 28px rgba(243, 107, 18, 0.15);
   --cBg: #FFFFFF;
   --r: 8px;
   --rL: 12px;
 
-  /* CLASPO Backward Compatibility Aliases */
-  --claspo-purple: #111111;
-  --claspo-purple-hover: #303638;
-  --claspo-lavender: #F5F5F5;
-  --claspo-lavender-subtle: #FAFAFA;
+  /* Backward Compatibility Aliases */
+  --claspo-purple: #F36B12;
+  --claspo-purple-hover: #D9570A;
+  --claspo-lavender: #FFF0E5;
+  --claspo-lavender-subtle: #FFF8F3;
   --claspo-bg: #FFFFFF;
   --claspo-bg-secondary: #F5F5F5;
-  --claspo-text: #111111;
-  --claspo-text-secondary: #777777;
-  --claspo-border: #DADADA;
+  --claspo-text: #17191C;
+  --claspo-text-secondary: #747474;
+  --claspo-border: #E5E5E5;
   --claspo-border-subtle: #EEEEEE;
 }
 
@@ -223,33 +236,33 @@ button {
   transform: scale(0.97);
 }
 
-/* Primary: CLASPO Monochrome Button */
+/* Primary: CLASPO Orange Button */
 .bp {
-  background: var(--button-bg, #111111);
+  background: var(--button-primary, #F36B12);
   color: var(--button-text, #ffffff);
-  border: 1px solid var(--button-bg, #111111);
+  border: 1px solid var(--button-primary, #F36B12);
   border-radius: 8px;
   font-weight: 700;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bp:hover {
-  background: var(--dark-bg, #303638);
+  background: var(--button-primary-hover, #D9570A);
   color: #ffffff;
-  border-color: var(--dark-bg, #303638);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-color: var(--button-primary-hover, #D9570A);
+  box-shadow: 0 4px 16px rgba(243, 107, 18, 0.3);
   transform: translateY(-1px);
 }
 
 [data-theme="dark"] .bp {
-  background: #ffffff;
-  color: #111111;
-  border-color: #ffffff;
+  background: var(--button-primary, #F36B12);
+  color: #ffffff;
+  border-color: var(--button-primary, #F36B12);
 }
 
 [data-theme="dark"] .bp:hover {
-  background: #e5e5e5;
-  color: #111111;
+  background: var(--button-primary-hover, #D9570A);
+  color: #ffffff;
 }
 
 /* Get a Quote nav button — plain text with underline-draw on hover */
@@ -341,18 +354,18 @@ button {
 
 /* Bordered button */
 .bod {
-  border: 1.5px solid var(--border-color, #DADADA);
-  color: var(--primary-text, #111111);
-  background: var(--primary-bg, #FFFFFF);
+  border: 1.5px solid var(--border, #E5E5E5);
+  color: var(--text-primary, #17191C);
+  background: var(--background, #FFFFFF);
   border-radius: 8px;
   font-weight: 700;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bod:hover {
-  background: var(--secondary-bg, #F5F5F5);
-  color: var(--primary-text, #111111);
-  border-color: var(--dark-bg, #303638);
+  background: var(--claspo-orange-light, #FFF0E5);
+  color: var(--claspo-orange, #F36B12);
+  border-color: var(--claspo-orange, #F36B12);
   transform: translateY(-1px);
 }
 
@@ -1572,22 +1585,23 @@ button {
 .form-input {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid var(--border-color, #DADADA);
+  border: 1px solid var(--border, #E5E5E5);
   border-radius: 6px;
-  background: var(--primary-bg, #FFFFFF);
-  color: var(--primary-text, #111111);
+  background: var(--background, #FFFFFF);
+  color: var(--text-primary, #17191C);
   font-family: var(--font-dm-sans), "Inter", sans-serif;
   font-size: 14.5px;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
 
 .form-input:focus {
-  border-color: var(--primary-text, #111111);
+  border-color: var(--claspo-orange, #F36B12);
+  box-shadow: 0 0 0 3px rgba(243, 107, 18, 0.15);
 }
 
 .form-input::placeholder {
-  color: var(--secondary-text, #777777);
+  color: var(--text-secondary, #747474);
 }
 
 .prod-det-grid {
@@ -1998,16 +2012,16 @@ button {
   color: #fff; background: transparent; font-family: var(--font-mono), monospace;
 }
 
-/* ── INNER PAGE BANNER (Monochrome Charcoal) ─────────────────────────────────── */
+/* ── INNER PAGE BANNER (Charcoal with Orange Highlight) ───────────────────────── */
 .inner-banner {
-  background: var(--dark-bg, #303638);
+  background: var(--charcoal, #303638);
   color: #ffffff;
   padding: 60px 0 70px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .inner-banner__eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
-  text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 16px;
+  text-transform: uppercase; color: var(--claspo-orange, #F36B12); margin-bottom: 16px;
   font-family: var(--font-mono), monospace; display: inline-block;
 }
 .inner-banner__h { color: #fff; }

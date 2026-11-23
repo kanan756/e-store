@@ -116,14 +116,14 @@ export default function AboutPage() {
   return (
     <main style={{ paddingTop: 120, background: "#FFFFFF" }}>
       {/* ── 1. Page Header ── */}
-      <section style={{ background: "linear-gradient(180deg, #F5F5F5 0%, #FFFFFF 100%)", padding: "64px 0 48px", borderBottom: "1px solid #DADADA" }}>
+      <section style={{ background: "linear-gradient(180deg, #FFF8F3 0%, #FFFFFF 100%)", padding: "64px 0 48px", borderBottom: "1px solid #E5E5E5" }}>
         <div className="W" style={{ textAlign: "center", maxWidth: 840, margin: "0 auto" }}>
           <div
             style={{
               display: "inline-block",
-              background: "#FFFFFF",
-              color: "#111111",
-              border: "1px solid #DADADA",
+              background: "#FFF0E5",
+              color: "#D9570A",
+              border: "1px solid rgba(243, 107, 18, 0.25)",
               fontSize: 12,
               fontWeight: 800,
               letterSpacing: "0.08em",
@@ -131,7 +131,6 @@ export default function AboutPage() {
               padding: "6px 16px",
               borderRadius: 9999,
               marginBottom: 16,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
             }}
           >
             About CLASPO
@@ -140,15 +139,15 @@ export default function AboutPage() {
             style={{
               fontSize: "clamp(32px, 4.5vw, 48px)",
               fontWeight: 900,
-              color: "#111111",
+              color: "#17191C",
               lineHeight: 1.15,
               letterSpacing: "-0.03em",
               marginBottom: 18,
             }}
           >
-            Making Everyday Living Smarter, Simpler, and Better.
+            Making Everyday Living <span style={{ color: "#F36B12" }}>Smarter, Simpler,</span> and Better.
           </h1>
-          <p style={{ fontSize: 18, color: "#777777", lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: 18, color: "#747474", lineHeight: 1.6, margin: 0 }}>
             Smart solutions for everyday living. Bringing thoughtful innovation, functional organization, and modern convenience to households worldwide.
           </p>
         </div>
@@ -175,7 +174,7 @@ export default function AboutPage() {
                   borderRadius: 24,
                   overflow: "hidden",
                   boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)",
-                  border: "1px solid #DADADA",
+                  border: "1px solid #E5E5E5",
                 }}
               >
                 <Image
@@ -196,8 +195,8 @@ export default function AboutPage() {
                   background: "#FFFFFF",
                   borderRadius: 16,
                   padding: "16px 24px",
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-                  border: "1.5px solid #DADADA",
+                  boxShadow: "0 8px 24px rgba(243, 107, 18, 0.15)",
+                  border: "1.5px solid #FFF0E5",
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
@@ -208,7 +207,7 @@ export default function AboutPage() {
                     width: 40,
                     height: 40,
                     borderRadius: 10,
-                    background: "#111111",
+                    background: "#F36B12",
                     color: "#FFFFFF",
                     display: "flex",
                     alignItems: "center",
@@ -219,8 +218,8 @@ export default function AboutPage() {
                   ✓
                 </div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: "#111111" }}>CLASPO</div>
-                  <div style={{ fontSize: 11, color: "#777777", fontWeight: 700, letterSpacing: "0.06em" }}>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "#17191C" }}>CLASPO</div>
+                  <div style={{ fontSize: 11, color: "#F36B12", fontWeight: 700, letterSpacing: "0.06em" }}>
                     CLICK. PICK. DONE.
                   </div>
                 </div>
@@ -233,7 +232,7 @@ export default function AboutPage() {
                 style={{
                   fontSize: 13,
                   fontWeight: 800,
-                  color: "#777777",
+                  color: "#F36B12",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   marginBottom: 12,
@@ -245,7 +244,7 @@ export default function AboutPage() {
                 style={{
                   fontSize: "clamp(26px, 3.5vw, 36px)",
                   fontWeight: 800,
-                  color: "#111111",
+                  color: "#17191C",
                   letterSpacing: "-0.02em",
                   lineHeight: 1.25,
                   marginBottom: 20,
@@ -265,13 +264,13 @@ export default function AboutPage() {
               <div
                 style={{
                   padding: "16px 20px",
-                  background: "#F5F5F5",
+                  background: "#FFF8F3",
                   borderRadius: 14,
-                  borderLeft: "4px solid #111111",
-                  borderTop: "1px solid #DADADA",
-                  borderRight: "1px solid #DADADA",
-                  borderBottom: "1px solid #DADADA",
-                  color: "#111111",
+                  borderLeft: "4px solid #F36B12",
+                  borderTop: "1px solid #FFE4D1",
+                  borderRight: "1px solid #FFE4D1",
+                  borderBottom: "1px solid #FFE4D1",
+                  color: "#D9570A",
                   fontWeight: 700,
                   fontSize: 15,
                 }}
@@ -284,7 +283,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── 3. Mission & Vision Dual Cards ── */}
-      <section style={{ padding: "64px 0", background: "#F5F5F5", borderTop: "1px solid #DADADA", borderBottom: "1px solid #DADADA" }}>
+      <section style={{ padding: "64px 0", background: "#F5F5F5", borderTop: "1px solid #E5E5E5", borderBottom: "1px solid #E5E5E5" }}>
         <div className="W">
           <div
             style={{
@@ -299,7 +298,7 @@ export default function AboutPage() {
                 background: "#FFFFFF",
                 borderRadius: 20,
                 padding: "40px 36px",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.03)",
               }}
             >
@@ -308,9 +307,9 @@ export default function AboutPage() {
                   width: 52,
                   height: 52,
                   borderRadius: 14,
-                  background: "#F5F5F5",
-                  color: "#111111",
-                  border: "1px solid #DADADA",
+                  background: "#FFF0E5",
+                  color: "#F36B12",
+                  border: "1px solid rgba(243, 107, 18, 0.2)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -322,10 +321,10 @@ export default function AboutPage() {
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
               </div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#111111", marginBottom: 14, letterSpacing: "-0.01em" }}>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#17191C", marginBottom: 14, letterSpacing: "-0.01em" }}>
                 Our Mission
               </h3>
-              <p style={{ fontSize: 15.5, color: "#666666", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: 15.5, color: "#747474", lineHeight: 1.7, margin: 0 }}>
                 Our mission is to simplify everyday living by offering practical, reliable, and affordable home solutions that bring greater convenience, organization, and efficiency to every household.
               </p>
             </div>
@@ -336,7 +335,7 @@ export default function AboutPage() {
                 background: "#FFFFFF",
                 borderRadius: 20,
                 padding: "40px 36px",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.03)",
               }}
             >
@@ -345,7 +344,7 @@ export default function AboutPage() {
                   width: 52,
                   height: 52,
                   borderRadius: 14,
-                  background: "#111111",
+                  background: "#F36B12",
                   color: "#FFFFFF",
                   display: "flex",
                   alignItems: "center",
@@ -358,10 +357,10 @@ export default function AboutPage() {
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </div>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#111111", marginBottom: 14, letterSpacing: "-0.01em" }}>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: "#17191C", marginBottom: 14, letterSpacing: "-0.01em" }}>
                 Our Vision
               </h3>
-              <p style={{ fontSize: 15.5, color: "#666666", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontSize: 15.5, color: "#747474", lineHeight: 1.7, margin: 0 }}>
                 To become a trusted destination for innovative home and utility products, helping households discover smarter ways to organize, manage, and improve their everyday lives.
               </p>
             </div>
@@ -376,9 +375,9 @@ export default function AboutPage() {
             <div
               style={{
                 display: "inline-block",
-                background: "#F5F5F5",
-                color: "#111111",
-                border: "1px solid #DADADA",
+                background: "#FFF0E5",
+                color: "#D9570A",
+                border: "1px solid rgba(243, 107, 18, 0.2)",
                 fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: "0.08em",
@@ -394,7 +393,7 @@ export default function AboutPage() {
               style={{
                 fontSize: "clamp(28px, 3.8vw, 38px)",
                 fontWeight: 800,
-                color: "#111111",
+                color: "#17191C",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 marginBottom: 12,
@@ -402,7 +401,7 @@ export default function AboutPage() {
             >
               What We Offer
             </h2>
-            <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: 16, color: "#747474", lineHeight: 1.6, margin: 0 }}>
               Thoughtfully curated collections created to solve real household challenges and make everyday living a joy.
             </p>
           </div>
@@ -418,13 +417,13 @@ export default function AboutPage() {
               <div
                 key={item.title}
                 style={{
-                  background: "#FAFAFA",
+                  background: "#F5F5F5",
                   borderRadius: 18,
                   padding: "32px 28px",
-                  border: "1px solid #DADADA",
+                  border: "1px solid #E5E5E5",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "transform 0.2s, box-shadow 0.2s",
+                  transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
                 }}
               >
                 <div
@@ -432,22 +431,22 @@ export default function AboutPage() {
                     width: 44,
                     height: 44,
                     borderRadius: 12,
-                    background: "#FFFFFF",
-                    color: "#111111",
-                    border: "1px solid #DADADA",
+                    background: "#FFF0E5",
+                    color: "#F36B12",
+                    border: "1px solid rgba(243, 107, 18, 0.2)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     marginBottom: 18,
-                    boxShadow: "0 2px 6px rgba(0, 0, 0, 0.04)",
+                    boxShadow: "0 2px 6px rgba(243, 107, 18, 0.1)",
                   }}
                 >
                   {item.icon}
                 </div>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: "#111111", marginBottom: 10 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: "#17191C", marginBottom: 10 }}>
                   {item.title}
                 </h3>
-                <p style={{ fontSize: 14, color: "#666666", lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: 14, color: "#747474", lineHeight: 1.6, margin: 0 }}>
                   {item.desc}
                 </p>
               </div>
@@ -457,15 +456,15 @@ export default function AboutPage() {
       </section>
 
       {/* ── 5. Why Choose CLASPO? ── */}
-      <section style={{ padding: "80px 0", background: "#F5F5F5", borderTop: "1px solid #DADADA", borderBottom: "1px solid #DADADA" }}>
+      <section style={{ padding: "80px 0", background: "#F5F5F5", borderTop: "1px solid #E5E5E5", borderBottom: "1px solid #E5E5E5" }}>
         <div className="W">
           <div style={{ textAlign: "center", maxWidth: 680, margin: "0 auto 52px" }}>
             <div
               style={{
                 display: "inline-block",
-                background: "#FFFFFF",
-                color: "#111111",
-                border: "1px solid #DADADA",
+                background: "#FFF0E5",
+                color: "#D9570A",
+                border: "1px solid rgba(243, 107, 18, 0.25)",
                 fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: "0.08em",
@@ -481,7 +480,7 @@ export default function AboutPage() {
               style={{
                 fontSize: "clamp(28px, 3.8vw, 38px)",
                 fontWeight: 800,
-                color: "#111111",
+                color: "#17191C",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 marginBottom: 12,
@@ -489,7 +488,7 @@ export default function AboutPage() {
             >
               Why Choose CLASPO?
             </h2>
-            <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontSize: 16, color: "#747474", lineHeight: 1.6, margin: 0 }}>
               Practical innovation, quality materials, and everyday simplicity designed around you.
             </p>
           </div>
@@ -508,7 +507,7 @@ export default function AboutPage() {
                   background: "#FFFFFF",
                   borderRadius: 16,
                   padding: "28px 24px",
-                  border: "1px solid #DADADA",
+                  border: "1px solid #E5E5E5",
                   boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
                   display: "flex",
                   gap: 16,
@@ -520,7 +519,7 @@ export default function AboutPage() {
                     width: 32,
                     height: 32,
                     borderRadius: 8,
-                    background: "#111111",
+                    background: "#F36B12",
                     color: "#FFFFFF",
                     display: "flex",
                     alignItems: "center",
@@ -534,10 +533,10 @@ export default function AboutPage() {
                   {idx + 1}
                 </div>
                 <div>
-                  <h3 style={{ fontSize: 17, fontWeight: 800, color: "#111111", marginBottom: 6 }}>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: "#17191C", marginBottom: 6 }}>
                     {item.title}
                   </h3>
-                  <p style={{ fontSize: 14, color: "#666666", lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontSize: 14, color: "#747474", lineHeight: 1.6, margin: 0 }}>
                     {item.desc}
                   </p>
                 </div>
@@ -553,8 +552,8 @@ export default function AboutPage() {
           <div
             style={{
               display: "inline-block",
-              background: "rgba(255,255,255,0.12)",
-              color: "#FFFFFF",
+              background: "rgba(243, 107, 18, 0.2)",
+              color: "#F36B12",
               fontSize: 12,
               fontWeight: 800,
               letterSpacing: "0.08em",
@@ -585,14 +584,14 @@ export default function AboutPage() {
             <Link
               href="/shop"
               style={{
-                background: "#FFFFFF",
-                color: "#111111",
+                background: "#F36B12",
+                color: "#FFFFFF",
                 fontSize: 14,
                 fontWeight: 800,
                 padding: "14px 32px",
                 borderRadius: 9999,
                 textDecoration: "none",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                boxShadow: "0 4px 16px rgba(243, 107, 18, 0.35)",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,

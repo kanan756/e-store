@@ -50,7 +50,7 @@ const CATEGORIES = [
 
 export default function Categories() {
   return (
-    <section style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
+    <section style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #E5E5E5" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "20px" }}>
@@ -58,15 +58,15 @@ export default function Categories() {
             <div
               style={{
                 display: "inline-block",
-                background: "#FFFFFF",
-                color: "#111111",
+                background: "#FFF0E5",
+                color: "#D9570A",
                 fontSize: "12px",
-                fontWeight: 700,
+                fontWeight: 800,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
                 borderRadius: "4px",
-                border: "1px solid #DADADA",
+                border: "1px solid rgba(243, 107, 18, 0.25)",
                 marginBottom: "12px",
               }}
             >
@@ -77,14 +77,14 @@ export default function Categories() {
                 fontSize: "clamp(26px, 3.5vw, 36px)",
                 fontWeight: 900,
                 letterSpacing: "-0.02em",
-                color: "#111111",
+                color: "#17191C",
                 fontFamily: "var(--font-sora), sans-serif",
                 margin: "0 0 8px",
               }}
             >
               Discover Smarter Living
             </h2>
-            <p style={{ fontSize: "16px", color: "#777777", margin: 0, maxWidth: "600px" }}>
+            <p style={{ fontSize: "16px", color: "#747474", margin: 0, maxWidth: "600px" }}>
               Explore practical products designed to make every corner of your home more functional.
             </p>
           </div>
@@ -92,14 +92,22 @@ export default function Categories() {
           <Link
             href="/shop"
             style={{
-              color: "#111111",
+              color: "#F36B12",
               fontSize: "14px",
               fontWeight: 700,
               textDecoration: "none",
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              transition: "transform 0.15s ease",
+              transition: "transform 0.15s ease, color 0.15s ease",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = "#D9570A"
+              e.currentTarget.style.transform = "translateX(3px)"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = "#F36B12"
+              e.currentTarget.style.transform = "translateX(0)"
             }}
           >
             <span>View All Categories</span>
@@ -122,15 +130,24 @@ export default function Categories() {
               style={{
                 background: "#FFFFFF",
                 borderRadius: "12px",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 overflow: "hidden",
                 textDecoration: "none",
                 display: "flex",
                 flexDirection: "column",
                 boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
               }}
-              className="claspo-cap-card"
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "#F36B12"
+                e.currentTarget.style.transform = "translateY(-4px)"
+                e.currentTarget.style.boxShadow = "0 10px 24px rgba(243, 107, 18, 0.12)"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = "#E5E5E5"
+                e.currentTarget.style.transform = "translateY(0)"
+                e.currentTarget.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.03)"
+              }}
             >
               {/* Image Preview */}
               <div
@@ -138,7 +155,7 @@ export default function Categories() {
                   position: "relative",
                   width: "100%",
                   aspectRatio: "16/10",
-                  background: "#F5F5F5",
+                  background: "#FFF0E5",
                   overflow: "hidden",
                 }}
               >
@@ -155,15 +172,14 @@ export default function Categories() {
                     position: "absolute",
                     top: 14,
                     right: 14,
-                    background: "#FFFFFF",
-                    color: "#111111",
+                    background: "#F36B12",
+                    color: "#FFFFFF",
                     fontSize: 11,
-                    fontWeight: 700,
+                    fontWeight: 800,
                     padding: "4px 10px",
                     borderRadius: "4px",
-                    border: "1px solid #DADADA",
                     letterSpacing: "0.04em",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                    boxShadow: "0 2px 8px rgba(243, 107, 18, 0.35)",
                   }}
                 >
                   {cat.badge}
@@ -176,7 +192,7 @@ export default function Categories() {
                   style={{
                     fontSize: 19,
                     fontWeight: 800,
-                    color: "#111111",
+                    color: "#17191C",
                     marginBottom: 8,
                     letterSpacing: "-0.01em",
                   }}
@@ -186,7 +202,7 @@ export default function Categories() {
                 <p
                   style={{
                     fontSize: 14,
-                    color: "#777777",
+                    color: "#747474",
                     lineHeight: 1.6,
                     margin: "0 0 16px 0",
                     flexGrow: 1,
@@ -199,7 +215,7 @@ export default function Categories() {
                   style={{
                     fontSize: 13.5,
                     fontWeight: 700,
-                    color: "#111111",
+                    color: "#F36B12",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 6,

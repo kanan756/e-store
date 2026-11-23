@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import type { Blog } from "@/lib/sheets"
@@ -38,7 +40,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
   const displayBlogs = blogs && blogs.length > 0 ? blogs.slice(0, 3) : FALLBACK_BLOGS
 
   return (
-    <section className="sec" style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
+    <section className="sec" style={{ background: "#FFFFFF", padding: "80px 0", borderBottom: "1px solid #E5E5E5" }}>
       <div className="W">
         {/* Header */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 20, marginBottom: 44 }}>
@@ -48,15 +50,15 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                background: "#F5F5F5",
-                color: "#111111",
+                background: "#FFF0E5",
+                color: "#D9570A",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 800,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
                 borderRadius: "4px",
-                border: "1px solid #DADADA",
+                border: "1px solid rgba(243, 107, 18, 0.25)",
                 marginBottom: 14,
               }}
             >
@@ -66,7 +68,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               style={{
                 fontSize: "clamp(26px, 3.5vw, 38px)",
                 fontWeight: 800,
-                color: "#111111",
+                color: "#17191C",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 margin: 0,
@@ -82,10 +84,19 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              color: "#111111",
+              color: "#F36B12",
               fontWeight: 700,
               fontSize: 14,
               textDecoration: "none",
+              transition: "transform 0.15s ease, color 0.15s ease",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = "#D9570A"
+              e.currentTarget.style.transform = "translateX(3px)"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = "#F36B12"
+              e.currentTarget.style.transform = "translateX(0)"
             }}
           >
             Browse All Articles
@@ -110,14 +121,23 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               style={{
                 background: "#FFFFFF",
                 borderRadius: 12,
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
               }}
-              className="claspo-blog-card"
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "#F36B12"
+                e.currentTarget.style.transform = "translateY(-4px)"
+                e.currentTarget.style.boxShadow = "0 10px 24px rgba(243, 107, 18, 0.12)"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = "#E5E5E5"
+                e.currentTarget.style.transform = "translateY(0)"
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.03)"
+              }}
             >
               {/* Media */}
               <Link href={`/blog/${b.slug}`} style={{ position: "relative", width: "100%", aspectRatio: "16/9", display: "block", background: "#F5F5F5", overflow: "hidden" }}>
@@ -135,9 +155,9 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 12 }}>
                   <span
                     style={{
-                      background: "#F5F5F5",
-                      color: "#111111",
-                      border: "1px solid #DADADA",
+                      background: "#FFF0E5",
+                      color: "#D9570A",
+                      border: "1px solid rgba(243, 107, 18, 0.2)",
                       fontSize: 11,
                       fontWeight: 700,
                       padding: "4px 8px",
@@ -148,7 +168,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                   >
                     {b.keywords?.split(",")[0] || "Home Guide"}
                   </span>
-                  <span style={{ fontSize: 12, color: "#777777" }}>
+                  <span style={{ fontSize: 12, color: "#747474" }}>
                     {b.publishDate || "Recent"}
                   </span>
                 </div>
@@ -157,7 +177,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                   style={{
                     fontSize: 18,
                     fontWeight: 800,
-                    color: "#111111",
+                    color: "#17191C",
                     lineHeight: 1.35,
                     marginBottom: 10,
                     letterSpacing: "-0.01em",
@@ -171,7 +191,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                 <p
                   style={{
                     fontSize: 14,
-                    color: "#777777",
+                    color: "#747474",
                     lineHeight: 1.6,
                     margin: "0 0 18px 0",
                     flexGrow: 1,
@@ -184,7 +204,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                   {b.metaDescription || "Read our practical home organization tips and product recommendations from CLASPO."}
                 </p>
 
-                <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid #DADADA" }}>
+                <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid #E5E5E5" }}>
                   <Link
                     href={`/blog/${b.slug}`}
                     style={{
@@ -193,7 +213,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                       gap: 6,
                       fontSize: 13.5,
                       fontWeight: 700,
-                      color: "#111111",
+                      color: "#F36B12",
                       textDecoration: "none",
                     }}
                   >

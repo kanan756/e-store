@@ -174,31 +174,31 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   {product.description || "Thoughtfully designed smart home and utility solution from CLASPO. Built for enduring quality, high reliability, and effortless everyday living."}
                 </p>
 
-                <div className="pd-price" style={{ color: "#111111", fontSize: "32px", fontWeight: 900, marginBottom: "20px" }}>
+                <div className="pd-price" style={{ color: "#17191C", fontSize: "32px", fontWeight: 900, marginBottom: "20px" }}>
                   {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
                 </div>
 
                 {/* Minimalist Quantity Selector */}
                 {product.inStock && (
                   <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#111111", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Quantity:
                     </span>
-                    <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #DADADA", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
+                    <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
                       <button
                         type="button"
                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                        style={{ width: 36, height: 36, background: "#F5F5F5", border: "none", color: "#111111", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                        style={{ width: 36, height: 36, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
                       >
                         -
                       </button>
-                      <span style={{ minWidth: 40, textAlign: "center", fontSize: 14, fontWeight: 700, color: "#111111" }}>
+                      <span style={{ minWidth: 40, textAlign: "center", fontSize: 14, fontWeight: 700, color: "#17191C" }}>
                         {quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => setQuantity(q => q + 1)}
-                        style={{ width: 36, height: 36, background: "#F5F5F5", border: "none", color: "#111111", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                        style={{ width: 36, height: 36, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
                       >
                         +
                       </button>
@@ -216,12 +216,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       width: "100%",
                       padding: "13px 24px",
                       borderRadius: 6,
-                      background: added ? "#303638" : (!product.inStock ? "#F5F5F5" : "#111111"),
-                      color: !product.inStock ? "#777777" : "#FFFFFF",
+                      background: added ? "#303638" : (!product.inStock ? "#F5F5F5" : "#F36B12"),
+                      color: !product.inStock ? "#747474" : "#FFFFFF",
                       cursor: !product.inStock ? "not-allowed" : "pointer",
-                      border: !product.inStock ? "1px solid #DADADA" : "1px solid #111111",
+                      border: !product.inStock ? "1px solid #E5E5E5" : "1px solid #F36B12",
                       fontWeight: 700,
                       fontSize: 14,
+                      boxShadow: !product.inStock || added ? "none" : "0 4px 14px rgba(243, 107, 18, 0.3)",
                     }}
                   >
                     {!product.inStock ? "Out of Stock" : added ? "✓ Added to Bag!" : adding ? "Adding…" : "Add to Cart"}
@@ -244,8 +245,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={e => {
-                        e.currentTarget.style.background = "#111111"
-                        e.currentTarget.style.borderColor = "#111111"
+                        e.currentTarget.style.background = "#17191C"
+                        e.currentTarget.style.borderColor = "#17191C"
                       }}
                       onMouseLeave={e => {
                         e.currentTarget.style.background = "#303638"
@@ -257,7 +258,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   )}
                 </div>
 
-                <div className="pd-overview-desc" style={{ borderTop: "1px solid #DADADA", paddingTop: 20 }}>
+                <div className="pd-overview-desc" style={{ borderTop: "1px solid #E5E5E5", paddingTop: 20 }}>
                   <p className="Bd" style={{ color: "#777777", fontSize: "14px", lineHeight: 1.6, margin: 0 }}>
                     Manufactured to rigorous quality benchmarks, offering reliable durability, high daily functionality, and easy maintenance.
                   </p>

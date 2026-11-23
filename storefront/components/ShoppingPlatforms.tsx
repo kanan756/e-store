@@ -42,7 +42,6 @@ const PLATFORMS = [
     desc: "Browse our curated home solutions and kitchen accessories on Flipkart with fast delivery.",
     href: "https://flipkart.com",
     logo: <FlipkartLogo />,
-    accent: "#2874F0",
   },
   {
     name: "Amazon",
@@ -50,7 +49,6 @@ const PLATFORMS = [
     desc: "Order smart home essentials and storage organizers with seamless delivery.",
     href: "https://amazon.com",
     logo: <AmazonLogo />,
-    accent: "#FF9900",
   },
   {
     name: "Instagram",
@@ -58,7 +56,6 @@ const PLATFORMS = [
     desc: "Discover creative home organization tips, new arrivals, and place direct orders via DM.",
     href: "https://www.instagram.com/claspo.store/",
     logo: <InstagramLogo />,
-    accent: "#E1306C",
   },
   {
     name: "WhatsApp",
@@ -66,28 +63,27 @@ const PLATFORMS = [
     desc: "Chat directly with our customer team for quick product inquiries and assistance.",
     href: "https://wa.me/17348910248?text=Hello%20CLASPO,%20I%20would%20like%20to%20inquire%20about%20a%20product",
     logo: <WhatsAppLogo />,
-    accent: "#25D366",
   },
 ]
 
 export default function ShoppingPlatforms() {
   return (
-    <section style={{ background: "#FFFFFF", padding: "64px 0 72px", borderBottom: "1px solid #DADADA" }}>
+    <section style={{ background: "#FFFFFF", padding: "64px 0 72px", borderBottom: "1px solid #E5E5E5" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
         {/* Section Header */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <div
             style={{
               display: "inline-block",
-              background: "#F5F5F5",
-              color: "#111111",
+              background: "#FFF0E5",
+              color: "#D9570A",
               fontSize: "12px",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
               borderRadius: "4px",
-              border: "1px solid #DADADA",
+              border: "1px solid rgba(243, 107, 18, 0.25)",
               marginBottom: "12px",
             }}
           >
@@ -98,14 +94,14 @@ export default function ShoppingPlatforms() {
               fontSize: "clamp(26px, 3.5vw, 36px)",
               fontWeight: 900,
               letterSpacing: "-0.02em",
-              color: "#111111",
+              color: "#17191C",
               fontFamily: "var(--font-sora), sans-serif",
               marginBottom: "10px",
             }}
           >
             Shop Your Way
           </h2>
-          <p style={{ fontSize: "16px", color: "#777777", maxWidth: "540px", margin: "0 auto" }}>
+          <p style={{ fontSize: "16px", color: "#747474", maxWidth: "540px", margin: "0 auto" }}>
             Find CLASPO products on your favourite shopping platforms.
           </p>
         </div>
@@ -127,7 +123,7 @@ export default function ShoppingPlatforms() {
               style={{
                 background: "#FFFFFF",
                 borderRadius: "12px",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 padding: "28px 24px",
                 textDecoration: "none",
                 display: "flex",
@@ -137,12 +133,12 @@ export default function ShoppingPlatforms() {
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.03)",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor = "#111111"
+                e.currentTarget.style.borderColor = "#F36B12"
                 e.currentTarget.style.transform = "translateY(-3px)"
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.08)"
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(243, 107, 18, 0.12)"
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.borderColor = "#DADADA"
+                e.currentTarget.style.borderColor = "#E5E5E5"
                 e.currentTarget.style.transform = "translateY(0)"
                 e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.03)"
               }}
@@ -158,7 +154,7 @@ export default function ShoppingPlatforms() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    border: "1px solid #DADADA",
+                    border: "1px solid #E5E5E5",
                   }}
                 >
                   {platform.logo}
@@ -168,9 +164,9 @@ export default function ShoppingPlatforms() {
                   style={{
                     fontSize: "11px",
                     fontWeight: 700,
-                    color: "#111111",
+                    color: "#17191C",
                     background: "#F5F5F5",
-                    border: "1px solid #DADADA",
+                    border: "1px solid #E5E5E5",
                     padding: "4px 10px",
                     borderRadius: "4px",
                   }}
@@ -180,11 +176,11 @@ export default function ShoppingPlatforms() {
               </div>
 
               {/* Name & Description */}
-              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#111111", margin: "0 0 8px" }}>
+              <h3 style={{ fontSize: "18px", fontWeight: 800, color: "#17191C", margin: "0 0 8px" }}>
                 {platform.name}
               </h3>
 
-              <p style={{ fontSize: "13.5px", color: "#777777", lineHeight: 1.55, margin: "0 0 20px", flex: 1 }}>
+              <p style={{ fontSize: "13.5px", color: "#747474", lineHeight: 1.55, margin: "0 0 20px", flex: 1 }}>
                 {platform.desc}
               </p>
 
@@ -196,7 +192,7 @@ export default function ShoppingPlatforms() {
                   gap: "6px",
                   fontSize: "13px",
                   fontWeight: 700,
-                  color: "#111111",
+                  color: "#F36B12",
                 }}
               >
                 <span>Connect via {platform.name}</span>

@@ -68,7 +68,7 @@ export default function CartClient() {
               {items.map((item) => (
                 <div key={item.id} className="cart-item">
                   {/* Thumbnail */}
-                  <div style={{ borderRadius: 8, overflow: "hidden", background: "#F5F5F5", border: "1px solid #DADADA", aspectRatio: "1", position: "relative" }}>
+                  <div style={{ borderRadius: 8, overflow: "hidden", background: "#F5F5F5", border: "1px solid #E5E5E5", aspectRatio: "1", position: "relative" }}>
                     {(() => {
                       const firstUrl = item.imageUrl ? item.imageUrl.split(",")[0].trim() : ""
                       if (!firstUrl || firstUrl === "-") return false
@@ -77,7 +77,7 @@ export default function CartClient() {
                     })() ? (
                       <img src={item.imageUrl.split(",")[0].trim()} alt={item.name} style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", padding: "8px" }} />
                     ) : (
-                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#777777", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
+                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#747474", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
                         {item.name}
                       </div>
                     )}
@@ -85,31 +85,31 @@ export default function CartClient() {
 
                   {/* Details */}
                   <div>
-                    <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4, color: "#111111" }}>
+                    <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4, color: "#17191C" }}>
                       {item.name}
                     </div>
-                    <div style={{ fontSize: 13, color: "#777777", marginBottom: 8 }}>{item.category}</div>
-                    <div style={{ fontSize: 14, color: "#111111", fontWeight: 700 }}>
+                    <div style={{ fontSize: 13, color: "#747474", marginBottom: 8 }}>{item.category}</div>
+                    <div style={{ fontSize: 14, color: "#F36B12", fontWeight: 800 }}>
                       {formatPrice(item.price)}
                     </div>
                   </div>
 
                   {/* Qty controls */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid #DADADA", borderRadius: 6, background: "#FFFFFF", padding: "4px 8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", padding: "4px 8px" }}>
                     <button
                       onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                       disabled={loading}
-                      style={{ color: "#111111", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
+                      style={{ color: "#17191C", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
                     >
                       <MinusIcon />
                     </button>
-                    <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 14, minWidth: 20, textAlign: "center", color: "#111111" }}>
+                    <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 14, minWidth: 20, textAlign: "center", color: "#17191C" }}>
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={loading}
-                      style={{ color: "#111111", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
+                      style={{ color: "#17191C", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
                     >
                       <PlusIcon />
                     </button>

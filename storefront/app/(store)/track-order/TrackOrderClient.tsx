@@ -200,9 +200,10 @@ export default function TrackOrderClient() {
               onClick={() => signIn("google")}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 12,
-                padding: "14px 28px", background: "#111111", color: "#f5f5f5",
+                padding: "14px 28px", background: "#F36B12", color: "#FFFFFF",
                 border: "none", borderRadius: 12, fontSize: 16, fontWeight: 700,
                 cursor: "pointer",
+                boxShadow: "0 4px 16px rgba(243, 107, 18, 0.3)",
               }}
             >
               <svg width="20" height="20" viewBox="0 0 48 48">

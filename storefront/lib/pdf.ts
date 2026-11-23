@@ -32,10 +32,10 @@ export async function generateInvoicePdf({
       doc.on("end", () => resolve(Buffer.concat(buffers)));
       doc.on("error", reject);
 
-      const PRIMARY_COLOR = "#111111";
+      const PRIMARY_COLOR = "#F36B12";
       const SECONDARY_COLOR = "#303638";
-      const TEXT_MAIN = "#111111";
-      const TEXT_MUTED = "#666666";
+      const TEXT_MAIN = "#17191C";
+      const TEXT_MUTED = "#747474";
 
       const fmt = (n: number) =>
         `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

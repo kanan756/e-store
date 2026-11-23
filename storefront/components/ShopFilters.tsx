@@ -448,9 +448,9 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
         {/* Grid */}
         <div>
           {filteredProducts.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "80px 0", color: "#777777", background: "#FAFAFA", borderRadius: "12px", border: "1px dashed #DADADA" }}>
-              <p style={{ fontSize: "16px", marginBottom: "8px", color: "#111111", fontWeight: 600 }}>No products match your filters.</p>
-              <p style={{ fontSize: "14px", color: "#777777" }}>Try clearing some filters or searching for different keywords.</p>
+            <div style={{ textAlign: "center", padding: "80px 0", color: "#747474", background: "#FFF8F3", borderRadius: "12px", border: "1px dashed #E5E5E5" }}>
+              <p style={{ fontSize: "16px", marginBottom: "8px", color: "#17191C", fontWeight: 700 }}>No products match your filters.</p>
+              <p style={{ fontSize: "14px", color: "#747474" }}>Try clearing some filters or searching for different keywords.</p>
               <button
                 onClick={() => {
                   setSearch("")
@@ -501,11 +501,12 @@ export default function ShopFilters({ initialProducts, initialQuery = "" }: Shop
                           width: 36, height: 36,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           borderRadius: 8,
-                          border: num === currentPage ? "2px solid var(--text)" : "1px solid var(--bd)",
-                          background: num === currentPage ? "var(--text)" : "transparent",
-                          color: num === currentPage ? "var(--bg)" : "var(--text)",
+                          border: num === currentPage ? "2px solid #F36B12" : "1px solid #E5E5E5",
+                          background: num === currentPage ? "#F36B12" : "transparent",
+                          color: num === currentPage ? "#FFFFFF" : "#17191C",
                           cursor: "pointer",
-                          transition: "all 0.2s ease"
+                          transition: "all 0.2s ease",
+                          boxShadow: num === currentPage ? "0 2px 8px rgba(243, 107, 18, 0.3)" : "none"
                         }}
                       >
                         {num}

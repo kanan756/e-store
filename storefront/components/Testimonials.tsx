@@ -1,6 +1,6 @@
 function StarRating() {
   return (
-    <div style={{ display: "flex", gap: 3, color: "#111111" }}>
+    <div style={{ display: "flex", gap: 3, color: "#F36B12" }}>
       {[...Array(5)].map((_, i) => (
         <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -36,7 +36,7 @@ const REVIEWS = [
 
 export default function Testimonials() {
   return (
-    <section className="sec" style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #DADADA" }}>
+    <section className="sec" style={{ background: "#F5F5F5", padding: "80px 0", borderBottom: "1px solid #E5E5E5" }}>
       <div className="W">
         {/* Section Header */}
         <div style={{ textAlign: "center", maxWidth: 660, margin: "0 auto 48px auto" }}>
@@ -45,15 +45,15 @@ export default function Testimonials() {
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
-              background: "#FFFFFF",
-              color: "#111111",
+              background: "#FFF0E5",
+              color: "#D9570A",
               fontSize: 12,
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               padding: "6px 14px",
               borderRadius: "4px",
-              border: "1px solid #DADADA",
+              border: "1px solid rgba(243, 107, 18, 0.25)",
               marginBottom: 14,
             }}
           >
@@ -63,7 +63,7 @@ export default function Testimonials() {
             style={{
               fontSize: "clamp(26px, 3.5vw, 38px)",
               fontWeight: 800,
-              color: "#111111",
+              color: "#17191C",
               letterSpacing: "-0.02em",
               lineHeight: 1.2,
               marginBottom: 12,
@@ -71,7 +71,7 @@ export default function Testimonials() {
           >
             Loved by Homes Everywhere
           </h2>
-          <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: 16, color: "#747474", lineHeight: 1.6, margin: 0 }}>
             See how CLASPO products help households discover smarter, simpler, and more organized living.
           </p>
         </div>
@@ -91,7 +91,7 @@ export default function Testimonials() {
                 background: "#FFFFFF",
                 borderRadius: 12,
                 padding: "32px 28px",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
                 display: "flex",
                 flexDirection: "column",
@@ -104,11 +104,11 @@ export default function Testimonials() {
                   <StarRating />
                   <span
                     style={{
-                      background: "#F5F5F5",
-                      color: "#111111",
-                      border: "1px solid #DADADA",
+                      background: "#FFF0E5",
+                      color: "#D9570A",
+                      border: "1px solid rgba(243, 107, 18, 0.2)",
                       fontSize: 11,
-                      fontWeight: 700,
+                      fontWeight: 800,
                       padding: "4px 8px",
                       borderRadius: 4,
                     }}
@@ -121,7 +121,7 @@ export default function Testimonials() {
                   style={{
                     fontSize: 14.5,
                     lineHeight: 1.65,
-                    color: "#111111",
+                    color: "#17191C",
                     margin: 0,
                     fontStyle: "normal",
                   }}
@@ -134,7 +134,7 @@ export default function Testimonials() {
                 style={{
                   marginTop: 24,
                   paddingTop: 18,
-                  borderTop: "1px solid #DADADA",
+                  borderTop: "1px solid #E5E5E5",
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
@@ -145,9 +145,9 @@ export default function Testimonials() {
                     width: 38,
                     height: 38,
                     borderRadius: 9999,
-                    background: "#F5F5F5",
-                    border: "1px solid #DADADA",
-                    color: "#111111",
+                    background: "#FFF0E5",
+                    border: "1px solid rgba(243, 107, 18, 0.25)",
+                    color: "#F36B12",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -158,10 +158,10 @@ export default function Testimonials() {
                   {rev.author.charAt(0)}
                 </div>
                 <div>
-                  <div style={{ fontSize: 14.5, fontWeight: 800, color: "#111111" }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: "#17191C" }}>
                     {rev.author}
                   </div>
-                  <div style={{ fontSize: 12.5, color: "#777777", marginTop: 2 }}>
+                  <div style={{ fontSize: 12.5, color: "#747474", marginTop: 2 }}>
                     {rev.location}
                   </div>
                 </div>

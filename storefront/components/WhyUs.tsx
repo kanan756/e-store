@@ -37,7 +37,7 @@ const FEATS = [
 
 export default function WhyUs() {
   return (
-    <section className="sec" style={{ background: "#F5F5F5", padding: "84px 0", borderBottom: "1px solid #DADADA" }}>
+    <section className="sec" style={{ background: "#F5F5F5", padding: "84px 0", borderBottom: "1px solid #E5E5E5" }}>
       <div className="W">
         <div
           style={{
@@ -57,7 +57,7 @@ export default function WhyUs() {
                 borderRadius: 16,
                 overflow: "hidden",
                 boxShadow: "0 8px 28px rgba(0, 0, 0, 0.06)",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
               }}
             >
               <Image
@@ -79,7 +79,7 @@ export default function WhyUs() {
                 borderRadius: 10,
                 padding: "14px 20px",
                 boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -90,9 +90,9 @@ export default function WhyUs() {
                   width: 38,
                   height: 38,
                   borderRadius: 8,
-                  background: "#F5F5F5",
-                  border: "1px solid #DADADA",
-                  color: "#111111",
+                  background: "#FFF0E5",
+                  border: "1px solid rgba(243, 107, 18, 0.25)",
+                  color: "#F36B12",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -103,8 +103,8 @@ export default function WhyUs() {
                 ✓
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "#111111" }}>Smart Living</div>
-                <div style={{ fontSize: 11, color: "#777777" }}>Designed for Real Homes</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#17191C" }}>Smart Living</div>
+                <div style={{ fontSize: 11, color: "#747474" }}>Designed for Real Homes</div>
               </div>
             </div>
 
@@ -118,7 +118,7 @@ export default function WhyUs() {
                 borderRadius: 10,
                 padding: "14px 20px",
                 boxShadow: "0 6px 20px rgba(0, 0, 0, 0.08)",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
@@ -129,20 +129,21 @@ export default function WhyUs() {
                   width: 38,
                   height: 38,
                   borderRadius: 8,
-                  background: "#111111",
+                  background: "#F36B12",
                   color: "#FFFFFF",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontWeight: 800,
                   fontSize: 14,
+                  boxShadow: "0 2px 8px rgba(243, 107, 18, 0.35)",
                 }}
               >
                 ★
               </div>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "#111111" }}>Top Rated Utility</div>
-                <div style={{ fontSize: 11, color: "#777777" }}>Click. Pick. Done.</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#17191C" }}>Top Rated Utility</div>
+                <div style={{ fontSize: 11, color: "#747474" }}>Click. Pick. Done.</div>
               </div>
             </div>
           </div>
@@ -154,15 +155,15 @@ export default function WhyUs() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                background: "#FFFFFF",
-                color: "#111111",
+                background: "#FFF0E5",
+                color: "#D9570A",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 800,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
                 borderRadius: "4px",
-                border: "1px solid #DADADA",
+                border: "1px solid rgba(243, 107, 18, 0.25)",
                 marginBottom: 16,
               }}
             >
@@ -173,16 +174,17 @@ export default function WhyUs() {
               style={{
                 fontSize: "clamp(28px, 3.8vw, 40px)",
                 fontWeight: 800,
-                color: "#111111",
+                color: "#17191C",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
                 marginBottom: 16,
               }}
             >
-              Small Solutions.<br />Big Difference.
+              Small Solutions.<br />
+              <span style={{ color: "#F36B12" }}>Big Difference.</span>
             </h2>
 
-            <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, marginBottom: 28 }}>
+            <p style={{ fontSize: 16, color: "#747474", lineHeight: 1.6, marginBottom: 28 }}>
               From smarter storage to everyday household essentials, discover products that bring convenience, functionality, and simplicity into your daily routine.
             </p>
 
@@ -197,7 +199,7 @@ export default function WhyUs() {
                     background: "#FFFFFF",
                     padding: "16px 18px",
                     borderRadius: 10,
-                    border: "1px solid #DADADA",
+                    border: "1px solid #E5E5E5",
                     boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
                   }}
                 >
@@ -206,9 +208,9 @@ export default function WhyUs() {
                       width: 26,
                       height: 26,
                       borderRadius: 6,
-                      background: "#F5F5F5",
-                      border: "1px solid #DADADA",
-                      color: "#111111",
+                      background: "#FFF0E5",
+                      border: "1px solid rgba(243, 107, 18, 0.25)",
+                      color: "#F36B12",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -219,10 +221,10 @@ export default function WhyUs() {
                     <CheckIcon />
                   </div>
                   <div>
-                    <div style={{ fontSize: 14.5, fontWeight: 700, color: "#111111", marginBottom: 2 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: "#17191C", marginBottom: 2 }}>
                       {t}
                     </div>
-                    <div style={{ fontSize: 13, color: "#777777", lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 13, color: "#747474", lineHeight: 1.5 }}>
                       {d}
                     </div>
                   </div>

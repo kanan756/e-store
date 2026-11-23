@@ -137,7 +137,7 @@ export default function ProductsPage() {
                   gap: 48,
                   alignItems: "center",
                   background: "#FFFFFF",
-                  border: "1px solid #DADADA",
+                  border: "1px solid #E5E5E5",
                   borderRadius: 24,
                   padding: "40px",
                   boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
@@ -160,9 +160,9 @@ export default function ProductsPage() {
                   <div
                     style={{
                       display: "inline-block",
-                      background: "#F5F5F5",
-                      color: "#111111",
-                      border: "1px solid #DADADA",
+                      background: "#FFF0E5",
+                      color: "#D9570A",
+                      border: "1px solid rgba(243, 107, 18, 0.25)",
                       fontSize: 11,
                       fontWeight: 800,
                       letterSpacing: "0.08em",
@@ -174,14 +174,14 @@ export default function ProductsPage() {
                   >
                     CLASPO Collection
                   </div>
-                  <h2 style={{ fontSize: 28, fontWeight: 900, color: "#111111", marginBottom: 14, letterSpacing: "-0.02em" }}>{title}</h2>
-                  <p style={{ fontSize: 15.5, lineHeight: 1.7, color: "#666666", marginBottom: 24 }}>{desc}</p>
+                  <h2 style={{ fontSize: 28, fontWeight: 900, color: "#17191C", marginBottom: 14, letterSpacing: "-0.02em" }}>{title}</h2>
+                  <p style={{ fontSize: 15.5, lineHeight: 1.7, color: "#747474", marginBottom: 24 }}>{desc}</p>
 
                   {/* Capabilities list */}
                   <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8, marginBottom: 28, padding: 0 }}>
                     {capabilities.map(cap => (
                       <li key={cap} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#444444" }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F36B12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                           <polyline points="20 6 9 17 4 12"/>
                         </svg>
                         {cap}
@@ -193,14 +193,14 @@ export default function ProductsPage() {
                     <Link
                       href={href}
                       style={{
-                        background: "#111111",
+                        background: "#F36B12",
                         color: "#FFFFFF",
                         fontSize: 14,
                         fontWeight: 700,
                         padding: "12px 28px",
                         borderRadius: 9999,
                         textDecoration: "none",
-                        boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
+                        boxShadow: "0 4px 14px rgba(243, 107, 18, 0.3)",
                       }}
                     >
                       Shop Collection &rarr;
@@ -222,13 +222,14 @@ export default function ProductsPage() {
             <Link
               href="/shop"
               style={{
-                background: "#FFFFFF",
-                color: "#111111",
+                background: "#F36B12",
+                color: "#FFFFFF",
                 fontSize: 14,
                 fontWeight: 800,
                 padding: "14px 32px",
                 borderRadius: 9999,
                 textDecoration: "none",
+                boxShadow: "0 4px 14px rgba(243, 107, 18, 0.35)",
               }}
             >
               Explore Full Catalog &rarr;

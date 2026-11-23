@@ -13,8 +13,8 @@ const PROMOTIONS = [
     cta: "Shop Kitchen Essentials",
     href: "/shop?category=Kitchen+Essentials",
     img: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800",
-    bgColor: "#FAFAFA",
-    borderColor: "#DADADA",
+    bgColor: "#FFFFFF",
+    borderColor: "#E5E5E5",
   },
   {
     id: "promo-2",
@@ -25,54 +25,184 @@ const PROMOTIONS = [
     cta: "Explore Storage",
     href: "/shop?category=Storage+Solutions",
     img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800",
-    bgColor: "#F5F5F5",
-    borderColor: "#DADADA",
+    bgColor: "#FFF8F3",
+    borderColor: "#E5E5E5",
   },
 ]
 
 export default function PromotionalBanners() {
   return (
-    <section className="sec" style={{ background: "#FFFFFF", padding: "72px 0", borderBottom: "1px solid #DADADA" }}>
+    <section className="sec" style={{ background: "#FFFFFF", padding: "72px 0", borderBottom: "1px solid #E5E5E5" }}>
       <div className="W">
-        {/* Section Header */}
-        <div style={{ textAlign: "center", maxWidth: 660, margin: "0 auto 48px auto" }}>
+        {/* ── Main Orange Feature Promotional Banner ── */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #F36B12 0%, #D9570A 100%)",
+            borderRadius: 16,
+            padding: "54px 48px",
+            color: "#FFFFFF",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 40,
+            alignItems: "center",
+            boxShadow: "0 10px 30px rgba(243, 107, 18, 0.25)",
+            marginBottom: 40,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* Subtle Ambient Decorative Circles */}
           <div
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              background: "#F5F5F5",
-              color: "#111111",
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              padding: "6px 14px",
-              borderRadius: "4px",
-              border: "1px solid #DADADA",
-              marginBottom: 14,
+              position: "absolute",
+              top: "-50px",
+              right: "-50px",
+              width: "300px",
+              height: "300px",
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.08)",
+              pointerEvents: "none",
             }}
-          >
-            Special Offers &amp; Promotions
-          </div>
-          <h2
+          />
+          <div
             style={{
-              fontSize: "clamp(26px, 3.5vw, 36px)",
-              fontWeight: 800,
-              color: "#111111",
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-              marginBottom: 12,
+              position: "absolute",
+              bottom: "-40px",
+              left: "20%",
+              width: "200px",
+              height: "200px",
+              borderRadius: "50%",
+              background: "rgba(0, 0, 0, 0.06)",
+              pointerEvents: "none",
             }}
-          >
-            Smarter Living Deals for Every Room
-          </h2>
-          <p style={{ fontSize: 16, color: "#777777", lineHeight: 1.6, margin: 0 }}>
-            Discover seasonal savings on practical household essentials, storage solutions, and innovative kitchen helpers.
-          </p>
+          />
+
+          {/* Left Text */}
+          <div style={{ position: "relative", zIndex: 2 }}>
+            <div
+              style={{
+                display: "inline-block",
+                background: "rgba(255, 255, 255, 0.2)",
+                color: "#FFFFFF",
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                padding: "6px 14px",
+                borderRadius: 9999,
+                marginBottom: 16,
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              CLASPO Signature Collection
+            </div>
+            <h2
+              style={{
+                fontSize: "clamp(30px, 4vw, 44px)",
+                fontWeight: 900,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.15,
+                color: "#FFFFFF",
+                marginBottom: 16,
+                fontFamily: "var(--font-sora), sans-serif",
+              }}
+            >
+              Upgrade Your Home, Upgrade Your Life.
+            </h2>
+            <p
+              style={{
+                fontSize: 16.5,
+                color: "rgba(255, 255, 255, 0.92)",
+                lineHeight: 1.65,
+                maxWidth: 500,
+                marginBottom: 28,
+              }}
+            >
+              Discover smart everyday essentials that make your home more organized, efficient, and convenient &mdash; engineered for modern living.
+            </p>
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <Link
+                href="/shop"
+                style={{
+                  background: "#FFFFFF",
+                  color: "#D9570A",
+                  fontWeight: 800,
+                  fontSize: 14.5,
+                  padding: "14px 32px",
+                  borderRadius: 8,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  boxShadow: "0 4px 14px rgba(0, 0, 0, 0.15)",
+                  transition: "transform 0.15s ease, background 0.15s ease",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-1px)"
+                  e.currentTarget.style.background = "#FFF0E5"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)"
+                  e.currentTarget.style.background = "#FFFFFF"
+                }}
+              >
+                <span>Shop Featured Deals</span>
+                <span>&rarr;</span>
+              </Link>
+              <Link
+                href="/products"
+                style={{
+                  background: "rgba(255, 255, 255, 0.15)",
+                  color: "#FFFFFF",
+                  border: "1.5px solid rgba(255, 255, 255, 0.4)",
+                  fontWeight: 700,
+                  fontSize: 14.5,
+                  padding: "14px 28px",
+                  borderRadius: 8,
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  transition: "background 0.15s ease",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.25)"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)"
+                }}
+              >
+                <span>Explore Catalog</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Product Image Showcase */}
+          <div style={{ position: "relative", zIndex: 2 }}>
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                height: 300,
+                borderRadius: 14,
+                overflow: "hidden",
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "1.5px solid rgba(255, 255, 255, 0.25)",
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+              }}
+            >
+              <Image
+                src="https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800"
+                alt="Upgrade Your Home with CLASPO"
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* 2-Column Promo Cards */}
+        {/* 2-Column Secondary Promo Cards */}
         <div
           style={{
             display: "grid",
@@ -94,15 +224,24 @@ export default function PromotionalBanners() {
                 flexDirection: "column",
                 justifyContent: "space-between",
                 boxShadow: "0 2px 8px rgba(0, 0, 0, 0.03)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
               }}
-              className="claspo-promo-card"
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "#F36B12"
+                e.currentTarget.style.transform = "translateY(-3px)"
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(243, 107, 18, 0.1)"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = promo.borderColor
+                e.currentTarget.style.transform = "translateY(0)"
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.03)"
+              }}
             >
               <div style={{ position: "relative", zIndex: 2 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
                   <span
                     style={{
-                      background: "#111111",
+                      background: "#F36B12",
                       color: "#FFFFFF",
                       fontSize: 11,
                       fontWeight: 800,
@@ -110,15 +249,16 @@ export default function PromotionalBanners() {
                       textTransform: "uppercase",
                       padding: "4px 10px",
                       borderRadius: 4,
+                      boxShadow: "0 2px 6px rgba(243, 107, 18, 0.3)",
                     }}
                   >
                     {promo.tag}
                   </span>
                   <span
                     style={{
-                      background: "#FFFFFF",
-                      color: "#111111",
-                      border: "1px solid #DADADA",
+                      background: "#FFF0E5",
+                      color: "#D9570A",
+                      border: "1px solid rgba(243, 107, 18, 0.25)",
                       fontSize: 12,
                       fontWeight: 700,
                       padding: "4px 10px",
@@ -131,9 +271,9 @@ export default function PromotionalBanners() {
 
                 <h3
                   style={{
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: 800,
-                    color: "#111111",
+                    color: "#17191C",
                     lineHeight: 1.25,
                     marginBottom: 12,
                     letterSpacing: "-0.01em",
@@ -145,7 +285,7 @@ export default function PromotionalBanners() {
                 <p
                   style={{
                     fontSize: 14.5,
-                    color: "#777777",
+                    color: "#747474",
                     lineHeight: 1.6,
                     marginBottom: 24,
                     maxWidth: "90%",
@@ -161,7 +301,7 @@ export default function PromotionalBanners() {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 8,
-                      background: "#111111",
+                      background: "#17191C",
                       color: "#FFFFFF",
                       fontSize: 14,
                       fontWeight: 700,
@@ -172,10 +312,10 @@ export default function PromotionalBanners() {
                       transition: "background 0.2s, transform 0.15s",
                     }}
                     onMouseEnter={e => {
-                      e.currentTarget.style.background = "#303638"
+                      e.currentTarget.style.background = "#F36B12"
                     }}
                     onMouseLeave={e => {
-                      e.currentTarget.style.background = "#111111"
+                      e.currentTarget.style.background = "#17191C"
                     }}
                   >
                     {promo.cta}
@@ -196,7 +336,7 @@ export default function PromotionalBanners() {
                   marginTop: 28,
                   borderRadius: 10,
                   overflow: "hidden",
-                  border: "1px solid #DADADA",
+                  border: "1px solid #E5E5E5",
                 }}
               >
                 <Image
@@ -233,15 +373,16 @@ export default function PromotionalBanners() {
                 width: 48,
                 height: 48,
                 borderRadius: 8,
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
+                background: "rgba(243, 107, 18, 0.15)",
+                border: "1px solid rgba(243, 107, 18, 0.3)",
+                color: "#F36B12",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
               }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="1" y="3" width="15" height="13" />
                 <polygon points="16 8 20 8 23 11 23 16 16 16 8" />
                 <circle cx="5.5" cy="18.5" r="2.5" />
@@ -249,7 +390,7 @@ export default function PromotionalBanners() {
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", opacity: 0.85 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#F36B12" }}>
                 Free Shipping Available
               </div>
               <div style={{ fontSize: 18, fontWeight: 800, marginTop: 2 }}>
@@ -262,8 +403,8 @@ export default function PromotionalBanners() {
             <Link
               href="/shop"
               style={{
-                background: "#FFFFFF",
-                color: "#111111",
+                background: "#F36B12",
+                color: "#FFFFFF",
                 fontWeight: 700,
                 fontSize: 14,
                 padding: "12px 26px",
@@ -272,14 +413,14 @@ export default function PromotionalBanners() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 8,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 10px rgba(243, 107, 18, 0.35)",
                 transition: "background 0.2s, transform 0.15s",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = "#F5F5F5"
+                e.currentTarget.style.background = "#D9570A"
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = "#FFFFFF"
+                e.currentTarget.style.background = "#F36B12"
               }}
             >
               Shop All Offers

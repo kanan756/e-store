@@ -87,8 +87,8 @@ export default function ContactClient() {
                 <div key={item.label} style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
                   <div style={{
                     width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                    background: "#F5F5F5", border: "1px solid #DADADA",
-                    color: "#111111",
+                    background: "#FFF0E5", border: "1px solid rgba(243, 107, 18, 0.2)",
+                    color: "#F36B12",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>{item.icon}</div>
                   <div>
@@ -123,8 +123,9 @@ export default function ContactClient() {
                 <button
                   onClick={() => setStatus("idle")}
                   style={{
-                    padding: "10px 24px", background: "#2563eb", color: "#fff",
+                    padding: "10px 24px", background: "#F36B12", color: "#fff",
                     border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer",
+                    boxShadow: "0 4px 12px rgba(243, 107, 18, 0.3)",
                   }}
                 >Send Another Message</button>
               </div>

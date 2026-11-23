@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 
@@ -84,10 +86,10 @@ export default function Footer() {
         >
           {/* Col 1: Brand & Description */}
           <div style={{ maxWidth: 320 }}>
-            <Link href="/" style={{ display: "inline-block", position: "relative", width: 146, height: 50, marginBottom: 14 }}>
+            <Link href="/" style={{ display: "inline-block", position: "relative", width: 154, height: 48, marginBottom: 14 }}>
               <Image
                 src="/images/claspo-logo-tight.png"
-                alt="CLASPO™ CLICK. PICK. DONE."
+                alt="CLASPO™ - SMART HOME SOLUTIONS"
                 fill
                 style={{ objectFit: "contain", filter: "brightness(0) invert(1)" }}
               />
@@ -96,8 +98,8 @@ export default function Footer() {
             <div
               style={{
                 fontSize: 12,
-                fontWeight: 700,
-                color: "#DADADA",
+                fontWeight: 800,
+                color: "#F36B12",
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 marginBottom: 12,
@@ -127,8 +129,9 @@ export default function Footer() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#DADADA",
-                  transition: "background 0.2s ease, color 0.2s ease",
+                  transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
                 }}
+                className="footer-soc-link"
               >
                 <IcoFB />
               </a>
@@ -147,8 +150,9 @@ export default function Footer() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#DADADA",
-                  transition: "background 0.2s ease, color 0.2s ease",
+                  transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
                 }}
+                className="footer-soc-link"
               >
                 <IcoX />
               </a>
@@ -167,8 +171,9 @@ export default function Footer() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#DADADA",
-                  transition: "background 0.2s ease, color 0.2s ease",
+                  transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
                 }}
+                className="footer-soc-link"
               >
                 <IcoIn />
               </a>
@@ -187,8 +192,9 @@ export default function Footer() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#DADADA",
-                  transition: "background 0.2s ease, color 0.2s ease",
+                  transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
                 }}
+                className="footer-soc-link"
               >
                 <IcoInsta />
               </a>
@@ -211,6 +217,7 @@ export default function Footer() {
                     textDecoration: "none",
                     transition: "color 0.15s ease",
                   }}
+                  className="footer-link"
                 >
                   {link.label}
                 </Link>
@@ -234,6 +241,7 @@ export default function Footer() {
                     textDecoration: "none",
                     transition: "color 0.15s ease",
                   }}
+                  className="footer-link"
                 >
                   {link.label}
                 </Link>
@@ -248,16 +256,16 @@ export default function Footer() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14, fontSize: 13.5, color: "#DADADA" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                <div style={{ marginTop: 2, color: "#DADADA" }}><IcoPin /></div>
+                <div style={{ marginTop: 2, color: "#F36B12" }}><IcoPin /></div>
                 <span>306, Radhe Kishan Arista, oppo. Hirabhai Tower, Maninagar, Ahmedabad, Gujarat - 380008</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ color: "#DADADA" }}><IcoPhone /></div>
+                <div style={{ color: "#F36B12" }}><IcoPhone /></div>
                 <span>+1 734 891 0248</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ color: "#DADADA" }}><IcoMail /></div>
-                <a href="mailto:info@claspo.store" style={{ color: "#FFFFFF", textDecoration: "none", fontWeight: 600 }}>
+                <div style={{ color: "#F36B12" }}><IcoMail /></div>
+                <a href="mailto:info@claspo.store" style={{ color: "#F36B12", textDecoration: "none", fontWeight: 700 }}>
                   info@claspo.store
                 </a>
               </div>
@@ -293,16 +301,27 @@ export default function Footer() {
           }}
         >
           <div>
-            &copy; {new Date().getFullYear()} CLASPO. All rights reserved. &middot; <span style={{ color: "#FFFFFF", fontWeight: 700 }}>CLICK. PICK. DONE.</span>
+            &copy; {new Date().getFullYear()} CLASPO. All rights reserved. &middot; <span style={{ color: "#F36B12", fontWeight: 700 }}>CLICK. PICK. DONE.</span>
           </div>
 
           <div style={{ display: "flex", gap: 20 }}>
-            <Link href="/privacy" style={{ color: "#DADADA", textDecoration: "none" }}>Privacy Policy</Link>
-            <Link href="/terms" style={{ color: "#DADADA", textDecoration: "none" }}>Terms of Service</Link>
-            <Link href="/cookies" style={{ color: "#DADADA", textDecoration: "none" }}>Cookie Preferences</Link>
+            <Link href="/privacy" className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Privacy Policy</Link>
+            <Link href="/terms" className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Terms of Service</Link>
+            <Link href="/cookies" className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Cookie Preferences</Link>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .footer-link:hover {
+          color: #F36B12 !important;
+        }
+        .footer-soc-link:hover {
+          background: #F36B12 !important;
+          color: #FFFFFF !important;
+          border-color: #F36B12 !important;
+        }
+      `}</style>
     </footer>
   )
 }

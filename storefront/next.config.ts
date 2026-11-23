@@ -10,6 +10,7 @@
  */
 
 import type { NextConfig } from "next"
+import path from "path"
 
 // ── Security headers applied to every route ──────────────────────────────────
 const securityHeaders = [
@@ -53,6 +54,9 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   output: "standalone",
 
   // Apply security headers to all responses

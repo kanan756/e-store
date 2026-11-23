@@ -101,34 +101,25 @@ export default function Header() {
   const { wishlistCount } = useWishlist()
 
   const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchFocused, setSearchFocused] = useState(false)
 
   const shopDDRef = useRef<HTMLDivElement>(null)
   const productsDDRef = useRef<HTMLDivElement>(null)
 
-  // Scroll handler for subtle elevation
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
+      setScrolled(window.scrollY > 15)
     }
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Close menus on page navigation
   useEffect(() => {
-    setMenuOpen(false)
-    setShopOpen(false)
-    setProductsOpen(false)
-  }, [pathname])
-
-  // Close dropdowns on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    function handleClickOutside(e: MouseEvent) {
       if (shopDDRef.current && !shopDDRef.current.contains(e.target as Node)) {
         setShopOpen(false)
       }
@@ -140,38 +131,51 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  // Close menus on path change
+  useEffect(() => {
+    setShopOpen(false)
+    setProductsOpen(false)
+    setMenuOpen(false)
+  }, [pathname])
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`)
-      setSearchQuery("")
-      setMenuOpen(false)
     }
   }
+
+  const isHome = pathname === "/"
+  const isShop = pathname.startsWith("/shop")
+  const isProducts = pathname.startsWith("/products")
+  const isAbout = pathname === "/about"
+  const isContact = pathname === "/contact"
+  const isBlog = pathname.startsWith("/blog")
 
   return (
     <>
       <header
         style={{
-          position: "sticky",
+          position: "fixed",
           top: 0,
+          left: 0,
+          right: 0,
           zIndex: 100,
           background: "#FFFFFF",
-          transition: "box-shadow 0.25s ease, border-color 0.25s ease",
           boxShadow: scrolled ? "0 4px 20px rgba(0, 0, 0, 0.06)" : "none",
-          borderBottom: "1px solid #DADADA",
-          width: "100%",
+          borderBottom: "1px solid #E5E5E5",
+          transition: "box-shadow 0.25s ease, background 0.25s ease",
         }}
       >
-        {/* ── Top Announcement Bar ── */}
+        {/* ── Top Announcement Bar (Charcoal with Orange accent) ── */}
         <div
           style={{
             background: "#303638",
             color: "#FFFFFF",
-            fontSize: "12.5px",
-            fontWeight: 500,
+            fontSize: "12px",
+            lineHeight: 1.4,
             padding: "8px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
           }}
         >
           <div
@@ -181,13 +185,12 @@ export default function Header() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 16,
-              flexWrap: "wrap",
+              gap: "16px",
             }}
           >
-            {/* Announcement banner */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: "14px" }}>⚡</span>
+            {/* Free shipping & tagline */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 500 }}>
+              <span style={{ color: "#F36B12", fontSize: "14px" }}>⚡</span>
               <span>Free Shipping on Orders $100+ &middot; Smart Solutions for Everyday Living</span>
             </div>
 
@@ -203,10 +206,16 @@ export default function Header() {
                   textDecoration: "none",
                   fontSize: "12px",
                   opacity: 0.9,
-                  transition: "opacity 0.2s",
+                  transition: "opacity 0.2s, color 0.2s",
                 }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0.9")}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = "#F36B12"
+                  e.currentTarget.style.opacity = "1"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "#FFFFFF"
+                  e.currentTarget.style.opacity = "0.9"
+                }}
               >
                 <IcoMail />
                 <span>info@claspo.store</span>
@@ -223,10 +232,16 @@ export default function Header() {
                   fontWeight: 600,
                   letterSpacing: "0.02em",
                   opacity: 0.9,
-                  transition: "opacity 0.2s",
+                  transition: "opacity 0.2s, color 0.2s",
                 }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "0.9")}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = "#F36B12"
+                  e.currentTarget.style.opacity = "1"
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = "#FFFFFF"
+                  e.currentTarget.style.opacity = "0.9"
+                }}
               >
                 Track Order
               </Link>
@@ -257,10 +272,10 @@ export default function Header() {
               flexShrink: 0,
             }}
           >
-            <div style={{ position: "relative", width: 140, height: 46 }}>
+            <div style={{ position: "relative", width: 154, height: 46 }}>
               <Image
                 src="/images/claspo-logo-tight.png"
-                alt="CLASPO™ - CLICK. PLACE. DONE."
+                alt="CLASPO™ - SMART HOME SOLUTIONS"
                 fill
                 style={{ objectFit: "contain" }}
                 priority
@@ -278,17 +293,17 @@ export default function Header() {
               fontFamily: "var(--font-dm-sans), sans-serif",
               fontSize: "14.5px",
               fontWeight: 600,
-              color: "#111111",
+              color: "#17191C",
             }}
           >
             <Link
               href="/"
               style={{
                 textDecoration: "none",
-                color: "#111111",
+                color: isHome ? "#F36B12" : "#17191C",
                 padding: "8px 0",
                 position: "relative",
-                borderBottom: pathname === "/" ? "2px solid #111111" : "2px solid transparent",
+                borderBottom: isHome ? "2px solid #F36B12" : "2px solid transparent",
                 transition: "border-color 0.2s, color 0.2s",
               }}
             >
@@ -308,9 +323,9 @@ export default function Header() {
                   gap: 5,
                   fontSize: "14.5px",
                   fontWeight: 600,
-                  color: "#111111",
+                  color: isShop ? "#F36B12" : "#17191C",
                   padding: "8px 0",
-                  borderBottom: pathname.startsWith("/shop") ? "2px solid #111111" : "2px solid transparent",
+                  borderBottom: isShop ? "2px solid #F36B12" : "2px solid transparent",
                   fontFamily: "inherit",
                 }}
                 aria-expanded={shopOpen}
@@ -328,13 +343,13 @@ export default function Header() {
                     background: "#FFFFFF",
                     borderRadius: "8px",
                     boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
-                    border: "1px solid #DADADA",
+                    border: "1px solid #E5E5E5",
                     padding: "10px",
                     zIndex: 150,
                   }}
                 >
-                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #DADADA" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#111111", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #E5E5E5" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                       Featured Categories
                     </div>
                   </div>
@@ -352,15 +367,17 @@ export default function Header() {
                           borderRadius: "6px",
                           textDecoration: "none",
                           fontSize: "13.5px",
-                          color: "#111111",
+                          color: "#17191C",
                           fontWeight: 500,
                           transition: "background 0.15s, color 0.15s",
                         }}
                         onMouseEnter={e => {
-                          e.currentTarget.style.background = "#F5F5F5"
+                          e.currentTarget.style.background = "#FFF0E5"
+                          e.currentTarget.style.color = "#F36B12"
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.background = "transparent"
+                          e.currentTarget.style.color = "#17191C"
                         }}
                       >
                         <span>{cat.label}</span>
@@ -370,10 +387,10 @@ export default function Header() {
                               fontSize: "10px",
                               padding: "2px 8px",
                               borderRadius: "4px",
-                              background: cat.tag.includes("→") ? "transparent" : "#F5F5F5",
-                              color: "#111111",
+                              background: cat.tag.includes("→") ? "transparent" : "#FFF0E5",
+                              color: "#F36B12",
                               fontWeight: 700,
-                              border: cat.tag.includes("→") ? "none" : "1px solid #DADADA",
+                              border: cat.tag.includes("→") ? "none" : "1px solid #F36B12",
                             }}
                           >
                             {cat.tag}
@@ -399,9 +416,9 @@ export default function Header() {
                   gap: 5,
                   fontSize: "14.5px",
                   fontWeight: 600,
-                  color: "#111111",
+                  color: isProducts ? "#F36B12" : "#17191C",
                   padding: "8px 0",
-                  borderBottom: pathname.startsWith("/products") ? "2px solid #111111" : "2px solid transparent",
+                  borderBottom: isProducts ? "2px solid #F36B12" : "2px solid transparent",
                   fontFamily: "inherit",
                 }}
                 aria-expanded={productsOpen}
@@ -419,13 +436,13 @@ export default function Header() {
                     background: "#FFFFFF",
                     borderRadius: "8px",
                     boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
-                    border: "1px solid #DADADA",
+                    border: "1px solid #E5E5E5",
                     padding: "10px",
                     zIndex: 150,
                   }}
                 >
-                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #DADADA" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#111111", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #E5E5E5" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                       Home Solutions
                     </div>
                   </div>
@@ -441,21 +458,23 @@ export default function Header() {
                           borderRadius: "6px",
                           textDecoration: "none",
                           fontSize: "13.5px",
-                          color: "#111111",
+                          color: "#17191C",
                           fontWeight: 500,
                           transition: "background 0.15s, color 0.15s",
                         }}
                         onMouseEnter={e => {
-                          e.currentTarget.style.background = "#F5F5F5"
+                          e.currentTarget.style.background = "#FFF0E5"
+                          e.currentTarget.style.color = "#F36B12"
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.background = "transparent"
+                          e.currentTarget.style.color = "#17191C"
                         }}
                       >
                         {prod.label}
                       </Link>
                     ))}
-                    <div style={{ marginTop: 6, borderTop: "1px solid #DADADA", paddingTop: 6 }}>
+                    <div style={{ marginTop: 6, borderTop: "1px solid #E5E5E5", paddingTop: 6 }}>
                       <Link
                         href="/products"
                         onClick={() => setProductsOpen(false)}
@@ -463,7 +482,7 @@ export default function Header() {
                           display: "block",
                           padding: "8px 12px",
                           fontSize: "12.5px",
-                          color: "#111111",
+                          color: "#F36B12",
                           fontWeight: 700,
                           textDecoration: "none",
                         }}
@@ -480,9 +499,9 @@ export default function Header() {
               href="/about"
               style={{
                 textDecoration: "none",
-                color: "#111111",
+                color: isAbout ? "#F36B12" : "#17191C",
                 padding: "8px 0",
-                borderBottom: pathname === "/about" ? "2px solid #111111" : "2px solid transparent",
+                borderBottom: isAbout ? "2px solid #F36B12" : "2px solid transparent",
                 transition: "border-color 0.2s, color 0.2s",
               }}
             >
@@ -493,9 +512,9 @@ export default function Header() {
               href="/contact"
               style={{
                 textDecoration: "none",
-                color: "#111111",
+                color: isContact ? "#F36B12" : "#17191C",
                 padding: "8px 0",
-                borderBottom: pathname === "/contact" ? "2px solid #111111" : "2px solid transparent",
+                borderBottom: isContact ? "2px solid #F36B12" : "2px solid transparent",
                 transition: "border-color 0.2s, color 0.2s",
               }}
             >
@@ -506,9 +525,9 @@ export default function Header() {
               href="/blog"
               style={{
                 textDecoration: "none",
-                color: "#111111",
+                color: isBlog ? "#F36B12" : "#17191C",
                 padding: "8px 0",
-                borderBottom: pathname.startsWith("/blog") ? "2px solid #111111" : "2px solid transparent",
+                borderBottom: isBlog ? "2px solid #F36B12" : "2px solid transparent",
                 transition: "border-color 0.2s, color 0.2s",
               }}
             >
@@ -538,14 +557,14 @@ export default function Header() {
                 style={{
                   padding: "9px 14px 9px 36px",
                   borderRadius: "6px",
-                  border: searchFocused ? "1.5px solid #111111" : "1px solid #DADADA",
+                  border: searchFocused ? "1.5px solid #F36B12" : "1px solid #E5E5E5",
                   background: searchFocused ? "#FFFFFF" : "#F5F5F5",
                   fontSize: "13px",
                   width: searchFocused ? "230px" : "190px",
                   outline: "none",
                   transition: "all 0.2s ease",
                   fontFamily: "inherit",
-                  color: "#111111",
+                  color: "#17191C",
                 }}
               />
               <button
@@ -556,7 +575,7 @@ export default function Header() {
                   left: "11px",
                   background: "none",
                   border: "none",
-                  color: searchFocused ? "#111111" : "#777777",
+                  color: searchFocused ? "#F36B12" : "#747474",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -579,19 +598,21 @@ export default function Header() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#111111",
+                color: "#17191C",
                 background: "#F5F5F5",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 textDecoration: "none",
                 transition: "all 0.2s",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = "#FFFFFF"
-                e.currentTarget.style.borderColor = "#111111"
+                e.currentTarget.style.background = "#FFF0E5"
+                e.currentTarget.style.color = "#F36B12"
+                e.currentTarget.style.borderColor = "#F36B12"
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.background = "#F5F5F5"
-                e.currentTarget.style.borderColor = "#DADADA"
+                e.currentTarget.style.color = "#17191C"
+                e.currentTarget.style.borderColor = "#E5E5E5"
               }}
             >
               <IcoUser />
@@ -610,19 +631,21 @@ export default function Header() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#111111",
+                color: "#17191C",
                 background: "#F5F5F5",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 textDecoration: "none",
                 transition: "all 0.2s",
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = "#FFFFFF"
-                e.currentTarget.style.borderColor = "#111111"
+                e.currentTarget.style.background = "#FFF0E5"
+                e.currentTarget.style.color = "#F36B12"
+                e.currentTarget.style.borderColor = "#F36B12"
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.background = "#F5F5F5"
-                e.currentTarget.style.borderColor = "#DADADA"
+                e.currentTarget.style.color = "#17191C"
+                e.currentTarget.style.borderColor = "#E5E5E5"
               }}
             >
               <IcoHeart />
@@ -632,7 +655,7 @@ export default function Header() {
                     position: "absolute",
                     top: -4,
                     right: -4,
-                    background: "#111111",
+                    background: "#F36B12",
                     color: "#FFFFFF",
                     fontSize: "10.5px",
                     fontWeight: 800,
@@ -643,6 +666,7 @@ export default function Header() {
                     alignItems: "center",
                     justifyContent: "center",
                     padding: "0 4px",
+                    boxShadow: "0 2px 6px rgba(243, 107, 18, 0.4)",
                   }}
                 >
                   {wishlistCount}
@@ -663,26 +687,29 @@ export default function Header() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: totalItems > 0 ? "#FFFFFF" : "#111111",
-                background: totalItems > 0 ? "#111111" : "#F5F5F5",
-                border: totalItems > 0 ? "1px solid #111111" : "1px solid #DADADA",
+                color: totalItems > 0 ? "#FFFFFF" : "#17191C",
+                background: totalItems > 0 ? "#F36B12" : "#F5F5F5",
+                border: totalItems > 0 ? "1px solid #F36B12" : "1px solid #E5E5E5",
                 textDecoration: "none",
                 transition: "all 0.2s",
+                boxShadow: totalItems > 0 ? "0 4px 12px rgba(243, 107, 18, 0.3)" : "none",
               }}
               onMouseEnter={e => {
                 if (totalItems === 0) {
-                  e.currentTarget.style.background = "#FFFFFF"
-                  e.currentTarget.style.borderColor = "#111111"
+                  e.currentTarget.style.background = "#FFF0E5"
+                  e.currentTarget.style.color = "#F36B12"
+                  e.currentTarget.style.borderColor = "#F36B12"
                 } else {
-                  e.currentTarget.style.background = "#303638"
+                  e.currentTarget.style.background = "#D9570A"
                 }
               }}
               onMouseLeave={e => {
                 if (totalItems === 0) {
                   e.currentTarget.style.background = "#F5F5F5"
-                  e.currentTarget.style.borderColor = "#DADADA"
+                  e.currentTarget.style.color = "#17191C"
+                  e.currentTarget.style.borderColor = "#E5E5E5"
                 } else {
-                  e.currentTarget.style.background = "#111111"
+                  e.currentTarget.style.background = "#F36B12"
                 }
               }}
             >
@@ -719,7 +746,7 @@ export default function Header() {
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               style={{
                 background: "#F5F5F5",
-                border: "1px solid #DADADA",
+                border: "1px solid #E5E5E5",
                 width: 40,
                 height: 40,
                 borderRadius: "6px",
@@ -727,7 +754,7 @@ export default function Header() {
                 display: "none",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#111111",
+                color: "#17191C",
               }}
             >
               <IcoBurger open={menuOpen} />
@@ -765,18 +792,18 @@ export default function Header() {
               onClick={e => e.stopPropagation()}
             >
               {/* Header inside drawer */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #DADADA" }}>
-                <div style={{ position: "relative", width: 125, height: 42 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #E5E5E5" }}>
+                <div style={{ position: "relative", width: 140, height: 42 }}>
                   <Image
                     src="/images/claspo-logo-tight.png"
-                    alt="CLASPO™ - CLICK. PLACE. DONE."
+                    alt="CLASPO™ - SMART HOME SOLUTIONS"
                     fill
                     style={{ objectFit: "contain" }}
                   />
                 </div>
                 <button
                   onClick={() => setMenuOpen(false)}
-                  style={{ background: "#F5F5F5", border: "1px solid #DADADA", width: 32, height: 32, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  style={{ background: "#F5F5F5", border: "1px solid #E5E5E5", width: 32, height: 32, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
                   ✕
                 </button>
@@ -794,13 +821,14 @@ export default function Header() {
                       width: "100%",
                       padding: "10px 14px 10px 36px",
                       borderRadius: "6px",
-                      border: "1px solid #DADADA",
+                      border: "1px solid #E5E5E5",
                       background: "#F5F5F5",
                       fontSize: "13.5px",
-                      color: "#111111",
+                      color: "#17191C",
+                      outline: "none",
                     }}
                   />
-                  <span style={{ position: "absolute", left: 12, top: 11, color: "#777777" }}>
+                  <span style={{ position: "absolute", left: 12, top: 11, color: "#747474" }}>
                     <IcoSearch />
                   </span>
                 </div>
@@ -808,18 +836,18 @@ export default function Header() {
 
               {/* Mobile links */}
               <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                <Link href="/" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Home</Link>
-                <Link href="/shop" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Shop Catalog</Link>
-                <Link href="/products" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Products & Categories</Link>
-                <Link href="/about" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
-                <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
-                <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
-                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#111111", fontWeight: 700, fontSize: "15px" }}>Track Your Order</Link>
+                <Link href="/" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isHome ? "#F36B12" : "#17191C", background: isHome ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Home</Link>
+                <Link href="/shop" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isShop ? "#F36B12" : "#17191C", background: isShop ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Shop Catalog</Link>
+                <Link href="/products" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isProducts ? "#F36B12" : "#17191C", background: isProducts ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Products & Categories</Link>
+                <Link href="/about" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
+                <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
+                <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
+                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#F36B12", fontWeight: 700, fontSize: "15px" }}>Track Your Order</Link>
               </nav>
 
               {/* Mobile Footer in drawer */}
-              <div style={{ paddingTop: 20, borderTop: "1px solid #DADADA", fontSize: "12px", color: "#777777" }}>
-                <div>Email: <a href="mailto:info@claspo.store" style={{ color: "#111111", fontWeight: 600 }}>info@claspo.store</a></div>
+              <div style={{ paddingTop: 20, borderTop: "1px solid #E5E5E5", fontSize: "12px", color: "#747474" }}>
+                <div>Email: <a href="mailto:info@claspo.store" style={{ color: "#F36B12", fontWeight: 600 }}>info@claspo.store</a></div>
                 <div style={{ marginTop: 6 }}>Address: 306, Radhe Kishan Arista, Maninagar, Ahmedabad</div>
               </div>
             </div>
