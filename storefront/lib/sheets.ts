@@ -125,29 +125,37 @@ export interface Inquiry {
 // Both generateMetadata and the page component call getProductByHandle →
 // getProducts(); without this, each triggers a full Sheets API round-trip.
 export const getProducts = cache(withTTL(async (): Promise<Product[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
+  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+    return []
+  }
+  try {
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
 
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Products!A2:H",
-  })
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Products!A2:H",
+    })
 
-  const rows = res.data.values ?? []
-  return rows
-    .map((r, i) => ({
-      rowIndex: i + 2,
-      id: String(i + 1),
-      name: r[0] ?? "",
-      category: r[1] ?? "",
-      description: r[2] ?? "",
-      imageUrl: r[3] ?? "",
-      price: Number(r[4]) || 0,
-      handle: r[5] ?? slugify(r[0] ?? ""),
-      inStock: (r[6] ?? "true").toLowerCase() !== "false",
-      partNumber: r[7] ?? "",
-    }))
-    .filter((p) => p.name !== "") // skip empty rows
+    const rows = res.data.values ?? []
+    return rows
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        id: String(i + 1),
+        name: r[0] ?? "",
+        category: r[1] ?? "",
+        description: r[2] ?? "",
+        imageUrl: r[3] ?? "",
+        price: Number(r[4]) || 0,
+        handle: r[5] ?? slugify(r[0] ?? ""),
+        inStock: (r[6] ?? "true").toLowerCase() !== "false",
+        partNumber: r[7] ?? "",
+      }))
+      .filter((p) => p.name !== "") // skip empty rows
+  } catch (err) {
+    console.warn("Failed to fetch products from Google Sheets:", err)
+    return []
+  }
 }))
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
@@ -223,29 +231,37 @@ export const getOrderByPaymentId = withTTL(async (paymentId: string): Promise<Or
 // cache() ensures generateStaticParams, generateMetadata, and the page body
 // all share the same Sheets API result within a single render cycle.
 export const getBlogs = cache(withTTL(async (publishedOnly = false): Promise<Blog[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
+  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+    return []
+  }
+  try {
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
 
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Blogs!A2:H",
-  })
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Blogs!A2:H",
+    })
 
-  const rows = res.data.values ?? []
-  return rows
-    .map((r, i) => ({
-      rowIndex: i + 2,
-      title: r[0] ?? "",
-      keywords: r[1] ?? "",
-      slug: r[2] ?? slugify(r[0] ?? ""),
-      publishDate: r[3] ?? "",
-      content: r[4] ?? "",
-      metaDescription: r[5] ?? "",
-      imageUrl: r[6] ?? "",
-      published: (r[7] ?? "true").toLowerCase() !== "false",
-    }))
-    .filter((b) => b.title !== "")
-    .filter((b) => !publishedOnly || b.published)
+    const rows = res.data.values ?? []
+    return rows
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        title: r[0] ?? "",
+        keywords: r[1] ?? "",
+        slug: r[2] ?? slugify(r[0] ?? ""),
+        publishDate: r[3] ?? "",
+        content: r[4] ?? "",
+        metaDescription: r[5] ?? "",
+        imageUrl: r[6] ?? "",
+        published: (r[7] ?? "true").toLowerCase() !== "false",
+      }))
+      .filter((b) => b.title !== "")
+      .filter((b) => !publishedOnly || b.published)
+  } catch (err) {
+    console.warn("Failed to fetch blogs from Google Sheets:", err)
+    return []
+  }
 }))
 
 export async function getBlogBySlug(slug: string): Promise<Blog | null> {

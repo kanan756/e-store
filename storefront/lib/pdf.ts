@@ -50,16 +50,13 @@ export async function generateInvoicePdf({
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, 50, 40, { fit: [140, 70] });
       } else {
-        doc.fillColor(PRIMARY_COLOR).font("Helvetica-Bold").fontSize(24).text("Superior Harness", 50, 50);
+        doc.fillColor(PRIMARY_COLOR).font("Helvetica-Bold").fontSize(24).text("CLASPO", 50, 50);
       }
 
-      doc.fillColor(TEXT_MAIN).font("Helvetica-Bold").fontSize(12).text("Superior Harness & Assembly", 300, 50, { align: "right", width: 245 });
+      doc.fillColor(TEXT_MAIN).font("Helvetica-Bold").fontSize(12).text("CLASPO", 300, 50, { align: "right", width: 245 });
       doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10)
-        // Old: .text("Canton, Michigan 48187", { align: "right", width: 245 })
         .text("3179 Black Gap Rd, Chambersburg, PA 17202", { align: "right", width: 245 })
-        // Old: .text("pateltushar1987@gmail.com", { align: "right", width: 245 })
-        .text("info@superiorharness.com", { align: "right", width: 245 })
-        // Old: .text("+91 7348910249", { align: "right", width: 245 })
+        .text("info@claspo.store", { align: "right", width: 245 })
         .text("+1 734 891 0248", { align: "right", width: 245 });
 
       doc.moveDown(3);
@@ -168,7 +165,7 @@ export async function generateInvoicePdf({
       // ── Footer ──────────────────────────────────────────────────────────────
       const footerY = doc.page.height - 80;
       doc.moveTo(50, footerY - 20).lineTo(545, footerY - 20).lineWidth(1).strokeColor("#E0E0E0").stroke();
-      doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10).text("Thank you for choosing Superior Harness & Assembly.", 50, footerY, { align: "center", width: 495 });
+      doc.fillColor(TEXT_MUTED).font("Helvetica").fontSize(10).text("Thank you for choosing CLASPO.", 50, footerY, { align: "center", width: 495 });
       doc.fillColor(SECONDARY_COLOR).text("If you have any questions about this invoice, please contact us.", 50, footerY + 15, { align: "center", width: 495 });
 
       doc.end();

@@ -155,7 +155,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               {/* Pricing + CTA */}
               <div className="pd-overview-info">
                 <p className="Bd" style={{ marginBottom: 28, color: "var(--text2)" }}>
-                  {product.description || "Superior Harness & Assembly is an ISO certified manufacturer of a wide range of custom products. Known for enduring quality, enhanced structure, and built to exact specifications."}
+                  {product.description || "CLASPO is an ISO certified manufacturer of a wide range of custom products. Known for enduring quality, enhanced structure, and built to exact specifications."}
                 </p>
 
                 <div className="pd-price">

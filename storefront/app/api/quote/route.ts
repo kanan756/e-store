@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
     })
 
-    const fromName = process.env.EMAIL_FROM_NAME ?? "Superior Harnessing"
+    const fromName = process.env.EMAIL_FROM_NAME ?? "CLASPO"
 
     const adminEmailHtml = `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#131310;color:#e5e2db;padding:32px;border:1px solid #2a2a24;border-radius:16px;">

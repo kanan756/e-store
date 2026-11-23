@@ -3,7 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 export const metadata: Metadata = {
-  title: "Industrial & Factory Wire Harnesses | Superior Harness & Assembly",
+  title: "Industrial & Factory Wire Harnesses | CLASPO",
   description: "Custom wire harnesses and cable assemblies for industrial machinery, factory automation, control panels, and heavy equipment. Oil-resistant and ruggedized.",
 }
 

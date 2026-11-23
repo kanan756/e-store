@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for Superior Harness & Assembly.",
+  description: "Terms of Service for CLASPO.",
 }
 
 export default function TermsPage() {
@@ -16,14 +16,14 @@ export default function TermsPage() {
           <section>
             <h2 style={{ fontSize: 20, marginBottom: 12 }}>1. Agreement to Terms</h2>
             <p style={{ color: "var(--text2)" }}>
-              By accessing this website, we assume you accept these terms and conditions. Do not continue to use Superior Harness & Assembly if you do not agree to take all of the terms and conditions stated on this page.
+              By accessing this website, we assume you accept these terms and conditions. Do not continue to use CLASPO if you do not agree to take all of the terms and conditions stated on this page.
             </p>
           </section>
 
           <section>
             <h2 style={{ fontSize: 20, marginBottom: 12 }}>2. Intellectual Property Rights</h2>
             <p style={{ color: "var(--text2)" }}>
-              Other than the content you own, under these Terms, Superior Harness & Assembly and/or its licensors own all the intellectual property rights and materials contained in this Website. You are granted limited license only for purposes of viewing the material contained on this Website.
+              Other than the content you own, under these Terms, CLASPO and/or its licensors own all the intellectual property rights and materials contained in this Website. You are granted limited license only for purposes of viewing the material contained on this Website.
             </p>
           </section>
 
@@ -43,7 +43,7 @@ export default function TermsPage() {
           <section>
             <h2 style={{ fontSize: 20, marginBottom: 12 }}>4. Limitation of Liability</h2>
             <p style={{ color: "var(--text2)" }}>
-              In no event shall Superior Harness & Assembly, nor any of its officers, directors and employees, shall be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract. Superior Harness & Assembly, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
+              In no event shall CLASPO, nor any of its officers, directors and employees, shall be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract. CLASPO, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
             </p>
           </section>
 

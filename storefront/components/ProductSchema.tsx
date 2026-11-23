@@ -11,8 +11,7 @@ export function ProductSchema({ product }: { product: Product }) {
     image: product.imageUrl ?? "",
     brand: {
       "@type": "Brand",
-      // Fixed: was hardcoded "Client Store" (template placeholder)
-      name: "Superior Harness & Assembly",
+      name: "CLASPO",
     },
     offers: {
       "@type": "Offer",

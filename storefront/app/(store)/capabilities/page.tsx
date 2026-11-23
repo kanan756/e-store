@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Capabilities | Custom Wire Harness Manufacturing",
   description:
-    "Explore Superior Harness & Assembly's full manufacturing capabilities: cut & strip, crimping, ultrasonic splicing, overmolding, in-house testing, and JIT delivery.",
+    "Explore CLASPO's full manufacturing capabilities: cut & strip, crimping, ultrasonic splicing, overmolding, in-house testing, and JIT delivery.",
 }
 
 const CAPS = [

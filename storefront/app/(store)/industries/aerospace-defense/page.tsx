@@ -3,7 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 export const metadata: Metadata = {
-  title: "Aerospace & Defense Wire Harnesses | Superior Harness & Assembly",
+  title: "Aerospace & Defense Wire Harnesses | CLASPO",
   description: "MIL-SPEC wire harnesses and cable assemblies for aerospace, aviation, and defense applications. ITAR registered, shielded, and hermetically sealed configurations.",
 }
 

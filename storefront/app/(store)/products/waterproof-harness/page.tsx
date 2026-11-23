@@ -5,7 +5,7 @@ import FAQAccordion from "@/components/FAQAccordion"
 import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
-  title: "Waterproof Wire Harness | Superior Harness & Assembly",
+  title: "Waterproof Wire Harness | CLASPO",
   description: "IP67/IP68-rated sealed wire harnesses. Peripheral seals, wire-level seals, overmolded strain relief. 100% hipot tested.",
 }
 
@@ -182,7 +182,7 @@ export default function WaterproofHarnessPage() {
           <div className="pp-quote__card">
             <div className="pp-quote__label">Engineering Note</div>
             <p className="pp-quote__text">&ldquo;The IP digit is the easy part. What kills field reliability is the wrong cable-seal size on a Deutsch DT — the connector passes the lab, but fails at month nine when the jacket shrinks in a Michigan winter. We size every seal against the measured jacket OD, not the spec sheet nominal. That is why our sealed harnesses come back for reorder, not warranty claims.&rdquo;</p>
-            <div className="pp-quote__attr"><div className="pp-quote__avatar">SHA</div><div><div className="pp-quote__name">Engineering Team</div><div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div></div></div>
+            <div className="pp-quote__attr"><div className="pp-quote__avatar">CLASPO</div><div><div className="pp-quote__name">Engineering Team</div><div className="pp-quote__role">CLASPO</div></div></div>
           </div>
         </div>
       </section>

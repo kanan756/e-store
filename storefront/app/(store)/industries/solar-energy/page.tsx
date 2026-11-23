@@ -3,7 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 export const metadata: Metadata = {
-  title: "Solar & Energy Cable Assemblies | Superior Harness & Assembly",
+  title: "Solar & Energy Cable Assemblies | CLASPO",
   description: "Solar panel cable assemblies, inverter wiring, and BMS harnesses for residential, commercial, and utility-scale solar installations. MC4 and custom connectors.",
 }
 

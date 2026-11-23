@@ -3,7 +3,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 export const metadata: Metadata = {
-  title: "Medical Device Cable Assemblies | Superior Harness & Assembly",
+  title: "Medical Device Cable Assemblies | CLASPO",
   description: "Life-critical wire harnesses and cable assemblies for medical device manufacturers. IEC 60601, ISO 13485, biocompatible materials, and full traceability.",
 }
 

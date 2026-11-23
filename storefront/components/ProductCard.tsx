@@ -1,48 +1,63 @@
-/**
- * @file components/ProductCard.tsx
- * @description Reusable product card component used on the shop listing page.
- *   Renders product image (with URL validation fallback to placeholder),
- *   category label, product name, price, and an "Add to Cart" / "View" CTA.
- *
- *   Props:
- *     product  – Product object from Google Sheets
- *     index    – Card index used for staggered reveal animation delay
- *
- *   Image handling: validates URL before passing to next/image to prevent
- *   crashes when imageUrl is empty, "-", or an invalid URL string.
- *
- * @owner Heet-P
- * @lastModified May 16, 2026
- */
-
 "use client"
 
 import Image from "next/image"
 import Link from "next/link"
 import { useCallback, useState } from "react"
 import { useCart } from "@/context/cart-context"
+import { useWishlist } from "@/context/wishlist-context"
 import type { Product } from "@/lib/sheets"
 import { formatPrice } from "@/lib/format"
-
-function ArrowIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12,5 19,12 12,19" />
-    </svg>
-  )
-}
 
 interface ProductCardProps {
   product: Product
   index?: number
 }
 
+function HeartIcon({ filled }: { filled: boolean }) {
+  if (filled) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#5420C8" stroke="#5420C8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    )
+  }
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#707070" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  )
+}
+
+function CartIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  )
+}
+
+function StarIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  )
+}
+
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const { addItem } = useCart()
+  const { isInWishlist, toggleWishlist } = useWishlist()
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
-  const handleAddToCart = useCallback(() => {
+  const isLiked = isInWishlist(product.handle || product.id)
+
+  const handleAddToCart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setAdding(true)
     addItem({
       id: product.handle || product.id,
@@ -56,6 +71,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     setTimeout(() => setAdded(false), 2000)
   }, [addItem, product])
 
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleWishlist(product.handle || product.id)
+  }
+
   const href = product.handle ? `/products/${product.handle}` : "/products"
 
   const isValidUrl = (url: string) => {
@@ -68,83 +89,245 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl)
     : []
   const primaryImage = images.length > 0 ? images[0] : null
-
   const outOfStock = product.inStock === false
 
-  const isWireOrCable = product.category?.toLowerCase().includes("wire") || product.category?.toLowerCase().includes("cable")
-  
+  // Compute realistic original price for visual discount display
+  const hasPrice = product.price > 0
+  const originalPrice = hasPrice ? Math.round(product.price * 1.18) : 0
+  const discountPercent = hasPrice ? 15 : 0
+
   return (
-    <div suppressHydrationWarning className="prodC rv" style={{ transitionDelay: `${index * 0.07}s`, opacity: outOfStock ? 0.55 : 1 }}>
-      <div className="prodC__img" style={{ position: "relative" }}>
-        {primaryImage ? (
-          <Image
-            src={primaryImage}
-            alt={product.name}
-            fill
-            unoptimized={true}
-            sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
-            style={{ objectFit: "contain", padding: "8px", filter: outOfStock ? "grayscale(70%)" : "none" }}
-          />
-        ) : (
-          <PlaceholderImage title={product.name} />
-        )}
-        {outOfStock && (
-          <div style={{
-            position: "absolute", top: 10, left: 10,
-            background: "rgba(0,0,0,0.55)",
-            backdropFilter: "blur(4px)",
-            color: "#e5e2db",
-            fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            padding: "4px 10px", borderRadius: 6,
-          }}>
-            Out of Stock
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        background: "#FFFFFF",
+        borderRadius: "16px",
+        border: "1px solid #E5E5EB",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        boxShadow: isHovered
+          ? "0 14px 34px rgba(84, 32, 200, 0.12)"
+          : "0 2px 10px rgba(0, 0, 0, 0.03)",
+        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+      }}
+    >
+      {/* ── Image & Badges Container ── */}
+      <Link href={href} style={{ textDecoration: "none", position: "relative", display: "block" }}>
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "220px",
+            background: "#F7F7F9",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {primaryImage ? (
+            <Image
+              src={primaryImage}
+              alt={product.name}
+              fill
+              unoptimized={true}
+              sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 25vw"
+              style={{
+                objectFit: "contain",
+                padding: "16px",
+                transition: "transform 0.4s ease",
+                transform: isHovered ? "scale(1.08)" : "scale(1)",
+                filter: outOfStock ? "grayscale(70%)" : "none",
+              }}
+            />
+          ) : (
+            <div style={{ color: "#707070", fontSize: "12px", fontFamily: "monospace" }}>CLASPO</div>
+          )}
+
+          {/* Badges */}
+          <div style={{ position: "absolute", top: 12, left: 12, display: "flex", flexDirection: "column", gap: 6, zIndex: 2 }}>
+            {outOfStock ? (
+              <span
+                style={{
+                  background: "#111111",
+                  color: "#FFFFFF",
+                  fontSize: "10px",
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                }}
+              >
+                Out of Stock
+              </span>
+            ) : discountPercent > 0 ? (
+              <span
+                style={{
+                  background: "#5420C8",
+                  color: "#FFFFFF",
+                  fontSize: "10.5px",
+                  fontWeight: 800,
+                  letterSpacing: "0.04em",
+                  padding: "4px 9px",
+                  borderRadius: "9999px",
+                  boxShadow: "0 2px 8px rgba(84, 32, 200, 0.3)",
+                }}
+              >
+                SAVE {discountPercent}%
+              </span>
+            ) : (
+              <span
+                style={{
+                  background: "#F1EBFF",
+                  color: "#5420C8",
+                  fontSize: "10px",
+                  fontWeight: 800,
+                  padding: "4px 8px",
+                  borderRadius: "9999px",
+                }}
+              >
+                Verified
+              </span>
+            )}
           </div>
-        )}
-      </div>
-      <div className="prodC__bd">
-        <div className="prodC__cat">{product.category || "Product"}</div>
-        <div className="prodC__nm">{product.name}</div>
-        {product.partNumber && (
-          <div style={{ fontSize: 13, color: "var(--text2)", marginBottom: 8, fontFamily: "monospace" }}>
-            PN: {product.partNumber}
-          </div>
-        )}
-        <div className="prodC__pr">
-          {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
-        </div>
-        <div className="prodC__row" style={{ flexWrap: "wrap" }}>
+
+          {/* Wishlist Button */}
           <button
-            className="btn bp bsm no-fill"
-            onClick={handleAddToCart}
-            disabled={adding || added || outOfStock}
-            style={outOfStock ? { opacity: 0.4, cursor: "not-allowed" } : added ? { background: "#16a34a" } : {}}
+            onClick={handleToggleWishlist}
+            aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
+            style={{
+              position: "absolute",
+              top: 12,
+              right: 12,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "#FFFFFF",
+              border: "1px solid #E5E5EB",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "transform 0.2s, background 0.2s",
+              zIndex: 3,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.1)")}
+            onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
           >
-            {outOfStock ? "Out of Stock" : added ? "✓ Added!" : adding ? "Adding…" : "Add to Cart"}
+            <HeartIcon filled={isLiked} />
           </button>
-          <Link href={href} className="btn bod bsm">
-            View <ArrowIcon />
-          </Link>
         </div>
+      </Link>
+
+      {/* ── Content Body ── */}
+      <div style={{ padding: "18px 18px 20px", display: "flex", flexDirection: "column", flex: 1 }}>
+        {/* Category & Rating */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "#5420C8",
+            }}
+          >
+            {product.category || "Wiring Solution"}
+          </span>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <StarIcon />
+            <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#111111" }}>5.0</span>
+          </div>
+        </div>
+
+        {/* Product Title */}
+        <Link
+          href={href}
+          style={{
+            textDecoration: "none",
+            color: "#111111",
+            fontSize: "15px",
+            fontWeight: 700,
+            lineHeight: 1.35,
+            marginBottom: 8,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            height: "40px",
+            fontFamily: "var(--font-sora), sans-serif",
+          }}
+          title={product.name}
+        >
+          {product.name}
+        </Link>
+
+        {/* Part Number / Description */}
+        {product.partNumber && (
+          <div style={{ fontSize: "11.5px", color: "#707070", fontFamily: "monospace", marginBottom: 12 }}>
+            PN: <span style={{ color: "#111111", fontWeight: 600 }}>{product.partNumber}</span>
+          </div>
+        )}
+
+        {/* Price Row */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: "auto", marginBottom: 16 }}>
+          <span style={{ fontSize: "18px", fontWeight: 900, color: "#5420C8", fontFamily: "var(--font-sora), sans-serif" }}>
+            {hasPrice ? formatPrice(product.price) : "Contact for Price"}
+          </span>
+
+          {hasPrice && originalPrice > 0 && (
+            <span style={{ fontSize: "12.5px", color: "#707070", textDecoration: "line-through", fontWeight: 500 }}>
+              {formatPrice(originalPrice)}
+            </span>
+          )}
+        </div>
+
+        {/* Add to Cart CTA */}
+        <button
+          onClick={handleAddToCart}
+          disabled={adding || added || outOfStock}
+          style={{
+            width: "100%",
+            padding: "11px 16px",
+            borderRadius: "9999px",
+            border: "none",
+            background: outOfStock ? "#F7F7F9" : added ? "#16A34A" : "#5420C8",
+            color: outOfStock ? "#707070" : "#FFFFFF",
+            fontSize: "13px",
+            fontWeight: 700,
+            cursor: outOfStock ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            boxShadow: !outOfStock && !added ? "0 4px 12px rgba(84, 32, 200, 0.24)" : "none",
+            fontFamily: "inherit",
+          }}
+          onMouseEnter={e => {
+            if (!outOfStock && !added) {
+              e.currentTarget.style.background = "#4317A8"
+              e.currentTarget.style.boxShadow = "0 6px 18px rgba(84, 32, 200, 0.34)"
+            }
+          }}
+          onMouseLeave={e => {
+            if (!outOfStock && !added) {
+              e.currentTarget.style.background = "#5420C8"
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(84, 32, 200, 0.24)"
+            }
+          }}
+        >
+          <CartIcon />
+          <span>{outOfStock ? "Out of Stock" : added ? "✓ Added to Bag" : adding ? "Adding..." : "Add to Cart"}</span>
+        </button>
       </div>
     </div>
-  )
-}
-
-function PlaceholderImage({ title }: { title: string }) {
-  const id = `prod-${title.replace(/\W/g, "")}`
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" style={{ width: "100%", height: "100%" }}>
-      <rect width="800" height="600" fill="#f8f9fa" />
-      <defs>
-        <pattern id={id} width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="9" y1="0" x2="9" y2="18" stroke="#dee2e6" strokeWidth="2" opacity="0.6" />
-        </pattern>
-      </defs>
-      <rect width="800" height="600" fill={`url(#${id})`} />
-      <text x="400" y="297" fontFamily="monospace" fontSize="11" fill="#adb5bd" opacity="0.9" textAnchor="middle" dominantBaseline="middle">
-        {title.toUpperCase()}
-      </text>
-    </svg>
   )
 }

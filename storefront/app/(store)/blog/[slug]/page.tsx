@@ -73,12 +73,12 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     url: `${BASE}/blog/${blog.slug}`,
     author: {
       "@type": "Organization",
-      name: "Superior Harness & Assembly",
+      name: "CLASPO",
       url: BASE,
     },
     publisher: {
       "@type": "Organization",
-      name: "Superior Harness & Assembly",
+      name: "CLASPO",
       url: BASE,
     },
   }

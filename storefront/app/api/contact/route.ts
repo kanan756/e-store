@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
     })
 
-    const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+    const fromName = process.env.EMAIL_FROM_NAME ?? "CLASPO"
 
     await transporter.sendMail({
       from: `"${fromName} Contact" <${process.env.GMAIL_USER}>`,
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
           <div style="margin-top:20px;padding:16px;background:#1c1c18;border-radius:10px;line-height:1.7;border:1px solid #2a2a24;">
             ${eMessage}
           </div>
-          <p style="margin-top:16px;font-size:12px;color:#737874;">Submitted via Contact Form — SHA Store</p>
+          <p style="margin-top:16px;font-size:12px;color:#737874;">Submitted via Contact Form — CLASPO</p>
         </div>
       `,
     })

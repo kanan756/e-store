@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="info@superiorharness.com"
+                placeholder="info@claspo.store"
                 required
                 style={{
                   width: "100%", boxSizing: "border-box", padding: "12px 14px",

@@ -20,7 +20,7 @@ import { z } from "zod"
 import { generateInvoiceToken } from "@/lib/invoice-token"
 import { stripEmoji } from "@/lib/sanitize"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
   apiVersion: "2025-01-27.acacia" as any,
 })
 
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Superior Harness & Assembly Order",
+              name: "CLASPO Order",
               description: productSummary,
             },
             unit_amount: Math.round(serverAmount * 100),

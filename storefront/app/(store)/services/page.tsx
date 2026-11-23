@@ -4,7 +4,7 @@ import Link from "next/link"
 export const metadata: Metadata = {
   title: "Services | Wire Harness & Cable Assembly Services",
   description:
-    "Superior Harness & Assembly offers end-to-end contract manufacturing services: engineering support, prototype, production, testing, and supply chain management.",
+    "CLASPO offers end-to-end contract manufacturing services: engineering support, prototype, production, testing, and supply chain management.",
 }
 
 const SERVICES = [

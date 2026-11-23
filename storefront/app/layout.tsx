@@ -30,8 +30,8 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Superior Harness & Assembly | Custom Cable Assembly Manufacturer",
-    template: "%s | Superior Harness & Assembly",
+    default: "CLASPO | Custom Cable Assembly Manufacturer",
+    template: "%s | CLASPO",
   },
   description:
     "Custom wire harness and cable assembly manufacturer providing engineered wiring solutions for OEMs, medical devices, robotics, EV applications, and more.",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "Superior Harness & Assembly",
+    siteName: "CLASPO",
   },
   twitter: {
     card: "summary_large_image",

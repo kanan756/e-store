@@ -1224,7 +1224,7 @@ export default function AdminDashboard({ role }: { role: string }) {
             </div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em", textTransform: "capitalize" }}>{role} Panel</div>
-              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2, fontFamily: "monospace" }}>SHA · Management</div>
+              <div style={{ fontSize: 11, color: "var(--text2)", marginTop: 2, fontFamily: "monospace" }}>CLASPO · Management</div>
             </div>
           </div>
         </div>

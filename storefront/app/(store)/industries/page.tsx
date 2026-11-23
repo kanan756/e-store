@@ -5,7 +5,7 @@ import Image from "next/image"
 export const metadata: Metadata = {
   title: "Industries Served | Wire Harness & Cable Assembly Manufacturing",
   description:
-    "Superior Harness & Assembly manufactures precision wire harnesses and cable assemblies for automotive, medical, aerospace, EV, robotics, solar, telecom, construction, agricultural, and more.",
+    "CLASPO manufactures precision wire harnesses and cable assemblies for automotive, medical, aerospace, EV, robotics, solar, telecom, construction, agricultural, and more.",
 }
 
 const INDUSTRIES = [

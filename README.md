@@ -1,6 +1,6 @@
-# Superior Harness & Assembly (SHA) — Custom Wire Harness & Cable Assembly Store
+# CLASPO — Custom Wire Harness & Cable Assembly Store
 
-Welcome to the **Superior Harness & Assembly (SHA) Store** project! This is a full-stack, modern eCommerce storefront and administrative dashboard built with **Next.js 16 (App Router)**, tailored specifically for B2B electronics manufacturing (Wire Harnessing, Cable Assembly, PCB Assembly, Coil Cables, EV Connectors, etc.).
+Welcome to the **CLASPO Store** project! This is a full-stack, modern eCommerce storefront and administrative dashboard built with **Next.js 16 (App Router)**, tailored specifically for B2B electronics manufacturing (Wire Harnessing, Cable Assembly, PCB Assembly, Coil Cables, EV Connectors, etc.).
 
 The project uses **Google Sheets as a lightweight, accessible database** for products, orders, inquiries, quotes, and blog posts — making it incredibly easy for non-technical users to manage content without any separate CMS or backend server.
 
@@ -136,7 +136,7 @@ Fill in all keys in `storefront/.env.local`:
 | `ADMIN_PASSWORD` | Password for the admin panel | Choose a strong password |
 | `GMAIL_USER` | Gmail address that sends emails | Your Gmail address |
 | `GMAIL_APP_PASSWORD` | App password for Gmail | **Google → Security → App passwords** |
-| `EMAIL_FROM_NAME` | Friendly sender name shown in emails | Anything you like (e.g. "Superior Harness") |
+| `EMAIL_FROM_NAME` | Friendly sender name shown in emails | Sender name (e.g. "CLASPO") |
 | `GOOGLE_SHEET_ID` | ID of the Google Sheet database | Open sheet → URL → part after `/d/` and before `/edit` |
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | Service-account email for Sheets API | **Google Cloud → IAM → Service Accounts** |
 | `GOOGLE_PRIVATE_KEY` | Private key of the service account | Download JSON from service account → copy `private_key` |

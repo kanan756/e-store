@@ -5,7 +5,7 @@ import FAQAccordion from "@/components/FAQAccordion"
 import ProductPageTabs from "@/components/ProductPageTabs"
 
 export const metadata: Metadata = {
-  title: "Custom Wire Harness | Superior Harness & Assembly",
+  title: "Custom Wire Harness | CLASPO",
   description: "Build-to-print custom wire harnesses from 28 AWG through 2/0 AWG. IPC/WHMA-A-620 production. 100% continuity tested.",
 }
 
@@ -51,7 +51,7 @@ const FAQS = [
   { q: "What wire gauges do you run?", a: "We run 28 AWG through 2/0 AWG. Our automated cut-and-strip equipment handles gauges from 28–12 AWG with repeatable accuracy. Larger gauges are cut and stripped manually to the same standard. UL 1015, UL 1283, XLPE, silicone, and Teflon insulation are all available." },
   { q: "What is the minimum order quantity?", a: "One unit for prototypes and NPI programs. Production orders have no volume minimum — we run short-run, medium-run, and high-volume programs on the same line with the same quality process. Pricing reflects volume." },
   { q: "What connector brands do you stock?", a: "We maintain active stock of Molex, TE Connectivity, Amphenol, JST, Deutsch DT/DTM, and Sumitomo series. Custom connector types can be sourced — typically 3–5 business days on standard parts. Provide your part number and we confirm availability with the quote." },
-  { q: "How do I submit a drawing for quote?", a: "Email drawings, schematics, or sample parts to info@superiorharness.com, or use the quote form on this site. We accept PDF, DXF, Gerber, and native CAD formats. BOM format is flexible — we work from your standard. Quotes typically issued within 24 hours." },
+  { q: "How do I submit a drawing for quote?", a: "Email drawings, schematics, or sample parts to info@claspo.store, or use the quote form on this site. We accept PDF, DXF, Gerber, and native CAD formats. BOM format is flexible — we work from your standard. Quotes typically issued within 24 hours." },
   { q: "What electrical tests do you perform?", a: "Standard test is 100% continuity using a dedicated test fixture. Resistance testing and hi-pot testing are available and recommended for safety-critical circuits. Test parameters default to IPC/WHMA-A-620 unless your spec calls out otherwise. First-article test reports are available on all programs." },
   { q: "Can you reverse-engineer a harness without drawings?", a: "Yes. Send a sample harness and we will generate a wire list and drawing for your approval before production. This is our most common NPI scenario — many customers come to us with a competitor sample or a field-removed unit and need it reproduced." },
 ]
@@ -235,10 +235,10 @@ export default function CustomWireHarnessPage() {
             <div className="pp-quote__label">Operations Note</div>
             <p className="pp-quote__text">&ldquo;Every harness we build starts with your drawing — not a catalog item, not a closest match. If your print has a note, we build to it. If a note is ambiguous, we call before we cut. That is the only way to produce a harness that installs on the first attempt and holds up in the field.&rdquo;</p>
             <div className="pp-quote__attr">
-              <div className="pp-quote__avatar">SHA</div>
+              <div className="pp-quote__avatar">CLASPO</div>
               <div>
                 <div className="pp-quote__name">Production Team</div>
-                <div className="pp-quote__role">Superior Harness &amp; Assembly · Canton, MI</div>
+                <div className="pp-quote__role">CLASPO</div>
               </div>
             </div>
           </div>

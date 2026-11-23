@@ -1,6 +1,6 @@
 /**
  * @file app/(store)/about/page.tsx
- * @description Dedicated About Us page for Superior Harnessing and Assembly.
+ * @description Dedicated About Us page for CLASPO.
  *   Covers company overview, why choose us, and certifications.
  *
  * @owner Heet-P
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Superior Harnessing and Assembly — custom wire harness manufacturer with 30+ years of combined experience delivering precision wiring solutions for OEMs, robotics, medical, EV, and industrial industries.",
+    "CLASPO — custom wire harness manufacturer with 30+ years of combined experience delivering precision wiring solutions for OEMs, robotics, medical, EV, and industrial industries.",
 }
 
 function ArrowIcon() {
@@ -51,7 +51,7 @@ export default function AboutPage() {
               <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=1400" alt="Factory Setup" style={{ width: "100%", height: "auto", display: "block",  objectFit: "contain" }} />
             </div>
             <div className="rv rv-d1">
-              <div className="lbl" style={{ marginBottom: 18 }}>About Superior Harnessing</div>
+              <div className="lbl" style={{ marginBottom: 18 }}>About CLASPO</div>
               <h2 className="D3" style={{ marginBottom: 22, letterSpacing: "-0.02em" }}>Built on Reliability,<br />Engineered for Trust</h2>
               <p style={{ fontSize: 16, lineHeight: 1.78, color: "var(--text2)", marginBottom: 16 }}>
                 We are a custom wire harness manufacturer committed to delivering high-quality, reliable, and fully customized wiring solutions. With a team that brings over 30 years of combined experience in the wire harness industry, we understand the importance of precision, durability, and performance in every project we undertake.

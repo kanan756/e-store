@@ -3,7 +3,7 @@ import { getProducts } from "@/lib/sheets"
 import ShopFilters from "@/components/ShopFilters"
 
 export const metadata: Metadata = {
-  title: "Shop | Superior Harness & Assembly",
+  title: "Shop | CLASPO",
   description: "Browse our full catalog of custom wire harnesses, cable assemblies, PCB assemblies, and OEM solutions.",
 }
 

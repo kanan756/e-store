@@ -19,8 +19,8 @@ import Image from "next/image"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Blog — Industry Insights & Updates",
-  description: "Explore industry insights, product guides, and company updates from Client Store.",
+  title: "Blog — Industry Insights & Updates | CLASPO",
+  description: "Explore industry insights, product guides, and company updates from CLASPO.",
 }
 
 export const revalidate = 3600

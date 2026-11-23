@@ -1,65 +1,228 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 
-const CATS = [
+const CATEGORIES = [
   {
-    name: "Wire Harnesses",
-    sub: "Custom OEM & small-batch wiring",
-    href: "/products?category=wire-harnesses",
-    img: "https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=600&q=80",
+    name: "Custom Wire Harnesses",
+    sub: "Multi-branch, engine, and control panel wiring systems",
+    href: "/products/custom-wire-harness",
+    img: "/images/custom-wire-harness.webp",
+    badge: "Most Popular",
   },
   {
-    name: "Cable Assemblies",
-    sub: "Multi-industry connector builds",
-    href: "/products?category=cable-assemblies",
-    img: "https://images.unsplash.com/photo-1551703599-6b3e8379aa8c?w=600&q=80",
+    name: "Overmolded Cable Assemblies",
+    sub: "Heavy-duty strain relief & weatherproof IP68 sealing",
+    href: "/products/overmolded-harness",
+    img: "/images/over-molding.webp",
+    badge: "Industrial Grade",
   },
   {
-    name: "PCB Assemblies",
-    sub: "SMT & through-hole boards",
-    href: "/products?category=pcb-assemblies",
-    img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80",
+    name: "Coil & Spiral Cables",
+    sub: "Retractable cords for robotics, automation & aviation",
+    href: "/products/coil-spiral-cable",
+    img: "/images/coil-cable-m12-connector.webp",
+    badge: "10M+ Cycles",
   },
   {
-    name: "OEM Solutions",
-    sub: "White goods, robotics & medical",
-    href: "/products?category=oem-solutions",
-    img: "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=600&q=80",
+    name: "High-Voltage & EV Harnesses",
+    sub: "Orange shielded cabling for battery packs & clean energy",
+    href: "/products/high-voltage-harness",
+    img: "/images/hv-orange-harness.webp",
+    badge: "EV Rated",
+  },
+  {
+    name: "PCB Assembly & SMT",
+    sub: "Surface mount, through-hole & complete box builds",
+    href: "/products/pcb-assemblies",
+    img: "/images/pcb.webp",
+    badge: "IPC Class III",
+  },
+  {
+    name: "Circular & MIL Connectors",
+    sub: "MIL-DTL-38999, M12, M8, and rugged Deutsch interconnects",
+    href: "/products/circular-connector",
+    img: "/images/circular-connector-pin-insert.webp",
+    badge: "MIL-Spec",
   },
 ]
 
-function ArrowIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12,5 19,12 12,19" />
-    </svg>
-  )
-}
-
 export default function Categories() {
   return (
-    <section id="categories" className="S" style={{ background: "var(--bg2)" }}>
-      <div className="W">
-        <div className="sHdr sHdr--c rv">
-          <div className="lbl">SHOP BY CATEGORY</div>
-          <h2 className="D2" style={{ marginTop: 16 }}>Our Product Categories</h2>
-        </div>
-        <div className="catG">
-          {CATS.map((c, i) => (
-            <Link
-              key={c.name}
-              href={c.href}
-              className="catC rv"
-              style={{ transitionDelay: `${i * 0.07}s` }}
+    <section style={{ background: "#F7F7F9", padding: "80px 0", borderBottom: "1px solid #E5E5EB" }}>
+      <div style={{ maxWidth: 1360, margin: "0 auto", padding: "0 24px" }}>
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "48px", flexWrap: "wrap", gap: "20px" }}>
+          <div>
+            <div
+              style={{
+                display: "inline-block",
+                background: "#F1EBFF",
+                color: "#5420C8",
+                fontSize: "12px",
+                fontWeight: 800,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                padding: "6px 14px",
+                borderRadius: "9999px",
+                marginBottom: "12px",
+              }}
             >
-              <Image src={c.img} alt={c.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" style={{ objectFit: "cover" }} />
-              <div className="catC__ov" />
-              <div className="catC__info">
-                <div className="catC__name">{c.name}</div>
-                <div className="catC__sub">{c.sub}</div>
+              Catalog Overview
+            </div>
+            <h2
+              style={{
+                fontSize: "clamp(26px, 3.5vw, 36px)",
+                fontWeight: 900,
+                letterSpacing: "-0.02em",
+                color: "#111111",
+                fontFamily: "var(--font-sora), sans-serif",
+                margin: "0 0 8px",
+              }}
+            >
+              Explore Product Categories
+            </h2>
+            <p style={{ fontSize: "16px", color: "#707070", margin: 0 }}>
+              Tailored interconnect solutions manufactured to your exact engineering prints.
+            </p>
+          </div>
+
+          <Link
+            href="/products"
+            style={{
+              color: "#5420C8",
+              fontSize: "14px",
+              fontWeight: 800,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "10px 20px",
+              borderRadius: "9999px",
+              background: "#FFFFFF",
+              border: "1px solid #E5E5EB",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "#F1EBFF"
+              e.currentTarget.style.borderColor = "#5420C8"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#FFFFFF"
+              e.currentTarget.style.borderColor = "#E5E5EB"
+            }}
+          >
+            <span>View All Categories</span>
+            <span>&rarr;</span>
+          </Link>
+        </div>
+
+        {/* Categories Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "24px",
+          }}
+        >
+          {CATEGORIES.map(cat => (
+            <Link
+              key={cat.name}
+              href={cat.href}
+              style={{
+                background: "#FFFFFF",
+                borderRadius: "18px",
+                border: "1px solid #E5E5EB",
+                overflow: "hidden",
+                textDecoration: "none",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative",
+                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03)",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "#5420C8"
+                e.currentTarget.style.transform = "translateY(-4px)"
+                e.currentTarget.style.boxShadow = "0 14px 32px rgba(84, 32, 200, 0.12)"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = "#E5E5EB"
+                e.currentTarget.style.transform = "translateY(0)"
+                e.currentTarget.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.03)"
+              }}
+            >
+              {/* Category Image */}
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "200px",
+                  background: "#F7F7F9",
+                  overflow: "hidden",
+                }}
+              >
+                <Image
+                  src={cat.img}
+                  alt={cat.name}
+                  fill
+                  unoptimized={true}
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  style={{
+                    objectFit: "cover",
+                    transition: "transform 0.4s ease",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    right: 14,
+                    background: "rgba(255,255,255,0.95)",
+                    backdropFilter: "blur(6px)",
+                    color: "#5420C8",
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    padding: "4px 10px",
+                    borderRadius: "9999px",
+                    border: "1px solid rgba(84,32,200,0.15)",
+                  }}
+                >
+                  {cat.badge}
+                </div>
               </div>
-              <div className="catC__arr">
-                <ArrowIcon />
+
+              {/* Card Body */}
+              <div style={{ padding: "20px 22px 24px", display: "flex", flexDirection: "column", flex: 1 }}>
+                <h3
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: 800,
+                    color: "#111111",
+                    margin: "0 0 6px",
+                    fontFamily: "var(--font-sora), sans-serif",
+                  }}
+                >
+                  {cat.name}
+                </h3>
+                <p style={{ fontSize: "14px", color: "#707070", lineHeight: 1.5, margin: "0 0 18px", flex: 1 }}>
+                  {cat.sub}
+                </p>
+
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    color: "#5420C8",
+                  }}
+                >
+                  <span>Explore Series</span>
+                  <span>&rarr;</span>
+                </div>
               </div>
             </Link>
           ))}

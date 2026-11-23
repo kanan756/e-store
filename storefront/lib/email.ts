@@ -86,7 +86,7 @@ export async function sendOrderStatusEmail({
 }) {
   const icon = STATUS_ICONS[status] ?? "📋"
   const color = STATUS_COLORS[status] ?? "#2563eb"
-  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const fromName = process.env.EMAIL_FROM_NAME ?? "CLASPO"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
   // Escaped aliases — applied to every user-sourced or admin-sourced string
@@ -223,7 +223,7 @@ export async function sendOrderConfirmationEmail({
   product: string
   amount: number
 }) {
-  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const fromName = process.env.EMAIL_FROM_NAME ?? "CLASPO"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
   const eName     = escapeHtml(customerName)
@@ -353,7 +353,7 @@ export async function sendInquiryReplyEmail({
   originalSubject: string
   replyMessage: string
 }) {
-  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const fromName = process.env.EMAIL_FROM_NAME ?? "CLASPO"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
   const eName     = escapeHtml(customerName)
@@ -424,7 +424,7 @@ export async function sendInquiryReplyEmail({
 }
 
 export async function sendNewsletterWelcomeEmail({ to }: { to: string }) {
-  const fromName = process.env.EMAIL_FROM_NAME ?? "Client Store"
+  const fromName = process.env.EMAIL_FROM_NAME ?? "CLASPO"
   const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "https://clientstore.com"
 
   const eFromName = escapeHtml(fromName)

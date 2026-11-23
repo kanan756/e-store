@@ -2,15 +2,42 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import { useCart } from "@/context/cart-context"
+import { useWishlist } from "@/context/wishlist-context"
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
+function IcoSearch() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  )
+}
+
+function IcoUser() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+}
+
+function IcoHeart() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  )
+}
+
 function IcoCart() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <path d="M16 10a4 4 0 0 1-8 0" />
@@ -30,58 +57,10 @@ function IcoBurger({ open }: { open: boolean }) {
   )
 }
 
-function IcoPhone() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.17 12a19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 3.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
-    </svg>
-  )
-}
-
 function IcoMail() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>
-    </svg>
-  )
-}
-
-function IcoFB() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/>
-    </svg>
-  )
-}
-
-function IcoX() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  )
-}
-
-function IcoIn() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
-    </svg>
-  )
-}
-
-function IcoInsta() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm3.98-10.169a1.44 1.44 0 1 1 0 2.881 1.44 1.44 0 0 1 0-2.881z"/>
-    </svg>
-  )
-}
-
-function IcoClose() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 6L2 7" />
     </svg>
   )
 }
@@ -94,669 +73,813 @@ function IcoChevron({ style }: { style?: React.CSSProperties } = {}) {
   )
 }
 
-// ── Nav data ───────────────────────────────────────────────────────────────────
+// ── Nav items ─────────────────────────────────────────────────────────────────
 
-const PRODUCTS_WIRE = [
-  { label: "Custom Wire Harness", href: "/products/custom-wire-harness" },
-  { label: "Multi-Branch Wire Harnesses", href: "/products/multi-branch-harness" },
-  { label: "Battery Cable Assemblies", href: "/products/power-battery" },
-  { label: "High-Flex Robotic Harnesses", href: "/products/high-flex-robotic-harness" },
-  { label: "Control Panel Wiring", href: "/products/control-panel-wiring" },
-  { label: "High Voltage Harness", href: "/products/high-voltage-harness" },
-  { label: "Waterproof Harness", href: "/products/waterproof-harness" },
+const SHOP_CATEGORIES = [
+  { label: "Custom Wire Harnesses", href: "/products/custom-wire-harness", tag: "Hot" },
+  { label: "Cable Assemblies", href: "/products/cable-assembly", tag: "Popular" },
+  { label: "Coil & Spiral Cables", href: "/products/coil-spiral-cable", tag: "New" },
+  { label: "Overmolded Harnesses", href: "/products/overmolded-harness", tag: "" },
+  { label: "High-Voltage & EV", href: "/products/high-voltage-harness", tag: "EV" },
+  { label: "PCB Assemblies", href: "/products/pcb-assemblies", tag: "" },
+  { label: "Browse All Shop Items", href: "/shop", tag: "View All →" },
 ]
 
-const PRODUCTS_OVERMOLDED = [
-  { label: "Overmolded Harness Overview", href: "/products/overmolded-harness" },
-  { label: "USB Overmolded Assemblies", href: "/products/usb-overmolded" },
+const PRODUCTS_POPULAR = [
+  { label: "Automotive & EV Wire Harness", href: "/products/ev-renewable-energy" },
+  { label: "Medical Grade Assemblies", href: "/products/medical-cable-assemblies" },
+  { label: "Robotic Umbilical & Coil", href: "/products/hi-flex-robotic-coil-cable" },
   { label: "Circular Connector Assemblies", href: "/products/circular-connector" },
-  { label: "Custom Strain Relief Molding", href: "/products/strain-relief-molding" },
-  { label: "Multi-Shot Molded Cable", href: "/products/multi-shot-molded" },
-  { label: "Connector Molding Services", href: "/products/connector-molding" },
+  { label: "Waterproof IP68 Solutions", href: "/products/waterproof-harness" },
+  { label: "Control Panel & Industrial", href: "/products/control-panel-wiring" },
 ]
 
-const PRODUCTS_COIL = [
-  { label: "Coil / Spiral Cable Overview", href: "/products/coil-spiral-cable" },
-  { label: "Industrial Coil Cables", href: "/products/industrial-coil-cable" },
-  { label: "Medical Coiled Cable Assembly", href: "/products/medical-coil-cable" },
-  { label: "Hi-Flex Robotic Coil Cable", href: "/products/hi-flex-robotic-coil-cable" },
-  { label: "Trailer & Vehicle Coil Cable", href: "/products/trailer-vehicle-coil-cable" },
-  { label: "Custom OEM Coil Assemblies", href: "/products/custom-oem-coil-cable" },
-  { label: "Overmolded Coil Cable", href: "/products/overmolded-coil-cable" },
-  { label: "Signal Coil Cable", href: "/products/signal-coil-cable" },
-  { label: "Aviation Coil Cables", href: "/products/aviation-coil-cable" },
-]
-
-const PRODUCTS_CABLE = [
-  { label: "Cable Assembly Overview", href: "/products/cable-assembly" },
-  { label: "Medical Cable Assemblies", href: "/products/medical-cable-assemblies" },
-  { label: "Coaxial / RF / Microwave", href: "/products/coaxial-rf-microwave" },
-  { label: "Ethernet & USB", href: "/products/ethernet-usb" },
-  { label: "Fiber Optic & Twinax", href: "/products/fiber-optic-twinax" },
-  { label: "Shielded / Hermetic", href: "/products/shielded-hermetic" },
-]
-
-const PRODUCTS_ADVANCED = [
-  { label: "PCB Assemblies", href: "/products/pcb-assemblies" },
-  { label: "Electromechanical Assemblies", href: "/products/electromechanical" },
-  { label: "Robotics & Automation Solutions", href: "/products/robotics-automation" },
-  { label: "EV & Renewable Energy Solutions", href: "/products/ev-renewable-energy" },
-  { label: "Prototype Engineering Services", href: "/products/prototype-npi" },
-]
-
-const INDUSTRIES_DD = [
-  { label: "Automotive & EV", href: "/industries/automotive-ev" },
-  { label: "Medical Devices", href: "/industries/medical-devices" },
-  { label: "Robotics & Automation", href: "/industries/robotics-automation" },
-  { label: "Industrial / Factory", href: "/industries/industrial-factory" },
-  { label: "Aerospace & Defense", href: "/industries/aerospace-defense" },
-  { label: "Solar & Energy", href: "/industries/solar-energy" },
-]
-
-const RESOURCES_DD = [
-  { label: "Blog", href: "/blog" },
-  { label: "Certifications", href: "/certifications" },
-  { label: "Capabilities", href: "/capabilities" },
-]
-
-// ── Quote Modal ───────────────────────────────────────────────────────────────
-const ACCEPTED_MIME = new Set(["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"])
-const MAX_FILES = 5
-const MAX_TOTAL_BYTES = 10 * 1024 * 1024 // 10 MB
-
-function isAccepted(f: File) {
-  return f.type.startsWith("image/") || ACCEPTED_MIME.has(f.type) || /\.(dwg|dxf)$/i.test(f.name)
-}
-
-// Compress images before upload — keeps mobile camera photos well under server limits.
-// Non-image files pass through unchanged.
-async function compressImage(file: File): Promise<File> {
-  if (!file.type.startsWith("image/")) return file
-  return new Promise((resolve) => {
-    const img = document.createElement("img")
-    const url = URL.createObjectURL(file)
-    img.onload = () => {
-      URL.revokeObjectURL(url)
-      const MAX_PX = 1920
-      const ratio = Math.min(1, MAX_PX / Math.max(img.naturalWidth, img.naturalHeight))
-      const w = Math.round(img.naturalWidth * ratio)
-      const h = Math.round(img.naturalHeight * ratio)
-      const canvas = document.createElement("canvas")
-      canvas.width = w
-      canvas.height = h
-      canvas.getContext("2d")!.drawImage(img, 0, 0, w, h)
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) { resolve(file); return }
-          const name = file.name.replace(/\.[^.]+$/, ".jpg")
-          resolve(new File([blob], name, { type: "image/jpeg" }))
-        },
-        "image/jpeg",
-        0.82
-      )
-    }
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
-    img.src = url
-  })
-}
-
-function QuoteModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [submitted, setSubmitted] = useState(false)
-  const [sending, setSending] = useState(false)
-  const [files, setFiles] = useState<File[]>([])
-  const [fileError, setFileError] = useState("")
-  const [dragOver, setDragOver] = useState(false)
-  const [compressing, setCompressing] = useState(false)
-
-  async function addFiles(incoming: File[]) {
-    setFileError("")
-    const valid = incoming.filter(isAccepted)
-    if (valid.length < incoming.length) setFileError("Some files were skipped — only images, PDF, DWG, and DOCX are accepted.")
-    if (valid.length === 0) return
-    setCompressing(true)
-    const compressed = await Promise.all(valid.map(compressImage))
-    setCompressing(false)
-    setFiles(prev => {
-      const merged = [...prev, ...compressed].slice(0, MAX_FILES)
-      if (prev.length + compressed.length > MAX_FILES) setFileError(`Max ${MAX_FILES} files allowed.`)
-      const total = merged.reduce((s, f) => s + f.size, 0)
-      if (total > MAX_TOTAL_BYTES) { setFileError("Total size exceeds 10 MB. Remove a file and try again."); return prev }
-      return merged
-    })
-  }
-
-  function removeFile(i: number) { setFiles(fs => fs.filter((_, j) => j !== i)) }
-
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
-  }, [open])
-
-  useEffect(() => {
-    if (!open) return
-    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
-    window.addEventListener("keydown", fn)
-    return () => window.removeEventListener("keydown", fn)
-  }, [open, onClose])
-
-  if (!open) return null
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setSending(true)
-    const fd = new FormData(e.currentTarget)
-    // Append files — the hidden input is controlled via state, not the form itself
-    files.forEach(f => fd.append("attachments", f))
-
-    try {
-      const res = await fetch("/api/quote", {
-        method: "POST",
-        // No Content-Type header — browser sets multipart/form-data + boundary automatically
-        body: fd,
-      })
-      if (res.ok) {
-        setSubmitted(true)
-      } else {
-        const err = await res.json()
-        alert(err.error || "Failed to submit quote")
-      }
-    } catch (err) {
-      alert("Failed to submit quote request. Please try again.")
-    } finally {
-      setSending(false)
-    }
-  }
-
-  return (
-    <div
-      ref={overlayRef}
-      className="quote-overlay"
-      onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
-      aria-modal="true"
-      role="dialog"
-      aria-label="Request a Quote"
-    >
-      <div className="quote-modal">
-        <div className="quote-modal__hdr">
-          <div>
-            <div className="quote-modal__title">REQUEST A QUOTE</div>
-            <div className="quote-modal__subtitle">We respond within two business days.</div>
-          </div>
-          <button className="quote-modal__close" onClick={onClose} aria-label="Close">
-            <IcoClose />
-          </button>
-        </div>
-
-        {submitted ? (
-          <div className="quote-modal__success">
-            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
-            </svg>
-            <h3>Request Received</h3>
-            <p>We&apos;ll get back to you within two business days.</p>
-            <button className="quote-modal__submit" style={{ marginTop: 24, width: "auto", padding: "14px 40px" }} onClick={() => { setSubmitted(false); onClose() }}>
-              Close
-            </button>
-          </div>
-        ) : (
-          <form className="quote-modal__form" onSubmit={handleSubmit}>
-            <div className="quote-modal__grid">
-              <div className="quote-modal__field">
-                <label className="quote-modal__label">Name <span className="quote-modal__req">*</span></label>
-                <input type="text" name="name" placeholder="Jane Doe" required autoComplete="name" />
-              </div>
-              <div className="quote-modal__field">
-                <label className="quote-modal__label">Phone <span className="quote-modal__req">*</span></label>
-                <input type="tel" name="phone" placeholder="(586) 555-0100" autoComplete="tel" required />
-              </div>
-            </div>
-            <div className="quote-modal__grid">
-              <div className="quote-modal__field">
-                <label className="quote-modal__label">Email <span className="quote-modal__req">*</span></label>
-                <input type="email" name="email" placeholder="jane@acme.com" required autoComplete="email" />
-              </div>
-              <div className="quote-modal__field">
-                <label className="quote-modal__label">Company</label>
-                <input type="text" name="company" placeholder="Acme Mfg." autoComplete="organization" />
-              </div>
-            </div>
-            <div className="quote-modal__grid">
-              <div className="quote-modal__field">
-                <label className="quote-modal__label">Application</label>
-                <input type="text" name="application" placeholder="e.g. Medical Device, Automotive" />
-              </div>
-              <div className="quote-modal__field">
-                <label className="quote-modal__label">Quantity</label>
-                <input type="text" name="quantity" placeholder="e.g. 500 units" />
-              </div>
-            </div>
-            <div className="quote-modal__field">
-              <label className="quote-modal__label">Project details <span className="quote-modal__req">*</span></label>
-              <textarea name="description" placeholder="Describe your assembly, quantities, target lead time..." rows={4} required minLength={10} />
-            </div>
-            <input type="hidden" name="honeypot" value="" />
-
-            {/* ── Upload zone ── */}
-            <div className="quote-modal__field">
-              <label className="quote-modal__label">
-                Drawings / Images&nbsp;<span style={{ color: "#999", fontWeight: 400 }}>(optional)</span>
-              </label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*,.pdf,.dwg,.dxf,.doc,.docx"
-                style={{ display: "none" }}
-                onChange={async e => { const list = Array.from(e.target.files ?? []); e.target.value = ""; await addFiles(list) }}
-              />
-              <div
-                className={`qu-dropzone${dragOver ? " drag-over" : ""}${compressing ? " drag-over" : ""}`}
-                onClick={() => !compressing && fileInputRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); if (!compressing) setDragOver(true) }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={async e => { e.preventDefault(); setDragOver(false); await addFiles(Array.from(e.dataTransfer.files)) }}
-              >
-                <div className="qu-dropzone__icon">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
-                </div>
-                <div className="qu-dropzone__title">{compressing ? "Optimising images…" : "Click to select files"}</div>
-                <div className="qu-dropzone__types">PDF, DWG, DOCX, Images</div>
-                <div className="qu-dropzone__limit">Max {MAX_FILES} files · 10 MB total</div>
-              </div>
-              {fileError && <div className="qu-file-error">{fileError}</div>}
-              {files.length > 0 && (
-                <div className="qu-file-list">
-                  {files.map((f, i) => (
-                    <div key={i} className="qu-file-item">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/>
-                      </svg>
-                      <span className="qu-file-item__name">{f.name}</span>
-                      <span className="qu-file-item__size">({(f.size / 1024).toFixed(0)} KB)</span>
-                      <button type="button" className="qu-file-item__remove" onClick={() => removeFile(i)} aria-label="Remove file">×</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button type="submit" className="quote-modal__submit" disabled={sending || compressing}>
-              {compressing ? "Optimising images…" : sending ? "Sending..." : "Submit Request"}
-              {!sending && !compressing && (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-              )}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ── Main component ─────────────────────────────────────────────────────────────
 export default function Header() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { totalItems } = useCart()
+  const { wishlistCount } = useWishlist()
+
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [quoteOpen, setQuoteOpen] = useState(false)
+  const [shopOpen, setShopOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
-  const [mobProductsOpen, setMobProductsOpen] = useState(false)
-  const [mobIndustriesOpen, setMobIndustriesOpen] = useState(false)
-  const [mobResourcesOpen, setMobResourcesOpen] = useState(false)
-  const productsDDRef = useRef<HTMLDivElement>(null)
-  const { totalItems } = useCart()
-  const pathname = usePathname()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchFocused, setSearchFocused] = useState(false)
 
+  const shopDDRef = useRef<HTMLDivElement>(null)
+  const productsDDRef = useRef<HTMLDivElement>(null)
+
+  // Scroll handler for subtle elevation
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 60)
-    window.addEventListener("scroll", fn, { passive: true })
-    return () => window.removeEventListener("scroll", fn)
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  useEffect(() => { 
+  // Close menus on page navigation
+  useEffect(() => {
     setMenuOpen(false)
+    setShopOpen(false)
     setProductsOpen(false)
-    setMobProductsOpen(false)
-    setMobIndustriesOpen(false)
-    setMobResourcesOpen(false)
   }, [pathname])
 
-  // Click-outside closes the sticky products dropdown
+  // Close dropdowns on outside click
   useEffect(() => {
-    if (!productsOpen) return
-    const fn = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (shopDDRef.current && !shopDDRef.current.contains(e.target as Node)) {
+        setShopOpen(false)
+      }
       if (productsDDRef.current && !productsDDRef.current.contains(e.target as Node)) {
         setProductsOpen(false)
       }
     }
-    document.addEventListener("mousedown", fn)
-    return () => document.removeEventListener("mousedown", fn)
-  }, [productsOpen])
-
-  // Close products dropdown on Escape
-  useEffect(() => {
-    if (!productsOpen) return
-    const fn = (e: KeyboardEvent) => { if (e.key === "Escape") setProductsOpen(false) }
-    window.addEventListener("keydown", fn)
-    return () => window.removeEventListener("keydown", fn)
-  }, [productsOpen])
-
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      const link = target.closest("a")
-      const href = link?.getAttribute("href") || link?.href
-      if (href && href.endsWith("#quote")) {
-        e.preventDefault()
-        setQuoteOpen(true)
-      }
-    }
-    document.addEventListener("click", handleGlobalClick)
-
-    if (typeof window !== "undefined" && window.location.hash === "#quote") {
-      setQuoteOpen(true)
-      window.history.replaceState(null, "", window.location.pathname + window.location.search)
-    }
-
-    return () => document.removeEventListener("click", handleGlobalClick)
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  useEffect(() => {
-    if (!quoteOpen) {
-      document.body.style.overflow = menuOpen ? "hidden" : ""
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery("")
+      setMenuOpen(false)
     }
-    return () => { if (!quoteOpen) document.body.style.overflow = "" }
-  }, [menuOpen, quoteOpen])
+  }
 
   return (
     <>
-      <header className={`hdr${scrolled ? " on" : ""}`}>
-        {/* ── Top Contact Bar ── */}
-        <div className="hdr__topbar">
-          <div className="hdr__topbar-in">
-            <div className="hdr__topbar-soc">
-              <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IcoFB /></a>
-              <a href="https://x.com" aria-label="X" target="_blank" rel="noopener noreferrer"><IcoX /></a>
-              <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><IcoIn /></a>
-              <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IcoInsta /></a>
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          background: "#FFFFFF",
+          transition: "box-shadow 0.25s ease, border-color 0.25s ease",
+          boxShadow: scrolled ? "0 4px 20px rgba(84, 32, 200, 0.08)" : "none",
+          borderBottom: "1px solid #E5E5EB",
+          width: "100%",
+        }}
+      >
+        {/* ── Top Announcement Bar ── */}
+        <div
+          style={{
+            background: "#5420C8",
+            color: "#FFFFFF",
+            fontSize: "12.5px",
+            fontWeight: 500,
+            padding: "8px 24px",
+            borderBottom: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 1360,
+              margin: "0 auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Announcement banner */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: "14px" }}>⚡</span>
+              <span>Free Shipping on Orders $100+ &middot; Quick 24h Turnaround Quotes</span>
             </div>
-            <div className="hdr__topbar-contacts">
-              {/* Old: <a className="hdr__topbar-item" href="tel:+917348910249"><IcoPhone /> +91 7348910249</a> */}
-              <a className="hdr__topbar-item" href="tel:+17348910248"><IcoPhone /> +1 734 891 0248</a>
-              {/* Old: <a className="hdr__topbar-item" href="mailto:sales@superiorharness.com"><IcoMail /> <span>sales@superiorharness.com</span></a> */}
-              <a className="hdr__topbar-item" href="mailto:info@superiorharness.com"><IcoMail /> <span>info@superiorharness.com</span></a>
+
+            {/* Email & Track Order */}
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              <a
+                href="mailto:info@claspo.store"
+                style={{
+                  color: "#FFFFFF",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  textDecoration: "none",
+                  fontSize: "12px",
+                  opacity: 0.95,
+                  transition: "opacity 0.2s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0.95")}
+              >
+                <IcoMail />
+                <span>info@claspo.store</span>
+              </a>
+
+              <span style={{ opacity: 0.4 }}>|</span>
+
+              <Link
+                href="/track-order"
+                style={{
+                  color: "#FFFFFF",
+                  textDecoration: "none",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  letterSpacing: "0.02em",
+                  opacity: 0.95,
+                  transition: "opacity 0.2s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "0.95")}
+              >
+                Track Order
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* ── Nav Bar ── */}
-        <div className="hdr__bar">
-          {/* Logo */}
-          <Link href="/" className="hdr__logo">
-            <Image
-              src="/images/dark-logo.webp"
-              alt="Superior Harness & Assembly"
-              height={64}
-              width={380}
-              style={{ objectFit: "contain", objectPosition: "left center" }}
-              priority
-            />
+        {/* ── Main Navigation Bar ── */}
+        <div
+          style={{
+            maxWidth: 1360,
+            margin: "0 auto",
+            padding: "0 24px",
+            height: "76px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 20,
+          }}
+        >
+          {/* Left: Brand Logo & Tagline */}
+          <Link
+            href="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              textDecoration: "none",
+              flexShrink: 0,
+            }}
+          >
+            {/* Icon Mark */}
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: "linear-gradient(135deg, #5420C8 0%, #7B47EE 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#FFFFFF",
+                fontWeight: 900,
+                fontSize: "20px",
+                fontFamily: "var(--font-sora), sans-serif",
+                boxShadow: "0 4px 12px rgba(84, 32, 200, 0.28)",
+              }}
+            >
+              C
+            </div>
+
+            {/* Typography & Tagline */}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 900,
+                  letterSpacing: "-0.03em",
+                  color: "#111111",
+                  fontFamily: "var(--font-sora), sans-serif",
+                  lineHeight: 1,
+                }}
+              >
+                CLASPO
+              </span>
+              <span
+                style={{
+                  fontSize: "9px",
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  color: "#5420C8",
+                  fontFamily: "var(--font-mono), monospace",
+                  marginTop: "3px",
+                  textTransform: "uppercase",
+                }}
+              >
+                CLICK. PICK. DONE.
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop navigation */}
-          <nav className="hdr__nav">
-            <Link href="/" data-active={pathname === "/" ? "true" : undefined}>Home</Link>
+          {/* Center Navigation Links (Desktop) */}
+          <nav
+            className="claspo-nav-links"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "24px",
+              fontFamily: "var(--font-dm-sans), sans-serif",
+              fontSize: "14.5px",
+              fontWeight: 600,
+              color: "#111111",
+            }}
+          >
+            <Link
+              href="/"
+              style={{
+                textDecoration: "none",
+                color: pathname === "/" ? "#5420C8" : "#111111",
+                padding: "8px 0",
+                position: "relative",
+                transition: "color 0.2s",
+              }}
+            >
+              Home
+            </Link>
 
-            {/* Products — mega dropdown */}
-            <div className="hdr__mega-wrap" ref={productsDDRef} data-open={productsOpen ? "true" : undefined}>
+            {/* Shop with Dropdown */}
+            <div ref={shopDDRef} style={{ position: "relative" }}>
+              <button
+                onClick={() => setShopOpen(o => !o)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: "14.5px",
+                  fontWeight: 600,
+                  color: pathname.startsWith("/shop") ? "#5420C8" : "#111111",
+                  padding: "8px 0",
+                  fontFamily: "inherit",
+                }}
+                aria-expanded={shopOpen}
+              >
+                Shop <IcoChevron style={{ transform: shopOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
+              </button>
+
+              {shopOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 12px)",
+                    left: "-20px",
+                    width: "280px",
+                    background: "#FFFFFF",
+                    borderRadius: "12px",
+                    boxShadow: "0 14px 40px rgba(84, 32, 200, 0.12)",
+                    border: "1px solid #E5E5EB",
+                    padding: "10px",
+                    zIndex: 150,
+                  }}
+                >
+                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #F1EBFF" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#5420C8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      Featured Categories
+                    </div>
+                  </div>
+                  <div style={{ padding: "6px 0" }}>
+                    {SHOP_CATEGORIES.map(cat => (
+                      <Link
+                        key={cat.label}
+                        href={cat.href}
+                        onClick={() => setShopOpen(false)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          textDecoration: "none",
+                          fontSize: "13.5px",
+                          color: "#111111",
+                          fontWeight: 500,
+                          transition: "background 0.15s, color 0.15s",
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = "#F1EBFF"
+                          e.currentTarget.style.color = "#5420C8"
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = "transparent"
+                          e.currentTarget.style.color = "#111111"
+                        }}
+                      >
+                        <span>{cat.label}</span>
+                        {cat.tag && (
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              padding: "2px 8px",
+                              borderRadius: "9999px",
+                              background: cat.tag.includes("→") ? "transparent" : "#F1EBFF",
+                              color: "#5420C8",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {cat.tag}
+                          </span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Products with Dropdown */}
+            <div ref={productsDDRef} style={{ position: "relative" }}>
               <button
                 onClick={() => setProductsOpen(o => !o)}
-                style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: "14.5px",
+                  fontWeight: 600,
+                  color: pathname.startsWith("/products") ? "#5420C8" : "#111111",
+                  padding: "8px 0",
+                  fontFamily: "inherit",
+                }}
                 aria-expanded={productsOpen}
-                aria-haspopup="true"
               >
-                Products <IcoChevron />
+                Products <IcoChevron style={{ transform: productsOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
               </button>
-              <div className="hdr__mega hdr__mega--wide">
-                <div className="hdr__mega-col">
-                  <div className="hdr__mega-section-title">
-                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
-                    Wire Harness
+
+              {productsOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 12px)",
+                    left: "-40px",
+                    width: "300px",
+                    background: "#FFFFFF",
+                    borderRadius: "12px",
+                    boxShadow: "0 14px 40px rgba(84, 32, 200, 0.12)",
+                    border: "1px solid #E5E5EB",
+                    padding: "10px",
+                    zIndex: 150,
+                  }}
+                >
+                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #F1EBFF" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#5420C8", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      Engineering Solutions
+                    </div>
                   </div>
-                  {PRODUCTS_WIRE.map(item => (
-                    <Link key={item.href} href={item.href}>{item.label}</Link>
-                  ))}
-                </div>
-                <div className="hdr__mega-col">
-                  <div className="hdr__mega-section-title">
-                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
-                    Overmolded Cable Assembly
+                  <div style={{ padding: "6px 0" }}>
+                    {PRODUCTS_POPULAR.map(prod => (
+                      <Link
+                        key={prod.label}
+                        href={prod.href}
+                        onClick={() => setProductsOpen(false)}
+                        style={{
+                          display: "block",
+                          padding: "9px 12px",
+                          borderRadius: "8px",
+                          textDecoration: "none",
+                          fontSize: "13.5px",
+                          color: "#111111",
+                          fontWeight: 500,
+                          transition: "background 0.15s, color 0.15s",
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = "#F1EBFF"
+                          e.currentTarget.style.color = "#5420C8"
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = "transparent"
+                          e.currentTarget.style.color = "#111111"
+                        }}
+                      >
+                        {prod.label}
+                      </Link>
+                    ))}
+                    <div style={{ marginTop: 6, borderTop: "1px solid #EFEFF4", paddingTop: 6 }}>
+                      <Link
+                        href="/products"
+                        onClick={() => setProductsOpen(false)}
+                        style={{
+                          display: "block",
+                          padding: "8px 12px",
+                          fontSize: "12.5px",
+                          color: "#5420C8",
+                          fontWeight: 700,
+                          textDecoration: "none",
+                        }}
+                      >
+                        View All 30+ Product Pages &rarr;
+                      </Link>
+                    </div>
                   </div>
-                  {PRODUCTS_OVERMOLDED.map(item => (
-                    <Link key={item.href} href={item.href}>{item.label}</Link>
-                  ))}
                 </div>
-                <div className="hdr__mega-col">
-                  <div className="hdr__mega-section-title">
-                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
-                    Coil / Spiral Cable
-                  </div>
-                  {PRODUCTS_COIL.map(item => (
-                    <Link key={item.href} href={item.href}>{item.label}</Link>
-                  ))}
-                </div>
-                <div className="hdr__mega-col">
-                  <div className="hdr__mega-section-title">
-                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
-                    Cable Assembly
-                  </div>
-                  {PRODUCTS_CABLE.map(item => (
-                    <Link key={item.href} href={item.href}>{item.label}</Link>
-                  ))}
-                </div>
-                <div className="hdr__mega-col">
-                  <div className="hdr__mega-section-title">
-                    <span style={{ width: 18, height: 2, background: "#000000", display: "inline-block", borderRadius: 2 }} />
-                    Advanced Solutions
-                  </div>
-                  {PRODUCTS_ADVANCED.map(item => (
-                    <Link key={item.href} href={item.href}>{item.label}</Link>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Industries — simple dropdown */}
-            <div className="hdr__dd-wrap">
-              <Link href="/industries" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                Industries <IcoChevron />
-              </Link>
-              <div className="hdr__dd">
-                {INDUSTRIES_DD.map(d => <Link key={d.href} href={d.href}>{d.label}</Link>)}
-                <Link href="/industries" style={{ fontWeight: 700, color: "var(--ink, #111)", marginTop: 4, display: "block", padding: "10px 14px" }}>View all industries →</Link>
-              </div>
-            </div>
+            <Link
+              href="/about"
+              style={{
+                textDecoration: "none",
+                color: pathname === "/about" ? "#5420C8" : "#111111",
+                padding: "8px 0",
+                transition: "color 0.2s",
+              }}
+            >
+              About Us
+            </Link>
 
-            {/* Resources — simple dropdown */}
-            <div className="hdr__dd-wrap">
-              <Link href="/capabilities" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                Resources <IcoChevron />
-              </Link>
-              <div className="hdr__dd">
-                {RESOURCES_DD.map(d => <Link key={d.href} href={d.href}>{d.label}</Link>)}
-              </div>
-            </div>
+            <Link
+              href="/contact"
+              style={{
+                textDecoration: "none",
+                color: pathname === "/contact" ? "#5420C8" : "#111111",
+                padding: "8px 0",
+                transition: "color 0.2s",
+              }}
+            >
+              Contact
+            </Link>
 
-            <Link href="/about" data-active={pathname === "/about" ? "true" : undefined}>About</Link>
-            <Link href="/contact" data-active={pathname === "/contact" ? "true" : undefined}>Contact</Link>
+            <Link
+              href="/blog"
+              style={{
+                textDecoration: "none",
+                color: pathname.startsWith("/blog") ? "#5420C8" : "#111111",
+                padding: "8px 0",
+                transition: "color 0.2s",
+              }}
+            >
+              Blogs
+            </Link>
           </nav>
 
-          {/* Right icons */}
-          <div className="hdr__icons" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            {/* Shop Online */}
-            <Link href="/shop" className="hdr--desk hdr-shop-btn">
-              Shop Online
-            </Link>
-
-            {/* Track Order */}
-            <Link href="/track-order" className="hdr--desk" style={{ fontFamily: "var(--font-sora), sans-serif", fontSize: "11px", fontWeight: 600, letterSpacing: "0.09em", color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
-              Track Order
-            </Link>
-
-            {/* Cart */}
-            <Link href="/cart" className="hic" aria-label="Shopping cart" style={{ position: "relative" }}>
-              <IcoCart />
-              {totalItems > 0 && <span className="cdot" />}
-            </Link>
-
-            {/* Request Quote */}
-            <button
-              className="btn bp hdr--desk"
-              style={{ marginLeft: 12 }}
-              onClick={() => setQuoteOpen(true)}
-              aria-label="Request a Quote"
+          {/* Right Action Icons & Search */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Search Input (Desktop) */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="claspo-header-search"
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+              }}
             >
-              Request Quote
-            </button>
+              <input
+                type="text"
+                placeholder="Search products, parts..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                style={{
+                  padding: "9px 14px 9px 36px",
+                  borderRadius: "9999px",
+                  border: searchFocused ? "1.5px solid #5420C8" : "1px solid #E5E5EB",
+                  background: searchFocused ? "#FFFFFF" : "#F7F7F9",
+                  fontSize: "13px",
+                  width: searchFocused ? "240px" : "190px",
+                  outline: "none",
+                  transition: "all 0.25s ease",
+                  fontFamily: "inherit",
+                  color: "#111111",
+                }}
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                style={{
+                  position: "absolute",
+                  left: "11px",
+                  background: "none",
+                  border: "none",
+                  color: searchFocused ? "#5420C8" : "#707070",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 0,
+                }}
+              >
+                <IcoSearch />
+              </button>
+            </form>
 
-            {/* Hamburger */}
+            {/* Account Icon */}
+            <Link
+              href="/track-order"
+              aria-label="User Account"
+              title="Track Order / Account"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#111111",
+                background: "#F7F7F9",
+                border: "1px solid #E5E5EB",
+                textDecoration: "none",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "#F1EBFF"
+                e.currentTarget.style.color = "#5420C8"
+                e.currentTarget.style.borderColor = "#5420C8"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "#F7F7F9"
+                e.currentTarget.style.color = "#111111"
+                e.currentTarget.style.borderColor = "#E5E5EB"
+              }}
+            >
+              <IcoUser />
+            </Link>
+
+            {/* Wishlist Icon with Item Count */}
+            <Link
+              href="/shop"
+              aria-label="Wishlist"
+              title="Wishlist"
+              style={{
+                position: "relative",
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: wishlistCount > 0 ? "#5420C8" : "#111111",
+                background: wishlistCount > 0 ? "#F1EBFF" : "#F7F7F9",
+                border: wishlistCount > 0 ? "1px solid #5420C8" : "1px solid #E5E5EB",
+                textDecoration: "none",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "#F1EBFF"
+                e.currentTarget.style.color = "#5420C8"
+                e.currentTarget.style.borderColor = "#5420C8"
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = wishlistCount > 0 ? "#F1EBFF" : "#F7F7F9"
+                e.currentTarget.style.color = wishlistCount > 0 ? "#5420C8" : "#111111"
+                e.currentTarget.style.borderColor = wishlistCount > 0 ? "#5420C8" : "#E5E5EB"
+              }}
+            >
+              <IcoHeart />
+              {wishlistCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -4,
+                    right: -4,
+                    background: "#5420C8",
+                    color: "#FFFFFF",
+                    fontSize: "10.5px",
+                    fontWeight: 800,
+                    minWidth: "18px",
+                    height: "18px",
+                    borderRadius: "9999px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 4px",
+                    boxShadow: "0 2px 6px rgba(84, 32, 200, 0.4)",
+                  }}
+                >
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            {/* Shopping Cart Icon with Item Count */}
+            <Link
+              href="/cart"
+              aria-label="Shopping Cart"
+              title="Shopping Cart"
+              style={{
+                position: "relative",
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: totalItems > 0 ? "#FFFFFF" : "#111111",
+                background: totalItems > 0 ? "#5420C8" : "#F7F7F9",
+                border: totalItems > 0 ? "1px solid #5420C8" : "1px solid #E5E5EB",
+                textDecoration: "none",
+                transition: "all 0.2s",
+                boxShadow: totalItems > 0 ? "0 4px 12px rgba(84, 32, 200, 0.3)" : "none",
+              }}
+              onMouseEnter={e => {
+                if (totalItems === 0) {
+                  e.currentTarget.style.background = "#F1EBFF"
+                  e.currentTarget.style.color = "#5420C8"
+                  e.currentTarget.style.borderColor = "#5420C8"
+                }
+              }}
+              onMouseLeave={e => {
+                if (totalItems === 0) {
+                  e.currentTarget.style.background = "#F7F7F9"
+                  e.currentTarget.style.color = "#111111"
+                  e.currentTarget.style.borderColor = "#E5E5EB"
+                }
+              }}
+            >
+              <IcoCart />
+              {totalItems > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -4,
+                    right: -4,
+                    background: "#111111",
+                    color: "#FFFFFF",
+                    fontSize: "10.5px",
+                    fontWeight: 800,
+                    minWidth: "18px",
+                    height: "18px",
+                    borderRadius: "9999px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 4px",
+                    border: "1.5px solid #FFFFFF",
+                  }}
+                >
+                  {totalItems}
+                </span>
+              )}
+            </Link>
+
+            {/* Mobile Hamburger Toggle */}
             <button
-              className="hic hdr__burger"
               onClick={() => setMenuOpen(o => !o)}
+              className="claspo-mobile-toggle"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={menuOpen}
+              style={{
+                background: "#F7F7F9",
+                border: "1px solid #E5E5EB",
+                width: 40,
+                height: 40,
+                borderRadius: "10px",
+                cursor: "pointer",
+                display: "none",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#111111",
+              }}
             >
               <IcoBurger open={menuOpen} />
             </button>
           </div>
         </div>
+
+        {/* ── Mobile Navigation Drawer ── */}
+        {menuOpen && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.5)",
+              zIndex: 200,
+              backdropFilter: "blur(4px)",
+            }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <div
+              style={{
+                width: "82%",
+                maxWidth: "340px",
+                height: "100%",
+                background: "#FFFFFF",
+                boxShadow: "0 0 30px rgba(0,0,0,0.2)",
+                padding: "24px 20px",
+                display: "flex",
+                flexDirection: "column",
+                overflowY: "auto",
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header inside drawer */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #E5E5EB" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: "#5420C8", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
+                    C
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: "18px", color: "#111" }}>CLASPO</div>
+                    <div style={{ fontSize: "9px", color: "#5420C8", fontWeight: 700, letterSpacing: "0.1em" }}>CLICK. PICK. DONE.</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  style={{ background: "#F7F7F9", border: "none", width: 32, height: 32, borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Mobile Search */}
+              <form onSubmit={handleSearchSubmit} style={{ marginBottom: 20 }}>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "10px 14px 10px 36px",
+                      borderRadius: "8px",
+                      border: "1px solid #E5E5EB",
+                      background: "#F7F7F9",
+                      fontSize: "13.5px",
+                    }}
+                  />
+                  <span style={{ position: "absolute", left: 12, top: 11, color: "#707070" }}>
+                    <IcoSearch />
+                  </span>
+                </div>
+              </form>
+
+              {/* Mobile links */}
+              <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+                <Link href="/" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Home</Link>
+                <Link href="/shop" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Shop Catalog</Link>
+                <Link href="/products" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Products & Categories</Link>
+                <Link href="/about" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
+                <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Contact & Quote</Link>
+                <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#111", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
+                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 8, textDecoration: "none", color: "#5420C8", fontWeight: 700, fontSize: "15px" }}>Track Your Order</Link>
+              </nav>
+
+              {/* Mobile Footer in drawer */}
+              <div style={{ paddingTop: 20, borderTop: "1px solid #E5E5EB", fontSize: "12px", color: "#707070" }}>
+                <div>Email: <a href="mailto:info@claspo.store" style={{ color: "#5420C8", fontWeight: 600 }}>info@claspo.store</a></div>
+                <div style={{ marginTop: 6 }}>Phone: +1 734 891 0248</div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* ── Mobile drawer ── */}
-      <div className={`mob-nav${menuOpen ? " mob-nav--open" : ""}`} aria-hidden={!menuOpen}>
-        <nav className="mob-nav__links" style={{ overflowY: "auto", paddingBottom: 24 }}>
-          {/* Products Accordion */}
-          <div>
-            <button 
-              className="mob-nav__link" 
-              style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: mobProductsOpen ? "none" : "", transitionDelay: menuOpen ? "0ms" : "0ms" }}
-              onClick={() => setMobProductsOpen(o => !o)}
-            >
-              Products
-              <IcoChevron style={{ transform: mobProductsOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
-            </button>
-            {mobProductsOpen && (
-              <div style={{ paddingLeft: 16, paddingBottom: 16, borderBottom: "1px solid rgba(255, 255, 255, 0.07)" }}>
-                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", textTransform: "uppercase", letterSpacing: "0.1em" }}>Wire Harness</div>
-                {PRODUCTS_WIRE.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Overmolded Cable Assembly</div>
-                {PRODUCTS_OVERMOLDED.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Coil / Spiral Cable</div>
-                {PRODUCTS_COIL.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Cable Assembly</div>
-                {PRODUCTS_CABLE.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-                <div style={{ color: "var(--textM)", fontSize: 12, padding: "8px 0", marginTop: 8, textTransform: "uppercase", letterSpacing: "0.1em" }}>Advanced Solutions</div>
-                {PRODUCTS_ADVANCED.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Industries Accordion */}
-          <div>
-            <button 
-              className="mob-nav__link" 
-              style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: mobIndustriesOpen ? "none" : "", transitionDelay: menuOpen ? "50ms" : "0ms" }}
-              onClick={() => setMobIndustriesOpen(o => !o)}
-            >
-              Industries
-              <IcoChevron style={{ transform: mobIndustriesOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
-            </button>
-            {mobIndustriesOpen && (
-              <div style={{ paddingLeft: 16, paddingBottom: 16, borderBottom: "1px solid rgba(255, 255, 255, 0.07)" }}>
-                {INDUSTRIES_DD.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Resources Accordion */}
-          <div>
-            <button 
-              className="mob-nav__link" 
-              style={{ width: "100%", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: mobResourcesOpen ? "none" : "", transitionDelay: menuOpen ? "100ms" : "0ms" }}
-              onClick={() => setMobResourcesOpen(o => !o)}
-            >
-              Resources
-              <IcoChevron style={{ transform: mobResourcesOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
-            </button>
-            {mobResourcesOpen && (
-              <div style={{ paddingLeft: 16, paddingBottom: 16, borderBottom: "1px solid rgba(255, 255, 255, 0.07)" }}>
-                {RESOURCES_DD.map(item => (
-                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "10px 0", fontSize: 16, color: "rgba(255,255,255,0.85)", textDecoration: "none" }}>{item.label}</Link>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Static Links */}
-          {[
-            { href: "/", label: "Home" },
-            { href: "/shop", label: "Shop Online" },
-            { href: "/track-order", label: "Track Order" },
-            { href: "/about", label: "About" },
-            { href: "/contact", label: "Contact" },
-          ].map(({ href, label }, i) => (
-            <Link
-              key={href}
-              href={href}
-              className="mob-nav__link"
-              style={{ transitionDelay: menuOpen ? `${150 + i * 50}ms` : "0ms" }}
-              onClick={() => setMenuOpen(false)}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-
-        <div style={{ padding: "0 24px 24px" }}>
-          <button
-            className="btn bp"
-            style={{ width: "100%", justifyContent: "center", display: "flex" }}
-            onClick={() => { setMenuOpen(false); setQuoteOpen(true) }}
-          >
-            Request Quote
-          </button>
-        </div>
-
-        <div className="mob-nav__bar">
-          <Link href="/cart" className="mob-nav__act" onClick={() => setMenuOpen(false)}>
-            <IcoCart />
-            Cart
-            {totalItems > 0 && <span className="mob-cart-dot">{totalItems}</span>}
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Quote Popup Modal ── */}
-      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} />
+      {/* Media query helper style for header responsiveness */}
+      <style jsx global>{`
+        @media (max-width: 900px) {
+          .claspo-nav-links,
+          .claspo-header-search {
+            display: none !important;
+          }
+          .claspo-mobile-toggle {
+            display: flex !important;
+          }
+        }
+      `}</style>
     </>
   )
 }
