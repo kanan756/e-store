@@ -143,7 +143,7 @@ export default function WhyUs() {
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 800, color: "#17191C" }}>Top Rated Utility</div>
-                <div style={{ fontSize: 11, color: "#747474" }}>Click. Pick. Done.</div>
+                <div style={{ fontSize: 11, color: "#747474" }}>Smart Home Solutions</div>
               </div>
             </div>
           </div>

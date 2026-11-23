@@ -20,6 +20,8 @@
 
 import { google } from "googleapis"
 import { cache } from "react"
+import fs from "fs"
+import path from "path"
 
 // ── Rate Limiting / Caching ───────────────────────────────────────────────────
 // Google Sheets has a strict 60 requests per minute limit. This wrapper holds
@@ -672,4 +674,233 @@ export function slugify(str: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")
+}
+
+// ── Customers ─────────────────────────────────────────────────────────────────
+export interface Customer {
+  rowIndex?: number
+  userId: string
+  fullName: string
+  username: string
+  phoneNumber: string
+  email: string
+  passwordHash: string
+  provider: "credentials" | "google"
+  role: "customer" | "admin"
+  resetToken?: string
+  resetTokenExpiry?: string
+  createdAt: string
+  updatedAt: string
+}
+
+const LOCAL_CUSTOMERS_FILE = path.join(process.cwd(), ".customers_store.json")
+
+function loadLocalCustomers(): Customer[] {
+  try {
+    if (fs.existsSync(LOCAL_CUSTOMERS_FILE)) {
+      const data = fs.readFileSync(LOCAL_CUSTOMERS_FILE, "utf-8")
+      return JSON.parse(data)
+    }
+  } catch (e) {
+    // ignore
+  }
+  return []
+}
+
+function saveLocalCustomers(list: Customer[]): void {
+  try {
+    fs.writeFileSync(LOCAL_CUSTOMERS_FILE, JSON.stringify(list, null, 2), "utf-8")
+  } catch (e) {
+    // ignore
+  }
+}
+
+async function ensureCustomersSheet(): Promise<void> {
+  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) return
+  try {
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID })
+    const sheetExists = meta.data.sheets?.some(s => s.properties?.title === "Customers")
+    if (!sheetExists) {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: SHEET_ID,
+        requestBody: {
+          requests: [{ addSheet: { properties: { title: "Customers" } } }]
+        }
+      })
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: SHEET_ID,
+        range: "Customers!A1:L1",
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [[
+            "userId", "fullName", "username", "phoneNumber", "email",
+            "passwordHash", "provider", "role", "resetToken", "resetTokenExpiry",
+            "createdAt", "updatedAt"
+          ]]
+        }
+      })
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+export async function getAllCustomers(): Promise<Customer[]> {
+  const localList = loadLocalCustomers()
+  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+    return localList
+  }
+
+  try {
+    await ensureCustomersSheet()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Customers!A2:L",
+    })
+    const rows = res.data.values ?? []
+    const sheetCustomers: Customer[] = rows
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        userId: r[0] ?? "",
+        fullName: r[1] ?? "",
+        username: r[2] ?? "",
+        phoneNumber: r[3] ?? "",
+        email: (r[4] ?? "").toLowerCase(),
+        passwordHash: r[5] ?? "",
+        provider: (r[6] ?? "credentials") as "credentials" | "google",
+        role: (r[7] ?? "customer") as "customer" | "admin",
+        resetToken: r[8] ?? "",
+        resetTokenExpiry: r[9] ?? "",
+        createdAt: r[10] ?? "",
+        updatedAt: r[11] ?? "",
+      }))
+      .filter((c) => c.userId !== "")
+
+    // Merge any local customer not yet synced
+    const sheetIds = new Set(sheetCustomers.map(c => c.userId))
+    const merged = [...sheetCustomers]
+    for (const loc of localList) {
+      if (!sheetIds.has(loc.userId)) {
+        merged.push(loc)
+      }
+    }
+    return merged
+  } catch (err) {
+    console.error("Error reading Customers sheet:", err)
+    return localList
+  }
+}
+
+export async function getCustomerByEmail(email: string): Promise<Customer | null> {
+  const cleanEmail = email.trim().toLowerCase()
+  const customers = await getAllCustomers()
+  return customers.find(c => c.email.toLowerCase() === cleanEmail) || null
+}
+
+export async function getCustomerByUsername(username: string): Promise<Customer | null> {
+  const cleanUsername = username.trim().toLowerCase()
+  const customers = await getAllCustomers()
+  return customers.find(c => c.username.toLowerCase() === cleanUsername) || null
+}
+
+export async function getCustomerById(userId: string): Promise<Customer | null> {
+  const customers = await getAllCustomers()
+  return customers.find(c => c.userId === userId) || null
+}
+
+export async function getCustomerByResetToken(token: string): Promise<Customer | null> {
+  if (!token) return null
+  const customers = await getAllCustomers()
+  return customers.find(c => c.resetToken === token) || null
+}
+
+export async function appendCustomer(customer: Omit<Customer, "rowIndex">): Promise<Customer> {
+  const newCustomer: Customer = { ...customer }
+  const localList = loadLocalCustomers()
+  localList.push(newCustomer)
+  saveLocalCustomers(localList)
+
+  if (SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+    try {
+      await ensureCustomersSheet()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: SHEET_ID,
+        range: "Customers!A:L",
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [[
+            newCustomer.userId,
+            newCustomer.fullName,
+            newCustomer.username,
+            newCustomer.phoneNumber,
+            newCustomer.email.toLowerCase(),
+            newCustomer.passwordHash,
+            newCustomer.provider,
+            newCustomer.role,
+            newCustomer.resetToken || "",
+            newCustomer.resetTokenExpiry || "",
+            newCustomer.createdAt,
+            newCustomer.updatedAt,
+          ]],
+        },
+      })
+    } catch (err) {
+      console.error("Error appending to Customers sheet:", err)
+    }
+  }
+
+  return newCustomer
+}
+
+export async function updateCustomer(userId: string, updates: Partial<Customer>): Promise<boolean> {
+  const localList = loadLocalCustomers()
+  const idx = localList.findIndex(c => c.userId === userId)
+  if (idx !== -1) {
+    localList[idx] = { ...localList[idx], ...updates, updatedAt: new Date().toISOString() }
+    saveLocalCustomers(localList)
+  }
+
+  if (SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+    try {
+      const customers = await getAllCustomers()
+      const target = customers.find(c => c.userId === userId)
+      if (target && target.rowIndex) {
+        const auth = getAuth()
+        const sheets = google.sheets({ version: "v4", auth })
+        const merged: Customer = { ...target, ...updates, updatedAt: new Date().toISOString() }
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SHEET_ID,
+          range: `Customers!A${target.rowIndex}:L${target.rowIndex}`,
+          valueInputOption: "RAW",
+          requestBody: {
+            values: [[
+              merged.userId,
+              merged.fullName,
+              merged.username,
+              merged.phoneNumber,
+              merged.email.toLowerCase(),
+              merged.passwordHash,
+              merged.provider,
+              merged.role,
+              merged.resetToken || "",
+              merged.resetTokenExpiry || "",
+              merged.createdAt,
+              merged.updatedAt,
+            ]],
+          },
+        })
+        return true
+      }
+    } catch (err) {
+      console.error("Error updating Customers sheet:", err)
+    }
+  }
+
+  return idx !== -1
 }

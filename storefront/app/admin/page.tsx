@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 export default function AdminLoginPage() {
@@ -9,6 +9,17 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(d => {
+        if (d?.user?.role === "admin") {
+          window.location.href = "/admin/dashboard"
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,7 +33,7 @@ export default function AdminLoginPage() {
     })
 
     if (res.ok) {
-      router.push("/admin/dashboard")
+      window.location.href = "/admin/dashboard"
     } else {
       setError("Invalid email or password. Please try again.")
       setLoading(false)

@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
+import { useSession, signOut } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 import { useWishlist } from "@/context/wishlist-context"
 
@@ -101,14 +102,17 @@ export default function Header() {
   const { wishlistCount } = useWishlist()
 
   const [scrolled, setScrolled] = useState(false)
+  const { data: session, status } = useSession()
   const [shopOpen, setShopOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchFocused, setSearchFocused] = useState(false)
 
   const shopDDRef = useRef<HTMLDivElement>(null)
   const productsDDRef = useRef<HTMLDivElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -126,6 +130,9 @@ export default function Header() {
       if (productsDDRef.current && !productsDDRef.current.contains(e.target as Node)) {
         setProductsOpen(false)
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
@@ -136,6 +143,7 @@ export default function Header() {
     setShopOpen(false)
     setProductsOpen(false)
     setMenuOpen(false)
+    setUserMenuOpen(false)
   }, [pathname])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -587,37 +595,204 @@ export default function Header() {
               </button>
             </form>
 
-            {/* Account Icon */}
-            <Link
-              href="/track-order"
-              aria-label="User Account"
-              title="Track Order / Account"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#17191C",
-                background: "#F5F5F5",
-                border: "1px solid #E5E5E5",
-                textDecoration: "none",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = "#FFF0E5"
-                e.currentTarget.style.color = "#F36B12"
-                e.currentTarget.style.borderColor = "#F36B12"
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = "#F5F5F5"
-                e.currentTarget.style.color = "#17191C"
-                e.currentTarget.style.borderColor = "#E5E5E5"
-              }}
-            >
-              <IcoUser />
-            </Link>
+            {/* Account Menu */}
+            <div ref={userMenuRef} style={{ position: "relative" }}>
+              {status === "authenticated" && session?.user ? (
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen(o => !o)}
+                  aria-label="User Account"
+                  title={session.user.name || session.user.email || "Account"}
+                  style={{
+                    height: 40,
+                    padding: "0 12px",
+                    borderRadius: 20,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "#17191C",
+                    background: userMenuOpen ? "#FFF0E5" : "#F5F5F5",
+                    border: userMenuOpen ? "1px solid #F36B12" : "1px solid #E5E5E5",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: "50%",
+                      background: "#F36B12",
+                      color: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 12,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {(session.user.name || session.user.email || "U").charAt(0).toUpperCase()}
+                  </span>
+                  <span style={{ maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {(session.user as any).username || session.user.name?.split(" ")[0] || "Account"}
+                  </span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: userMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  aria-label="Sign In / Register"
+                  title="Sign In / Register"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#17191C",
+                    background: "#F5F5F5",
+                    border: "1px solid #E5E5E5",
+                    textDecoration: "none",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "#FFF0E5"
+                    e.currentTarget.style.color = "#F36B12"
+                    e.currentTarget.style.borderColor = "#F36B12"
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "#F5F5F5"
+                    e.currentTarget.style.color = "#17191C"
+                    e.currentTarget.style.borderColor = "#E5E5E5"
+                  }}
+                >
+                  <IcoUser />
+                </Link>
+              )}
+
+              {/* User Dropdown */}
+              {userMenuOpen && status === "authenticated" && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    right: 0,
+                    width: 220,
+                    background: "#FFFFFF",
+                    borderRadius: 10,
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)",
+                    border: "1px solid #E5E5E5",
+                    padding: "8px 0",
+                    zIndex: 200,
+                  }}
+                >
+                  <div style={{ padding: "10px 16px", borderBottom: "1px solid #F0F0F0" }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#17191C" }}>
+                      {session?.user?.name || "Customer"}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "#747474", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {session?.user?.email}
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/account"
+                    onClick={() => setUserMenuOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 16px",
+                      fontSize: 13.5,
+                      color: "#17191C",
+                      textDecoration: "none",
+                      transition: "background 0.15s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#FFF0E5")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    My Account
+                  </Link>
+
+                  <Link
+                    href="/track-order"
+                    onClick={() => setUserMenuOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 16px",
+                      fontSize: 13.5,
+                      color: "#17191C",
+                      textDecoration: "none",
+                      transition: "background 0.15s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#FFF0E5")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                    Track Order
+                  </Link>
+
+                  {(session?.user as any)?.role === "admin" && (
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "10px 16px",
+                        fontSize: 13.5,
+                        color: "#F36B12",
+                        fontWeight: 700,
+                        textDecoration: "none",
+                        transition: "background 0.15s",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "#FFF0E5")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      Admin Dashboard
+                    </Link>
+                  )}
+
+                  <div style={{ height: 1, background: "#F0F0F0", margin: "6px 0" }} />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserMenuOpen(false)
+                      signOut({ callbackUrl: "/login" })
+                    }}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 16px",
+                      fontSize: 13.5,
+                      color: "#ef4444",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Wishlist Icon with Item Count */}
             <Link
@@ -844,7 +1019,36 @@ export default function Header() {
                 <Link href="/about" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
                 <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
                 <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
-                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#F36B12", fontWeight: 700, fontSize: "15px" }}>Track Your Order</Link>
+                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Track Your Order</Link>
+
+                <div style={{ height: 1, background: "#E5E5E5", margin: "8px 0" }} />
+
+                {status === "authenticated" && session?.user ? (
+                  <>
+                    <div style={{ padding: "6px 12px", fontSize: "12px", color: "#747474" }}>
+                      Signed in as <strong style={{ color: "#17191C" }}>{session.user.name || session.user.email}</strong>
+                    </div>
+                    <Link href="/account" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#F36B12", fontWeight: 700, fontSize: "15px", background: "#FFF0E5" }}>My Account</Link>
+                    {(session.user as any)?.role === "admin" && (
+                      <Link href="/admin/dashboard" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 700, fontSize: "15px" }}>Admin Dashboard</Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false)
+                        signOut({ callbackUrl: "/login" })
+                      }}
+                      style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#ef4444", fontWeight: 600, fontSize: "15px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer" }}
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#FFFFFF", background: "#F36B12", fontWeight: 700, fontSize: "15px", textAlign: "center" }}>Sign In</Link>
+                    <Link href="/signup" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", background: "#F5F5F5", border: "1px solid #E5E5E5", fontWeight: 600, fontSize: "15px", textAlign: "center" }}>Create Account</Link>
+                  </>
+                )}
               </nav>
 
               {/* Mobile Footer in drawer */}

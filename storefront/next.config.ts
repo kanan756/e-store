@@ -54,9 +54,6 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
   output: "standalone",
 
   // Apply security headers to all responses

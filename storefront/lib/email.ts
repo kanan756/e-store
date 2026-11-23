@@ -482,3 +482,95 @@ export async function sendNewsletterWelcomeEmail({ to }: { to: string }) {
     html,
   })
 }
+
+// ── Password Reset Email ───────────────────────────────────────────────────────
+export async function sendPasswordResetEmail({
+  to,
+  name,
+  resetUrl,
+}: {
+  to: string
+  name: string
+  resetUrl: string
+}): Promise<boolean> {
+  const fromName = process.env.EMAIL_FROM_NAME || "CLASPO"
+  const eName = escapeHtml(name || "Customer")
+  const eUrl = escapeHtml(resetUrl)
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background-color:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F5F5;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background:#FFFFFF;border-radius:12px;border:1px solid #E5E5E5;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+        <!-- Header -->
+        <tr>
+          <td style="background:#303638;padding:28px 36px;text-align:center;">
+            <div style="color:#FFFFFF;font-size:24px;font-weight:900;letter-spacing:0.04em;">CLASPO</div>
+            <div style="color:#F36B12;font-size:11px;font-weight:700;letter-spacing:0.12em;margin-top:4px;">SMART HOME SOLUTIONS</div>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding:36px 36px 28px;">
+            <h2 style="margin:0 0 16px;color:#17191C;font-size:20px;font-weight:800;">Password Reset Request</h2>
+            <p style="color:#555555;font-size:15px;line-height:1.6;margin:0 0 20px;">
+              Hello ${eName},
+            </p>
+            <p style="color:#555555;font-size:15px;line-height:1.6;margin:0 0 28px;">
+              We received a request to reset the password for your CLASPO account. Click the button below to set a new password. This link will expire in <strong>1 hour</strong>.
+            </p>
+
+            <div style="text-align:center;margin:32px 0;">
+              <a href="${eUrl}" style="display:inline-block;padding:14px 32px;background:#F36B12;color:#FFFFFF;text-decoration:none;border-radius:8px;font-size:15px;font-weight:700;letter-spacing:0.02em;box-shadow:0 4px 12px rgba(243,107,18,0.3);">
+                Reset Password
+              </a>
+            </div>
+
+            <p style="color:#747474;font-size:13px;line-height:1.6;margin:28px 0 0;padding-top:20px;border-top:1px solid #E5E5E5;">
+              If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+            </p>
+            <p style="color:#999999;font-size:12px;margin:12px 0 0;word-break:break-all;">
+              Button not working? Copy and paste this link into your browser:<br>
+              <a href="${eUrl}" style="color:#F36B12;">${eUrl}</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 36px;background:#FAFAFA;border-top:1px solid #E5E5E5;text-align:center;">
+            <p style="margin:0;color:#747474;font-size:12px;line-height:1.5;">
+              ${fromName} &middot; Smart Solutions for Everyday Living<br>
+              306, Radhe Kishan Arista, oppo. Hirabhai Tower, Maninagar, Ahmedabad, Gujarat - 380008
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+`
+
+  try {
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      console.log(`[Email Mock] Password reset link for ${to}: ${resetUrl}`)
+      return true
+    }
+    await transporter.sendMail({
+      from: `"${fromName}" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `Reset Your ${fromName} Password`,
+      html,
+    })
+    return true
+  } catch (err) {
+    console.error("Failed to send password reset email:", err)
+    console.log(`[Email Fallback] Password reset link for ${to}: ${resetUrl}`)
+    return false
+  }
+}

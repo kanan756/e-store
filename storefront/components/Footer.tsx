@@ -302,7 +302,7 @@ export default function Footer() {
           }}
         >
           <div>
-            &copy; {new Date().getFullYear()} CLASPO. All rights reserved. &middot; <span style={{ color: "#F36B12", fontWeight: 700 }}>CLICK. PICK. DONE.</span>
+            &copy; {new Date().getFullYear()} CLASPO. All rights reserved. &middot; <span style={{ color: "#F36B12", fontWeight: 700 }}>SMART HOME SOLUTIONS</span>
           </div>
 
           <div style={{ display: "flex", gap: 20 }}>

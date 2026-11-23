@@ -220,7 +220,7 @@ export default function AboutPage() {
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: "#17191C" }}>CLASPO</div>
                   <div style={{ fontSize: 11, color: "#F36B12", fontWeight: 700, letterSpacing: "0.06em" }}>
-                    CLICK. PICK. DONE.
+                    SMART HOME SOLUTIONS
                   </div>
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function AboutPage() {
                   fontSize: 15,
                 }}
               >
-                CLASPO &ndash; Click. Pick. Done.
+                CLASPO &ndash; Smart Home Solutions
               </div>
             </div>
           </div>

@@ -26,7 +26,7 @@ const REVIEWS = [
     rating: 5,
   },
   {
-    quote: "CLASPO's modular drawer dividers and deep-cleaning brush set are thoughtfully designed. Everything in our kitchen and pantry now has an organized place. Truly click, pick, and done.",
+    quote: "CLASPO's modular drawer dividers and deep-cleaning brush set are thoughtfully designed. Everything in our kitchen and pantry now has an organized place. Truly smart home solutions.",
     author: "Ananya D.",
     location: "Busy Homemaker",
     verified: "Verified Buyer",

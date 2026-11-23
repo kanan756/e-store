@@ -1,5 +1,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import { verifyAdminToken } from "@/lib/admin-auth"
 import DashboardClient from "./DashboardClient"
 
@@ -7,15 +9,20 @@ export default async function AdminDashboardPage() {
   const cookieStore = await cookies()
   const token = cookieStore.get("admin_session")?.value
 
-  if (!token) {
-    redirect("/admin")
+  if (token) {
+    const { valid, role } = verifyAdminToken(token)
+    if (valid && role) {
+      return <DashboardClient role={role} />
+    }
   }
 
-  const { valid, role } = verifyAdminToken(token)
+  // Fallback: verify NextAuth session
+  const session = await getServerSession(authOptions)
+  const sessionRole = (session?.user as any)?.role
 
-  if (!valid || !role) {
-    redirect("/admin")
+  if (sessionRole === "admin") {
+    return <DashboardClient role="admin" />
   }
 
-  return <DashboardClient role={role} />
+  redirect("/admin")
 }

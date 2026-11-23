@@ -1,0 +1,14 @@
+[
+  {
+    "userId": "usr_1795438921393_9g45e",
+    "fullName": "Hir Shah",
+    "username": "hir",
+    "phoneNumber": "+919874563210",
+    "email": "hir0408@gmail.com",
+    "passwordHash": "$2b$10$8rlhwLaxPfVexX1UDegBKOutdCDE4PrMAhnTmfO/bir9yd4NgHLdW",
+    "provider": "credentials",
+    "role": "customer",
+    "createdAt": "2026-11-23T13:02:01.393Z",
+    "updatedAt": "2026-11-23T13:02:16.608Z"
+  }
+]
