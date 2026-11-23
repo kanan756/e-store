@@ -46,7 +46,7 @@ export async function generateInvoicePdf({
       doc.y = 50;
       doc.x = 50;
 
-      const logoPath = path.join(process.cwd(), "public", "images", "logo.png");
+      const logoPath = path.join(process.cwd(), "public", "images", "claspo-latest-logo.png");
       if (fs.existsSync(logoPath)) {
         doc.image(logoPath, 50, 40, { fit: [140, 70] });
       } else {

@@ -274,11 +274,12 @@ export default function Header() {
           >
             <div style={{ position: "relative", width: 154, height: 46 }}>
               <Image
-                src="/images/claspo-logo-tight.png"
+                src="/images/claspo-latest-logo.png"
                 alt="CLASPO™ - SMART HOME SOLUTIONS"
                 fill
                 style={{ objectFit: "contain" }}
                 priority
+                unoptimized
               />
             </div>
           </Link>
@@ -795,10 +796,11 @@ export default function Header() {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid #E5E5E5" }}>
                 <div style={{ position: "relative", width: 140, height: 42 }}>
                   <Image
-                    src="/images/claspo-logo-tight.png"
+                    src="/images/claspo-latest-logo.png"
                     alt="CLASPO™ - SMART HOME SOLUTIONS"
                     fill
                     style={{ objectFit: "contain" }}
+                    unoptimized
                   />
                 </div>
                 <button

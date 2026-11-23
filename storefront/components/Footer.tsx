@@ -88,10 +88,11 @@ export default function Footer() {
           <div style={{ maxWidth: 320 }}>
             <Link href="/" style={{ display: "inline-block", position: "relative", width: 154, height: 48, marginBottom: 14 }}>
               <Image
-                src="/images/claspo-logo-tight.png"
+                src="/images/claspo-latest-logo-white.png"
                 alt="CLASPO™ - SMART HOME SOLUTIONS"
                 fill
-                style={{ objectFit: "contain", filter: "brightness(0) invert(1)" }}
+                style={{ objectFit: "contain" }}
+                unoptimized
               />
             </Link>
 
@@ -105,7 +106,7 @@ export default function Footer() {
                 marginBottom: 12,
               }}
             >
-              CLASPO &ndash; CLICK. PICK. DONE.
+              CLASPO &ndash; SMART HOME SOLUTIONS
             </div>
 
             <p style={{ fontSize: 13.5, color: "#DADADA", lineHeight: 1.65, marginBottom: 20 }}>
