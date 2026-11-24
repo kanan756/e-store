@@ -20,9 +20,13 @@ import os from "os"
 function getLocalDevOrigins(): string[] {
   const origins = new Set<string>([
     "localhost",
+    "localhost:3000",
     "127.0.0.1",
+    "127.0.0.1:3000",
     "192.168.56.1",
+    "192.168.56.1:3000",
     "192.168.1.8",
+    "192.168.1.8:3000",
   ])
   try {
     const ifaces = os.networkInterfaces()
@@ -30,6 +34,7 @@ function getLocalDevOrigins(): string[] {
       for (const iface of ifaces[name] || []) {
         if (iface.family === "IPv4" && !iface.internal) {
           origins.add(iface.address)
+          origins.add(`${iface.address}:3000`)
         }
       }
     }
@@ -72,7 +77,7 @@ const securityHeaders = [
       "frame-src https://accounts.google.com https://*.stripe.com",
       // Fetch/XHR/WebSockets: own API + Google OAuth + GA + dev HMR WebSockets
       "connect-src 'self' ws: wss: http: https: https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com",
-      "form-action 'self' http://localhost:* http://127.0.0.1:* http://192.168.*:* https://*.stripe.com",
+      "form-action 'self' http://localhost:3000 http://localhost http://127.0.0.1:3000 http://127.0.0.1 http://192.168.56.1:3000 http://192.168.56.1 http://192.168.1.8:3000 http://192.168.1.8 http://192.168.*:* https://*.stripe.com",
       "base-uri 'self'",
     ].join("; "),
   },
@@ -107,6 +112,17 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "localhost" },
     ],
   },
+  // Redirects (e.g. legacy /shop redirects directly to /products)
+  async redirects() {
+    return [
+      {
+        source: "/shop",
+        destination: "/products",
+        permanent: false,
+      },
+    ]
+  },
+
   serverExternalPackages: ["pdfkit"],
 }
 

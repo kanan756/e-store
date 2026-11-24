@@ -76,25 +76,6 @@ function IcoChevron({ style }: { style?: React.CSSProperties } = {}) {
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
-const SHOP_CATEGORIES = [
-  { label: "Kitchen Essentials", href: "/shop?category=Kitchen+Essentials", tag: "Hot" },
-  { label: "Home Organization", href: "/shop?category=Home+Organization", tag: "Popular" },
-  { label: "Storage Solutions", href: "/shop?category=Storage+Solutions", tag: "New" },
-  { label: "Cleaning Essentials", href: "/shop?category=Cleaning+Essentials", tag: "" },
-  { label: "Adhesive Solutions", href: "/shop?category=Adhesive+Solutions", tag: "No-Drill" },
-  { label: "Bathroom Accessories", href: "/shop?category=Bathroom+Accessories", tag: "" },
-  { label: "Browse All Products", href: "/shop", tag: "View All →" },
-]
-
-const PRODUCTS_POPULAR = [
-  { label: "Kitchen Tools & Gadgets", href: "/shop?category=Kitchen+Essentials" },
-  { label: "Home Organization & Storage", href: "/shop?category=Home+Organization" },
-  { label: "Cleaning Essentials", href: "/shop?category=Cleaning+Essentials" },
-  { label: "Adhesive & No-Drill Solutions", href: "/shop?category=Adhesive+Solutions" },
-  { label: "Space-Saving Products", href: "/shop?category=Storage+Solutions" },
-  { label: "Bathroom Accessories", href: "/shop?category=Bathroom+Accessories" },
-]
-
 export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
@@ -103,15 +84,11 @@ export default function Header() {
 
   const [scrolled, setScrolled] = useState(false)
   const { data: session, status } = useSession()
-  const [shopOpen, setShopOpen] = useState(false)
-  const [productsOpen, setProductsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchFocused, setSearchFocused] = useState(false)
 
-  const shopDDRef = useRef<HTMLDivElement>(null)
-  const productsDDRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -124,12 +101,6 @@ export default function Header() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (shopDDRef.current && !shopDDRef.current.contains(e.target as Node)) {
-        setShopOpen(false)
-      }
-      if (productsDDRef.current && !productsDDRef.current.contains(e.target as Node)) {
-        setProductsOpen(false)
-      }
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false)
       }
@@ -140,8 +111,6 @@ export default function Header() {
 
   // Close menus on path change
   useEffect(() => {
-    setShopOpen(false)
-    setProductsOpen(false)
     setMenuOpen(false)
     setUserMenuOpen(false)
   }, [pathname])
@@ -149,12 +118,11 @@ export default function Header() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`)
+      router.push(`/products?q=${encodeURIComponent(searchQuery.trim())}`)
     }
   }
 
   const isHome = pathname === "/"
-  const isShop = pathname.startsWith("/shop")
   const isProducts = pathname.startsWith("/products")
   const isAbout = pathname === "/about"
   const isContact = pathname === "/contact"
@@ -175,87 +143,6 @@ export default function Header() {
           transition: "box-shadow 0.25s ease, background 0.25s ease",
         }}
       >
-        {/* ── Top Announcement Bar (Charcoal with Orange accent) ── */}
-        <div
-          style={{
-            background: "#303638",
-            color: "#FFFFFF",
-            fontSize: "12px",
-            lineHeight: 1.4,
-            padding: "8px 24px",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 1360,
-              margin: "0 auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "16px",
-            }}
-          >
-            {/* Free shipping & tagline */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 500 }}>
-              <span style={{ color: "#F36B12", fontSize: "14px" }}>⚡</span>
-              <span>Free Shipping on Orders $100+ &middot; Smart Solutions for Everyday Living</span>
-            </div>
-
-            {/* Email & Track Order */}
-            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-              <a
-                href="mailto:info@claspo.store"
-                style={{
-                  color: "#FFFFFF",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  textDecoration: "none",
-                  fontSize: "12px",
-                  opacity: 0.9,
-                  transition: "opacity 0.2s, color 0.2s",
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.color = "#F36B12"
-                  e.currentTarget.style.opacity = "1"
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.color = "#FFFFFF"
-                  e.currentTarget.style.opacity = "0.9"
-                }}
-              >
-                <IcoMail />
-                <span>info@claspo.store</span>
-              </a>
-
-              <span style={{ opacity: 0.3 }}>|</span>
-
-              <Link
-                href="/track-order"
-                style={{
-                  color: "#FFFFFF",
-                  textDecoration: "none",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  letterSpacing: "0.02em",
-                  opacity: 0.9,
-                  transition: "opacity 0.2s, color 0.2s",
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.color = "#F36B12"
-                  e.currentTarget.style.opacity = "1"
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.color = "#FFFFFF"
-                  e.currentTarget.style.opacity = "0.9"
-                }}
-              >
-                Track Order
-              </Link>
-            </div>
-          </div>
-        </div>
 
         {/* ── Main Navigation Bar ── */}
         <div
@@ -319,190 +206,19 @@ export default function Header() {
               Home
             </Link>
 
-            {/* Shop with Dropdown */}
-            <div ref={shopDDRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setShopOpen(o => !o)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: "14.5px",
-                  fontWeight: 600,
-                  color: isShop ? "#F36B12" : "#17191C",
-                  padding: "8px 0",
-                  borderBottom: isShop ? "2px solid #F36B12" : "2px solid transparent",
-                  fontFamily: "inherit",
-                }}
-                aria-expanded={shopOpen}
-              >
-                Shop <IcoChevron style={{ transform: shopOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-              </button>
-
-              {shopOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 12px)",
-                    left: "-20px",
-                    width: "280px",
-                    background: "#FFFFFF",
-                    borderRadius: "8px",
-                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
-                    border: "1px solid #E5E5E5",
-                    padding: "10px",
-                    zIndex: 150,
-                  }}
-                >
-                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #E5E5E5" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                      Featured Categories
-                    </div>
-                  </div>
-                  <div style={{ padding: "6px 0" }}>
-                    {SHOP_CATEGORIES.map(cat => (
-                      <Link
-                        key={cat.label}
-                        href={cat.href}
-                        onClick={() => setShopOpen(false)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "9px 12px",
-                          borderRadius: "6px",
-                          textDecoration: "none",
-                          fontSize: "13.5px",
-                          color: "#17191C",
-                          fontWeight: 500,
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.background = "#FFF0E5"
-                          e.currentTarget.style.color = "#F36B12"
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.background = "transparent"
-                          e.currentTarget.style.color = "#17191C"
-                        }}
-                      >
-                        <span>{cat.label}</span>
-                        {cat.tag && (
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              background: cat.tag.includes("→") ? "transparent" : "#FFF0E5",
-                              color: "#F36B12",
-                              fontWeight: 700,
-                              border: cat.tag.includes("→") ? "none" : "1px solid #F36B12",
-                            }}
-                          >
-                            {cat.tag}
-                          </span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Products with Dropdown */}
-            <div ref={productsDDRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setProductsOpen(o => !o)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: "14.5px",
-                  fontWeight: 600,
-                  color: isProducts ? "#F36B12" : "#17191C",
-                  padding: "8px 0",
-                  borderBottom: isProducts ? "2px solid #F36B12" : "2px solid transparent",
-                  fontFamily: "inherit",
-                }}
-                aria-expanded={productsOpen}
-              >
-                Products <IcoChevron style={{ transform: productsOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-              </button>
-
-              {productsOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 12px)",
-                    left: "-40px",
-                    width: "300px",
-                    background: "#FFFFFF",
-                    borderRadius: "8px",
-                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
-                    border: "1px solid #E5E5E5",
-                    padding: "10px",
-                    zIndex: 150,
-                  }}
-                >
-                  <div style={{ padding: "6px 12px 10px", borderBottom: "1px solid #E5E5E5" }}>
-                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                      Home Solutions
-                    </div>
-                  </div>
-                  <div style={{ padding: "6px 0" }}>
-                    {PRODUCTS_POPULAR.map(prod => (
-                      <Link
-                        key={prod.label}
-                        href={prod.href}
-                        onClick={() => setProductsOpen(false)}
-                        style={{
-                          display: "block",
-                          padding: "9px 12px",
-                          borderRadius: "6px",
-                          textDecoration: "none",
-                          fontSize: "13.5px",
-                          color: "#17191C",
-                          fontWeight: 500,
-                          transition: "background 0.15s, color 0.15s",
-                        }}
-                        onMouseEnter={e => {
-                          e.currentTarget.style.background = "#FFF0E5"
-                          e.currentTarget.style.color = "#F36B12"
-                        }}
-                        onMouseLeave={e => {
-                          e.currentTarget.style.background = "transparent"
-                          e.currentTarget.style.color = "#17191C"
-                        }}
-                      >
-                        {prod.label}
-                      </Link>
-                    ))}
-                    <div style={{ marginTop: 6, borderTop: "1px solid #E5E5E5", paddingTop: 6 }}>
-                      <Link
-                        href="/products"
-                        onClick={() => setProductsOpen(false)}
-                        style={{
-                          display: "block",
-                          padding: "8px 12px",
-                          fontSize: "12.5px",
-                          color: "#F36B12",
-                          fontWeight: 700,
-                          textDecoration: "none",
-                        }}
-                      >
-                        View All Collections &rarr;
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <Link
+              href="/products"
+              style={{
+                textDecoration: "none",
+                color: isProducts ? "#F36B12" : "#17191C",
+                padding: "8px 0",
+                position: "relative",
+                borderBottom: isProducts ? "2px solid #F36B12" : "2px solid transparent",
+                transition: "border-color 0.2s, color 0.2s",
+              }}
+            >
+              Products
+            </Link>
 
             <Link
               href="/about"
@@ -773,7 +489,7 @@ export default function Header() {
 
             {/* Wishlist Icon with Item Count */}
             <Link
-              href="/shop"
+              href="/products"
               aria-label="Wishlist"
               title="Wishlist"
               style={{
@@ -990,13 +706,12 @@ export default function Header() {
 
               {/* Mobile links */}
               <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                <Link href="/" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isHome ? "#F36B12" : "#17191C", background: isHome ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Home</Link>
-                <Link href="/shop" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isShop ? "#F36B12" : "#17191C", background: isShop ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Shop Catalog</Link>
-                <Link href="/products" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isProducts ? "#F36B12" : "#17191C", background: isProducts ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Products & Categories</Link>
-                <Link href="/about" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
-                <Link href="/contact" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
-                <Link href="/blog" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
-                <Link href="/track-order" style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Track Your Order</Link>
+                <Link href="/" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isHome ? "#F36B12" : "#17191C", background: isHome ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Home</Link>
+                <Link href="/products" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isProducts ? "#F36B12" : "#17191C", background: isProducts ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Products</Link>
+                <Link href="/about" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
+                <Link href="/contact" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
+                <Link href="/blog" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
+                <Link href="/track-order" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Track Your Order</Link>
 
                 <div style={{ height: 1, background: "#E5E5E5", margin: "8px 0" }} />
 

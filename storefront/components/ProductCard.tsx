@@ -60,6 +60,37 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const isLiked = isInWishlist(product.handle || product.id)
   const href = product.handle ? `/products/${product.handle}` : "/products"
 
+  const isValidUrl = (url: string) => {
+    if (!url || url === "-" || typeof url !== "string") return false
+    if (url.startsWith("/")) return true
+    try { new URL(url); return true } catch { return false }
+  }
+
+  // Extract primary image from primaryImage, imageUrl, or additionalImages array
+  let primaryImage: string | null = null
+  if (product.primaryImage && isValidUrl(product.primaryImage)) {
+    primaryImage = product.primaryImage
+  } else if (product.imageUrl) {
+    const list = product.imageUrl.split(",").map(u => u.trim()).filter(isValidUrl)
+    if (list.length > 0) primaryImage = list[0]
+  } else if (Array.isArray(product.additionalImages) && product.additionalImages.length > 0) {
+    const first = product.additionalImages[0]?.url
+    if (first && isValidUrl(first)) primaryImage = first
+  }
+
+  const outOfStock = product.inStock === false
+
+  // Compute pricing with discount support from Product Manager
+  const regularPrice = Number(product.price) || 0
+  const rawDiscount = product.discountPrice ? Number(product.discountPrice) : null
+  const hasDiscount = Boolean(rawDiscount !== null && rawDiscount > 0 && rawDiscount < regularPrice)
+  const sellingPrice = hasDiscount ? rawDiscount! : regularPrice
+  const originalPrice = hasDiscount ? regularPrice : 0
+  const discountPercent = hasDiscount
+    ? Math.round(((regularPrice - rawDiscount!) / regularPrice) * 100)
+    : 0
+  const hasPrice = sellingPrice > 0
+
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -74,37 +105,20 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     addItem({
       id: product.handle || product.id,
       name: product.name,
-      price: product.price,
-      imageUrl: product.imageUrl,
+      price: sellingPrice,
+      imageUrl: primaryImage || "",
       category: product.category,
     })
     setAdding(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
-  }, [addItem, product, session, router, href])
+  }, [addItem, product, session, router, href, sellingPrice, primaryImage])
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     toggleWishlist(product.handle || product.id)
   }
-
-  const isValidUrl = (url: string) => {
-    if (!url || url === "-") return false
-    if (url.startsWith("/")) return true
-    try { new URL(url); return true } catch { return false }
-  }
-
-  const images = product.imageUrl 
-    ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl)
-    : []
-  const primaryImage = images.length > 0 ? images[0] : null
-  const outOfStock = product.inStock === false
-
-  // Compute realistic original price for visual discount display
-  const hasPrice = product.price > 0
-  const originalPrice = hasPrice ? Math.round(product.price * 1.18) : 0
-  const discountPercent = hasPrice ? 15 : 0
 
   return (
     <div
@@ -155,7 +169,40 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
               }}
             />
           ) : (
-            <div style={{ color: "#747474", fontSize: "12px", fontFamily: "monospace" }}>CLASPO</div>
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)",
+                padding: "20px",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ position: "relative", width: 110, height: 32, opacity: 0.75, marginBottom: 8 }}>
+                <Image
+                  src="/images/claspo-latest-logo.png"
+                  alt="CLASPO"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  unoptimized
+                />
+              </div>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  color: "#9CA3AF",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Product Preview
+              </span>
+            </div>
           )}
 
           {/* Badges */}

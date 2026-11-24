@@ -86,19 +86,8 @@ export default async function SecureProductManagerLayout({
 
       {/* ── Main Work Area ── */}
       <div className="pm-main">
-        <header className="pm-topbar">
-          <div className="pm-topbar-title">Product Management Portal</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div className="pm-user-pill">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              <span>{session.email}</span>
-            </div>
-            <Link href="/secure-product-manager/products/add" className="pm-btn pm-btn-primary" style={{ padding: "7px 14px", fontSize: 13 }}>
-              + Add Product
-            </Link>
-          </div>
+        <header className="pm-header">
+          <h1 className="pm-header-title">CLASPO Product Management Portal</h1>
         </header>
 
         <div className="pm-container">{children}</div>

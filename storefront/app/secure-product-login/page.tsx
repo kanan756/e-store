@@ -182,11 +182,7 @@ function LoginFormContent() {
             <button
               type="button"
               id="pm-toggle-pw-btn"
-              onClick={() => {
-                setShowPassword((prev) => !prev)
-                const inp = document.getElementById("pm-password-input") as HTMLInputElement | null
-                if (inp) inp.type = inp.type === "password" ? "text" : "password"
-              }}
+              onClick={() => setShowPassword((prev) => !prev)}
               style={{
                 background: "none",
                 border: "none",
