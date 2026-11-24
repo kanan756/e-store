@@ -13,9 +13,32 @@ const loginSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const parsed = loginSchema.safeParse(body)
+    const contentType = request.headers.get("content-type") || ""
+    const isFormSubmit =
+      contentType.includes("application/x-www-form-urlencoded") ||
+      contentType.includes("multipart/form-data")
+
+    let rawEmail = ""
+    let rawPassword = ""
+
+    if (isFormSubmit) {
+      const formData = await request.formData()
+      rawEmail = String(formData.get("email") || "")
+      rawPassword = String(formData.get("password") || "")
+    } else {
+      const body = await request.json().catch(() => ({}))
+      rawEmail = body?.email || ""
+      rawPassword = body?.password || ""
+    }
+
+    const parsed = loginSchema.safeParse({ email: rawEmail, password: rawPassword })
     if (!parsed.success) {
+      if (isFormSubmit) {
+        return NextResponse.redirect(
+          new URL("/secure-product-login?error=invalid_credentials", request.url),
+          303
+        )
+      }
       return NextResponse.json(
         { error: parsed.error.issues[0]?.message || "Invalid input data" },
         { status: 400 }
@@ -32,6 +55,12 @@ export async function POST(request: Request) {
     )
 
     if (!success || !session) {
+      if (isFormSubmit) {
+        return NextResponse.redirect(
+          new URL("/secure-product-login?error=invalid_credentials", request.url),
+          303
+        )
+      }
       const isRateLimit = error?.toLowerCase().includes("too many")
       return NextResponse.json(
         { error: error || "Authentication failed" },
@@ -40,6 +69,18 @@ export async function POST(request: Request) {
     }
 
     const token = signPMSession(session)
+    const proto = request.headers.get("x-forwarded-proto") || (request.url.startsWith("https:") ? "https" : "http")
+    const host = request.headers.get("host") || ""
+    const isLocal = host.includes("localhost") || host.includes("127.0.0.1") || host.includes("192.168.")
+    const isSecure = proto === "https" && !isLocal
+
+    if (isFormSubmit) {
+      const redirectUrl = new URL("/secure-product-manager", request.url)
+      const redirectResponse = NextResponse.redirect(redirectUrl, 303)
+      setPMSessionCookie(redirectResponse, token, isSecure)
+      return redirectResponse
+    }
+
     const response = NextResponse.json({
       success: true,
       message: "Authentication successful",
@@ -49,7 +90,7 @@ export async function POST(request: Request) {
       },
     })
 
-    setPMSessionCookie(response, token)
+    setPMSessionCookie(response, token, isSecure)
     return response
   } catch (err: any) {
     console.error("PM login route error:", err)

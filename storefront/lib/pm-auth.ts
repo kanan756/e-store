@@ -102,6 +102,11 @@ export function verifyPMSessionToken(token: string): PMSession | null {
  * Check and record login rate limiting (max 5 failed attempts per 15 minutes per IP)
  */
 export function checkPMLoginRateLimit(ip: string): { allowed: boolean; remainingSeconds?: number } {
+  // In development (localhost), do not block local administrator logins with rate limits
+  if (ip === "127.0.0.1" || ip === "::1" || ip === "localhost" || process.env.NODE_ENV !== "production") {
+    return { allowed: true }
+  }
+
   const now = Date.now()
   const entry = loginAttempts.get(ip)
 
@@ -208,13 +213,17 @@ export async function getProductManagerSession(): Promise<PMSession | null> {
 /**
  * Set HTTP-only secure session cookie on a NextResponse
  */
-export function setPMSessionCookie(response: NextResponse, token: string): void {
-  const isProduction = process.env.NODE_ENV === "production"
+export function setPMSessionCookie(response: NextResponse, token: string, forceSecure?: boolean): void {
+  const isHttps =
+    typeof forceSecure === "boolean"
+      ? forceSecure
+      : (process.env.NEXTAUTH_URL?.startsWith("https://") ||
+         (process.env.NODE_ENV === "production" && process.env.VERCEL === "1"))
   response.cookies.set({
     name: PM_COOKIE_NAME,
     value: token,
     httpOnly: true,
-    secure: isProduction,
+    secure: isHttps || false,
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_DURATION_SECONDS,
@@ -224,12 +233,17 @@ export function setPMSessionCookie(response: NextResponse, token: string): void 
 /**
  * Clear the session cookie on logout
  */
-export function clearPMSessionCookie(response: NextResponse): void {
+export function clearPMSessionCookie(response: NextResponse, forceSecure?: boolean): void {
+  const isHttps =
+    typeof forceSecure === "boolean"
+      ? forceSecure
+      : (process.env.NEXTAUTH_URL?.startsWith("https://") ||
+         (process.env.NODE_ENV === "production" && process.env.VERCEL === "1"))
   response.cookies.set({
     name: PM_COOKIE_NAME,
     value: "",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps || false,
     sameSite: "lax",
     path: "/",
     maxAge: 0,
