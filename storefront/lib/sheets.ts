@@ -147,14 +147,23 @@ export const REQUIRED_SHEETS = {
 
 export const STORE_SHEETS = {
   Products: [
-    "name",
+    "productId",
+    "productName",
+    "slug",
+    "sku",
     "category",
+    "shortDescription",
     "description",
-    "imageUrl",
     "price",
-    "handle",
-    "inStock",
-    "partNumber",
+    "discountPrice",
+    "stock",
+    "primaryImage",
+    "additionalImages",
+    "primaryVideo",
+    "additionalVideos",
+    "status",
+    "createdAt",
+    "updatedAt",
   ],
   Blogs: [
     "title",
@@ -263,17 +272,49 @@ export interface PasswordResetRecord {
   createdAt: string
 }
 
+export interface ProductMediaItem {
+  id?: string
+  url: string
+  publicId?: string
+  width?: number
+  height?: number
+  isPrimary?: boolean
+}
+
+export interface ProductVideoItem {
+  id?: string
+  url: string
+  publicId?: string
+  thumbnail?: string
+  duration?: number
+  title?: string
+}
+
 export interface Product {
   rowIndex?: number
-  id: string
-  name: string
+  id: string              // productId (e.g. prod_...)
+  productId?: string       // alias for clarity
+  name: string            // productName
+  productName?: string     // alias
+  slug?: string           // slug
+  handle: string          // URL slug (backward compatible)
+  sku?: string            // SKU
+  partNumber?: string     // alias to sku
   category: string
+  shortDescription?: string
   description: string
-  imageUrl: string
-  price: number
-  handle: string
-  inStock: boolean
-  partNumber?: string
+  price: number           // Regular price
+  discountPrice?: number | null  // Discounted price
+  stock?: number          // Available inventory count
+  inStock: boolean        // Stock status (stock > 0 and status === 'Active')
+  imageUrl: string        // Primary image URL (backward compatible)
+  primaryImage?: string
+  additionalImages?: ProductMediaItem[]
+  primaryVideo?: string
+  additionalVideos?: ProductVideoItem[]
+  status?: "Active" | "Inactive" | string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Blog {
@@ -1179,116 +1220,375 @@ export async function updateOrderStatus(
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
-export const getProducts = cache(
-  withTTL(async (): Promise<Product[]> => {
-    if (!isSheetsConfigured()) {
-      return []
-    }
-    try {
-      await ensureAllSheetsInitialized()
-      const auth = getAuth()
-      const sheets = google.sheets({ version: "v4", auth })
-      const spreadsheetId = getSheetId()
+export async function getProducts(includeInactive = false): Promise<Product[]> {
+  if (!isSheetsConfigured()) {
+    return []
+  }
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
 
-      const res = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: "Products!A2:H",
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Products!A1:Q",
+    })
+
+    const allRows = res.data.values ?? []
+    if (allRows.length <= 1) return []
+
+    const headerRow = allRows[0] ?? []
+    const isNewSchema = headerRow[0]?.toLowerCase().includes("productid")
+    const dataRows = allRows.slice(1)
+
+    const products: Product[] = dataRows
+      .map((r, i) => {
+        const rowIndex = i + 2
+        if (isNewSchema) {
+          const productId = r[0] || `prod_${rowIndex}`
+          const productName = r[1] || ""
+          const slug = r[2] || slugify(productName)
+          const sku = r[3] || ""
+          const category = r[4] || "General"
+          const shortDescription = r[5] || ""
+          const description = r[6] || ""
+          const price = Number(r[7]) || 0
+          const discountPrice = r[8] ? Number(r[8]) : undefined
+          const stock = Number(r[9]) || 0
+          const primaryImage = r[10] || ""
+
+          let additionalImages: ProductMediaItem[] = []
+          try {
+            if (r[11]) additionalImages = JSON.parse(r[11])
+          } catch {}
+
+          const primaryVideo = r[12] || ""
+          let additionalVideos: ProductVideoItem[] = []
+          try {
+            if (r[13]) additionalVideos = JSON.parse(r[13])
+          } catch {}
+
+          const status: "Active" | "Inactive" = (r[14] || "Active") === "Inactive" ? "Inactive" : "Active"
+          const createdAt = r[15] || new Date().toISOString()
+          const updatedAt = r[16] || createdAt
+
+          // Compose imageUrl for backward compatibility: primaryImage or first additional image
+          const fallbackImage = additionalImages.length > 0 ? additionalImages[0].url : ""
+          const resolvedImageUrl = primaryImage || fallbackImage || ""
+
+          return {
+            rowIndex,
+            id: productId,
+            productId,
+            name: productName,
+            productName,
+            slug,
+            handle: slug,
+            sku,
+            partNumber: sku,
+            category,
+            shortDescription,
+            description,
+            price,
+            discountPrice,
+            stock,
+            inStock: status === "Active" && stock > 0,
+            imageUrl: resolvedImageUrl,
+            primaryImage,
+            additionalImages,
+            primaryVideo,
+            additionalVideos,
+            status,
+            createdAt,
+            updatedAt,
+          }
+        } else {
+          // Legacy 8-column layout
+          const name = r[0] ?? ""
+          const category = r[1] ?? ""
+          const description = r[2] ?? ""
+          const imageUrl = r[3] ?? ""
+          const price = Number(r[4]) || 0
+          const handle = r[5] ?? slugify(name)
+          const inStock = (r[6] ?? "true").toLowerCase() !== "false"
+          const partNumber = r[7] ?? ""
+
+          return {
+            rowIndex,
+            id: String(i + 1),
+            productId: String(i + 1),
+            name,
+            productName: name,
+            category,
+            description,
+            imageUrl,
+            primaryImage: imageUrl,
+            price,
+            handle,
+            slug: handle,
+            inStock,
+            stock: inStock ? 100 : 0,
+            status: (inStock ? "Active" : "Inactive") as "Active" | "Inactive",
+            partNumber,
+            sku: partNumber,
+          }
+        }
       })
+      .filter((p) => Boolean(p.name && p.name.trim() !== ""))
 
-      const rows = res.data.values ?? []
-      return rows
-        .map((r, i) => ({
-          rowIndex: i + 2,
-          id: String(i + 1),
-          name: r[0] ?? "",
-          category: r[1] ?? "",
-          description: r[2] ?? "",
-          imageUrl: r[3] ?? "",
-          price: Number(r[4]) || 0,
-          handle: r[5] ?? slugify(r[0] ?? ""),
-          inStock: (r[6] ?? "true").toLowerCase() !== "false",
-          partNumber: r[7] ?? "",
-        }))
-        .filter((p) => p.name !== "")
-    } catch (err) {
-      console.warn("Failed to fetch products from Google Sheets:", err)
-      return []
+    if (!includeInactive) {
+      return products.filter((p) => p.status !== "Inactive")
     }
-  })
-)
-
-export async function getProductByHandle(handle: string): Promise<Product | null> {
-  const products = await getProducts()
-  return products.find((p) => p.handle === handle) ?? null
+    return products
+  } catch (err) {
+    console.warn("Failed to fetch products from Google Sheets:", err)
+    return []
+  }
 }
 
-export async function appendProduct(product: Omit<Product, "id">): Promise<void> {
-  if (!isSheetsConfigured()) return
+export async function getProductByHandle(handle: string): Promise<Product | null> {
+  const products = await getProducts(true)
+  return products.find((p) => p.handle === handle || p.slug === handle || p.id === handle) ?? null
+}
+
+export async function getProductById(productId: string): Promise<Product | null> {
+  const products = await getProducts(true)
+  return products.find((p) => p.id === productId || p.productId === productId || String(p.rowIndex) === productId) ?? null
+}
+
+export async function getProductMetrics(): Promise<{
+  total: number
+  active: number
+  inactive: number
+  outOfStock: number
+}> {
+  const all = await getProducts(true)
+  let active = 0
+  let inactive = 0
+  let outOfStock = 0
+
+  for (const p of all) {
+    if (p.status === "Inactive") {
+      inactive++
+    } else {
+      active++
+      if ((p.stock ?? 0) <= 0) {
+        outOfStock++
+      }
+    }
+  }
+
+  return {
+    total: all.length,
+    active,
+    inactive,
+    outOfStock,
+  }
+}
+
+export async function createProduct(product: {
+  productId?: string
+  productName: string
+  slug?: string
+  sku?: string
+  category: string
+  shortDescription?: string
+  description?: string
+  price: number
+  discountPrice?: number
+  stock?: number
+  primaryImage?: string
+  additionalImages?: ProductMediaItem[]
+  primaryVideo?: string
+  additionalVideos?: ProductVideoItem[]
+  status?: "Active" | "Inactive"
+}): Promise<Product> {
+  if (!isSheetsConfigured()) throw new Error("Google Sheets not configured")
   await ensureAllSheetsInitialized()
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   const spreadsheetId = getSheetId()
+
+  const productId = product.productId || `prod_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+  const slug = product.slug ? slugify(product.slug) : slugify(product.productName)
+  const sku = product.sku || ""
+  const category = product.category || "General"
+  const shortDescription = product.shortDescription || ""
+  const description = product.description || ""
+  const price = product.price || 0
+  const discountPrice = product.discountPrice != null ? product.discountPrice : ""
+  const stock = product.stock != null ? product.stock : 0
+  const primaryImage = product.primaryImage || (product.additionalImages?.[0]?.url || "")
+  const additionalImagesJson = product.additionalImages ? JSON.stringify(product.additionalImages) : "[]"
+  const primaryVideo = product.primaryVideo || (product.additionalVideos?.[0]?.url || "")
+  const additionalVideosJson = product.additionalVideos ? JSON.stringify(product.additionalVideos) : "[]"
+  const status = product.status || "Active"
+  const now = new Date().toISOString()
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "Products!A:H",
+    range: "Products!A:Q",
     valueInputOption: "RAW",
     requestBody: {
       values: [
         [
-          product.name,
-          product.category,
-          product.description,
-          product.imageUrl,
-          product.price,
-          product.handle || slugify(product.name),
-          product.inStock !== false ? "true" : "false",
-          product.partNumber || "",
+          productId,
+          product.productName,
+          slug,
+          sku,
+          category,
+          shortDescription,
+          description,
+          price,
+          discountPrice,
+          stock,
+          primaryImage,
+          additionalImagesJson,
+          primaryVideo,
+          additionalVideosJson,
+          status,
+          now,
+          now,
         ],
       ],
     },
   })
+
+  return {
+    id: productId,
+    productId,
+    name: product.productName,
+    productName: product.productName,
+    slug,
+    handle: slug,
+    sku,
+    partNumber: sku,
+    category,
+    shortDescription,
+    description,
+    price,
+    discountPrice: typeof discountPrice === "number" ? discountPrice : undefined,
+    stock,
+    inStock: status === "Active" && stock > 0,
+    imageUrl: primaryImage,
+    primaryImage,
+    additionalImages: product.additionalImages,
+    primaryVideo,
+    additionalVideos: product.additionalVideos,
+    status,
+    createdAt: now,
+    updatedAt: now,
+  }
 }
 
-export async function updateProduct(rowIndex: number, product: Omit<Product, "id">): Promise<void> {
-  if (!isSheetsConfigured()) return
+export async function updateProductById(
+  productId: string,
+  updates: Partial<Product>
+): Promise<Product | null> {
+  if (!isSheetsConfigured()) throw new Error("Google Sheets not configured")
   await ensureAllSheetsInitialized()
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   const spreadsheetId = getSheetId()
+
+  const existing = await getProductById(productId)
+  if (!existing || !existing.rowIndex) return null
+
+  const updatedName = updates.productName ?? updates.name ?? existing.name
+  const updatedSlug = updates.slug ?? updates.handle ?? existing.handle
+  const updatedSku = updates.sku ?? updates.partNumber ?? existing.sku ?? ""
+  const updatedCategory = updates.category ?? existing.category
+  const updatedShortDesc = updates.shortDescription ?? existing.shortDescription ?? ""
+  const updatedDesc = updates.description ?? existing.description
+  const updatedPrice = updates.price ?? existing.price
+  const updatedDiscount = updates.discountPrice !== undefined ? updates.discountPrice : existing.discountPrice
+  const updatedStock = updates.stock !== undefined ? updates.stock : (existing.stock ?? (existing.inStock ? 50 : 0))
+  const updatedPrimaryImage = updates.primaryImage ?? updates.imageUrl ?? existing.primaryImage ?? existing.imageUrl
+  const updatedAdditionalImages = updates.additionalImages ?? existing.additionalImages ?? []
+  const updatedPrimaryVideo = updates.primaryVideo ?? existing.primaryVideo ?? ""
+  const updatedAdditionalVideos = updates.additionalVideos ?? existing.additionalVideos ?? []
+  const updatedStatus = updates.status ?? existing.status ?? "Active"
+  const now = new Date().toISOString()
+
+  const rowValues = [
+    existing.id,
+    updatedName,
+    updatedSlug,
+    updatedSku,
+    updatedCategory,
+    updatedShortDesc,
+    updatedDesc,
+    updatedPrice,
+    updatedDiscount != null ? updatedDiscount : "",
+    updatedStock,
+    updatedPrimaryImage,
+    JSON.stringify(updatedAdditionalImages),
+    updatedPrimaryVideo,
+    JSON.stringify(updatedAdditionalVideos),
+    updatedStatus,
+    existing.createdAt || now,
+    now,
+  ]
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `Products!A${rowIndex}:H${rowIndex}`,
+    range: `Products!A${existing.rowIndex}:Q${existing.rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
-      values: [
-        [
-          product.name,
-          product.category,
-          product.description,
-          product.imageUrl,
-          product.price,
-          product.handle || slugify(product.name),
-          product.inStock !== false ? "true" : "false",
-          product.partNumber || "",
-        ],
-      ],
+      values: [rowValues],
     },
   })
+
+  return {
+    ...existing,
+    name: updatedName,
+    productName: updatedName,
+    slug: updatedSlug,
+    handle: updatedSlug,
+    sku: updatedSku,
+    partNumber: updatedSku,
+    category: updatedCategory,
+    shortDescription: updatedShortDesc,
+    description: updatedDesc,
+    price: updatedPrice,
+    discountPrice: updatedDiscount,
+    stock: updatedStock,
+    inStock: updatedStatus === "Active" && updatedStock > 0,
+    primaryImage: updatedPrimaryImage,
+    imageUrl: updatedPrimaryImage,
+    additionalImages: updatedAdditionalImages,
+    primaryVideo: updatedPrimaryVideo,
+    additionalVideos: updatedAdditionalVideos,
+    status: updatedStatus,
+    updatedAt: now,
+  }
 }
 
-export async function deleteProduct(rowIndex: number): Promise<void> {
-  if (!isSheetsConfigured()) return
+export async function deleteProductById(
+  productId: string,
+  softDelete = true
+): Promise<boolean> {
+  if (!isSheetsConfigured()) return false
   await ensureAllSheetsInitialized()
   const auth = getAuth()
   const sheets = google.sheets({ version: "v4", auth })
   const spreadsheetId = getSheetId()
 
+  const existing = await getProductById(productId)
+  if (!existing || !existing.rowIndex) return false
+
+  if (softDelete) {
+    // Soft delete: set status to Inactive so historical orders and links are protected
+    await updateProductById(productId, { status: "Inactive" })
+    return true
+  }
+
+  // Hard delete if explicitly requested
   const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId })
   const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === "Products")
   const sheetId = sheet?.properties?.sheetId
-  if (sheetId === undefined) throw new Error("Products sheet not found")
+  if (sheetId === undefined) return false
 
   await sheets.spreadsheets.batchUpdate({
     spreadsheetId,
@@ -1299,14 +1599,57 @@ export async function deleteProduct(rowIndex: number): Promise<void> {
             range: {
               sheetId: sheetId,
               dimension: "ROWS",
-              startIndex: rowIndex - 1,
-              endIndex: rowIndex,
+              startIndex: existing.rowIndex - 1,
+              endIndex: existing.rowIndex,
             },
           },
         },
       ],
     },
   })
+
+  return true
+}
+
+export async function appendProduct(product: Omit<Product, "id">): Promise<void> {
+  await createProduct({
+    productName: product.name,
+    category: product.category,
+    description: product.description,
+    price: product.price,
+    primaryImage: product.imageUrl,
+    slug: product.handle,
+    sku: product.partNumber,
+    stock: product.inStock ? 50 : 0,
+    status: product.inStock ? "Active" : "Inactive",
+  })
+}
+
+export async function updateProduct(rowIndex: number, product: Omit<Product, "id">): Promise<void> {
+  const products = await getProducts(true)
+  const target = products.find((p) => p.rowIndex === rowIndex)
+  if (target) {
+    await updateProductById(target.id, {
+      name: product.name,
+      category: product.category,
+      description: product.description,
+      price: product.price,
+      primaryImage: product.imageUrl,
+      imageUrl: product.imageUrl,
+      handle: product.handle,
+      sku: product.partNumber,
+      stock: product.inStock ? 50 : 0,
+      status: product.inStock ? "Active" : "Inactive",
+    })
+  }
+}
+
+export async function deleteProduct(rowIndex: number): Promise<void> {
+  const products = await getProducts(true)
+  const target = products.find((p) => p.rowIndex === rowIndex)
+  if (target) {
+    await deleteProductById(target.id, true)
+  }
 }
 
 // ── Blogs ─────────────────────────────────────────────────────────────────────

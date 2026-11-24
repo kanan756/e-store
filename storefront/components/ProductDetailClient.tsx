@@ -2,15 +2,17 @@
 
 /**
  * @file ProductDetailClient.tsx
- * @description Renders the individual product details, image gallery, and tabbed information.
+ * @description Renders individual product details, multi-image and video gallery, tabs, and interactive purchase controls.
  * 
- * Logic Highlights:
- * 1. Image Gallery: Splits the comma-separated `imageUrl` string and renders a main image with thumbnails.
- * 2. Tabs State: Uses React `useState` to switch between Overview, Features, Services, Gallery, and Customize tabs without reloading the page.
- * 3. Add to Cart: Integrates with `useCart` context. Also temporarily shows a "Added to Cart!" success state.
+ * Features:
+ * 1. Multi-media gallery supporting both images and playable videos
+ * 2. Full-screen image preview and zoom capabilities
+ * 3. Lazy video playback directly inside the media viewer
+ * 4. Discount pricing display (sale price + regular price crossed out)
+ * 5. Authentication protection for Add to Cart and Buy Now
  */
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
@@ -35,6 +37,13 @@ const ALL_TABS = [
 
 type TabId = typeof ALL_TABS[number]["id"]
 
+export interface UnifiedMediaItem {
+  type: "image" | "video"
+  url: string
+  thumbnail?: string
+  title?: string
+}
+
 export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter()
   const { data: session } = useSession()
@@ -43,10 +52,86 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [added, setAdded]           = useState(false)
   const [quantity, setQuantity]     = useState(1)
   const [activeTab, setActiveTab]   = useState<TabId>("overview")
-  const [activeImage, setActiveImage] = useState(0)
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0)
+  const [isZoomed, setIsZoomed]     = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const productUrl = `/products/${product.handle || product.id}`
   const loginMessage = "Please log in to your CLASPO account to add products to your cart."
+
+  // ── Unified Media Extractor (Images + Videos) ──────────────────────────────
+  const mediaItems: UnifiedMediaItem[] = useMemo(() => {
+    const list: UnifiedMediaItem[] = []
+    const seenUrls = new Set<string>()
+
+    const isValidUrl = (url?: string) => {
+      if (!url || url === "-") return false
+      if (url.startsWith("/")) return true
+      try { new URL(url); return true } catch { return false }
+    }
+
+    // 1. Primary Image
+    if (isValidUrl(product.primaryImage)) {
+      list.push({ type: "image", url: product.primaryImage! })
+      seenUrls.add(product.primaryImage!)
+    }
+
+    // 2. Legacy / Comma-separated imageUrls
+    if (product.imageUrl) {
+      const split = product.imageUrl.split(",").map((s) => s.trim()).filter(isValidUrl)
+      for (const u of split) {
+        if (!seenUrls.has(u)) {
+          list.push({ type: "image", url: u })
+          seenUrls.add(u)
+        }
+      }
+    }
+
+    // 3. Structured additionalImages
+    if (product.additionalImages && Array.isArray(product.additionalImages)) {
+      for (const img of product.additionalImages) {
+        if (isValidUrl(img.url) && !seenUrls.has(img.url)) {
+          if (img.isPrimary) {
+            list.unshift({ type: "image", url: img.url })
+          } else {
+            list.push({ type: "image", url: img.url })
+          }
+          seenUrls.add(img.url)
+        }
+      }
+    }
+
+    // 4. Primary Video
+    if (isValidUrl(product.primaryVideo)) {
+      list.push({
+        type: "video",
+        url: product.primaryVideo!,
+        thumbnail: list[0]?.url,
+      })
+      seenUrls.add(product.primaryVideo!)
+    }
+
+    // 5. Additional Videos
+    if (product.additionalVideos && Array.isArray(product.additionalVideos)) {
+      for (const vid of product.additionalVideos) {
+        if (isValidUrl(vid.url) && !seenUrls.has(vid.url)) {
+          list.push({
+            type: "video",
+            url: vid.url,
+            thumbnail: vid.thumbnail || list[0]?.url,
+            title: vid.title,
+          })
+          seenUrls.add(vid.url)
+        }
+      }
+    }
+
+    return list
+  }, [product])
+
+  const currentMedia = mediaItems[activeMediaIndex] || mediaItems[0] || null
+  const hasMedia = mediaItems.length > 0
+  const tabs = hasMedia ? ALL_TABS : ALL_TABS.filter((t) => t.id !== "gallery")
 
   const handleAddToCart = useCallback(() => {
     if (!session?.user) {
@@ -58,15 +143,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       addItem({
         id: product.handle || product.id,
         name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl,
+        price: product.discountPrice ?? product.price,
+        imageUrl: product.imageUrl || mediaItems[0]?.url || "",
         category: product.category,
       })
     }
     setAdding(false)
     setAdded(true)
     setTimeout(() => { setAdded(false) }, 2000)
-  }, [addItem, product, quantity, session, router, productUrl, loginMessage])
+  }, [addItem, product, quantity, session, router, productUrl, loginMessage, mediaItems])
 
   const handleBuyNow = useCallback(() => {
     if (!session?.user) {
@@ -77,33 +162,20 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       addItem({
         id: product.handle || product.id,
         name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl,
+        price: product.discountPrice ?? product.price,
+        imageUrl: product.imageUrl || mediaItems[0]?.url || "",
         category: product.category,
       })
     }
     router.push("/checkout")
-  }, [addItem, product, quantity, router, session, productUrl, loginMessage])
+  }, [addItem, product, quantity, router, session, productUrl, loginMessage, mediaItems])
 
-  const isValidUrl = (url: string) => {
-    if (!url || url === "-") return false
-    if (url.startsWith("/")) return true
-    try { new URL(url); return true } catch { return false }
-  }
-
-  const images = product.imageUrl
-    ? product.imageUrl.split(",").map(i => i.trim()).filter(isValidUrl)
-    : []
-  const hasImages = images.length > 0
-
-  const tabs = hasImages ? ALL_TABS : ALL_TABS.filter(t => t.id !== "gallery")
-
-  const isWireOrCable = product.category?.toLowerCase().includes("wire") || product.category?.toLowerCase().includes("cable")
+  const isInactive = product.status === "Inactive"
+  const isOutOfStock = !product.inStock || (product.stock !== undefined && product.stock <= 0)
 
   return (
     <div className="pd-shell">
-
-      {/* ── Product name header ── */}
+      {/* ── Product Header ── */}
       <div className="pd-hdr">
         <div className="W">
           <div className="lbl" style={{ marginBottom: 12 }}>
@@ -113,14 +185,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 PN: {product.partNumber}
               </span>
             )}
+            {isInactive && (
+              <span style={{ marginLeft: 12, background: "#F3F4F6", color: "#6B7280", padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 700 }}>
+                INACTIVE
+              </span>
+            )}
           </div>
           <h1 className="D3" style={{ fontSize: "clamp(32px, 5vw, 64px)" }}>{product.name}</h1>
         </div>
       </div>
 
-      {/* ── Tab body ── */}
+      {/* ── Tab Layout ── */}
       <div className="pd-layout">
-
         {/* Sidebar */}
         <aside className="pd-sidebar">
           {tabs.map((tab) => (
@@ -134,65 +210,185 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           ))}
         </aside>
 
-        {/* Content panel */}
+        {/* Content Panel */}
         <div className="pd-panel">
-
           {/* OVERVIEW */}
           {activeTab === "overview" && (
             <div className="pd-overview-grid">
-              {/* Image gallery */}
+              {/* Media Gallery Column */}
               <div>
-                <div className="pd-img-main">
-                  {hasImages ? (
-                    <>
-                      <img
-                        src={images[activeImage]}
-                        alt={product.name}
-                        style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
-                      />
-                      {images.length > 1 && (
-                        <>
-                          <button className="pd-img-arrow pd-img-arrow--l" onClick={() => setActiveImage(p => (p === 0 ? images.length - 1 : p - 1))} aria-label="Previous image">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                          </button>
-                          <button className="pd-img-arrow pd-img-arrow--r" onClick={() => setActiveImage(p => (p === images.length - 1 ? 0 : p + 1))} aria-label="Next image">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                          </button>
-                        </>
-                      )}
-                    </>
+                <div
+                  className="pd-img-main"
+                  style={{
+                    position: "relative",
+                    background: "#F9FAFB",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 400,
+                  }}
+                >
+                  {currentMedia ? (
+                    currentMedia.type === "video" ? (
+                      <div style={{ width: "100%", height: "100%", background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <video
+                          key={currentMedia.url}
+                          src={currentMedia.url}
+                          controls
+                          autoPlay
+                          playsInline
+                          preload="metadata"
+                          style={{ maxWidth: "100%", maxHeight: "100%" }}
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <img
+                          src={currentMedia.url}
+                          alt={product.name}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: isZoomed ? "cover" : "contain",
+                            cursor: isZoomed ? "zoom-out" : "zoom-in",
+                            transition: "transform 0.25s ease",
+                            transform: isZoomed ? "scale(1.4)" : "scale(1)",
+                            display: "block",
+                          }}
+                          onClick={() => setIsZoomed(!isZoomed)}
+                        />
+
+                        {/* Expand / Lightbox Button */}
+                        <button
+                          type="button"
+                          onClick={() => setLightboxOpen(true)}
+                          title="Full-screen image view"
+                          style={{
+                            position: "absolute",
+                            top: 14,
+                            right: 14,
+                            background: "rgba(255, 255, 255, 0.9)",
+                            border: "1px solid #E5E5E5",
+                            borderRadius: "50%",
+                            width: 38,
+                            height: 38,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                            color: "#17191C",
+                          }}
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="15 3 21 3 21 9" />
+                            <polyline points="9 21 3 21 3 15" />
+                            <line x1="21" y1="3" x2="14" y2="10" />
+                            <line x1="3" y1="21" x2="10" y2="14" />
+                          </svg>
+                        </button>
+                      </>
+                    )
                   ) : (
                     <div className="pd-img-placeholder">{product.name}</div>
                   )}
+
+                  {/* Navigation Arrows */}
+                  {mediaItems.length > 1 && (
+                    <>
+                      <button
+                        className="pd-img-arrow pd-img-arrow--l"
+                        onClick={() => {
+                          setIsZoomed(false)
+                          setActiveMediaIndex((prev) => (prev === 0 ? mediaItems.length - 1 : prev - 1))
+                        }}
+                        aria-label="Previous item"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                      </button>
+                      <button
+                        className="pd-img-arrow pd-img-arrow--r"
+                        onClick={() => {
+                          setIsZoomed(false)
+                          setActiveMediaIndex((prev) => (prev === mediaItems.length - 1 ? 0 : prev + 1))
+                        }}
+                        aria-label="Next item"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                      </button>
+                    </>
+                  )}
                 </div>
 
-                {hasImages && images.length > 1 && (
-                  <div className="pd-thumbs">
-                    {images.map((img, idx) => (
+                {/* Thumbnails Row */}
+                {mediaItems.length > 1 && (
+                  <div className="pd-thumbs" style={{ marginTop: 14 }}>
+                    {mediaItems.map((item, idx) => (
                       <button
                         key={idx}
-                        className={`pd-thumb${activeImage === idx ? " active" : ""}`}
-                        onClick={() => setActiveImage(idx)}
+                        className={`pd-thumb${activeMediaIndex === idx ? " active" : ""}`}
+                        onClick={() => {
+                          setIsZoomed(false)
+                          setActiveMediaIndex(idx)
+                        }}
+                        style={{ position: "relative", overflow: "hidden" }}
                       >
-                        <img src={img} alt={`${product.name} view ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                        {item.type === "video" ? (
+                          <div style={{ width: "100%", height: "100%", background: "#1F2324", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                            {item.thumbnail ? (
+                              <img src={item.thumbnail} alt="Video thumbnail" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : null}
+                            <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ color: "#FFFFFF", fontSize: 13, background: "#F36B12", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                ▶
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <img src={item.url} alt={`${product.name} thumbnail ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                        )}
                       </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Pricing + CTA */}
+              {/* Pricing & CTA Column */}
               <div className="pd-overview-info">
+                {product.shortDescription && (
+                  <p style={{ fontSize: 16, fontWeight: 600, color: "#303638", marginBottom: 16, lineHeight: 1.5 }}>
+                    {product.shortDescription}
+                  </p>
+                )}
+
                 <p className="Bd" style={{ marginBottom: 24, color: "#777777", lineHeight: 1.6 }}>
-                  {product.description || "Thoughtfully designed smart home and utility solution from CLASPO. Built for enduring quality, high reliability, and effortless everyday living."}
+                  {product.description || "Thoughtfully engineered everyday solutions from CLASPO. Built for enduring performance, functional convenience, and lasting satisfaction."}
                 </p>
 
-                <div className="pd-price" style={{ color: "#17191C", fontSize: "32px", fontWeight: 900, marginBottom: "20px" }}>
-                  {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
+                {/* Pricing Block with Discount Support */}
+                <div style={{ marginBottom: 20 }}>
+                  {product.discountPrice != null && product.discountPrice > 0 ? (
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+                      <span style={{ color: "#F36B12", fontSize: "34px", fontWeight: 900 }}>
+                        {formatPrice(product.discountPrice)}
+                      </span>
+                      <span style={{ color: "#9CA3AF", fontSize: "20px", textDecoration: "line-through", fontWeight: 600 }}>
+                        {formatPrice(product.price)}
+                      </span>
+                      <span style={{ background: "#ECFDF5", color: "#059669", fontSize: 12, fontWeight: 800, padding: "3px 8px", borderRadius: 4 }}>
+                        SAVE {Math.round(((product.price - product.discountPrice) / product.price) * 100)}%
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="pd-price" style={{ color: "#17191C", fontSize: "32px", fontWeight: 900 }}>
+                      {product.price > 0 ? formatPrice(product.price) : "Contact for price"}
+                    </div>
+                  )}
                 </div>
 
-                {/* Minimalist Quantity Selector */}
-                {product.inStock && (
+                {/* Quantity Selector */}
+                {!isInactive && !isOutOfStock && (
                   <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Quantity:
@@ -200,7 +396,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
                       <button
                         type="button"
-                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         style={{ width: 36, height: 36, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
                       >
                         -
@@ -210,7 +406,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setQuantity(q => q + 1)}
+                        onClick={() => setQuantity((q) => q + 1)}
                         style={{ width: 36, height: 36, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
                       >
                         +
@@ -219,29 +415,37 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   </div>
                 )}
 
-                {/* Primary Action Buttons */}
+                {/* Action Buttons */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
                   <button
                     className="btn bp"
                     onClick={handleAddToCart}
-                    disabled={adding || added || !product.inStock}
+                    disabled={adding || added || isOutOfStock || isInactive}
                     style={{
                       width: "100%",
                       padding: "13px 24px",
                       borderRadius: 6,
-                      background: added ? "#303638" : (!product.inStock ? "#F5F5F5" : "#F36B12"),
-                      color: !product.inStock ? "#747474" : "#FFFFFF",
-                      cursor: !product.inStock ? "not-allowed" : "pointer",
-                      border: !product.inStock ? "1px solid #E5E5E5" : "1px solid #F36B12",
+                      background: added ? "#303638" : (isInactive || isOutOfStock ? "#F5F5F5" : "#F36B12"),
+                      color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
+                      cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
+                      border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #F36B12",
                       fontWeight: 700,
                       fontSize: 14,
-                      boxShadow: !product.inStock || added ? "none" : "0 4px 14px rgba(243, 107, 18, 0.3)",
+                      boxShadow: isInactive || isOutOfStock || added ? "none" : "0 4px 14px rgba(243, 107, 18, 0.3)",
                     }}
                   >
-                    {!product.inStock ? "Out of Stock" : added ? "✓ Added to Bag!" : adding ? "Adding…" : "Add to Cart"}
+                    {isInactive
+                      ? "Currently Unavailable"
+                      : isOutOfStock
+                      ? "Out of Stock"
+                      : added
+                      ? "✓ Added to Bag!"
+                      : adding
+                      ? "Adding…"
+                      : "Add to Cart"}
                   </button>
 
-                  {product.inStock && (
+                  {!isInactive && !isOutOfStock && (
                     <button
                       type="button"
                       onClick={handleBuyNow}
@@ -257,16 +461,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         fontSize: 14,
                         transition: "all 0.2s ease",
                       }}
-                      onMouseEnter={e => {
+                      onMouseEnter={(e) => {
                         e.currentTarget.style.background = "#17191C"
                         e.currentTarget.style.borderColor = "#17191C"
                       }}
-                      onMouseLeave={e => {
+                      onMouseLeave={(e) => {
                         e.currentTarget.style.background = "#303638"
                         e.currentTarget.style.borderColor = "#303638"
                       }}
                     >
-                      Buy Now &rarr;
+                      Buy It Now
                     </button>
                   )}
                 </div>
@@ -285,20 +489,20 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <div>
               <div className="pd-tab-hdr">
                 <h2 className="pd-tab-title">Features &amp; Materials</h2>
-                <p className="Bd pd-tab-sub">Technical specifications and materials used in manufacturing {product.name.toLowerCase()}.</p>
+                <p className="Bd pd-tab-sub">Technical specifications and materials used in {product.name.toLowerCase()}.</p>
               </div>
               <div className="pd-two-col">
                 <div>
                   <h3 className="pd-section-h">Salient Features</h3>
                   <p className="Bd" style={{ marginBottom: 20, color: "var(--text2)" }}>
-                    {product.name} is a versatile component known for its excellent properties and wide range of applications.
+                    {product.name} is designed for optimal performance, ergonomic convenience, and extended durability.
                   </p>
                   <ul className="pd-list">
                     {[
-                      "Suitable for usage in extreme temperatures ranging from -60 F to 400 F",
-                      "Manufactured to meet strict ISO quality standards",
-                      "Resistant to ozone and UV radiations",
-                      "Available in industrial grade and custom specifications",
+                      "Engineered for daily resilience and reliable operation",
+                      "Manufactured to meet strict quality control standards",
+                      "Resistant to routine wear, environmental factors, and heat",
+                      "Optimized for effortless household and workplace utility",
                     ].map((item, i) => (
                       <li key={i}><span className="pd-list-bullet">›</span><span>{item}</span></li>
                     ))}
@@ -307,14 +511,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <div>
                   <h3 className="pd-section-h">Materials</h3>
                   <p className="Bd" style={{ marginBottom: 20, color: "var(--text2)" }}>
-                    Premium materials depending on application type and requirements.
+                    Selected premium materials crafted for long-lasting performance.
                   </p>
                   <ul className="pd-list">
                     {[
-                      "OEM-Grade Wiring",
-                      "Automotive Connectors (Deutsch, Delphi)",
-                      "Silicone & EPDM",
-                      "High-temperature Neoprene",
+                      "High-grade composite materials",
+                      "Precision-machined connection points",
+                      "Impact and temperature resistant finishes",
+                      "Eco-conscious and compliant construction",
                     ].map((item, i) => (
                       <li key={i}><span className="pd-list-bullet">›</span><span>{item}</span></li>
                     ))}
@@ -331,7 +535,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <h2 className="pd-tab-title">Product Facility and Service</h2>
               </div>
               <p className="Bd" style={{ marginBottom: 32, color: "var(--text2)" }}>
-                The {product.name.toLowerCase()} is high in demand as it has many applications including industrial equipment sealing, vehicle wiring, and complex machinery. With an earnest aim to provide satisfactory and customized products, we ensure sturdy quality that will never fail your expectations. As per the customer&rsquo;s requirements, we are capable of manufacturing any custom and complex assembly.
+                The {product.name.toLowerCase()} is supported by CLASPO&rsquo;s dedicated customer service and warranty assistance. We ensure every unit meets the highest standard before delivery.
               </p>
               <a href="#quote" className="btn bp" style={{ display: "inline-flex" }}>
                 Request a Quotation <ArrowIcon />
@@ -339,17 +543,34 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </div>
           )}
 
-          {/* GALLERY */}
-          {activeTab === "gallery" && hasImages && (
+          {/* GALLERY TAB */}
+          {activeTab === "gallery" && hasMedia && (
             <div>
               <div className="pd-tab-hdr">
-                <h2 className="pd-tab-title">Product Gallery</h2>
-                <p className="Bd pd-tab-sub">Visual profiles of {product.name.toLowerCase()}.</p>
+                <h2 className="pd-tab-title">Product Gallery &amp; Media</h2>
+                <p className="Bd pd-tab-sub">Visual showcase and demonstration videos for {product.name}.</p>
               </div>
+
               <div className="pd-gallery-grid">
-                {images.map((img, idx) => (
-                  <div key={idx} className="pd-gallery-item">
-                    <img src={img} alt={`${product.name} profile ${idx + 1}`} style={{ width: "100%", height: "auto", display: "block", padding: 16 }} />
+                {mediaItems.map((item, idx) => (
+                  <div key={idx} className="pd-gallery-item" style={{ overflow: "hidden", borderRadius: 8, background: "#F9FAFB" }}>
+                    {item.type === "video" ? (
+                      <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: "#000000" }}>
+                        <video
+                          src={item.url}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        />
+                      </div>
+                    ) : (
+                      <img
+                        src={item.url}
+                        alt={`${product.name} profile ${idx + 1}`}
+                        style={{ width: "100%", height: "auto", display: "block", padding: 16 }}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -363,14 +584,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <h2 className="pd-tab-title">Customization</h2>
               </div>
               <p className="Bd" style={{ marginBottom: 32, color: "var(--text2)" }}>
-                Your order can be completely customized, as per your requirements. We provide value-added services such as cut-to-length extrusion, wire splicing, terminal crimping, custom loom protection, and complex color-matching assemblies.
+                Your order can be customized according to your specifications or bulk requirements. We offer custom packaging, dimensions, labeling, and component adjustments.
               </p>
               <div className="pd-cta-card">
                 <h3 className="pd-cta-card__h">
-                  Have specific custom material, size and component requirements?
+                  Have custom dimensions or specific volume requirements?
                 </h3>
                 <p className="Bd" style={{ marginBottom: 28, color: "var(--text2)" }}>
-                  Please contact us today to get the best competitive prices.
+                  Please reach out to our support and enterprise sales team today.
                 </p>
                 <a href="/contact" className="btn bp" style={{ display: "inline-flex" }}>
                   Contact Us <ArrowIcon />
@@ -378,9 +599,61 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </div>
             </div>
           )}
-
         </div>
       </div>
+
+      {/* ── Full-Screen Lightbox Modal ── */}
+      {lightboxOpen && currentMedia && currentMedia.type === "image" && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.9)",
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(false)}
+            style={{
+              position: "absolute",
+              top: 20,
+              right: 24,
+              background: "rgba(255, 255, 255, 0.2)",
+              color: "#FFFFFF",
+              border: "none",
+              borderRadius: "50%",
+              width: 44,
+              height: 44,
+              fontSize: 22,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ✕
+          </button>
+
+          <img
+            src={currentMedia.url}
+            alt={product.name}
+            style={{
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              objectFit: "contain",
+              borderRadius: 8,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   )
 }
