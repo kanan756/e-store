@@ -86,9 +86,7 @@ export default async function SecureProductManagerLayout({
 
       {/* ── Main Work Area ── */}
       <div className="pm-main">
-        <header className="pm-header">
-          <h1 className="pm-header-title">CLASPO Product Management Portal</h1>
-        </header>
+        
 
         <div className="pm-container">{children}</div>
       </div>
