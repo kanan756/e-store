@@ -204,6 +204,15 @@ export const STORE_SHEETS = {
     "submittedAt",
     "status",
   ],
+  VisitorEvents: [
+    "eventId",
+    "page",
+    "referrer",
+    "utmSource",
+    "utmMedium",
+    "utmCampaign",
+    "timestamp",
+  ],
 } as const
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -1989,30 +1998,34 @@ export const getAllSubscribers = withTTL(
 // ── Visitor Events ────────────────────────────────────────────────────────────
 export async function appendVisitorEvent(event: VisitorEvent): Promise<void> {
   if (!isSheetsConfigured()) return
-  await ensureAllSheetsInitialized()
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const spreadsheetId = getSheetId()
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+    const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
 
-  await sheets.spreadsheets.values.append({
-    spreadsheetId,
-    range: "VisitorEvents!A:G",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [
-        [
-          `EVT-${Date.now()}`,
-          event.page,
-          event.referrer,
-          event.utmSource,
-          event.utmMedium,
-          event.utmCampaign,
-          now,
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "VisitorEvents!A:G",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [
+          [
+            `EVT-${Date.now()}`,
+            event.page,
+            event.referrer,
+            event.utmSource,
+            event.utmMedium,
+            event.utmCampaign,
+            now,
+          ],
         ],
-      ],
-    },
-  })
+      },
+    })
+  } catch (err) {
+    console.warn("[visitor-event] Failed to record visitor event:", err instanceof Error ? err.message : err)
+  }
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────

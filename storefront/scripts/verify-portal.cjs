@@ -52,7 +52,8 @@ async function runTests() {
 
   // 1. Verify environment configuration
   const pmEmail = (process.env.PRODUCT_MANAGER_EMAIL || '').trim().toLowerCase();
-  const pmHash = (process.env.PRODUCT_MANAGER_PASSWORD_HASH || '').replace(/^"|"$/g, '').trim();
+  let pmHash = (process.env.PRODUCT_MANAGER_PASSWORD_HASH || '').replace(/^"|"$/g, '').trim();
+  if (pmHash.includes('\\$')) pmHash = pmHash.replace(/\\(\$)/g, '$1');
   assert(pmEmail === 'info@claspo.store', '1. PRODUCT_MANAGER_EMAIL is set to info@claspo.store');
   assert(pmHash.startsWith('$2b$') || pmHash.startsWith('$2a$'), '2. PRODUCT_MANAGER_PASSWORD_HASH is a valid bcrypt hash');
 

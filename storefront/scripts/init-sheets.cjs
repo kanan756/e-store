@@ -157,6 +157,15 @@ const REQUIRED_SHEETS = {
     'submittedAt',
     'status',
   ],
+  VisitorEvents: [
+    'eventId',
+    'page',
+    'referrer',
+    'utmSource',
+    'utmMedium',
+    'utmCampaign',
+    'timestamp',
+  ],
 };
 
 async function run() {
