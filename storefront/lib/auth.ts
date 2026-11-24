@@ -4,10 +4,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { getCustomerByEmail, appendCustomer } from "@/lib/sheets"
 
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "info@claspo.store").trim().toLowerCase()
-// Default bcrypt hash for initial password claspo123:
-const DEFAULT_ADMIN_HASH = "$2b$10$sFjkwuDGXDkkymInnBDg7.5BKqDDMydnfa9L8I/LRbnzrW29OUDoy"
-
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -23,33 +19,7 @@ export const authOptions: AuthOptions = {
         const email = credentials.email.trim().toLowerCase()
         const password = credentials.password
 
-        // 1. Check if Admin
-        if (email === ADMIN_EMAIL) {
-          const adminHash = process.env.ADMIN_PASSWORD_HASH || DEFAULT_ADMIN_HASH
-          let isMatch = false
-          if (adminHash.startsWith("$2")) {
-            isMatch = await bcrypt.compare(password, adminHash)
-          }
-          if (!isMatch && process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
-            isMatch = true
-          }
-          if (!isMatch && password === "claspo123") {
-            isMatch = true
-          }
-
-          if (isMatch) {
-            return {
-              id: "admin_claspo",
-              email: ADMIN_EMAIL,
-              name: "CLASPO Admin",
-              role: "admin",
-              username: "admin",
-            }
-          }
-          return null
-        }
-
-        // 2. Check Customer from Google Sheets
+        // Authenticate customer from Google Sheets
         try {
           const customer = await getCustomerByEmail(email)
           if (!customer || !customer.passwordHash) {
@@ -64,10 +34,10 @@ export const authOptions: AuthOptions = {
             email: customer.email,
             name: customer.fullName,
             username: customer.username,
-            role: customer.role || "customer",
+            role: "customer",
           }
         } catch (err) {
-          console.error("Authorize error:", err)
+          console.error("Customer authorize error:", err)
           return null
         }
       },
@@ -90,7 +60,6 @@ export const authOptions: AuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
         const email = user.email.toLowerCase()
-        // Admin privileges can NEVER be assigned via Google sign-in
         try {
           const existing = await getCustomerByEmail(email)
           if (!existing) {
@@ -118,8 +87,21 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role || "customer"
+        token.role = "customer"
         token.username = (user as any).username || ""
+      }
+      // If customer signed in via Google or username is missing, retrieve from Google Sheets customer data
+      if ((!token.username || !token.id || String(token.id).startsWith("google-") || !String(token.id).startsWith("usr_")) && token.email) {
+        try {
+          const cust = await getCustomerByEmail(token.email)
+          if (cust) {
+            token.id = cust.userId
+            token.username = cust.username
+            if (cust.fullName) token.name = cust.fullName
+          }
+        } catch (err) {
+          console.error("JWT customer lookup error:", err)
+        }
       }
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name
@@ -130,7 +112,7 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
-        (session.user as any).role = token.role || "customer";
+        (session.user as any).role = "customer";
         (session.user as any).username = token.username || "";
       }
       return session

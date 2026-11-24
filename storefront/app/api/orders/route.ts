@@ -31,11 +31,7 @@ const orderSchema = z.object({
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const email = searchParams.get("email")
-
-  if (!email) {
-    return NextResponse.json({ error: "Email required" }, { status: 400 })
-  }
+  let email = searchParams.get("email")
 
   // Require a valid NextAuth session and verify the session email matches
   // the requested email so customers can only see their own orders.
@@ -48,8 +44,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    if (session.user.email.toLowerCase() !== email.toLowerCase()) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (!email) {
+      email = session.user.email
+    } else if (session.user.email.toLowerCase() !== email.toLowerCase()) {
+      return NextResponse.json({ error: "Forbidden: You can only access your own orders" }, { status: 403 })
     }
   } catch {
     return NextResponse.json({ error: "Authentication check failed" }, { status: 500 })

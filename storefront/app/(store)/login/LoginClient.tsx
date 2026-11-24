@@ -46,16 +46,6 @@ export default function LoginClient() {
     if (resetSuccess === "true") {
       setSuccess("Password reset successful. Please sign in with your new password.")
     }
-
-    // If already logged in as admin, directly open admin dashboard
-    fetch("/api/auth/session")
-      .then(r => r.json())
-      .then(data => {
-        if (data?.user?.role === "admin") {
-          window.location.href = "/admin/dashboard"
-        }
-      })
-      .catch(() => {})
   }, [registered, resetSuccess])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,33 +68,8 @@ export default function LoginClient() {
         return
       }
 
-      // Check role directly
-      let isAdmin = cleanEmail === "info@claspo.store"
-      try {
-        const sRes = await fetch("/api/auth/session")
-        const sData = await sRes.json()
-        if (sData?.user?.role === "admin") {
-          isAdmin = true
-        }
-      } catch (_) {}
-
-      if (isAdmin) {
-        // Issue admin_session cookie so admin APIs & dashboard work immediately
-        try {
-          await fetch("/api/admin/auth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: cleanEmail, password }),
-          })
-        } catch (_) {}
-
-        // Direct navigate to Admin Dashboard
-        window.location.href = "/admin/dashboard"
-        return
-      }
-
       // Customer redirect
-      window.location.href = callbackUrl && !callbackUrl.startsWith("/admin") ? callbackUrl : "/account"
+      window.location.href = callbackUrl || "/account"
     } catch (err: any) {
       setError("An unexpected error occurred. Please try again.")
       setLoading(false)

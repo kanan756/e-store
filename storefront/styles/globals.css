@@ -2276,7 +2276,6 @@ button {
 .hero-v2__right-btn { display: flex; justify-content: center; }
 .hero-v2__quote-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: #fff; color: #0B0F1C; border: 1.5px solid #0B0F1C; height: 52px; flex: 1; font-family: var(--font-mono), monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none; border-radius: 4px; transition: background 0.2s ease, color 0.2s ease; }
 .hero-v2__quote-btn:hover { background: #0B0F1C; color: #fff; }
-.hero-v2__admin-cta { white-space: nowrap; padding: 0 20px; }
 .hero-v2__form-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
 .hero-v2__form-badge { display: inline-flex; align-items: center; gap: 6px; background: #0B0F1C; color: #fff; font-family: var(--font-mono), monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; }
 .hero-v2__form-eyebrow { font-family: var(--font-mono), monospace; font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #777777; margin-bottom: 10px; }

@@ -1,6 +1,8 @@
 # CLASPO — Custom Wire Harness & Cable Assembly Store
 
-Welcome to the **CLASPO Store** project! This is a full-stack, modern eCommerce storefront and administrative dashboard built with **Next.js 16 (App Router)**, tailored specifically for B2B electronics manufacturing (Wire Harnessing, Cable Assembly, PCB Assembly, Coil Cables, EV Connectors, etc.).
+Welcome to the **CLASPO Store** project! This is a full-stack, modern eCommerce storefront built with **Next.js 16 (App Router)**, tailored for smart home solutions, electronics, and accessories.
+
+IMPORTANT: This website operates purely as a customer-facing e-commerce application with a secure authentication system, customer account portal, and seamless Google Sheets integration.
 
 The project uses **Google Sheets as a lightweight, accessible database** for products, orders, inquiries, quotes, and blog posts — making it incredibly easy for non-technical users to manage content without any separate CMS or backend server.
 
@@ -52,22 +54,14 @@ The project uses **Google Sheets as a lightweight, accessible database** for pro
 - **Email Notifications (both forms):**
   - Admin receives HTML alert email for every new inquiry/quote
   - Customer receives branded HTML auto-reply confirmation email
-- **Inquiry Reply:** Admin can reply directly to customer inquiries from the Admin Dashboard. Reply email is sent to the customer.
-- **Newsletter Subscription:** Footer newsletter signup. Logged to `Subscribers` tab in Google Sheets.
-
----
-
-### 🛠️ Admin Dashboard (`/admin`)
-**Secure Login** → Cookie-based authentication with `ADMIN_PASSWORD`.
-
-- **Dashboard Overview (`/admin/dashboard`):** KPI cards showing Total Products, Total Orders, Total Revenue, New Quotes, New Inquiries. Recent Orders quick table.
-- **Product Management:** Full CRUD — add, edit, delete products. Fields: Name, Part Number, Category, Price, Description, Image URL, In Stock toggle, Handle.
-- **Order Management:** View all orders, update fulfillment status (Pending → Processing → Shipped → Delivered), add internal tracking comments.
-- **Quote Requests:** View all customer quote requests. Mark as Reviewed / Quoted / Rejected.
-- **Inquiry Management:** View all customer inquiries. Reply directly from admin panel (sends email to customer).
-- **Blog CMS:** Write, publish, and delete blog posts. Fields: Title, Slug, Excerpt, Content, Author, Tags.
-- **Subscriber List:** View all newsletter subscribers.
-- **Settings Panel:** Update store-wide settings.
+- **Customer Account Portal (`/account`):**
+  - **Registration & Login:** Full customer registration (Full Name, Username, Phone Number, Email, Password, Confirm Password) and email/password login.
+  - **Google Authentication:** One-click Continue with Google via NextAuth.js.
+  - **Password Management:** Forgot Password with secure single-use token email reset, plus in-app Change Password.
+  - **Profile Management:** View and update personal details (Full Name, Username, Phone Number) with uniqueness checks.
+  - **My Orders & Order History:** Real-time customer order tracking with strict authorization (customers access only their own orders).
+  - **Wishlist & Cart Overview:** Direct integration with saved wishlist items and shopping cart counters.
+  - **Security:** Secure server-side password hashing (bcrypt), rate-limited authentication endpoints, and Google Sheets persistent customer storage.
 
 ---
 
@@ -100,7 +94,7 @@ The project uses **Google Sheets as a lightweight, accessible database** for pro
 | Framework | Next.js 16 (App Router, Turbopack) |
 | Styling | CSS (Vanilla + Custom Variables) |
 | Database | Google Sheets API (`googleapis`) |
-| Authentication | NextAuth.js + Cookie-based Admin Login |
+| Authentication | NextAuth.js (Credentials + Google OAuth) |
 | Payments | Stripe |
 | Emails | Nodemailer (Gmail SMTP) |
 | Validation | Zod |
@@ -133,7 +127,6 @@ Fill in all keys in `storefront/.env.local`:
 | Variable | What it does | Where to get it |
 |---|---|---|
 | `NEXT_PUBLIC_STORE_URL` | URL of the store (dev: `http://localhost:3000`) | Type it yourself |
-| `ADMIN_PASSWORD` | Password for the admin panel | Choose a strong password |
 | `GMAIL_USER` | Gmail address that sends emails | Your Gmail address |
 | `GMAIL_APP_PASSWORD` | App password for Gmail | **Google → Security → App passwords** |
 | `EMAIL_FROM_NAME` | Friendly sender name shown in emails | Sender name (e.g. "CLASPO") |
@@ -156,8 +149,9 @@ Your Google Sheet needs the following tabs (exact names):
 - `Orders` — auto-written by the checkout webhook
 - `Inquiries` — written by the contact form
 - `Quotes` — written by the quote request form
-- `Blogs` — managed via Admin Dashboard
+- `Blogs` — articles and updates
 - `Subscribers` — written by the newsletter form
+- `Customers` — user accounts (Full Name, Username, Phone, Email, Password Hash, Provider)
 
 **Share the sheet** with your `GOOGLE_SERVICE_ACCOUNT_EMAIL` as **Editor**.
 
@@ -206,11 +200,15 @@ e-store/
 │   │   │   ├── blog/         ← Blog listing + articles
 │   │   │   ├── industries/   ← 6 industry sub-pages
 │   │   │   ├── track-order/  ← Customer order tracking
+│   │   │   ├── login/        ← Customer sign in
+│   │   │   ├── signup/       ← Customer registration
+│   │   │   ├── account/      ← Customer profile & orders portal
+│   │   │   ├── forgot-password/ ← Password reset request
+│   │   │   ├── reset-password/  ← Password reset confirmation
 │   │   │   └── order-confirmed/
-│   │   ├── admin/            ← Admin dashboard (protected)
 │   │   └── api/              ← All API routes
 │   ├── components/           ← Reusable UI components
-│   ├── context/              ← Cart context (global state)
+│   ├── context/              ← Cart & Wishlist context (global state)
 │   ├── lib/                  ← Google Sheets logic, helpers, format utils
 │   ├── styles/               ← globals.css (design tokens, animations)
 │   └── public/               ← Static assets (images, icons)
@@ -220,7 +218,9 @@ e-store/
 ---
 
 ## 🔐 Security Notes
-- Admin dashboard is protected by cookie-based auth. Only `ADMIN_PASSWORD` holder can log in.
+- Customer passwords are encrypted with salted **bcrypt (10 rounds)** before storage.
+- Rate-limiting protects customer login, registration, and password reset endpoints.
+- Server-side session verification ensures customers can only query and modify their own account and orders.
 - Stripe prices are resolved **server-side** from Google Sheets. Cart prices from the browser are never trusted.
 - reCAPTCHA v3 + honeypot protect all public forms from bots.
 - All environment secrets are server-only (no `NEXT_PUBLIC_` prefix on sensitive keys).

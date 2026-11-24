@@ -740,29 +740,6 @@ export default function Header() {
                     Track Order
                   </Link>
 
-                  {(session?.user as any)?.role === "admin" && (
-                    <Link
-                      href="/admin/dashboard"
-                      onClick={() => setUserMenuOpen(false)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        padding: "10px 16px",
-                        fontSize: 13.5,
-                        color: "#F36B12",
-                        fontWeight: 700,
-                        textDecoration: "none",
-                        transition: "background 0.15s",
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.background = "#FFF0E5")}
-                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                      Admin Dashboard
-                    </Link>
-                  )}
-
                   <div style={{ height: 1, background: "#F0F0F0", margin: "6px 0" }} />
 
                   <button
@@ -1029,9 +1006,6 @@ export default function Header() {
                       Signed in as <strong style={{ color: "#17191C" }}>{session.user.name || session.user.email}</strong>
                     </div>
                     <Link href="/account" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#F36B12", fontWeight: 700, fontSize: "15px", background: "#FFF0E5" }}>My Account</Link>
-                    {(session.user as any)?.role === "admin" && (
-                      <Link href="/admin/dashboard" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 700, fontSize: "15px" }}>Admin Dashboard</Link>
-                    )}
                     <button
                       type="button"
                       onClick={() => {

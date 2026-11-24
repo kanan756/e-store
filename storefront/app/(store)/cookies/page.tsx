@@ -36,7 +36,7 @@ export default function CookiesPage() {
             <h2 style={{ fontSize: 20, marginBottom: 12 }}>3. Cookies We Set</h2>
             <p style={{ color: "var(--text2)" }}>
               <strong>Essential Cookies:</strong> Required for site operation — including theme preferences
-              (dark/light mode), shopping cart state, and admin session management. These cannot be disabled
+              (dark/light mode), and shopping cart state. These cannot be disabled
               while using the site.<br /><br />
               <strong>Analytics Cookies (optional):</strong> If you accept all cookies, we load Google Analytics
               to collect anonymized data such as pages visited, time on site, and referral sources. This data

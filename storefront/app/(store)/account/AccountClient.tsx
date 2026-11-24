@@ -19,7 +19,7 @@ interface OrderItem {
 }
 
 export default function AccountClient() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
   const tabParam = searchParams.get("tab")
@@ -112,6 +112,9 @@ export default function AccountClient() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to update profile")
+      if (update) {
+        await update({ name: profile.fullName, username: profile.username })
+      }
       setProfileMsg({ type: "success", text: "Profile updated successfully!" })
     } catch (err: any) {
       setProfileMsg({ type: "error", text: err.message })
@@ -162,8 +165,6 @@ export default function AccountClient() {
     )
   }
 
-  const role = (session?.user as any)?.role
-
   return (
     <div style={{ background: "#F5F5F5", minHeight: "100vh", paddingTop: 130, paddingBottom: 80 }}>
       <div className="W">
@@ -213,11 +214,11 @@ export default function AccountClient() {
                     textTransform: "uppercase",
                     padding: "3px 10px",
                     borderRadius: 9999,
-                    background: role === "admin" ? "#303638" : "#FFF0E5",
-                    color: role === "admin" ? "#FFFFFF" : "#F36B12",
+                    background: "#FFF0E5",
+                    color: "#F36B12",
                   }}
                 >
-                  {role === "admin" ? "Admin" : "Verified Customer"}
+                  Verified Customer
                 </span>
               </div>
               <div style={{ fontSize: 14, color: "#747474", marginTop: 4 }}>
@@ -227,22 +228,6 @@ export default function AccountClient() {
           </div>
 
           <div style={{ display: "flex", gap: 12 }}>
-            {role === "admin" && (
-              <Link
-                href="/admin/dashboard"
-                style={{
-                  padding: "10px 20px",
-                  background: "#303638",
-                  color: "#FFFFFF",
-                  borderRadius: 10,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  textDecoration: "none",
-                }}
-              >
-                Admin Panel &rarr;
-              </Link>
-            )}
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               style={{

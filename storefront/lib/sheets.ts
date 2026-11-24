@@ -201,27 +201,36 @@ export async function appendOrder(order: {
 }
 
 export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
+  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+    return []
+  }
 
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Orders!A2:H",
-  })
+  try {
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
 
-  const rows = res.data.values ?? []
-  return rows
-    .filter((r) => r[2]?.toLowerCase() === email.toLowerCase())
-    .map((r) => ({
-      orderId: r[0] ?? "",
-      customerName: r[1] ?? "",
-      email: r[2] ?? "",
-      product: r[3] ?? "",
-      amount: Number(r[4]) || 0,
-      status: r[5] ?? "Processing",
-      comments: r[6] ?? "",
-      updatedBy: r[7] ?? "",
-    }))
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: "Orders!A2:H",
+    })
+
+    const rows = res.data.values ?? []
+    return rows
+      .filter((r) => r[2]?.toLowerCase() === email.toLowerCase())
+      .map((r) => ({
+        orderId: r[0] ?? "",
+        customerName: r[1] ?? "",
+        email: r[2] ?? "",
+        product: r[3] ?? "",
+        amount: Number(r[4]) || 0,
+        status: r[5] ?? "Processing",
+        comments: r[6] ?? "",
+        updatedBy: r[7] ?? "",
+      }))
+  } catch (err) {
+    console.error("Error reading Orders sheet:", err)
+    return []
+  }
 })
 
 export const getOrderByPaymentId = withTTL(async (paymentId: string): Promise<Order | null> => {
@@ -686,7 +695,7 @@ export interface Customer {
   email: string
   passwordHash: string
   provider: "credentials" | "google"
-  role: "customer" | "admin"
+  role: "customer"
   resetToken?: string
   resetTokenExpiry?: string
   createdAt: string
@@ -772,7 +781,7 @@ export async function getAllCustomers(): Promise<Customer[]> {
         email: (r[4] ?? "").toLowerCase(),
         passwordHash: r[5] ?? "",
         provider: (r[6] ?? "credentials") as "credentials" | "google",
-        role: (r[7] ?? "customer") as "customer" | "admin",
+        role: "customer" as const,
         resetToken: r[8] ?? "",
         resetTokenExpiry: r[9] ?? "",
         createdAt: r[10] ?? "",
@@ -859,11 +868,15 @@ export async function appendCustomer(customer: Omit<Customer, "rowIndex">): Prom
 }
 
 export async function updateCustomer(userId: string, updates: Partial<Customer>): Promise<boolean> {
+  let updated = false
+  const now = new Date().toISOString()
+
   const localList = loadLocalCustomers()
   const idx = localList.findIndex(c => c.userId === userId)
   if (idx !== -1) {
-    localList[idx] = { ...localList[idx], ...updates, updatedAt: new Date().toISOString() }
+    localList[idx] = { ...localList[idx], ...updates, updatedAt: now }
     saveLocalCustomers(localList)
+    updated = true
   }
 
   if (SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
@@ -873,7 +886,7 @@ export async function updateCustomer(userId: string, updates: Partial<Customer>)
       if (target && target.rowIndex) {
         const auth = getAuth()
         const sheets = google.sheets({ version: "v4", auth })
-        const merged: Customer = { ...target, ...updates, updatedAt: new Date().toISOString() }
+        const merged: Customer = { ...target, ...updates, updatedAt: now }
         await sheets.spreadsheets.values.update({
           spreadsheetId: SHEET_ID,
           range: `Customers!A${target.rowIndex}:L${target.rowIndex}`,
@@ -895,6 +908,10 @@ export async function updateCustomer(userId: string, updates: Partial<Customer>)
             ]],
           },
         })
+        if (idx === -1) {
+          localList.push(merged)
+          saveLocalCustomers(localList)
+        }
         return true
       }
     } catch (err) {
@@ -902,5 +919,5 @@ export async function updateCustomer(userId: string, updates: Partial<Customer>)
     }
   }
 
-  return idx !== -1
+  return updated
 }

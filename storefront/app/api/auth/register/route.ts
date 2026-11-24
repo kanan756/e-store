@@ -4,8 +4,6 @@ import bcrypt from "bcryptjs"
 import { getCustomerByEmail, getCustomerByUsername, appendCustomer } from "@/lib/sheets"
 import { rateLimit } from "@/lib/rate-limit"
 
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "info@claspo.store").trim().toLowerCase()
-
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Full name must be at least 2 characters").max(100),
   username: z
@@ -51,12 +49,7 @@ export async function POST(request: Request) {
     const cleanEmail = email.toLowerCase()
     const cleanUsername = username.toLowerCase()
 
-    // 1. Prevent customer registering as admin email
-    if (cleanEmail === ADMIN_EMAIL) {
-      return NextResponse.json({ error: "Registration is not permitted with this email address" }, { status: 400 })
-    }
-
-    // 2. Check duplicate email
+    // 1. Check duplicate email
     const existingEmail = await getCustomerByEmail(cleanEmail)
     if (existingEmail) {
       return NextResponse.json({ error: "An account with this email address already exists" }, { status: 409 })
