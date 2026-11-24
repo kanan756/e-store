@@ -1,0 +1,16 @@
+[
+  {
+    "activityId": "act_1795504728988_noj9t",
+    "userId": "usr_1795502728468_q4rda",
+    "activityType": "USER_LOGIN",
+    "description": "Customer logged in with email hir@miraclecloud-technology.com",
+    "createdAt": "2026-11-24T07:18:48.988Z"
+  },
+  {
+    "activityId": "act_1795504803982_eyqgh",
+    "userId": "usr_1795502728468_q4rda",
+    "activityType": "USER_LOGIN",
+    "description": "Customer logged in with email hir@miraclecloud-technology.com",
+    "createdAt": "2026-11-24T07:20:03.982Z"
+  }
+]

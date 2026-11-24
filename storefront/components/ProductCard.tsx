@@ -2,7 +2,9 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 import { useWishlist } from "@/context/wishlist-context"
 import type { Product } from "@/lib/sheets"
@@ -47,6 +49,8 @@ function StarIcon() {
 }
 
 export default function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const router = useRouter()
+  const { data: session } = useSession()
   const { addItem } = useCart()
   const { isInWishlist, toggleWishlist } = useWishlist()
   const [adding, setAdding] = useState(false)
@@ -54,10 +58,18 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
   const isLiked = isInWishlist(product.handle || product.id)
+  const href = product.handle ? `/products/${product.handle}` : "/products"
 
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+
+    if (!session?.user) {
+      const message = "Please log in to your CLASPO account to add products to your cart."
+      router.push(`/login?callbackUrl=${encodeURIComponent(href)}&message=${encodeURIComponent(message)}`)
+      return
+    }
+
     setAdding(true)
     addItem({
       id: product.handle || product.id,
@@ -69,15 +81,13 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     setAdding(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
-  }, [addItem, product])
+  }, [addItem, product, session, router, href])
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     toggleWishlist(product.handle || product.id)
   }
-
-  const href = product.handle ? `/products/${product.handle}` : "/products"
 
   const isValidUrl = (url: string) => {
     if (!url || url === "-") return false

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ received: true, message: "Order already processed" })
       }
 
-      const { customerName, email, productSummary } = session.metadata || {}
+      const { customerName, email, productSummary, userId } = session.metadata || {}
 
       if (!customerName || !email) {
         console.error("Missing metadata in session", session.id)
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
         : 0
 
       const orderId = await appendOrder({
+        userId: userId || undefined,
         customerName,
         email,
         product: productSummary || "Stripe Order",

@@ -12,6 +12,7 @@
 
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 import type { Product } from "@/lib/sheets"
 import { formatPrice } from "@/lib/format"
@@ -36,6 +37,7 @@ type TabId = typeof ALL_TABS[number]["id"]
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter()
+  const { data: session } = useSession()
   const { addItem } = useCart()
   const [adding, setAdding]         = useState(false)
   const [added, setAdded]           = useState(false)
@@ -43,7 +45,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [activeTab, setActiveTab]   = useState<TabId>("overview")
   const [activeImage, setActiveImage] = useState(0)
 
+  const productUrl = `/products/${product.handle || product.id}`
+  const loginMessage = "Please log in to your CLASPO account to add products to your cart."
+
   const handleAddToCart = useCallback(() => {
+    if (!session?.user) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(productUrl)}&message=${encodeURIComponent(loginMessage)}`)
+      return
+    }
     setAdding(true)
     for (let i = 0; i < quantity; i++) {
       addItem({
@@ -57,9 +66,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     setAdding(false)
     setAdded(true)
     setTimeout(() => { setAdded(false) }, 2000)
-  }, [addItem, product, quantity])
+  }, [addItem, product, quantity, session, router, productUrl, loginMessage])
 
   const handleBuyNow = useCallback(() => {
+    if (!session?.user) {
+      router.push(`/login?callbackUrl=${encodeURIComponent(productUrl)}&message=${encodeURIComponent(loginMessage)}`)
+      return
+    }
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: product.handle || product.id,
@@ -70,7 +83,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       })
     }
     router.push("/checkout")
-  }, [addItem, product, quantity, router])
+  }, [addItem, product, quantity, router, session, productUrl, loginMessage])
 
   const isValidUrl = (url: string) => {
     if (!url || url === "-") return false

@@ -5,10 +5,10 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react"
-
-const CART_KEY = "cs_cart_v2"
+import { useSession } from "next-auth/react"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface CartItem {
@@ -42,25 +42,85 @@ export function useCart(): CartContextValue {
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession()
   const [items, setItems] = useState<CartItem[]>([])
-  const [loading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const isInitialLoad = useRef(true)
 
-  // Hydrate from localStorage on mount
+  // Derived user storage key
+  const userId = (session?.user as any)?.id || session?.user?.email || null
+  const userCartKey = userId ? `claspo_cart_${userId}` : null
+
+  // Hydrate cart when authentication status changes
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(CART_KEY)
-      if (saved) setItems(JSON.parse(saved))
-    } catch {
-      // ignore corrupt data
+    if (status === "loading") {
+      setLoading(true)
+      return
     }
-  }, [])
 
-  // Persist to localStorage on every change
+    if (status === "authenticated" && userCartKey) {
+      try {
+        let loadedItems: CartItem[] = []
+        const saved = localStorage.getItem(userCartKey)
+        if (saved) {
+          loadedItems = JSON.parse(saved)
+          if (!Array.isArray(loadedItems)) loadedItems = []
+        }
+
+        // Migrate any legacy guest cart data safely without contaminating other users
+        const legacyGuest = localStorage.getItem("cs_cart_v2") || localStorage.getItem("claspo_cart_guest")
+        if (legacyGuest) {
+          try {
+            const guestItems: CartItem[] = JSON.parse(legacyGuest)
+            if (Array.isArray(guestItems) && guestItems.length > 0) {
+              const merged = [...loadedItems]
+              for (const gItem of guestItems) {
+                const idx = merged.findIndex((i) => i.id === gItem.id)
+                if (idx >= 0) {
+                  merged[idx] = { ...merged[idx], quantity: Math.max(merged[idx].quantity, gItem.quantity) }
+                } else {
+                  merged.push(gItem)
+                }
+              }
+              loadedItems = merged
+              localStorage.setItem(userCartKey, JSON.stringify(merged))
+            }
+          } catch {
+            // ignore corrupt legacy data
+          } finally {
+            localStorage.removeItem("cs_cart_v2")
+            localStorage.removeItem("claspo_cart_guest")
+          }
+        }
+
+        setItems(loadedItems)
+      } catch {
+        setItems([])
+      } finally {
+        setLoading(false)
+        isInitialLoad.current = false
+      }
+    } else {
+      // Unauthenticated / logged out: cart is empty, never reveal previous user's cart
+      setItems([])
+      setLoading(false)
+      isInitialLoad.current = false
+    }
+  }, [status, userCartKey])
+
+  // Persist to user-scoped localStorage on every cart change (only when authenticated)
   useEffect(() => {
-    localStorage.setItem(CART_KEY, JSON.stringify(items))
-  }, [items])
+    if (isInitialLoad.current || status !== "authenticated" || !userCartKey) {
+      return
+    }
+    try {
+      localStorage.setItem(userCartKey, JSON.stringify(items))
+    } catch {
+      // ignore storage errors
+    }
+  }, [items, status, userCartKey])
 
-  const addItem = useCallback((product: Omit<CartItem, "quantity">, quantity = 5) => {
+  const addItem = useCallback((product: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === product.id)
       if (existing) {
@@ -88,8 +148,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([])
-    localStorage.removeItem(CART_KEY)
-  }, [])
+    if (userCartKey) {
+      try {
+        localStorage.removeItem(userCartKey)
+      } catch {
+        // ignore
+      }
+    }
+  }, [userCartKey])
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0)
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)

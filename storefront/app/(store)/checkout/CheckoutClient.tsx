@@ -15,6 +15,7 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import type { ChangeEvent, FormEvent } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { z } from "zod"
 import { useCart } from "@/context/cart-context"
 import { formatPrice } from "@/lib/format"
@@ -72,22 +73,39 @@ const EMPTY_FORM: FormData = {
 export default function CheckoutClient() {
   const { items, subtotal, clearCart } = useCart()
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
   const isSubmitting = useRef(false)
   const [error, setError] = useState("")
   const [saveInfo, setSaveInfo] = useState(false)
 
-  // Load saved address
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=" + encodeURIComponent("/checkout") + "&message=" + encodeURIComponent("Please log in to your CLASPO account to complete checkout."))
+    }
+  }, [status, router])
+
+  // Load saved address or prefill from user session
   useEffect(() => {
     try {
       const saved = localStorage.getItem("clientStore_savedInfo")
       if (saved) {
         setForm(JSON.parse(saved))
         setSaveInfo(true)
+      } else if (session?.user) {
+        const fullName = session.user.name || ""
+        const parts = fullName.trim().split(" ")
+        setForm((prev) => ({
+          ...prev,
+          firstName: prev.firstName || parts[0] || "",
+          lastName: prev.lastName || parts.slice(1).join(" ") || "",
+          email: prev.email || session.user?.email || "",
+        }))
       }
     } catch {}
-  }, [])
+  }, [session])
 
 
 
@@ -159,6 +177,20 @@ export default function CheckoutClient() {
     },
     [items, form, clearCart, router, saveInfo]
   )
+
+  if (status === "loading") {
+    return (
+      <div className="checkout-page" style={{ padding: "100px 0", textAlign: "center" }}>
+        <div className="W">
+          <p style={{ color: "var(--text2)", fontSize: 16 }}>Loading checkout...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === "unauthenticated") {
+    return null
+  }
 
   if (items.length === 0) {
     return (

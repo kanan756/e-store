@@ -28,6 +28,7 @@ export default function LoginClient() {
   const searchParams = useSearchParams()
   const registered = searchParams.get("registered")
   const resetSuccess = searchParams.get("reset")
+  const messageParam = searchParams.get("message")
   const callbackUrl = searchParams.get("callbackUrl") || "/account"
 
   const [email, setEmail] = useState("")
@@ -38,6 +39,7 @@ export default function LoginClient() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [infoMessage, setInfoMessage] = useState("")
 
   useEffect(() => {
     if (registered === "true") {
@@ -46,7 +48,10 @@ export default function LoginClient() {
     if (resetSuccess === "true") {
       setSuccess("Password reset successful. Please sign in with your new password.")
     }
-  }, [registered, resetSuccess])
+    if (messageParam) {
+      setInfoMessage(messageParam)
+    }
+  }, [registered, resetSuccess, messageParam])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,7 +83,7 @@ export default function LoginClient() {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
-    await signIn("google", { callbackUrl: "/account" })
+    await signIn("google", { callbackUrl: callbackUrl || "/account" })
   }
 
   return (
@@ -174,6 +179,32 @@ export default function LoginClient() {
           </div>
 
           {/* Feedback Alerts */}
+          {infoMessage && (
+            <div
+              style={{
+                padding: "13px 16px",
+                background: "#FFF7ED",
+                border: "1.5px solid #FDBA74",
+                borderRadius: 10,
+                color: "#C2410C",
+                fontSize: 13.5,
+                fontWeight: 600,
+                marginBottom: 20,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                lineHeight: 1.45,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F36B12" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{infoMessage}</span>
+            </div>
+          )}
+
           {error && (
             <div
               style={{

@@ -11,8 +11,11 @@
  * 3. Shipping Calculation: Adds a flat $15.00 shipping rate to the subtotal.
  */
 
+import { useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 
 import { formatPrice } from "@/lib/format"
@@ -38,7 +41,29 @@ function TrashIcon() {
 }
 
 export default function CartClient() {
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const { items, loading, subtotal, removeItem, updateQuantity } = useCart()
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login?callbackUrl=" + encodeURIComponent("/cart") + "&message=" + encodeURIComponent("Please log in to your CLASPO account to view your cart."))
+    }
+  }, [status, router])
+
+  if (status === "loading" || loading) {
+    return (
+      <div className="cart-page" style={{ padding: "100px 0", textAlign: "center" }}>
+        <div className="W">
+          <p style={{ color: "#747474", fontSize: 16 }}>Loading your cart...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === "unauthenticated") {
+    return null
+  }
 
   const isEmpty = items.length === 0
 

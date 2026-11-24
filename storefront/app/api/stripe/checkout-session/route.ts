@@ -17,6 +17,8 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { z } from "zod"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
 import { generateInvoiceToken } from "@/lib/invoice-token"
 import { stripEmoji } from "@/lib/sanitize"
 
@@ -41,6 +43,17 @@ const checkoutSessionSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // ── Server-Side Authentication Verification ──────────────────────────────
+    // Only authenticated customers can create payment sessions.
+    // Guests or unauthenticated requests are strictly rejected with HTTP 401.
+    const authSession = await getServerSession(authOptions)
+    if (!authSession?.user?.email) {
+      return NextResponse.json(
+        { error: "Authentication required to checkout. Please log in to your CLASPO account." },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const parsed = checkoutSessionSchema.safeParse(body)
 
@@ -48,27 +61,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request data" }, { status: 400 })
     }
 
-    const { customerName, email, items, successUrl, cancelUrl } = parsed.data
+    const { customerName, items, successUrl, cancelUrl } = parsed.data
+    // Always bind order to verified session customer email rather than unverified client payload
+    const verifiedEmail = authSession.user.email.toLowerCase()
 
-    // Restrict redirect URLs to the same origin as the store to prevent
-    // open-redirect phishing (attacker supplies an external successUrl).
-    const storeOrigin = process.env.NEXT_PUBLIC_STORE_URL
-      ? new URL(process.env.NEXT_PUBLIC_STORE_URL).origin
-      : null
-
-    if (storeOrigin) {
-      const successOrigin = new URL(successUrl).origin
-      const cancelOrigin  = new URL(cancelUrl).origin
-      if (successOrigin !== storeOrigin || cancelOrigin !== storeOrigin) {
-        return NextResponse.json({ error: "Invalid redirect URL" }, { status: 400 })
-      }
-    }
-
-    // ── Server-side price resolution ──────────────────────────────────────────
-    // Look up every requested product by handle from the authoritative Google
-    // Sheets catalogue. This prevents clients from manipulating cart prices
-    // via localStorage edits.
-    const { getProducts } = await import("@/lib/sheets")
+    // ── Lookup Verified User Record ──────────────────────────────────────────
+    const { getProducts, getUserByEmail } = await import("@/lib/sheets")
+    const dbUser = await getUserByEmail(verifiedEmail).catch(() => null)
+    const verifiedUserId = dbUser?.userId || (authSession.user as any).id || `usr_${verifiedEmail}`
     const products = await getProducts()
     const productMap = new Map(products.map((p) => [p.handle, p]))
 
@@ -127,10 +127,11 @@ export async function POST(request: Request) {
       mode: "payment",
       success_url: successUrl,
       cancel_url:  cancelUrl,
-      customer_email: email,
+      customer_email: verifiedEmail,
       metadata: {
-        customerName,
-        email,
+        userId: verifiedUserId,
+        customerName: customerName || dbUser?.fullName || authSession.user.name || "Customer",
+        email: verifiedEmail,
         productSummary,
         amount: (serverAmount + 15).toString(), // server-computed, stored for reference only
       },
