@@ -10,6 +10,7 @@ import { useCart } from "@/context/cart-context"
 
 interface OrderItem {
   orderId: string
+  orderNumber?: string
   customerName: string
   email: string
   product: string
@@ -625,7 +626,7 @@ export default function AccountClient() {
                       >
                         <div>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span style={{ fontWeight: 800, color: "#17191C", fontSize: 15 }}>#{o.orderId}</span>
+                            <span style={{ fontWeight: 800, color: "#17191C", fontSize: 15 }}>#{o.orderNumber || o.orderId}</span>
                             <span
                               style={{
                                 fontSize: 12,

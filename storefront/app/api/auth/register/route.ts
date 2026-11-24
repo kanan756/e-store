@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
-import { getCustomerByEmail, getCustomerByUsername, appendCustomer } from "@/lib/sheets"
+import { getUserByEmail, getUserByUsername, appendUser, logUserActivity } from "@/lib/sheets"
 import { rateLimit } from "@/lib/rate-limit"
 
 const registerSchema = z.object({
@@ -50,24 +50,24 @@ export async function POST(request: Request) {
     const cleanUsername = username.toLowerCase()
 
     // 1. Check duplicate email
-    const existingEmail = await getCustomerByEmail(cleanEmail)
+    const existingEmail = await getUserByEmail(cleanEmail)
     if (existingEmail) {
       return NextResponse.json({ error: "An account with this email address already exists" }, { status: 409 })
     }
 
-    // 3. Check duplicate username
-    const existingUser = await getCustomerByUsername(cleanUsername)
+    // 2. Check duplicate username
+    const existingUser = await getUserByUsername(cleanUsername)
     if (existingUser) {
       return NextResponse.json({ error: "This username is already taken. Please choose another." }, { status: 409 })
     }
 
-    // 4. Hash password
+    // 3. Hash password using bcrypt
     const passwordHash = await bcrypt.hash(password, 10)
     const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
     const now = new Date().toISOString()
 
-    // 5. Append customer to database (Google Sheets / local fallback)
-    const created = await appendCustomer({
+    // 4. Save customer details to Users sheet
+    const created = await appendUser({
       userId,
       fullName,
       username: cleanUsername,
@@ -75,10 +75,18 @@ export async function POST(request: Request) {
       email: cleanEmail,
       passwordHash,
       provider: "credentials",
-      role: "customer",
+      profileImage: "",
+      emailVerified: "",
       createdAt: now,
       updatedAt: now,
     })
+
+    // 5. Log activity
+    await logUserActivity(
+      userId,
+      "USER_REGISTER",
+      `Customer registered with email ${cleanEmail}`
+    ).catch(() => {})
 
     return NextResponse.json({
       success: true,

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "init-sheets": "node scripts/init-sheets.cjs"
   },
   "dependencies": {
     "@stripe/stripe-js": "^9.6.0",

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { getCustomerByEmail, getCustomerByUsername, updateCustomer } from "@/lib/sheets"
+import { getUserByEmail, getUserByUsername, updateUser, logUserActivity } from "@/lib/sheets"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
 
@@ -11,27 +11,27 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const customer = await getCustomerByEmail(session.user.email)
-  if (!customer) {
+  const user = await getUserByEmail(session.user.email)
+  if (!user) {
     return NextResponse.json({
-      name: session.user.name || "Customer",
+      fullName: session.user.name || "Customer",
       email: session.user.email,
       username: (session.user as any).username || "",
       phoneNumber: "",
       provider: "google",
-      role: (session.user as any).role || "customer",
+      profileImage: session.user.image || "",
     })
   }
 
   return NextResponse.json({
-    userId: customer.userId,
-    fullName: customer.fullName,
-    username: customer.username,
-    phoneNumber: customer.phoneNumber,
-    email: customer.email,
-    provider: customer.provider,
-    role: customer.role,
-    createdAt: customer.createdAt,
+    userId: user.userId,
+    fullName: user.fullName,
+    username: user.username,
+    phoneNumber: user.phoneNumber,
+    email: user.email,
+    provider: user.provider,
+    profileImage: user.profileImage,
+    createdAt: user.createdAt,
   })
 }
 
@@ -54,23 +54,30 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid input" }, { status: 400 })
     }
 
-    const customer = await getCustomerByEmail(session.user.email)
-    if (!customer) {
-      return NextResponse.json({ error: "Customer not found" }, { status: 404 })
+    const user = await getUserByEmail(session.user.email)
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     const { fullName, phoneNumber, username } = parsed.data
     const updates: any = { fullName, phoneNumber }
 
-    if (username && username.toLowerCase() !== customer.username.toLowerCase()) {
-      const taken = await getCustomerByUsername(username.toLowerCase())
-      if (taken && taken.userId !== customer.userId) {
+    if (username && username.toLowerCase() !== user.username.toLowerCase()) {
+      const taken = await getUserByUsername(username.toLowerCase())
+      if (taken && taken.userId !== user.userId) {
         return NextResponse.json({ error: "Username is already taken" }, { status: 409 })
       }
       updates.username = username.toLowerCase()
     }
 
-    await updateCustomer(customer.userId, updates)
+    await updateUser(user.userId, updates)
+
+    await logUserActivity(
+      user.userId,
+      "PROFILE_UPDATE",
+      `Updated profile details (name: ${fullName})`
+    ).catch(() => {})
+
     return NextResponse.json({ success: true, message: "Profile updated successfully" })
   } catch (err) {
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
@@ -99,18 +106,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid input" }, { status: 400 })
     }
 
-    const customer = await getCustomerByEmail(session.user.email)
-    if (!customer || !customer.passwordHash) {
+    const user = await getUserByEmail(session.user.email)
+    if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "Password change not available for OAuth accounts" }, { status: 400 })
     }
 
-    const match = await bcrypt.compare(parsed.data.currentPassword, customer.passwordHash)
+    const match = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash)
     if (!match) {
       return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 })
     }
 
     const newHash = await bcrypt.hash(parsed.data.newPassword, 10)
-    await updateCustomer(customer.userId, { passwordHash: newHash })
+    await updateUser(user.userId, { passwordHash: newHash })
+
+    await logUserActivity(
+      user.userId,
+      "PASSWORD_CHANGE",
+      "Customer updated account password"
+    ).catch(() => {})
 
     return NextResponse.json({ success: true, message: "Password updated successfully" })
   } catch (err) {

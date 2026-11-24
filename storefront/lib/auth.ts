@@ -2,7 +2,20 @@ import type { AuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
-import { getCustomerByEmail, appendCustomer } from "@/lib/sheets"
+import { getUserByEmail, appendUser, updateUser, logUserActivity, getUserByUsername } from "@/lib/sheets"
+
+async function generateUniqueUsername(base: string): Promise<string> {
+  const cleanBase = base.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() || "user"
+  let candidate = cleanBase
+  let counter = 1
+
+  while (await getUserByUsername(candidate)) {
+    candidate = `${cleanBase}_${Math.random().toString(36).substring(2, 6)}`
+    counter++
+    if (counter > 10) break
+  }
+  return candidate
+}
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -19,22 +32,30 @@ export const authOptions: AuthOptions = {
         const email = credentials.email.trim().toLowerCase()
         const password = credentials.password
 
-        // Authenticate customer from Google Sheets
+        // Authenticate customer from Users sheet in Google Sheets
         try {
-          const customer = await getCustomerByEmail(email)
-          if (!customer || !customer.passwordHash) {
+          const user = await getUserByEmail(email)
+          if (!user || !user.passwordHash) {
             return null
           }
-          const isPasswordValid = await bcrypt.compare(password, customer.passwordHash)
+          const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
           if (!isPasswordValid) {
             return null
           }
+
+          // Log successful login activity
+          await logUserActivity(
+            user.userId,
+            "USER_LOGIN",
+            `Customer logged in with email ${user.email}`
+          ).catch(() => {})
+
           return {
-            id: customer.userId,
-            email: customer.email,
-            name: customer.fullName,
-            username: customer.username,
-            role: "customer",
+            id: user.userId,
+            email: user.email,
+            name: user.fullName,
+            username: user.username,
+            image: user.profileImage || null,
           }
         } catch (err) {
           console.error("Customer authorize error:", err)
@@ -61,22 +82,43 @@ export const authOptions: AuthOptions = {
       if (account?.provider === "google" && user.email) {
         const email = user.email.toLowerCase()
         try {
-          const existing = await getCustomerByEmail(email)
+          const existing = await getUserByEmail(email)
           if (!existing) {
-            const usernameBase = (user.name ?? email.split("@")[0]).replace(/[^a-zA-Z0-9_]/g, "").toLowerCase()
-            const uniqueUsername = `${usernameBase || "user"}_${Math.random().toString(36).substring(2, 6)}`
-            await appendCustomer({
-              userId: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            const rawBase = (user.name ?? email.split("@")[0])
+            const uniqueUsername = await generateUniqueUsername(rawBase)
+            const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+            const now = new Date().toISOString()
+
+            await appendUser({
+              userId,
               fullName: user.name || "Customer",
               username: uniqueUsername,
               phoneNumber: "",
-              email: email,
+              email,
               passwordHash: "",
               provider: "google",
-              role: "customer",
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
+              profileImage: user.image || "",
+              emailVerified: now,
+              createdAt: now,
+              updatedAt: now,
             })
+
+            await logUserActivity(
+              userId,
+              "USER_REGISTER_GOOGLE",
+              `Created account via Google OAuth (${email})`
+            ).catch(() => {})
+          } else {
+            // Update profile image if missing
+            if (user.image && !existing.profileImage) {
+              await updateUser(existing.userId, { profileImage: user.image })
+            }
+
+            await logUserActivity(
+              existing.userId,
+              "USER_LOGIN_GOOGLE",
+              `Logged in via Google OAuth (${email})`
+            ).catch(() => {})
           }
         } catch (err) {
           console.error("Google signIn callback error:", err)
@@ -87,33 +129,37 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
-        token.role = "customer"
         token.username = (user as any).username || ""
+        if (user.image) token.picture = user.image
       }
-      // If customer signed in via Google or username is missing, retrieve from Google Sheets customer data
-      if ((!token.username || !token.id || String(token.id).startsWith("google-") || !String(token.id).startsWith("usr_")) && token.email) {
+
+      // If username or valid userId is missing (e.g. initial Google login token), lookup from Users sheet
+      if ((!token.username || !token.id || !String(token.id).startsWith("usr_")) && token.email) {
         try {
-          const cust = await getCustomerByEmail(token.email)
-          if (cust) {
-            token.id = cust.userId
-            token.username = cust.username
-            if (cust.fullName) token.name = cust.fullName
+          const found = await getUserByEmail(token.email)
+          if (found) {
+            token.id = found.userId
+            token.username = found.username
+            if (found.fullName) token.name = found.fullName
+            if (found.profileImage) token.picture = found.profileImage
           }
         } catch (err) {
-          console.error("JWT customer lookup error:", err)
+          console.error("JWT user lookup error:", err)
         }
       }
+
       if (trigger === "update" && session) {
         if (session.name) token.name = session.name
         if (session.username) token.username = session.username
+        if (session.image) token.picture = session.image
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
-        (session.user as any).role = "customer";
         (session.user as any).username = token.username || "";
+        if (token.picture) session.user.image = token.picture as string;
       }
       return session
     },

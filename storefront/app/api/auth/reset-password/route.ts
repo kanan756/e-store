@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
-import { getCustomerByEmail, updateCustomer } from "@/lib/sheets"
+import {
+  getUserByEmail,
+  updateUser,
+  getPasswordResetByTokenHash,
+  markPasswordResetAsUsed,
+  logUserActivity,
+} from "@/lib/sheets"
 import { rateLimit } from "@/lib/rate-limit"
 
 const resetSchema = z.object({
@@ -40,29 +47,45 @@ export async function POST(request: Request) {
     const { email, token, password } = parsed.data
     const cleanEmail = email.toLowerCase()
 
-    const customer = await getCustomerByEmail(cleanEmail)
-    if (!customer) {
+    // 1. Compute SHA-256 token hash to look up in Password Reset sheet
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+    const resetRecord = await getPasswordResetByTokenHash(tokenHash, cleanEmail)
+
+    if (!resetRecord) {
       return NextResponse.json({ error: "Password reset link is invalid or has expired." }, { status: 400 })
     }
 
-    // Verify token match and expiry
-    if (!customer.resetToken || customer.resetToken !== token) {
-      return NextResponse.json({ error: "Password reset link is invalid or has expired." }, { status: 400 })
+    if (resetRecord.used === "true") {
+      return NextResponse.json({ error: "This password reset link has already been used." }, { status: 400 })
     }
 
-    if (!customer.resetTokenExpiry || new Date(customer.resetTokenExpiry).getTime() < Date.now()) {
+    if (!resetRecord.expiresAt || new Date(resetRecord.expiresAt).getTime() < Date.now()) {
       return NextResponse.json({ error: "Password reset link has expired. Please request a new one." }, { status: 400 })
     }
 
-    // Hash new password
+    // 2. Fetch User from Users sheet
+    const user = await getUserByEmail(cleanEmail)
+    if (!user) {
+      return NextResponse.json({ error: "User account could not be found." }, { status: 404 })
+    }
+
+    // 3. Hash new password
     const newPasswordHash = await bcrypt.hash(password, 10)
 
-    // Update customer and invalidate single-use token
-    await updateCustomer(customer.userId, {
+    // 4. Update user's passwordHash in Users sheet
+    await updateUser(user.userId, {
       passwordHash: newPasswordHash,
-      resetToken: "",
-      resetTokenExpiry: "",
     })
+
+    // 5. Mark reset token as used in Password Reset sheet
+    await markPasswordResetAsUsed(resetRecord.resetId)
+
+    // 6. Log activity
+    await logUserActivity(
+      user.userId,
+      "PASSWORD_RESET_SUCCESS",
+      "Customer completed password reset successfully"
+    ).catch(() => {})
 
     return NextResponse.json({
       success: true,

@@ -1,21 +1,20 @@
 /**
  * @file lib/sheets.ts
- * @description Google Sheets data layer for the Client Store application.
- *   Acts as the primary database replacement — all Products, Orders, Blogs,
- *   and Inquiries are read from and written to a shared Google Spreadsheet
- *   via the Google Sheets API v4.  The Service Account credentials are loaded
- *   from environment variables at runtime so no secrets ever touch the repo.
+ * @description Google Sheets data layer for the CLASPO E-Commerce application.
+ *   Acts as the primary database — Users, Orders, User Activity, Password Reset,
+ *   Products, Blogs, Inquiries, Quotes, and Subscribers are read from and written
+ *   to a Google Spreadsheet via the Google Sheets API v4.
  *
- *   Exported functions are grouped by entity:
- *     - Products  : getProducts, getProductByHandle, appendProduct, updateProduct, deleteProduct
- *     - Orders    : appendOrder, getOrdersByEmail, getAllOrders, updateOrderStatus
- *     - Blogs     : getBlogs, getBlogBySlug, appendBlog, deleteBlog, updateBlogPublished
- *     - Inquiries   : appendInquiry, getAllInquiries, updateInquiryStatus
- *     - Subscribers : appendSubscriber, getAllSubscribers
- *     - VisitorEvents: appendVisitorEvent
- *
- * @owner Heet-P
- * @lastModified May 16, 2026
+ *   Tabs:
+ *     - Users          : userId, fullName, username, phoneNumber, email, passwordHash,
+ *                        provider, profileImage, emailVerified, createdAt, updatedAt
+ *     - Orders         : orderId, userId, orderNumber, customerName, email, phoneNumber,
+ *                        shippingAddress, items, subtotal, shippingCharge, discount,
+ *                        totalAmount, paymentMethod, paymentStatus, orderStatus,
+ *                        transactionId, createdAt, updatedAt
+ *     - User Activity  : activityId, userId, activityType, description, createdAt
+ *     - Password Reset : resetId, userId, email, tokenHash, expiresAt, used, createdAt
+ *     - Products, Blogs, Inquiries, Quotes, Subscribers
  */
 
 import { google } from "googleapis"
@@ -24,56 +23,246 @@ import fs from "fs"
 import path from "path"
 
 // ── Rate Limiting / Caching ───────────────────────────────────────────────────
-// Google Sheets has a strict 60 requests per minute limit. This wrapper holds
-// the result in memory for 60 seconds, coalescing concurrent requests and heavily
-// reducing API pressure during development or traffic bursts.
-// Note: 60 s is intentionally longer than the old 10 s default so that rapid
-// page navigations in dev (which bypass Next.js ISR) don't each trigger a fresh
-// Sheets API round-trip. Production ISR handles revalidation independently.
+// Google Sheets has a 60 requests per minute quota. This wrapper caches results
+// in-memory for TTL duration while consolidating concurrent in-flight requests.
 function withTTL<T extends (...args: any[]) => Promise<any>>(fn: T, ttlMs = 60_000): T {
-  const cacheMap = new Map<string, { data: any; timestamp: number }>();
-  const inflightMap = new Map<string, Promise<any>>();
+  const cacheMap = new Map<string, { data: any; timestamp: number }>()
+  const inflightMap = new Map<string, Promise<any>>()
 
   return (async (...args: any[]) => {
-    const key = JSON.stringify(args);
-    const cached = cacheMap.get(key);
-    
+    const key = JSON.stringify(args)
+    const cached = cacheMap.get(key)
+
     if (cached && Date.now() - cached.timestamp < ttlMs) {
-      return cached.data;
+      return cached.data
     }
 
-    const inflight = inflightMap.get(key);
-    if (inflight) return inflight;
+    const inflight = inflightMap.get(key)
+    if (inflight) return inflight
 
-    const promise = fn(...args).then(data => {
-      cacheMap.set(key, { data, timestamp: Date.now() });
-      inflightMap.delete(key);
-      return data;
-    }).catch(err => {
-      inflightMap.delete(key);
-      throw err;
-    });
+    const promise = fn(...args)
+      .then((data) => {
+        cacheMap.set(key, { data, timestamp: Date.now() })
+        inflightMap.delete(key)
+        return data
+      })
+      .catch((err) => {
+        inflightMap.delete(key)
+        throw err
+      })
 
-    inflightMap.set(key, promise);
-    return promise;
-  }) as any;
+    inflightMap.set(key, promise)
+    return promise
+  }) as any
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-function getAuth() {
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n")
-  return new google.auth.GoogleAuth({
+// ── Auth & Sheet ID Helpers ───────────────────────────────────────────────────
+let cachedAuth: any = null
+
+export function getAuth() {
+  if (cachedAuth) return cachedAuth
+
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY ?? ""
+  const privateKey = rawKey
+    .replace(/^"|"$/g, "")
+    .replace(/\\n/g, "\n")
+    .trim()
+
+  cachedAuth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       private_key: privateKey,
     },
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   })
+
+  return cachedAuth
 }
 
-const SHEET_ID = process.env.GOOGLE_SHEET_ID!
+export function getSheetId(): string {
+  const raw = process.env.GOOGLE_SHEET_ID ?? ""
+  const match = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+  return match ? match[1] : raw.trim()
+}
+
+export function isSheetsConfigured(): boolean {
+  const sheetId = getSheetId()
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
+  const key = process.env.GOOGLE_PRIVATE_KEY
+  return Boolean(sheetId && email && key)
+}
+
+// ── Schema Definitions ────────────────────────────────────────────────────────
+export const REQUIRED_SHEETS = {
+  Users: [
+    "userId",
+    "fullName",
+    "username",
+    "phoneNumber",
+    "email",
+    "passwordHash",
+    "provider",
+    "profileImage",
+    "emailVerified",
+    "createdAt",
+    "updatedAt",
+  ],
+  Orders: [
+    "orderId",
+    "userId",
+    "orderNumber",
+    "customerName",
+    "email",
+    "phoneNumber",
+    "shippingAddress",
+    "items",
+    "subtotal",
+    "shippingCharge",
+    "discount",
+    "totalAmount",
+    "paymentMethod",
+    "paymentStatus",
+    "orderStatus",
+    "transactionId",
+    "createdAt",
+    "updatedAt",
+  ],
+  "User Activity": [
+    "activityId",
+    "userId",
+    "activityType",
+    "description",
+    "createdAt",
+  ],
+  "Password Reset": [
+    "resetId",
+    "userId",
+    "email",
+    "tokenHash",
+    "expiresAt",
+    "used",
+    "createdAt",
+  ],
+} as const
+
+export const STORE_SHEETS = {
+  Products: [
+    "name",
+    "category",
+    "description",
+    "imageUrl",
+    "price",
+    "handle",
+    "inStock",
+    "partNumber",
+  ],
+  Blogs: [
+    "title",
+    "keywords",
+    "slug",
+    "publishDate",
+    "content",
+    "metaDescription",
+    "imageUrl",
+    "published",
+  ],
+  Inquiries: [
+    "id",
+    "name",
+    "email",
+    "subject",
+    "message",
+    "submittedAt",
+    "status",
+  ],
+  Quotes: [
+    "id",
+    "name",
+    "email",
+    "phone",
+    "company",
+    "application",
+    "quantity",
+    "description",
+    "submittedAt",
+    "status",
+    "hasAttachment",
+  ],
+  Subscribers: [
+    "id",
+    "email",
+    "source",
+    "submittedAt",
+    "status",
+  ],
+} as const
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+export interface User {
+  rowIndex?: number
+  userId: string
+  fullName: string
+  username: string
+  phoneNumber: string
+  email: string
+  passwordHash: string
+  provider: "credentials" | "google"
+  profileImage: string
+  emailVerified: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Backward compatibility alias for customer references
+export type Customer = User
+
+export interface Order {
+  rowIndex?: number
+  orderId: string
+  userId: string
+  orderNumber: string
+  customerName: string
+  email: string
+  phoneNumber: string
+  shippingAddress: string
+  items: string
+  product: string // alias for UI compatibility
+  subtotal: number
+  shippingCharge: number
+  discount: number
+  totalAmount: number
+  amount: number // alias for UI compatibility
+  paymentMethod: string
+  paymentStatus: string
+  orderStatus: string
+  status: string // alias for UI compatibility
+  transactionId: string
+  createdAt: string
+  updatedAt: string
+  comments?: string
+  updatedBy?: string
+}
+
+export interface UserActivityRecord {
+  rowIndex?: number
+  activityId: string
+  userId: string
+  activityType: string
+  description: string
+  createdAt: string
+}
+
+export interface PasswordResetRecord {
+  rowIndex?: number
+  resetId: string
+  userId: string
+  email: string
+  tokenHash: string
+  expiresAt: string
+  used: string
+  createdAt: string
+}
+
 export interface Product {
   rowIndex?: number
   id: string
@@ -85,18 +274,6 @@ export interface Product {
   handle: string
   inStock: boolean
   partNumber?: string
-}
-
-export interface Order {
-  rowIndex?: number
-  orderId: string
-  customerName: string
-  email: string
-  product: string
-  amount: number
-  status: string
-  comments: string
-  updatedBy: string
 }
 
 export interface Blog {
@@ -122,402 +299,6 @@ export interface Inquiry {
   status: string
 }
 
-// ── Products ──────────────────────────────────────────────────────────────────
-// cache() deduplicates repeated calls within the same server render cycle.
-// Both generateMetadata and the page component call getProductByHandle →
-// getProducts(); without this, each triggers a full Sheets API round-trip.
-export const getProducts = cache(withTTL(async (): Promise<Product[]> => {
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
-    return []
-  }
-  try {
-    const auth = getAuth()
-    const sheets = google.sheets({ version: "v4", auth })
-
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: "Products!A2:H",
-    })
-
-    const rows = res.data.values ?? []
-    return rows
-      .map((r, i) => ({
-        rowIndex: i + 2,
-        id: String(i + 1),
-        name: r[0] ?? "",
-        category: r[1] ?? "",
-        description: r[2] ?? "",
-        imageUrl: r[3] ?? "",
-        price: Number(r[4]) || 0,
-        handle: r[5] ?? slugify(r[0] ?? ""),
-        inStock: (r[6] ?? "true").toLowerCase() !== "false",
-        partNumber: r[7] ?? "",
-      }))
-      .filter((p) => p.name !== "") // skip empty rows
-  } catch (err) {
-    console.warn("Failed to fetch products from Google Sheets:", err)
-    return []
-  }
-}))
-
-export async function getProductByHandle(handle: string): Promise<Product | null> {
-  const products = await getProducts()
-  return products.find((p) => p.handle === handle) ?? null
-}
-
-// ── Orders ────────────────────────────────────────────────────────────────────
-export async function appendOrder(order: {
-  customerName: string
-  email: string
-  product: string
-  amount: number
-  paymentId: string
-}): Promise<string> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-
-  const orderId = `ORD-${Date.now()}`
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "Orders!A:H",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        orderId,
-        order.customerName,
-        order.email,
-        order.product,
-        order.amount,
-        "Processing",           // default status
-        `Payment ID: ${order.paymentId}`,
-        `System (${now})`,
-      ]],
-    },
-  })
-
-  return orderId
-}
-
-export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> => {
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
-    return []
-  }
-
-  try {
-    const auth = getAuth()
-    const sheets = google.sheets({ version: "v4", auth })
-
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: "Orders!A2:H",
-    })
-
-    const rows = res.data.values ?? []
-    return rows
-      .filter((r) => r[2]?.toLowerCase() === email.toLowerCase())
-      .map((r) => ({
-        orderId: r[0] ?? "",
-        customerName: r[1] ?? "",
-        email: r[2] ?? "",
-        product: r[3] ?? "",
-        amount: Number(r[4]) || 0,
-        status: r[5] ?? "Processing",
-        comments: r[6] ?? "",
-        updatedBy: r[7] ?? "",
-      }))
-  } catch (err) {
-    console.error("Error reading Orders sheet:", err)
-    return []
-  }
-})
-
-export const getOrderByPaymentId = withTTL(async (paymentId: string): Promise<Order | null> => {
-  const orders = await getAllOrders()
-  return orders.find(o => o.comments.includes(paymentId)) ?? null
-})
-
-// ── Blogs ─────────────────────────────────────────────────────────────────────
-// cache() ensures generateStaticParams, generateMetadata, and the page body
-// all share the same Sheets API result within a single render cycle.
-export const getBlogs = cache(withTTL(async (publishedOnly = false): Promise<Blog[]> => {
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
-    return []
-  }
-  try {
-    const auth = getAuth()
-    const sheets = google.sheets({ version: "v4", auth })
-
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: "Blogs!A2:H",
-    })
-
-    const rows = res.data.values ?? []
-    return rows
-      .map((r, i) => ({
-        rowIndex: i + 2,
-        title: r[0] ?? "",
-        keywords: r[1] ?? "",
-        slug: r[2] ?? slugify(r[0] ?? ""),
-        publishDate: r[3] ?? "",
-        content: r[4] ?? "",
-        metaDescription: r[5] ?? "",
-        imageUrl: r[6] ?? "",
-        published: (r[7] ?? "true").toLowerCase() !== "false",
-      }))
-      .filter((b) => b.title !== "")
-      .filter((b) => !publishedOnly || b.published)
-  } catch (err) {
-    console.warn("Failed to fetch blogs from Google Sheets:", err)
-    return []
-  }
-}))
-
-export async function getBlogBySlug(slug: string): Promise<Blog | null> {
-  const blogs = await getBlogs()
-  return blogs.find((b) => b.slug === slug) ?? null
-}
-
-// ── Admin: Products CRUD ──────────────────────────────────────────────────────
-export async function appendProduct(product: Omit<Product, "id">): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "Products!A:H",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        product.name,
-        product.category,
-        product.description,
-        product.imageUrl,
-        product.price,
-        product.handle || slugify(product.name),
-        product.inStock !== false ? "true" : "false",
-        product.partNumber || "",
-      ]],
-    },
-  })
-}
-
-export async function updateProduct(rowIndex: number, product: Omit<Product, "id">): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `Products!A${rowIndex}:H${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        product.name,
-        product.category,
-        product.description,
-        product.imageUrl,
-        product.price,
-        product.handle || slugify(product.name),
-        product.inStock !== false ? "true" : "false",
-        product.partNumber || "",
-      ]],
-    },
-  })
-}
-
-export async function deleteProduct(rowIndex: number): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-
-  const spreadsheet = await sheets.spreadsheets.get({
-    spreadsheetId: SHEET_ID,
-  })
-  
-  const sheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Products")
-  const sheetId = sheet?.properties?.sheetId
-  
-  if (sheetId === undefined) throw new Error("Products sheet not found")
-
-  await sheets.spreadsheets.batchUpdate({
-    spreadsheetId: SHEET_ID,
-    requestBody: {
-      requests: [
-        {
-          deleteDimension: {
-            range: {
-              sheetId: sheetId,
-              dimension: "ROWS",
-              startIndex: rowIndex - 1,
-              endIndex: rowIndex,
-            }
-          }
-        }
-      ]
-    }
-  })
-}
-
-// ── Admin: Orders ─────────────────────────────────────────────────────────────
-export const getAllOrders = withTTL(async (): Promise<(Order & { rowIndex: number })[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Orders!A2:H",
-  })
-  const rows = res.data.values ?? []
-  return rows
-    .filter((r) => r[0])
-    .map((r, i) => ({
-      rowIndex: i + 2, // actual sheet row
-      orderId: r[0] ?? "",
-      customerName: r[1] ?? "",
-      email: r[2] ?? "",
-      product: r[3] ?? "",
-      amount: Number(r[4]) || 0,
-      status: r[5] ?? "Processing",
-      comments: r[6] ?? "",
-      updatedBy: r[7] ?? "",
-    }))
-})
-
-export async function updateOrderStatus(rowIndex: number, status: string, comments: string): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `Orders!F${rowIndex}:H${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[status, comments, `Admin (${now})`]],
-    },
-  })
-}
-
-// ── Admin: Blogs CRUD ─────────────────────────────────────────────────────────
-export async function appendBlog(blog: Blog): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "Blogs!A:H",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        blog.title,
-        blog.keywords,
-        blog.slug || slugify(blog.title),
-        blog.publishDate || new Date().toISOString().split("T")[0],
-        blog.content,
-        blog.metaDescription,
-        blog.imageUrl ?? "",
-        blog.published !== false ? "true" : "false",
-      ]],
-    },
-  })
-}
-
-export async function deleteBlog(rowIndex: number): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-
-  const spreadsheet = await sheets.spreadsheets.get({
-    spreadsheetId: SHEET_ID,
-  })
-  
-  const sheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Blogs")
-  const sheetId = sheet?.properties?.sheetId
-  
-  if (sheetId === undefined) throw new Error("Blogs sheet not found")
-
-  await sheets.spreadsheets.batchUpdate({
-    spreadsheetId: SHEET_ID,
-    requestBody: {
-      requests: [
-        {
-          deleteDimension: {
-            range: {
-              sheetId: sheetId,
-              dimension: "ROWS",
-              startIndex: rowIndex - 1,
-              endIndex: rowIndex,
-            }
-          }
-        }
-      ]
-    }
-  })
-}
-
-export async function updateBlogPublished(rowIndex: number, published: boolean): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `Blogs!H${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: { values: [[published ? "true" : "false"]] },
-  })
-}
-
-// ── Inquiries ───────────────────────────────────────────────────────────────
-export async function appendInquiry(inq: Omit<Inquiry, "id" | "submittedAt" | "status">): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "Inquiries!A:F",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        `INQ-${Date.now()}`,
-        inq.name,
-        inq.email,
-        inq.subject,
-        inq.message,
-        now,
-        "New",
-      ]],
-    },
-  })
-}
-
-export const getAllInquiries = withTTL(async (): Promise<(Inquiry & { rowIndex: number })[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Inquiries!A2:G",
-  })
-  const rows = res.data.values ?? []
-  return rows
-    .map((r, i) => ({
-      rowIndex: i + 2,
-      id: r[0] ?? "",
-      name: r[1] ?? "",
-      email: r[2] ?? "",
-      subject: r[3] ?? "",
-      message: r[4] ?? "",
-      submittedAt: r[5] ?? "",
-      status: r[6] ?? "New",
-    }))
-    .filter((r) => r.id !== "")
-})
-
-export async function updateInquiryStatus(rowIndex: number, status: string): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `Inquiries!G${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: { values: [[status]] },
-  })
-}
-
-// ── Quotes ────────────────────────────────────────────────────────────────────
 export interface Quote {
   rowIndex?: number
   id: string
@@ -533,70 +314,6 @@ export interface Quote {
   hasAttachment?: string
 }
 
-export async function appendQuote(q: Omit<Quote, "id" | "submittedAt" | "status">): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "Quotes!A:K",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        `QUO-${Date.now()}`,
-        q.name,
-        q.email,
-        q.phone,
-        q.company,
-        q.application,
-        q.quantity,
-        q.description,
-        now,
-        "New",
-        q.hasAttachment ?? "No",
-      ]],
-    },
-  })
-}
-
-export const getAllQuotes = withTTL(async (): Promise<(Quote & { rowIndex: number })[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Quotes!A2:K",
-  })
-  const rows = res.data.values ?? []
-  return rows
-    .map((r, i) => ({
-      rowIndex: i + 2,
-      id: r[0] ?? "",
-      name: r[1] ?? "",
-      email: r[2] ?? "",
-      phone: r[3] ?? "",
-      company: r[4] ?? "",
-      application: r[5] ?? "",
-      quantity: r[6] ?? "",
-      description: r[7] ?? "",
-      submittedAt: r[8] ?? "",
-      status: r[9] ?? "New",
-      hasAttachment: r[10] ?? "No",
-    }))
-    .filter((r) => r.id !== "")
-})
-
-export async function updateQuoteStatus(rowIndex: number, status: string): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `Quotes!J${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: { values: [[status]] },
-  })
-}
-
-// ── Subscribers ───────────────────────────────────────────────────────────────
 export interface Subscriber {
   rowIndex?: number
   id: string
@@ -606,47 +323,6 @@ export interface Subscriber {
   status: string
 }
 
-export async function appendSubscriber(sub: Omit<Subscriber, "id" | "submittedAt" | "status">): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "Subscribers!A:E",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        `SUB-${Date.now()}`,
-        sub.email,
-        sub.source,
-        now,
-        "Active",
-      ]],
-    },
-  })
-}
-
-export const getAllSubscribers = withTTL(async (): Promise<(Subscriber & { rowIndex: number })[]> => {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: "Subscribers!A2:E",
-  })
-  const rows = res.data.values ?? []
-  return rows
-    .map((r, i) => ({
-      rowIndex: i + 2,
-      id: r[0] ?? "",
-      email: r[1] ?? "",
-      source: r[2] ?? "",
-      submittedAt: r[3] ?? "",
-      status: r[4] ?? "Active",
-    }))
-    .filter((r) => r.id !== "")
-})
-
-// ── Visitor Events ────────────────────────────────────────────────────────────
 export interface VisitorEvent {
   page: string
   referrer: string
@@ -655,123 +331,146 @@ export interface VisitorEvent {
   utmCampaign: string
 }
 
-export async function appendVisitorEvent(event: VisitorEvent): Promise<void> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: "v4", auth })
-  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: SHEET_ID,
-    range: "VisitorEvents!A:G",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        `EVT-${Date.now()}`,
-        event.page,
-        event.referrer,
-        event.utmSource,
-        event.utmMedium,
-        event.utmCampaign,
-        now,
-      ]],
-    },
-  })
+// ── Database Initialization (Auto-Create Tabs & Headers) ──────────────────────
+let dbInitPromise: Promise<void> | null = null
+
+export async function ensureAllSheetsInitialized(): Promise<void> {
+  if (dbInitPromise) return dbInitPromise
+
+  dbInitPromise = (async () => {
+    if (!isSheetsConfigured()) {
+      return
+    }
+
+    try {
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const meta = await sheets.spreadsheets.get({ spreadsheetId })
+      const existingSheetList = meta.data.sheets ?? []
+      const existingTitles = new Set(existingSheetList.map((s) => s.properties?.title ?? ""))
+
+      const allDefinitions: Record<string, readonly string[]> = {
+        ...REQUIRED_SHEETS,
+        ...STORE_SHEETS,
+      }
+
+      const sheetsToCreate: string[] = []
+      for (const title of Object.keys(allDefinitions)) {
+        if (!existingTitles.has(title)) {
+          sheetsToCreate.push(title)
+        }
+      }
+
+      // Add missing sheets in batch
+      if (sheetsToCreate.length > 0) {
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requestBody: {
+            requests: sheetsToCreate.map((title) => ({
+              addSheet: { properties: { title } },
+            })),
+          },
+        })
+      }
+
+      // Populate header row for each tab if not already present
+      for (const [title, columns] of Object.entries(allDefinitions)) {
+        const headerRange = `${title}!1:1`
+        const headerCheck = await sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range: headerRange,
+        })
+        const currentHeaders = headerCheck.data.values?.[0] ?? []
+        if (currentHeaders.length === 0) {
+          await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${title}!A1:${String.fromCharCode(64 + columns.length)}1`,
+            valueInputOption: "RAW",
+            requestBody: {
+              values: [columns as string[]],
+            },
+          })
+        }
+      }
+
+      // If default "Sheet1" exists and our main sheets are initialized, remove empty Sheet1
+      const sheet1 = existingSheetList.find((s) => s.properties?.title === "Sheet1")
+      if (sheet1 && sheet1.properties?.sheetId !== undefined) {
+        const sheet1Check = await sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range: "Sheet1!A1:B2",
+        })
+        const hasData = (sheet1Check.data.values?.length ?? 0) > 0
+        if (!hasData && existingSheetList.length > 1) {
+          try {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId,
+              requestBody: {
+                requests: [{ deleteSheet: { sheetId: sheet1.properties.sheetId } }],
+              },
+            })
+          } catch {
+            // Ignore if Sheet1 is the only sheet or cannot be deleted
+          }
+        }
+      }
+    } catch (err) {
+      console.error("ensureAllSheetsInitialized error:", err)
+      dbInitPromise = null
+    }
+  })()
+
+  return dbInitPromise
 }
 
-// ── Util ──────────────────────────────────────────────────────────────────────
-export function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-}
+// ── Local Fallback Stores (used when offline/local without sheets creds) ────────
+const LOCAL_USERS_FILE = path.join(process.cwd(), ".users_store.json")
+const LOCAL_ORDERS_FILE = path.join(process.cwd(), ".orders_store.json")
+const LOCAL_ACTIVITY_FILE = path.join(process.cwd(), ".activity_store.json")
+const LOCAL_RESET_FILE = path.join(process.cwd(), ".reset_store.json")
 
-// ── Customers ─────────────────────────────────────────────────────────────────
-export interface Customer {
-  rowIndex?: number
-  userId: string
-  fullName: string
-  username: string
-  phoneNumber: string
-  email: string
-  passwordHash: string
-  provider: "credentials" | "google"
-  role: "customer"
-  resetToken?: string
-  resetTokenExpiry?: string
-  createdAt: string
-  updatedAt: string
-}
-
-const LOCAL_CUSTOMERS_FILE = path.join(process.cwd(), ".customers_store.json")
-
-function loadLocalCustomers(): Customer[] {
+function loadLocalFile<T>(filePath: string): T[] {
   try {
-    if (fs.existsSync(LOCAL_CUSTOMERS_FILE)) {
-      const data = fs.readFileSync(LOCAL_CUSTOMERS_FILE, "utf-8")
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, "utf-8")
       return JSON.parse(data)
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
   return []
 }
 
-function saveLocalCustomers(list: Customer[]): void {
+function saveLocalFile<T>(filePath: string, data: T[]): void {
   try {
-    fs.writeFileSync(LOCAL_CUSTOMERS_FILE, JSON.stringify(list, null, 2), "utf-8")
-  } catch (e) {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8")
+  } catch {
     // ignore
   }
 }
 
-async function ensureCustomersSheet(): Promise<void> {
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) return
-  try {
-    const auth = getAuth()
-    const sheets = google.sheets({ version: "v4", auth })
-    const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID })
-    const sheetExists = meta.data.sheets?.some(s => s.properties?.title === "Customers")
-    if (!sheetExists) {
-      await sheets.spreadsheets.batchUpdate({
-        spreadsheetId: SHEET_ID,
-        requestBody: {
-          requests: [{ addSheet: { properties: { title: "Customers" } } }]
-        }
-      })
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: SHEET_ID,
-        range: "Customers!A1:L1",
-        valueInputOption: "RAW",
-        requestBody: {
-          values: [[
-            "userId", "fullName", "username", "phoneNumber", "email",
-            "passwordHash", "provider", "role", "resetToken", "resetTokenExpiry",
-            "createdAt", "updatedAt"
-          ]]
-        }
-      })
-    }
-  } catch (e) {
-    // ignore
-  }
-}
-
-export async function getAllCustomers(): Promise<Customer[]> {
-  const localList = loadLocalCustomers()
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+// ── Users / Customer Management ───────────────────────────────────────────────
+export async function getAllUsers(): Promise<User[]> {
+  const localList = loadLocalFile<User>(LOCAL_USERS_FILE)
+  if (!isSheetsConfigured()) {
     return localList
   }
 
   try {
-    await ensureCustomersSheet()
+    await ensureAllSheetsInitialized()
     const auth = getAuth()
     const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
     const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: "Customers!A2:L",
+      spreadsheetId,
+      range: "Users!A2:K",
     })
+
     const rows = res.data.values ?? []
-    const sheetCustomers: Customer[] = rows
+    const sheetUsers: User[] = rows
       .map((r, i) => ({
         rowIndex: i + 2,
         userId: r[0] ?? "",
@@ -781,17 +480,16 @@ export async function getAllCustomers(): Promise<Customer[]> {
         email: (r[4] ?? "").toLowerCase(),
         passwordHash: r[5] ?? "",
         provider: (r[6] ?? "credentials") as "credentials" | "google",
-        role: "customer" as const,
-        resetToken: r[8] ?? "",
-        resetTokenExpiry: r[9] ?? "",
-        createdAt: r[10] ?? "",
-        updatedAt: r[11] ?? "",
+        profileImage: r[7] ?? "",
+        emailVerified: r[8] ?? "",
+        createdAt: r[9] ?? "",
+        updatedAt: r[10] ?? "",
       }))
-      .filter((c) => c.userId !== "")
+      .filter((u) => u.userId !== "")
 
-    // Merge any local customer not yet synced
-    const sheetIds = new Set(sheetCustomers.map(c => c.userId))
-    const merged = [...sheetCustomers]
+    // Merge any local user not yet synced
+    const sheetIds = new Set(sheetUsers.map((u) => u.userId))
+    const merged = [...sheetUsers]
     for (const loc of localList) {
       if (!sheetIds.has(loc.userId)) {
         merged.push(loc)
@@ -799,125 +497,1185 @@ export async function getAllCustomers(): Promise<Customer[]> {
     }
     return merged
   } catch (err) {
-    console.error("Error reading Customers sheet:", err)
+    console.error("Error reading Users sheet:", err)
     return localList
   }
 }
 
-export async function getCustomerByEmail(email: string): Promise<Customer | null> {
+export async function getUserByEmail(email: string): Promise<User | null> {
   const cleanEmail = email.trim().toLowerCase()
-  const customers = await getAllCustomers()
-  return customers.find(c => c.email.toLowerCase() === cleanEmail) || null
+  const users = await getAllUsers()
+  return users.find((u) => u.email.toLowerCase() === cleanEmail) || null
 }
 
-export async function getCustomerByUsername(username: string): Promise<Customer | null> {
+export async function getUserByUsername(username: string): Promise<User | null> {
   const cleanUsername = username.trim().toLowerCase()
-  const customers = await getAllCustomers()
-  return customers.find(c => c.username.toLowerCase() === cleanUsername) || null
+  const users = await getAllUsers()
+  return users.find((u) => u.username.toLowerCase() === cleanUsername) || null
 }
 
-export async function getCustomerById(userId: string): Promise<Customer | null> {
-  const customers = await getAllCustomers()
-  return customers.find(c => c.userId === userId) || null
+export async function getUserById(userId: string): Promise<User | null> {
+  const users = await getAllUsers()
+  return users.find((u) => u.userId === userId) || null
 }
 
-export async function getCustomerByResetToken(token: string): Promise<Customer | null> {
-  if (!token) return null
-  const customers = await getAllCustomers()
-  return customers.find(c => c.resetToken === token) || null
-}
+export async function appendUser(user: Omit<User, "rowIndex">): Promise<User> {
+  const newUser: User = { ...user }
+  const localList = loadLocalFile<User>(LOCAL_USERS_FILE)
+  localList.push(newUser)
+  saveLocalFile(LOCAL_USERS_FILE, localList)
 
-export async function appendCustomer(customer: Omit<Customer, "rowIndex">): Promise<Customer> {
-  const newCustomer: Customer = { ...customer }
-  const localList = loadLocalCustomers()
-  localList.push(newCustomer)
-  saveLocalCustomers(localList)
-
-  if (SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+  if (isSheetsConfigured()) {
     try {
-      await ensureCustomersSheet()
+      await ensureAllSheetsInitialized()
       const auth = getAuth()
       const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
       await sheets.spreadsheets.values.append({
-        spreadsheetId: SHEET_ID,
-        range: "Customers!A:L",
+        spreadsheetId,
+        range: "Users!A:K",
         valueInputOption: "RAW",
         requestBody: {
-          values: [[
-            newCustomer.userId,
-            newCustomer.fullName,
-            newCustomer.username,
-            newCustomer.phoneNumber,
-            newCustomer.email.toLowerCase(),
-            newCustomer.passwordHash,
-            newCustomer.provider,
-            newCustomer.role,
-            newCustomer.resetToken || "",
-            newCustomer.resetTokenExpiry || "",
-            newCustomer.createdAt,
-            newCustomer.updatedAt,
-          ]],
+          values: [
+            [
+              newUser.userId,
+              newUser.fullName,
+              newUser.username,
+              newUser.phoneNumber,
+              newUser.email.toLowerCase(),
+              newUser.passwordHash,
+              newUser.provider,
+              newUser.profileImage || "",
+              newUser.emailVerified || "",
+              newUser.createdAt,
+              newUser.updatedAt,
+            ],
+          ],
         },
       })
     } catch (err) {
-      console.error("Error appending to Customers sheet:", err)
+      console.error("Error appending to Users sheet:", err)
     }
   }
 
-  return newCustomer
+  return newUser
 }
 
-export async function updateCustomer(userId: string, updates: Partial<Customer>): Promise<boolean> {
+export async function updateUser(userId: string, updates: Partial<User>): Promise<boolean> {
   let updated = false
   const now = new Date().toISOString()
 
-  const localList = loadLocalCustomers()
-  const idx = localList.findIndex(c => c.userId === userId)
+  const localList = loadLocalFile<User>(LOCAL_USERS_FILE)
+  const idx = localList.findIndex((u) => u.userId === userId)
   if (idx !== -1) {
     localList[idx] = { ...localList[idx], ...updates, updatedAt: now }
-    saveLocalCustomers(localList)
+    saveLocalFile(LOCAL_USERS_FILE, localList)
     updated = true
   }
 
-  if (SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+  if (isSheetsConfigured()) {
     try {
-      const customers = await getAllCustomers()
-      const target = customers.find(c => c.userId === userId)
+      await ensureAllSheetsInitialized()
+      const users = await getAllUsers()
+      const target = users.find((u) => u.userId === userId)
       if (target && target.rowIndex) {
         const auth = getAuth()
         const sheets = google.sheets({ version: "v4", auth })
-        const merged: Customer = { ...target, ...updates, updatedAt: now }
+        const spreadsheetId = getSheetId()
+        const merged: User = { ...target, ...updates, updatedAt: now }
+
         await sheets.spreadsheets.values.update({
-          spreadsheetId: SHEET_ID,
-          range: `Customers!A${target.rowIndex}:L${target.rowIndex}`,
+          spreadsheetId,
+          range: `Users!A${target.rowIndex}:K${target.rowIndex}`,
           valueInputOption: "RAW",
           requestBody: {
-            values: [[
-              merged.userId,
-              merged.fullName,
-              merged.username,
-              merged.phoneNumber,
-              merged.email.toLowerCase(),
-              merged.passwordHash,
-              merged.provider,
-              merged.role,
-              merged.resetToken || "",
-              merged.resetTokenExpiry || "",
-              merged.createdAt,
-              merged.updatedAt,
-            ]],
+            values: [
+              [
+                merged.userId,
+                merged.fullName,
+                merged.username,
+                merged.phoneNumber,
+                merged.email.toLowerCase(),
+                merged.passwordHash,
+                merged.provider,
+                merged.profileImage || "",
+                merged.emailVerified || "",
+                merged.createdAt,
+                merged.updatedAt,
+              ],
+            ],
           },
         })
+
         if (idx === -1) {
           localList.push(merged)
-          saveLocalCustomers(localList)
+          saveLocalFile(LOCAL_USERS_FILE, localList)
         }
         return true
       }
     } catch (err) {
-      console.error("Error updating Customers sheet:", err)
+      console.error("Error updating Users sheet:", err)
     }
   }
 
   return updated
+}
+
+// Backward compatibility function aliases for Customer naming
+export const getAllCustomers = getAllUsers
+export const getCustomerByEmail = getUserByEmail
+export const getCustomerByUsername = getUserByUsername
+export const getCustomerById = getUserById
+export const appendCustomer = appendUser
+export const updateCustomer = updateUser
+
+// ── User Activity Logging ─────────────────────────────────────────────────────
+export async function logUserActivity(
+  userId: string,
+  activityType: string,
+  description: string
+): Promise<UserActivityRecord> {
+  const activityId = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+  const createdAt = new Date().toISOString()
+  const record: UserActivityRecord = {
+    activityId,
+    userId,
+    activityType,
+    description,
+    createdAt,
+  }
+
+  const localList = loadLocalFile<UserActivityRecord>(LOCAL_ACTIVITY_FILE)
+  localList.push(record)
+  saveLocalFile(LOCAL_ACTIVITY_FILE, localList)
+
+  if (isSheetsConfigured()) {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "User Activity!A:E",
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [[activityId, userId, activityType, description, createdAt]],
+        },
+      })
+    } catch (err) {
+      console.error("Error logging user activity to sheet:", err)
+    }
+  }
+
+  return record
+}
+
+export async function getUserActivities(userId: string): Promise<UserActivityRecord[]> {
+  const localList = loadLocalFile<UserActivityRecord>(LOCAL_ACTIVITY_FILE).filter(
+    (a) => a.userId === userId
+  )
+  if (!isSheetsConfigured()) {
+    return localList
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "User Activity!A2:E",
+    })
+
+    const rows = res.data.values ?? []
+    return rows
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        activityId: r[0] ?? "",
+        userId: r[1] ?? "",
+        activityType: r[2] ?? "",
+        description: r[3] ?? "",
+        createdAt: r[4] ?? "",
+      }))
+      .filter((a) => a.userId === userId)
+  } catch (err) {
+    console.error("Error fetching user activities:", err)
+    return localList
+  }
+}
+
+// ── Password Reset Management ─────────────────────────────────────────────────
+export async function appendPasswordReset(
+  record: Omit<PasswordResetRecord, "rowIndex">
+): Promise<PasswordResetRecord> {
+  const localList = loadLocalFile<PasswordResetRecord>(LOCAL_RESET_FILE)
+  localList.push(record)
+  saveLocalFile(LOCAL_RESET_FILE, localList)
+
+  if (isSheetsConfigured()) {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "Password Reset!A:G",
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [
+            [
+              record.resetId,
+              record.userId,
+              record.email.toLowerCase(),
+              record.tokenHash,
+              record.expiresAt,
+              record.used,
+              record.createdAt,
+            ],
+          ],
+        },
+      })
+    } catch (err) {
+      console.error("Error appending to Password Reset sheet:", err)
+    }
+  }
+
+  return record
+}
+
+export async function getPasswordResetByTokenHash(
+  tokenHash: string,
+  email: string
+): Promise<PasswordResetRecord | null> {
+  const cleanEmail = email.trim().toLowerCase()
+  const localList = loadLocalFile<PasswordResetRecord>(LOCAL_RESET_FILE)
+  const localMatch = localList.find(
+    (r) => r.tokenHash === tokenHash && r.email.toLowerCase() === cleanEmail && r.used !== "true"
+  )
+
+  if (!isSheetsConfigured()) {
+    return localMatch || null
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Password Reset!A2:G",
+    })
+
+    const rows = res.data.values ?? []
+    const sheetRecords: PasswordResetRecord[] = rows.map((r, i) => ({
+      rowIndex: i + 2,
+      resetId: r[0] ?? "",
+      userId: r[1] ?? "",
+      email: (r[2] ?? "").toLowerCase(),
+      tokenHash: r[3] ?? "",
+      expiresAt: r[4] ?? "",
+      used: r[5] ?? "false",
+      createdAt: r[6] ?? "",
+    }))
+
+    const match = sheetRecords.find(
+      (r) => r.tokenHash === tokenHash && r.email.toLowerCase() === cleanEmail && r.used !== "true"
+    )
+
+    return match || localMatch || null
+  } catch (err) {
+    console.error("Error reading Password Reset sheet:", err)
+    return localMatch || null
+  }
+}
+
+export async function markPasswordResetAsUsed(resetId: string): Promise<boolean> {
+  let updated = false
+  const localList = loadLocalFile<PasswordResetRecord>(LOCAL_RESET_FILE)
+  const idx = localList.findIndex((r) => r.resetId === resetId)
+  if (idx !== -1) {
+    localList[idx].used = "true"
+    saveLocalFile(LOCAL_RESET_FILE, localList)
+    updated = true
+  }
+
+  if (isSheetsConfigured()) {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Password Reset!A2:G",
+      })
+
+      const rows = res.data.values ?? []
+      const rowIndex = rows.findIndex((r) => r[0] === resetId)
+      if (rowIndex !== -1) {
+        const targetRow = rowIndex + 2
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `Password Reset!F${targetRow}`,
+          valueInputOption: "RAW",
+          requestBody: { values: [["true"]] },
+        })
+        return true
+      }
+    } catch (err) {
+      console.error("Error marking Password Reset as used:", err)
+    }
+  }
+
+  return updated
+}
+
+// ── Orders Management (Sheet 2: Orders) ───────────────────────────────────────
+export async function appendOrder(orderData: {
+  customerName: string
+  email: string
+  userId?: string
+  orderNumber?: string
+  phoneNumber?: string
+  shippingAddress?: string
+  items?: string
+  product?: string
+  subtotal?: number
+  shippingCharge?: number
+  discount?: number
+  totalAmount?: number
+  amount?: number
+  paymentMethod?: string
+  paymentStatus?: string
+  orderStatus?: string
+  transactionId?: string
+  paymentId?: string
+}): Promise<string> {
+  const orderId = `ORD-${Date.now()}`
+  const orderNumber = orderData.orderNumber || `CLS-${Date.now().toString().slice(-6)}`
+  const cleanEmail = orderData.email.trim().toLowerCase()
+
+  // Try to associate with an existing user if userId wasn't provided
+  let resolvedUserId = orderData.userId || ""
+  if (!resolvedUserId) {
+    try {
+      const user = await getUserByEmail(cleanEmail)
+      if (user) {
+        resolvedUserId = user.userId
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const items = orderData.items || orderData.product || "CLASPO Electronics Order"
+  const totalAmount = orderData.totalAmount ?? orderData.amount ?? 0
+  const subtotal = orderData.subtotal ?? totalAmount
+  const shippingCharge = orderData.shippingCharge ?? 0
+  const discount = orderData.discount ?? 0
+  const paymentMethod = orderData.paymentMethod || "Stripe"
+  const paymentStatus = orderData.paymentStatus || "Paid"
+  const orderStatus = orderData.orderStatus || "Processing"
+  const transactionId = orderData.transactionId || orderData.paymentId || ""
+  const now = new Date().toISOString()
+
+  const orderRecord: Order = {
+    orderId,
+    userId: resolvedUserId,
+    orderNumber,
+    customerName: orderData.customerName,
+    email: cleanEmail,
+    phoneNumber: orderData.phoneNumber || "",
+    shippingAddress: orderData.shippingAddress || "",
+    items,
+    product: items,
+    subtotal,
+    shippingCharge,
+    discount,
+    totalAmount,
+    amount: totalAmount,
+    paymentMethod,
+    paymentStatus,
+    orderStatus,
+    status: orderStatus,
+    transactionId,
+    comments: transactionId ? `Payment ID: ${transactionId}` : "",
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
+  localOrders.push(orderRecord)
+  saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
+
+  if (isSheetsConfigured()) {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "Orders!A:R",
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [
+            [
+              orderRecord.orderId,
+              orderRecord.userId,
+              orderRecord.orderNumber,
+              orderRecord.customerName,
+              orderRecord.email,
+              orderRecord.phoneNumber,
+              orderRecord.shippingAddress,
+              orderRecord.items,
+              orderRecord.subtotal,
+              orderRecord.shippingCharge,
+              orderRecord.discount,
+              orderRecord.totalAmount,
+              orderRecord.paymentMethod,
+              orderRecord.paymentStatus,
+              orderRecord.orderStatus,
+              orderRecord.transactionId,
+              orderRecord.createdAt,
+              orderRecord.updatedAt,
+            ],
+          ],
+        },
+      })
+
+      if (resolvedUserId) {
+        await logUserActivity(
+          resolvedUserId,
+          "ORDER_PLACED",
+          `Order ${orderNumber} placed for ${orderRecord.items}`
+        ).catch(() => {})
+      }
+    } catch (err) {
+      console.error("Error appending to Orders sheet:", err)
+    }
+  }
+
+  return orderId
+}
+
+export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> => {
+  const cleanEmail = email.trim().toLowerCase()
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE).filter(
+    (o) => o.email.toLowerCase() === cleanEmail
+  )
+
+  if (!isSheetsConfigured()) {
+    return localOrders
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Orders!A2:R",
+    })
+
+    const rows = res.data.values ?? []
+    return rows
+      .filter((r) => (r[4] ?? "").toLowerCase() === cleanEmail)
+      .map((r, i) => {
+        const orderId = r[0] ?? ""
+        const userId = r[1] ?? ""
+        const orderNumber = r[2] ?? ""
+        const customerName = r[3] ?? ""
+        const rowEmail = r[4] ?? ""
+        const phoneNumber = r[5] ?? ""
+        const shippingAddress = r[6] ?? ""
+        const items = r[7] ?? ""
+        const subtotal = Number(r[8]) || 0
+        const shippingCharge = Number(r[9]) || 0
+        const discount = Number(r[10]) || 0
+        const totalAmount = Number(r[11]) || 0
+        const paymentMethod = r[12] ?? ""
+        const paymentStatus = r[13] ?? ""
+        const orderStatus = r[14] ?? "Processing"
+        const transactionId = r[15] ?? ""
+        const createdAt = r[16] ?? ""
+        const updatedAt = r[17] ?? ""
+
+        return {
+          rowIndex: i + 2,
+          orderId,
+          userId,
+          orderNumber,
+          customerName,
+          email: rowEmail,
+          phoneNumber,
+          shippingAddress,
+          items,
+          product: items, // alias for existing UI
+          subtotal,
+          shippingCharge,
+          discount,
+          totalAmount,
+          amount: totalAmount, // alias for existing UI
+          paymentMethod,
+          paymentStatus,
+          orderStatus,
+          status: orderStatus, // alias for existing UI
+          transactionId,
+          comments: transactionId ? `Payment ID: ${transactionId}` : "",
+          createdAt,
+          updatedAt,
+        }
+      })
+  } catch (err) {
+    console.error("Error reading Orders sheet:", err)
+    return localOrders
+  }
+})
+
+export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]> => {
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE).filter((o) => o.userId === userId)
+  if (!isSheetsConfigured()) {
+    return localOrders
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Orders!A2:R",
+    })
+
+    const rows = res.data.values ?? []
+    return rows
+      .filter((r) => r[1] === userId)
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        orderId: r[0] ?? "",
+        userId: r[1] ?? "",
+        orderNumber: r[2] ?? "",
+        customerName: r[3] ?? "",
+        email: r[4] ?? "",
+        phoneNumber: r[5] ?? "",
+        shippingAddress: r[6] ?? "",
+        items: r[7] ?? "",
+        product: r[7] ?? "",
+        subtotal: Number(r[8]) || 0,
+        shippingCharge: Number(r[9]) || 0,
+        discount: Number(r[10]) || 0,
+        totalAmount: Number(r[11]) || 0,
+        amount: Number(r[11]) || 0,
+        paymentMethod: r[12] ?? "",
+        paymentStatus: r[13] ?? "",
+        orderStatus: r[14] ?? "Processing",
+        status: r[14] ?? "Processing",
+        transactionId: r[15] ?? "",
+        comments: r[15] ? `Payment ID: ${r[15]}` : "",
+        createdAt: r[16] ?? "",
+        updatedAt: r[17] ?? "",
+      }))
+  } catch (err) {
+    console.error("Error fetching orders by userId:", err)
+    return localOrders
+  }
+})
+
+export const getAllOrders = withTTL(async (): Promise<Order[]> => {
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
+  if (!isSheetsConfigured()) {
+    return localOrders
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Orders!A2:R",
+    })
+
+    const rows = res.data.values ?? []
+    return rows
+      .filter((r) => r[0])
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        orderId: r[0] ?? "",
+        userId: r[1] ?? "",
+        orderNumber: r[2] ?? "",
+        customerName: r[3] ?? "",
+        email: r[4] ?? "",
+        phoneNumber: r[5] ?? "",
+        shippingAddress: r[6] ?? "",
+        items: r[7] ?? "",
+        product: r[7] ?? "",
+        subtotal: Number(r[8]) || 0,
+        shippingCharge: Number(r[9]) || 0,
+        discount: Number(r[10]) || 0,
+        totalAmount: Number(r[11]) || 0,
+        amount: Number(r[11]) || 0,
+        paymentMethod: r[12] ?? "",
+        paymentStatus: r[13] ?? "",
+        orderStatus: r[14] ?? "Processing",
+        status: r[14] ?? "Processing",
+        transactionId: r[15] ?? "",
+        comments: r[15] ? `Payment ID: ${r[15]}` : "",
+        createdAt: r[16] ?? "",
+        updatedAt: r[17] ?? "",
+      }))
+  } catch (err) {
+    console.error("Error reading all orders:", err)
+    return localOrders
+  }
+})
+
+export const getOrderByPaymentId = withTTL(async (paymentId: string): Promise<Order | null> => {
+  const orders = await getAllOrders()
+  return (
+    orders.find(
+      (o) => o.transactionId === paymentId || (o.comments && o.comments.includes(paymentId))
+    ) ?? null
+  )
+})
+
+export async function updateOrderStatus(
+  rowIndex: number,
+  status: string,
+  comments: string
+): Promise<void> {
+  if (!isSheetsConfigured()) return
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+  const now = new Date().toISOString()
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `Orders!O${rowIndex}:R${rowIndex}`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[status, comments, "", now]],
+    },
+  })
+}
+
+// ── Products ──────────────────────────────────────────────────────────────────
+export const getProducts = cache(
+  withTTL(async (): Promise<Product[]> => {
+    if (!isSheetsConfigured()) {
+      return []
+    }
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Products!A2:H",
+      })
+
+      const rows = res.data.values ?? []
+      return rows
+        .map((r, i) => ({
+          rowIndex: i + 2,
+          id: String(i + 1),
+          name: r[0] ?? "",
+          category: r[1] ?? "",
+          description: r[2] ?? "",
+          imageUrl: r[3] ?? "",
+          price: Number(r[4]) || 0,
+          handle: r[5] ?? slugify(r[0] ?? ""),
+          inStock: (r[6] ?? "true").toLowerCase() !== "false",
+          partNumber: r[7] ?? "",
+        }))
+        .filter((p) => p.name !== "")
+    } catch (err) {
+      console.warn("Failed to fetch products from Google Sheets:", err)
+      return []
+    }
+  })
+)
+
+export async function getProductByHandle(handle: string): Promise<Product | null> {
+  const products = await getProducts()
+  return products.find((p) => p.handle === handle) ?? null
+}
+
+export async function appendProduct(product: Omit<Product, "id">): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "Products!A:H",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        [
+          product.name,
+          product.category,
+          product.description,
+          product.imageUrl,
+          product.price,
+          product.handle || slugify(product.name),
+          product.inStock !== false ? "true" : "false",
+          product.partNumber || "",
+        ],
+      ],
+    },
+  })
+}
+
+export async function updateProduct(rowIndex: number, product: Omit<Product, "id">): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `Products!A${rowIndex}:H${rowIndex}`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        [
+          product.name,
+          product.category,
+          product.description,
+          product.imageUrl,
+          product.price,
+          product.handle || slugify(product.name),
+          product.inStock !== false ? "true" : "false",
+          product.partNumber || "",
+        ],
+      ],
+    },
+  })
+}
+
+export async function deleteProduct(rowIndex: number): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId })
+  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === "Products")
+  const sheetId = sheet?.properties?.sheetId
+  if (sheetId === undefined) throw new Error("Products sheet not found")
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: sheetId,
+              dimension: "ROWS",
+              startIndex: rowIndex - 1,
+              endIndex: rowIndex,
+            },
+          },
+        },
+      ],
+    },
+  })
+}
+
+// ── Blogs ─────────────────────────────────────────────────────────────────────
+export const getBlogs = cache(
+  withTTL(async (publishedOnly = false): Promise<Blog[]> => {
+    if (!isSheetsConfigured()) {
+      return []
+    }
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Blogs!A2:H",
+      })
+
+      const rows = res.data.values ?? []
+      return rows
+        .map((r, i) => ({
+          rowIndex: i + 2,
+          title: r[0] ?? "",
+          keywords: r[1] ?? "",
+          slug: r[2] ?? slugify(r[0] ?? ""),
+          publishDate: r[3] ?? "",
+          content: r[4] ?? "",
+          metaDescription: r[5] ?? "",
+          imageUrl: r[6] ?? "",
+          published: (r[7] ?? "true").toLowerCase() !== "false",
+        }))
+        .filter((b) => b.title !== "")
+        .filter((b) => !publishedOnly || b.published)
+    } catch (err) {
+      console.warn("Failed to fetch blogs from Google Sheets:", err)
+      return []
+    }
+  })
+)
+
+export async function getBlogBySlug(slug: string): Promise<Blog | null> {
+  const blogs = await getBlogs()
+  return blogs.find((b) => b.slug === slug) ?? null
+}
+
+export async function appendBlog(blog: Blog): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "Blogs!A:H",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        [
+          blog.title,
+          blog.keywords,
+          blog.slug || slugify(blog.title),
+          blog.publishDate || new Date().toISOString().split("T")[0],
+          blog.content,
+          blog.metaDescription,
+          blog.imageUrl ?? "",
+          blog.published !== false ? "true" : "false",
+        ],
+      ],
+    },
+  })
+}
+
+export async function deleteBlog(rowIndex: number): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId })
+  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === "Blogs")
+  const sheetId = sheet?.properties?.sheetId
+  if (sheetId === undefined) throw new Error("Blogs sheet not found")
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: sheetId,
+              dimension: "ROWS",
+              startIndex: rowIndex - 1,
+              endIndex: rowIndex,
+            },
+          },
+        },
+      ],
+    },
+  })
+}
+
+export async function updateBlogPublished(rowIndex: number, published: boolean): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `Blogs!H${rowIndex}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [[published ? "true" : "false"]] },
+  })
+}
+
+// ── Inquiries ─────────────────────────────────────────────────────────────────
+export async function appendInquiry(
+  inq: Omit<Inquiry, "id" | "submittedAt" | "status">
+): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "Inquiries!A:G",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        [
+          `INQ-${Date.now()}`,
+          inq.name,
+          inq.email,
+          inq.subject,
+          inq.message,
+          now,
+          "New",
+        ],
+      ],
+    },
+  })
+}
+
+export const getAllInquiries = withTTL(
+  async (): Promise<(Inquiry & { rowIndex: number })[]> => {
+    if (!isSheetsConfigured()) return []
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Inquiries!A2:G",
+      })
+
+      const rows = res.data.values ?? []
+      return rows
+        .map((r, i) => ({
+          rowIndex: i + 2,
+          id: r[0] ?? "",
+          name: r[1] ?? "",
+          email: r[2] ?? "",
+          subject: r[3] ?? "",
+          message: r[4] ?? "",
+          submittedAt: r[5] ?? "",
+          status: r[6] ?? "New",
+        }))
+        .filter((r) => r.id !== "")
+    } catch {
+      return []
+    }
+  }
+)
+
+export async function updateInquiryStatus(rowIndex: number, status: string): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `Inquiries!G${rowIndex}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [[status]] },
+  })
+}
+
+// ── Quotes ────────────────────────────────────────────────────────────────────
+export async function appendQuote(
+  q: Omit<Quote, "id" | "submittedAt" | "status">
+): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "Quotes!A:K",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        [
+          `QUO-${Date.now()}`,
+          q.name,
+          q.email,
+          q.phone,
+          q.company,
+          q.application,
+          q.quantity,
+          q.description,
+          now,
+          "New",
+          q.hasAttachment ?? "No",
+        ],
+      ],
+    },
+  })
+}
+
+export const getAllQuotes = withTTL(async (): Promise<(Quote & { rowIndex: number })[]> => {
+  if (!isSheetsConfigured()) return []
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Quotes!A2:K",
+    })
+
+    const rows = res.data.values ?? []
+    return rows
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        id: r[0] ?? "",
+        name: r[1] ?? "",
+        email: r[2] ?? "",
+        phone: r[3] ?? "",
+        company: r[4] ?? "",
+        application: r[5] ?? "",
+        quantity: r[6] ?? "",
+        description: r[7] ?? "",
+        submittedAt: r[8] ?? "",
+        status: r[9] ?? "New",
+        hasAttachment: r[10] ?? "No",
+      }))
+      .filter((r) => r.id !== "")
+  } catch {
+    return []
+  }
+})
+
+export async function updateQuoteStatus(rowIndex: number, status: string): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `Quotes!J${rowIndex}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [[status]] },
+  })
+}
+
+// ── Subscribers ───────────────────────────────────────────────────────────────
+export async function appendSubscriber(
+  sub: Omit<Subscriber, "id" | "submittedAt" | "status">
+): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "Subscribers!A:E",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[`SUB-${Date.now()}`, sub.email, sub.source, now, "Active"]],
+    },
+  })
+}
+
+export const getAllSubscribers = withTTL(
+  async (): Promise<(Subscriber & { rowIndex: number })[]> => {
+    if (!isSheetsConfigured()) return []
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Subscribers!A2:E",
+      })
+
+      const rows = res.data.values ?? []
+      return rows
+        .map((r, i) => ({
+          rowIndex: i + 2,
+          id: r[0] ?? "",
+          email: r[1] ?? "",
+          source: r[2] ?? "",
+          submittedAt: r[3] ?? "",
+          status: r[4] ?? "Active",
+        }))
+        .filter((r) => r.id !== "")
+    } catch {
+      return []
+    }
+  }
+)
+
+// ── Visitor Events ────────────────────────────────────────────────────────────
+export async function appendVisitorEvent(event: VisitorEvent): Promise<void> {
+  if (!isSheetsConfigured()) return
+  await ensureAllSheetsInitialized()
+  const auth = getAuth()
+  const sheets = google.sheets({ version: "v4", auth })
+  const spreadsheetId = getSheetId()
+  const now = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "VisitorEvents!A:G",
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [
+        [
+          `EVT-${Date.now()}`,
+          event.page,
+          event.referrer,
+          event.utmSource,
+          event.utmMedium,
+          event.utmCampaign,
+          now,
+        ],
+      ],
+    },
+  })
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
 }

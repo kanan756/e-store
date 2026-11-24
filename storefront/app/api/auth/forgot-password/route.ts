@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import crypto from "crypto"
 import { z } from "zod"
-import { getCustomerByEmail, updateCustomer } from "@/lib/sheets"
+import { getUserByEmail, appendPasswordReset, logUserActivity } from "@/lib/sheets"
 import { sendPasswordResetEmail } from "@/lib/email"
 import { rateLimit } from "@/lib/rate-limit"
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const email = parsed.data.email.toLowerCase()
-    const customer = await getCustomerByEmail(email)
+    const user = await getUserByEmail(email)
 
     // Safe response: Always return success message whether user exists or not,
     // to prevent email enumeration attacks!
@@ -37,26 +37,41 @@ export async function POST(request: Request) {
       message: "If an account with that email address exists, a password reset link has been sent.",
     })
 
-    if (!customer) {
+    if (!user) {
       return genericResponse
     }
 
-    // Generate single-use secure random token and 1-hour expiry
-    const resetToken = crypto.randomBytes(32).toString("hex")
-    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+    // Generate single-use secure random token
+    const plainToken = crypto.randomBytes(32).toString("hex")
+    // Store only its SHA-256 hash in the Password Reset sheet
+    const tokenHash = crypto.createHash("sha256").update(plainToken).digest("hex")
+    const resetId = `rst_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1 hour
+    const now = new Date().toISOString()
 
-    await updateCustomer(customer.userId, {
-      resetToken,
-      resetTokenExpiry,
+    await appendPasswordReset({
+      resetId,
+      userId: user.userId,
+      email: user.email,
+      tokenHash,
+      expiresAt,
+      used: "false",
+      createdAt: now,
     })
 
+    await logUserActivity(
+      user.userId,
+      "PASSWORD_RESET_REQUEST",
+      `Password reset link requested for ${user.email}`
+    ).catch(() => {})
+
     const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_STORE_URL || "http://localhost:3000"
-    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(customer.email)}`
+    const resetUrl = `${baseUrl}/reset-password?token=${plainToken}&email=${encodeURIComponent(user.email)}`
 
     // Send email via Nodemailer
     await sendPasswordResetEmail({
-      to: customer.email,
-      name: customer.fullName,
+      to: user.email,
+      name: user.fullName,
       resetUrl,
     })
 
