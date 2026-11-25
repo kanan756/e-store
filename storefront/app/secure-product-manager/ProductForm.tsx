@@ -105,6 +105,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [pricingError, setPricingError] = useState("")
 
   const imageInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
@@ -418,8 +419,11 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
       return
     }
 
+    const INVALID_PRICING_MSG = "Discounted price cannot be greater than the regular price."
+
     const regularPriceInr = Math.round(parseFloat(price || "0") * 100) / 100
     if (isNaN(regularPriceInr) || regularPriceInr < 0) {
+      setPricingError("Please enter a valid regular price in INR.")
       setErrorMessage("Please enter a valid regular price in INR.")
       return
     }
@@ -428,14 +432,19 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     if (discountPrice && discountPrice.trim() !== "") {
       discountInr = Math.round(parseFloat(discountPrice) * 100) / 100
       if (isNaN(discountInr) || discountInr < 0) {
+        setPricingError("Please enter a valid discount price in INR.")
         setErrorMessage("Please enter a valid discount price in INR.")
         return
       }
       if (discountInr > regularPriceInr) {
-        setErrorMessage("Discounted price cannot exceed regular price.")
+        setPricingError(INVALID_PRICING_MSG)
+        setErrorMessage(INVALID_PRICING_MSG)
+        const el = document.getElementById("pm-pricing-card")
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
         return
       }
     }
+    setPricingError("")
 
     const stockNumber = parseInt(stock || "0", 10)
     if (isNaN(stockNumber) || stockNumber < 0) {
@@ -458,7 +467,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         shortDescription: shortDescription.trim(),
         description: description.trim(),
         price: regularPriceInr,
-        discountPrice: discountInr,
+        discountPrice: discountInr ?? null,
         stock: stockNumber,
         status,
         primaryImage: primaryItem ? primaryItem.url : "",
@@ -495,7 +504,15 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         router.refresh()
       }, 1200)
     } catch (err: any) {
-      setErrorMessage(err.message || "An unexpected error occurred while saving.")
+      const msg = err.message || "An unexpected error occurred while saving."
+      setErrorMessage(msg)
+      if (/discounted price|regular price|invalid pricing/i.test(msg)) {
+        setPricingError(msg)
+        const el = document.getElementById("pm-pricing-card")
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+      } else if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      }
       setSubmitting(false)
     }
   }
@@ -1311,14 +1328,22 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
             </div>
 
             {/* Pricing Card */}
-            <div className="pm-card" style={{ padding: "24px", marginBottom: 24 }}>
+            <div
+              id="pm-pricing-card"
+              className="pm-card"
+              style={{
+                padding: "24px",
+                marginBottom: 24,
+                borderColor: pricingError ? "#DC2626" : undefined,
+              }}
+            >
               <h2 style={{ fontSize: 15, fontWeight: 800, color: "#17191C", margin: "0 0 16px" }}>
                 Pricing & Valuation (INR)
               </h2>
 
               <div className="pm-field-group">
                 <label className="pm-label">
-                  MRP (₹) <span style={{ color: "#EF4444" }}>*</span>
+                  Regular Price / MRP (₹) <span style={{ color: "#EF4444" }}>*</span>
                 </label>
                 <input
                   type="number"
@@ -1327,7 +1352,18 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                   className="pm-input"
                   placeholder="499"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => {
+                    const nextVal = e.target.value
+                    setPrice(nextVal)
+                    if (pricingError) {
+                      const r = parseFloat(nextVal || "0")
+                      const d = parseFloat(discountPrice || "0")
+                      if (!discountPrice.trim() || (!isNaN(r) && !isNaN(d) && d <= r)) {
+                        setPricingError("")
+                        setErrorMessage("")
+                      }
+                    }
+                  }}
                   required
                 />
               </div>
@@ -1341,11 +1377,45 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                   className="pm-input"
                   placeholder="399"
                   value={discountPrice}
-                  onChange={(e) => setDiscountPrice(e.target.value)}
+                  onChange={(e) => {
+                    const nextVal = e.target.value
+                    setDiscountPrice(nextVal)
+                    if (pricingError) {
+                      const r = parseFloat(price || "0")
+                      const d = parseFloat(nextVal || "0")
+                      if (!nextVal.trim() || (!isNaN(r) && !isNaN(d) && d <= r)) {
+                        setPricingError("")
+                        setErrorMessage("")
+                      }
+                    }
+                  }}
+                  style={
+                    pricingError
+                      ? { borderColor: "#DC2626", background: "#FEF2F2" }
+                      : undefined
+                  }
                 />
-                <span style={{ fontSize: 11.5, color: "#6B7280", marginTop: 4, display: "block" }}>
-                  Optional sale price in INR. Must be lower than regular price.
-                </span>
+                {pricingError ? (
+                  <div
+                    role="alert"
+                    style={{
+                      marginTop: 8,
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      background: "#FEF2F2",
+                      border: "1px solid #FCA5A5",
+                      color: "#DC2626",
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {pricingError}
+                  </div>
+                ) : (
+                  <span style={{ fontSize: 11.5, color: "#6B7280", marginTop: 4, display: "block" }}>
+                    Optional sale price in INR. Must be less than or equal to regular price.
+                  </span>
+                )}
               </div>
             </div>
 

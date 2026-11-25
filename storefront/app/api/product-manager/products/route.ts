@@ -70,7 +70,7 @@ const createProductSchema = z
       return true
     },
     {
-      message: "Discounted price cannot exceed regular price",
+      message: "Discounted price cannot be greater than the regular price.",
       path: ["discountPrice"],
     }
   )

@@ -72,7 +72,7 @@ const updateProductSchema = z
       return true
     },
     {
-      message: "Discounted price cannot exceed regular price",
+      message: "Discounted price cannot be greater than the regular price.",
       path: ["discountPrice"],
     }
   )
@@ -122,6 +122,23 @@ export async function PUT(
 
     const data = parsed.data
 
+    const resolvedPrice = data.price ?? existing.price
+    const resolvedDiscount =
+      data.discountPrice !== undefined ? data.discountPrice : existing.discountPrice
+
+    if (
+      resolvedDiscount != null &&
+      resolvedDiscount > 0 &&
+      resolvedDiscount > resolvedPrice
+    ) {
+      return NextResponse.json(
+        {
+          error: "Discounted price cannot be greater than the regular price.",
+        },
+        { status: 400 }
+      )
+    }
+
     // Automatically synchronize primary image if additionalImages changed
     let primaryImage = data.primaryImage
     if (!primaryImage && data.additionalImages && data.additionalImages.length > 0) {
@@ -131,7 +148,7 @@ export async function PUT(
 
     const updated = await updateProductById(productId, {
       ...data,
-      discountPrice: data.discountPrice ?? undefined,
+      discountPrice: data.discountPrice === null ? null : (data.discountPrice ?? undefined),
       primaryImage: primaryImage ?? existing.primaryImage,
       imageUrl: primaryImage ?? existing.imageUrl,
     })
