@@ -63,6 +63,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   // Tabbed Content Section state
   const [activeTab, setActiveTab] = useState<DetailTab>("how-to-use")
+  const [footerVisible, setFooterVisible] = useState(false)
 
   // Reviews state
   const [reviews, setReviews] = useState<ProductReviewItem[]>(() =>
@@ -85,6 +86,25 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const productHandle = product.handle || product.id
   const productUrl = `/products/${productHandle}`
   const loginMessage = "Please log in to your CLASPO account to continue."
+
+  // Hide fixed bottom order panel when website footer enters viewport
+  useEffect(() => {
+    const footerEl = document.querySelector("footer")
+    if (!footerEl || typeof IntersectionObserver === "undefined") return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const isIntersecting = entries.some((entry) => entry.isIntersecting)
+        setFooterVisible(isIntersecting)
+      },
+      { threshold: 0.01 }
+    )
+
+    observer.observe(footerEl)
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   // Check verified-purchase review eligibility
   useEffect(() => {
@@ -315,7 +335,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   }
 
   return (
-    <div className="pd-shell" style={{ background: "#FFFFFF" }}>
+    <>
+      <div className="pd-shell" style={{ background: "#FFFFFF" }}>
       {/* ── Breadcrumb Bar ── */}
       <div style={{ borderBottom: "1px solid #E5E5E5", background: "#FAFAFA", padding: "14px 0" }}>
         <div className="W" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
@@ -580,7 +601,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       </section>
 
       {/* ── 2. TABBED CONTENT SECTION (Single Container with 3 Tabs) ── */}
-      <section id="pd-tabs-container" style={{ padding: "48px 0 72px", background: "#FAFAFA" }}>
+      <section id="pd-tabs-container" style={{ padding: "48px 0 130px", background: "#FAFAFA" }}>
         <div className="W">
           <div
             style={{
@@ -604,8 +625,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             >
               {(
                 [
-                  { id: "how-to-use", label: `How to Use (${howToUseSteps.length})` },
-                  { id: "reviews", label: `Product Reviews (${reviewCount})` },
+                  { id: "how-to-use", label: "How to Use" },
+                  { id: "reviews", label: "Product Reviews" },
                   { id: "add-review", label: "Add Review" },
                 ] as const
               ).map((tab) => {
@@ -972,8 +993,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         </div>
       </section>
 
-      {/* ── 3. BOTTOM STICKY ORDER SUMMARY PANEL (Stops before Footer) ── */}
-      <div className="pd-sticky-bar" role="region" aria-label="Order summary">
+      </div>
+
+      {/* ── 3. FIXED BOTTOM ORDER SUMMARY PANEL (Outside scrollable container, hides at footer) ── */}
+      <div
+        className={`pd-fixed-bar${footerVisible ? " is-hidden" : ""}`}
+        role="region"
+        aria-label="Order summary"
+        aria-hidden={footerVisible}
+      >
         <div className="W">
           {added && (
             <div
@@ -1175,6 +1203,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           />
         </div>
       )}
-    </div>
+    </>
   )
 }

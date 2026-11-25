@@ -2478,15 +2478,26 @@ button {
   min-height: 100vh;
 }
 
-/* ── Product Detail Bottom Sticky Order Summary Panel ── */
-.pd-sticky-bar {
-  position: sticky;
+/* ── Product Detail Fixed Bottom Order Summary Panel ── */
+.pd-fixed-bar {
+  position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 40;
   background: #FFFFFF;
   border-top: 2px solid #F36B12;
-  box-shadow: 0 -8px 30px rgba(23, 25, 28, 0.12);
-  padding: 14px 0;
+  box-shadow: 0 -8px 30px rgba(23, 25, 28, 0.14);
+  padding: 14px 0 calc(14px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.pd-fixed-bar.is-hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .pd-sticky-inner {
@@ -2494,7 +2505,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .pd-sticky-metrics {
@@ -2508,11 +2519,12 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
-  .pd-sticky-bar {
-    padding: 12px 0;
+  .pd-fixed-bar {
+    padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px));
   }
   .pd-sticky-inner {
     flex-direction: column;
