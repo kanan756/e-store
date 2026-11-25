@@ -343,6 +343,8 @@ export interface Product {
   additionalVideos?: ProductVideoItem[]
   reviews?: ProductReviewItem[]
   howToUse?: ProductHowToStep[]
+  averageRating?: number
+  reviewCount?: number
   status?: "Active" | "Inactive" | string
   createdAt?: string
   updatedAt?: string
@@ -1262,143 +1264,209 @@ export async function updateOrderStatus(
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
-export async function getProducts(includeInactive = false): Promise<Product[]> {
+const PRODUCTS_CACHE_TTL_MS = 15_000
+let productsCache: { data: Product[]; timestamp: number } | null = null
+let productsInflight: Promise<Product[]> | null = null
+
+export function invalidateProductsCache() {
+  productsCache = null
+}
+
+function parseSheetNumber(val: unknown): number | null {
+  if (val === null || val === undefined) return null
+  const cleaned = String(val).replace(/[₹$,\s]/g, "").trim()
+  if (!cleaned) return null
+  const num = Number(cleaned)
+  return Number.isFinite(num) ? num : null
+}
+
+async function fetchAllProductsFromSheets(): Promise<Product[]> {
   if (!isSheetsConfigured()) {
     return []
   }
-  try {
-    await ensureAllSheetsInitialized()
-    const auth = getAuth()
-    const sheets = google.sheets({ version: "v4", auth })
-    const spreadsheetId = getSheetId()
 
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: "Products!A1:S",
-    })
-
-    const allRows = res.data.values ?? []
-    if (allRows.length <= 1) return []
-
-    const headerRow = allRows[0] ?? []
-    const isNewSchema = headerRow[0]?.toLowerCase().includes("productid")
-    const dataRows = allRows.slice(1)
-
-    const products: Product[] = dataRows
-      .map((r, i) => {
-        const rowIndex = i + 2
-        if (isNewSchema) {
-          const productId = r[0] || `prod_${rowIndex}`
-          const productName = r[1] || ""
-          const slug = r[2] || slugify(productName)
-          const sku = r[3] || ""
-          const category = r[4] || "General"
-          const shortDescription = r[5] || ""
-          const description = r[6] || ""
-          const price = Number(r[7]) || 0
-          const discountPrice = r[8] ? Number(r[8]) : undefined
-          const stock = Number(r[9]) || 0
-          const primaryImage = r[10] || ""
-
-          let additionalImages: ProductMediaItem[] = []
-          try {
-            if (r[11]) additionalImages = JSON.parse(r[11])
-          } catch {}
-
-          const primaryVideo = r[12] || ""
-          let additionalVideos: ProductVideoItem[] = []
-          try {
-            if (r[13]) additionalVideos = JSON.parse(r[13])
-          } catch {}
-
-          const status: "Active" | "Inactive" = (r[14] || "Active") === "Inactive" ? "Inactive" : "Active"
-          const createdAt = r[15] || new Date().toISOString()
-          const updatedAt = r[16] || createdAt
-
-          let reviews: ProductReviewItem[] = []
-          try {
-            if (r[17]) reviews = JSON.parse(r[17])
-          } catch {}
-
-          let howToUse: ProductHowToStep[] = []
-          try {
-            if (r[18]) howToUse = JSON.parse(r[18])
-          } catch {}
-
-          // Compose imageUrl for backward compatibility: primaryImage or first additional image
-          const fallbackImage = additionalImages.length > 0 ? additionalImages[0].url : ""
-          const resolvedImageUrl = primaryImage || fallbackImage || ""
-
-          return {
-            rowIndex,
-            id: productId,
-            productId,
-            name: productName,
-            productName,
-            slug,
-            handle: slug,
-            sku,
-            partNumber: sku,
-            category,
-            shortDescription,
-            description,
-            price,
-            discountPrice,
-            stock,
-            inStock: status === "Active" && stock > 0,
-            imageUrl: resolvedImageUrl,
-            primaryImage,
-            additionalImages,
-            primaryVideo,
-            additionalVideos,
-            reviews,
-            howToUse,
-            status,
-            createdAt,
-            updatedAt,
-          }
-        } else {
-          // Legacy 8-column layout
-          const name = r[0] ?? ""
-          const category = r[1] ?? ""
-          const description = r[2] ?? ""
-          const imageUrl = r[3] ?? ""
-          const price = Number(r[4]) || 0
-          const handle = r[5] ?? slugify(name)
-          const inStock = (r[6] ?? "true").toLowerCase() !== "false"
-          const partNumber = r[7] ?? ""
-
-          return {
-            rowIndex,
-            id: String(i + 1),
-            productId: String(i + 1),
-            name,
-            productName: name,
-            category,
-            description,
-            imageUrl,
-            primaryImage: imageUrl,
-            price,
-            handle,
-            slug: handle,
-            inStock,
-            stock: inStock ? 100 : 0,
-            status: (inStock ? "Active" : "Inactive") as "Active" | "Inactive",
-            partNumber,
-            sku: partNumber,
-          }
-        }
-      })
-      .filter((p) => Boolean(p.name && p.name.trim() !== ""))
-
-    if (!includeInactive) {
-      return products.filter((p) => p.status !== "Inactive")
-    }
-    return products
-  } catch (err) {
-    console.warn("Failed to fetch products from Google Sheets:", err)
-    return []
+  if (productsCache && Date.now() - productsCache.timestamp < PRODUCTS_CACHE_TTL_MS) {
+    return productsCache.data
   }
+
+  if (productsInflight) {
+    return productsInflight
+  }
+
+  productsInflight = (async () => {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: "Products!A1:S",
+      })
+
+      const allRows = res.data.values ?? []
+      if (allRows.length <= 1) {
+        productsCache = { data: [], timestamp: Date.now() }
+        return []
+      }
+
+      const headerRow = allRows[0] ?? []
+      const isNewSchema = headerRow[0]?.toLowerCase().includes("productid")
+      const dataRows = allRows.slice(1)
+
+      const products: Product[] = dataRows
+        .map((r, i) => {
+          const rowIndex = i + 2
+          if (isNewSchema) {
+            const productId = r[0] || `prod_${rowIndex}`
+            const productName = r[1] || ""
+            const slug = r[2] || slugify(productName)
+            const sku = r[3] || ""
+            const category = r[4] || "General"
+            const shortDescription = r[5] || ""
+            const description = r[6] || ""
+            const price = parseSheetNumber(r[7]) ?? 0
+            const parsedDiscount = parseSheetNumber(r[8])
+            const discountPrice =
+              parsedDiscount !== null && parsedDiscount > 0 ? parsedDiscount : undefined
+            const stock = Math.max(0, Math.floor(parseSheetNumber(r[9]) ?? 0))
+            const primaryImage = r[10] || ""
+
+            let additionalImages: ProductMediaItem[] = []
+            try {
+              if (r[11]) {
+                const parsed = JSON.parse(r[11])
+                if (Array.isArray(parsed)) additionalImages = parsed
+              }
+            } catch {}
+
+            const primaryVideo = r[12] || ""
+            let additionalVideos: ProductVideoItem[] = []
+            try {
+              if (r[13]) {
+                const parsed = JSON.parse(r[13])
+                if (Array.isArray(parsed)) additionalVideos = parsed
+              }
+            } catch {}
+
+            const status: "Active" | "Inactive" = (r[14] || "Active") === "Inactive" ? "Inactive" : "Active"
+            const createdAt = r[15] || new Date().toISOString()
+            const updatedAt = r[16] || createdAt
+
+            let reviews: ProductReviewItem[] = []
+            try {
+              if (r[17]) {
+                const parsed = JSON.parse(r[17])
+                if (Array.isArray(parsed)) reviews = parsed
+              }
+            } catch {}
+
+            let howToUse: ProductHowToStep[] = []
+            try {
+              if (r[18]) {
+                const parsed = JSON.parse(r[18])
+                if (Array.isArray(parsed)) howToUse = parsed
+              }
+            } catch {}
+
+            const reviewCount = reviews.length
+            const averageRating =
+              reviewCount > 0
+                ? reviews.reduce((sum, rev) => sum + (Number(rev.rating) || 0), 0) / reviewCount
+                : 0
+
+            // Compose imageUrl for backward compatibility: primaryImage or first additional image
+            const fallbackImage = additionalImages.length > 0 ? additionalImages[0].url : ""
+            const resolvedImageUrl = primaryImage || fallbackImage || ""
+
+            return {
+              rowIndex,
+              id: productId,
+              productId,
+              name: productName,
+              productName,
+              slug,
+              handle: slug,
+              sku,
+              partNumber: sku,
+              category,
+              shortDescription,
+              description,
+              price,
+              discountPrice,
+              stock,
+              inStock: status === "Active" && stock > 0,
+              imageUrl: resolvedImageUrl,
+              primaryImage,
+              additionalImages,
+              primaryVideo,
+              additionalVideos,
+              reviews,
+              howToUse,
+              averageRating,
+              reviewCount,
+              status,
+              createdAt,
+              updatedAt,
+            }
+          } else {
+            // Legacy 8-column layout
+            const name = r[0] ?? ""
+            const category = r[1] ?? ""
+            const description = r[2] ?? ""
+            const imageUrl = r[3] ?? ""
+            const price = parseSheetNumber(r[4]) ?? 0
+            const handle = r[5] ?? slugify(name)
+            const inStock = (r[6] ?? "true").toLowerCase() !== "false"
+            const partNumber = r[7] ?? ""
+
+            return {
+              rowIndex,
+              id: String(i + 1),
+              productId: String(i + 1),
+              name,
+              productName: name,
+              category,
+              description,
+              imageUrl,
+              primaryImage: imageUrl,
+              price,
+              handle,
+              slug: handle,
+              inStock,
+              stock: inStock ? 100 : 0,
+              reviews: [],
+              howToUse: [],
+              averageRating: 0,
+              reviewCount: 0,
+              status: (inStock ? "Active" : "Inactive") as "Active" | "Inactive",
+              partNumber,
+              sku: partNumber,
+            }
+          }
+        })
+        .filter((p) => Boolean(p.name && p.name.trim() !== ""))
+
+      productsCache = { data: products, timestamp: Date.now() }
+      return products
+    } catch (err) {
+      console.warn("Failed to fetch products from Google Sheets:", err)
+      return productsCache?.data ?? []
+    } finally {
+      productsInflight = null
+    }
+  })()
+
+  return productsInflight
+}
+
+export async function getProducts(includeInactive = false): Promise<Product[]> {
+  const products = await fetchAllProductsFromSheets()
+  if (!includeInactive) {
+    return products.filter((p) => p.status !== "Inactive")
+  }
+  return products
 }
 
 export async function getProductByHandle(handle: string): Promise<Product | null> {
@@ -1515,6 +1583,8 @@ export async function createProduct(product: {
     },
   })
 
+  invalidateProductsCache()
+
   return {
     id: productId,
     productId,
@@ -1606,6 +1676,8 @@ export async function updateProductById(
     },
   })
 
+  invalidateProductsCache()
+
   return {
     ...existing,
     name: updatedName,
@@ -1675,6 +1747,8 @@ export async function deleteProductById(
       ],
     },
   })
+
+  invalidateProductsCache()
 
   return true
 }

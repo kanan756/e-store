@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { getProductManagerSession } from "@/lib/pm-auth"
 import {
@@ -215,6 +216,11 @@ export async function POST(request: Request) {
       howToUse: data.howToUse,
       status: data.status,
     })
+
+    revalidatePath("/")
+    revalidatePath("/products")
+    revalidatePath("/wishlist")
+    revalidatePath(`/products/${created.handle}`)
 
     return NextResponse.json({
       success: true,

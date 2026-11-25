@@ -48,7 +48,14 @@ export async function GET(request: Request) {
       getProducts().catch(() => []),
     ]);
 
-    const productMap = new Map(products.map((p) => [p.name.toLowerCase(), p.price]));
+    const productMap = new Map(
+      products.map((p) => [
+        p.name.toLowerCase(),
+        p.discountPrice != null && p.discountPrice > 0 && p.discountPrice < p.price
+          ? p.discountPrice
+          : p.price,
+      ])
+    );
 
     // Determine invoice data: prefer the saved order, fall back to Stripe session
     // when the webhook hasn't written the order to Sheets yet (race condition on mobile).

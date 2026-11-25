@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { getProductManagerSession } from "@/lib/pm-auth"
 import {
@@ -160,6 +161,14 @@ export async function PUT(
       )
     }
 
+    revalidatePath("/")
+    revalidatePath("/products")
+    revalidatePath("/wishlist")
+    revalidatePath(`/products/${updated.handle}`)
+    if (existing.handle && existing.handle !== updated.handle) {
+      revalidatePath(`/products/${existing.handle}`)
+    }
+
     return NextResponse.json({
       success: true,
       message: "Product updated successfully",
@@ -199,6 +208,13 @@ export async function DELETE(
       { error: "Failed to remove product" },
       { status: 500 }
     )
+  }
+
+  revalidatePath("/")
+  revalidatePath("/products")
+  revalidatePath("/wishlist")
+  if (existing.handle) {
+    revalidatePath(`/products/${existing.handle}`)
   }
 
   return NextResponse.json({

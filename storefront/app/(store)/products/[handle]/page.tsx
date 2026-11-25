@@ -4,8 +4,8 @@ import { getProducts, getProductByHandle } from "@/lib/sheets"
 import { ProductSchema } from "@/components/ProductSchema"
 import ProductDetailClient from "@/components/ProductDetailClient"
 
-// Pre-render all product pages at build time; revalidate hourly via ISR
-export const revalidate = 3600
+// Pre-render product pages; revalidate every 60s and on portal mutations
+export const revalidate = 60
 
 export async function generateStaticParams() {
   const products = await getProducts()
