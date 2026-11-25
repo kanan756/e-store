@@ -26,6 +26,22 @@ const videoItemSchema = z.object({
   title: z.string().optional(),
 })
 
+const reviewItemSchema = z.object({
+  id: z.string().min(1),
+  reviewerName: z.string().trim().min(1, "Reviewer name is required").max(100),
+  title: z.string().trim().min(1, "Review title is required").max(150),
+  description: z.string().trim().min(1, "Review description is required").max(2000),
+  rating: z.number().int().min(1).max(5),
+  createdAt: z.string().optional(),
+})
+
+const howToStepSchema = z.object({
+  id: z.string().min(1),
+  stepNumber: z.number().int().min(1),
+  title: z.string().trim().max(150).optional(),
+  instruction: z.string().trim().min(1, "Step instruction is required").max(2000),
+})
+
 const createProductSchema = z
   .object({
     productId: z.string().trim().optional(),
@@ -43,6 +59,8 @@ const createProductSchema = z
     additionalImages: z.array(mediaItemSchema).default([]),
     primaryVideo: z.string().optional(),
     additionalVideos: z.array(videoItemSchema).default([]),
+    reviews: z.array(reviewItemSchema).default([]),
+    howToUse: z.array(howToStepSchema).default([]),
   })
   .refine(
     (data) => {
@@ -193,6 +211,8 @@ export async function POST(request: Request) {
       additionalImages: data.additionalImages,
       primaryVideo,
       additionalVideos: data.additionalVideos,
+      reviews: data.reviews,
+      howToUse: data.howToUse,
       status: data.status,
     })
 

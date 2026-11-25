@@ -394,7 +394,7 @@ export default function PromotionalBanners() {
                 Free Shipping Available
               </div>
               <div style={{ fontSize: 18, fontWeight: 800, marginTop: 2 }}>
-                Enjoy Free Standard Delivery on all orders over $100
+                Enjoy Free Standard Delivery on all orders over ₹999
               </div>
             </div>
           </div>

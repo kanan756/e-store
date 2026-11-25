@@ -15,10 +15,9 @@ export function ProductSchema({ product }: { product: Product }) {
     },
     offers: {
       "@type": "Offer",
-      // Fixed: prices are stored as whole dollars — no division needed.
-      // Previous code divided by 100 (e.g. $1500 → $15 in structured data).
-      price: product.price > 0 ? product.price : undefined,
-      priceCurrency: "USD",
+      // Prices are stored in whole INR units — no division needed.
+      price: (product.discountPrice != null && product.discountPrice > 0) ? product.discountPrice : (product.price > 0 ? product.price : undefined),
+      priceCurrency: "INR",
       // Fixed: was always "InStock" — now reflects the actual stock flag
       availability: product.inStock
         ? "https://schema.org/InStock"

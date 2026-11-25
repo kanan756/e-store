@@ -164,6 +164,8 @@ export const STORE_SHEETS = {
     "status",
     "createdAt",
     "updatedAt",
+    "reviews",
+    "howToUse",
   ],
   Blogs: [
     "title",
@@ -299,6 +301,22 @@ export interface ProductVideoItem {
   title?: string
 }
 
+export interface ProductReviewItem {
+  id: string
+  reviewerName: string
+  title: string
+  description: string
+  rating: number
+  createdAt?: string
+}
+
+export interface ProductHowToStep {
+  id: string
+  stepNumber: number
+  title?: string
+  instruction: string
+}
+
 export interface Product {
   rowIndex?: number
   id: string              // productId (e.g. prod_...)
@@ -321,6 +339,8 @@ export interface Product {
   additionalImages?: ProductMediaItem[]
   primaryVideo?: string
   additionalVideos?: ProductVideoItem[]
+  reviews?: ProductReviewItem[]
+  howToUse?: ProductHowToStep[]
   status?: "Active" | "Inactive" | string
   createdAt?: string
   updatedAt?: string
@@ -440,6 +460,17 @@ export async function ensureAllSheetsInitialized(): Promise<void> {
             valueInputOption: "RAW",
             requestBody: {
               values: [columns as string[]],
+            },
+          })
+        } else if (currentHeaders.length < columns.length) {
+          const startCol = String.fromCharCode(65 + currentHeaders.length)
+          const endCol = String.fromCharCode(64 + columns.length)
+          await sheets.spreadsheets.values.update({
+            spreadsheetId,
+            range: `${title}!${startCol}1:${endCol}1`,
+            valueInputOption: "RAW",
+            requestBody: {
+              values: [columns.slice(currentHeaders.length) as string[]],
             },
           })
         }
@@ -1241,7 +1272,7 @@ export async function getProducts(includeInactive = false): Promise<Product[]> {
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Products!A1:Q",
+      range: "Products!A1:S",
     })
 
     const allRows = res.data.values ?? []
@@ -1282,6 +1313,16 @@ export async function getProducts(includeInactive = false): Promise<Product[]> {
           const createdAt = r[15] || new Date().toISOString()
           const updatedAt = r[16] || createdAt
 
+          let reviews: ProductReviewItem[] = []
+          try {
+            if (r[17]) reviews = JSON.parse(r[17])
+          } catch {}
+
+          let howToUse: ProductHowToStep[] = []
+          try {
+            if (r[18]) howToUse = JSON.parse(r[18])
+          } catch {}
+
           // Compose imageUrl for backward compatibility: primaryImage or first additional image
           const fallbackImage = additionalImages.length > 0 ? additionalImages[0].url : ""
           const resolvedImageUrl = primaryImage || fallbackImage || ""
@@ -1308,6 +1349,8 @@ export async function getProducts(includeInactive = false): Promise<Product[]> {
             additionalImages,
             primaryVideo,
             additionalVideos,
+            reviews,
+            howToUse,
             status,
             createdAt,
             updatedAt,
@@ -1411,6 +1454,8 @@ export async function createProduct(product: {
   additionalImages?: ProductMediaItem[]
   primaryVideo?: string
   additionalVideos?: ProductVideoItem[]
+  reviews?: ProductReviewItem[]
+  howToUse?: ProductHowToStep[]
   status?: "Active" | "Inactive"
 }): Promise<Product> {
   if (!isSheetsConfigured()) throw new Error("Google Sheets not configured")
@@ -1432,12 +1477,14 @@ export async function createProduct(product: {
   const additionalImagesJson = product.additionalImages ? JSON.stringify(product.additionalImages) : "[]"
   const primaryVideo = product.primaryVideo || (product.additionalVideos?.[0]?.url || "")
   const additionalVideosJson = product.additionalVideos ? JSON.stringify(product.additionalVideos) : "[]"
+  const reviewsJson = product.reviews ? JSON.stringify(product.reviews) : "[]"
+  const howToUseJson = product.howToUse ? JSON.stringify(product.howToUse) : "[]"
   const status = product.status || "Active"
   const now = new Date().toISOString()
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "Products!A:Q",
+    range: "Products!A:S",
     valueInputOption: "RAW",
     requestBody: {
       values: [
@@ -1459,6 +1506,8 @@ export async function createProduct(product: {
           status,
           now,
           now,
+          reviewsJson,
+          howToUseJson,
         ],
       ],
     },
@@ -1485,6 +1534,8 @@ export async function createProduct(product: {
     additionalImages: product.additionalImages,
     primaryVideo,
     additionalVideos: product.additionalVideos,
+    reviews: product.reviews ?? [],
+    howToUse: product.howToUse ?? [],
     status,
     createdAt: now,
     updatedAt: now,
@@ -1517,6 +1568,8 @@ export async function updateProductById(
   const updatedAdditionalImages = updates.additionalImages ?? existing.additionalImages ?? []
   const updatedPrimaryVideo = updates.primaryVideo ?? existing.primaryVideo ?? ""
   const updatedAdditionalVideos = updates.additionalVideos ?? existing.additionalVideos ?? []
+  const updatedReviews = updates.reviews ?? existing.reviews ?? []
+  const updatedHowToUse = updates.howToUse ?? existing.howToUse ?? []
   const updatedStatus = updates.status ?? existing.status ?? "Active"
   const now = new Date().toISOString()
 
@@ -1538,11 +1591,13 @@ export async function updateProductById(
     updatedStatus,
     existing.createdAt || now,
     now,
+    JSON.stringify(updatedReviews),
+    JSON.stringify(updatedHowToUse),
   ]
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `Products!A${existing.rowIndex}:Q${existing.rowIndex}`,
+    range: `Products!A${existing.rowIndex}:S${existing.rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
       values: [rowValues],
@@ -1569,6 +1624,8 @@ export async function updateProductById(
     additionalImages: updatedAdditionalImages,
     primaryVideo: updatedPrimaryVideo,
     additionalVideos: updatedAdditionalVideos,
+    reviews: updatedReviews,
+    howToUse: updatedHowToUse,
     status: updatedStatus,
     updatedAt: now,
   }

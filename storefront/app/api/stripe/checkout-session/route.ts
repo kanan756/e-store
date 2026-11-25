@@ -20,6 +20,7 @@ import { z } from "zod"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { generateInvoiceToken } from "@/lib/invoice-token"
+import { FLAT_SHIPPING_INR } from "@/lib/format"
 import { stripEmoji } from "@/lib/sanitize"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
@@ -89,37 +90,43 @@ export async function POST(request: Request) {
           { status: 400 }
         )
       }
-      serverAmount += product.price * item.quantity
+      const unitPrice =
+        product.discountPrice != null && product.discountPrice > 0
+          ? product.discountPrice
+          : product.price
+      serverAmount += unitPrice * item.quantity
       productSummaryParts.push(`${product.name} x${item.quantity}`)
     }
 
-    if (serverAmount < 0) {
+    if (serverAmount <= 0) {
       return NextResponse.json({ error: "Invalid order amount" }, { status: 400 })
     }
 
     const productSummary = productSummaryParts.join(", ").substring(0, 500)
+    const shippingAmount = FLAT_SHIPPING_INR
+    const totalAmountInr = serverAmount + shippingAmount
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "inr",
             product_data: {
               name: "CLASPO Order",
               description: productSummary,
             },
-            unit_amount: Math.round(serverAmount * 100),
+            unit_amount: Math.round(serverAmount * 100), // INR to paise
           },
           quantity: 1,
         },
         {
           price_data: {
-            currency: "usd",
+            currency: "inr",
             product_data: {
               name: "Shipping (Flat Rate)",
             },
-            unit_amount: 1500, // $15.00
+            unit_amount: Math.round(shippingAmount * 100), // INR to paise
           },
           quantity: 1,
         },
@@ -133,7 +140,9 @@ export async function POST(request: Request) {
         customerName: customerName || dbUser?.fullName || authSession.user.name || "Customer",
         email: verifiedEmail,
         productSummary,
-        amount: (serverAmount + 15).toString(), // server-computed, stored for reference only
+        subtotal: serverAmount.toString(),
+        shippingCharge: shippingAmount.toString(),
+        amount: totalAmountInr.toString(), // server-computed INR total, stored for reference only
       },
     })
 

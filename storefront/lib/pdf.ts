@@ -14,7 +14,7 @@ export async function generateInvoicePdf({
   email,
   items,
   amount,
-  date = new Date().toLocaleDateString("en-US", { timeZone: "America/New_York" }),
+  date = new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" }),
 }: {
   orderId: string;
   customerName: string;
@@ -37,8 +37,9 @@ export async function generateInvoicePdf({
       const TEXT_MAIN = "#17191C";
       const TEXT_MUTED = "#747474";
 
+      // PDFKit's built-in Helvetica uses WinAnsiEncoding which does not include the ₹ glyph
       const fmt = (n: number) =>
-        `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        `Rs. ${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
       // Top accent bar
       doc.rect(0, 0, doc.page.width, 12).fill(PRIMARY_COLOR);

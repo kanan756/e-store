@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { z } from "zod"
 import { useCart } from "@/context/cart-context"
-import { formatPrice } from "@/lib/format"
+import { formatPrice, FLAT_SHIPPING_INR } from "@/lib/format"
 import Script from "next/script"
 
 declare global {
@@ -270,13 +270,13 @@ export default function CheckoutClient() {
 
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, fontSize: 13, color: "var(--text2)", marginTop: 12 }}>
                 <span>Shipping (Flat Rate)</span>
-                <span>$15.00</span>
+                <span>{formatPrice(FLAT_SHIPPING_INR)}</span>
               </div>
 
               <div style={{ borderTop: "1px solid var(--bd)", marginTop: 16, paddingTop: 16, display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
                   <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 20 }}>
-                    {formatPrice(subtotal + 15)}
+                    {formatPrice(subtotal + FLAT_SHIPPING_INR)}
                   </span>
               </div>
 

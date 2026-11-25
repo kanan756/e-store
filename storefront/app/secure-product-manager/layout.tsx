@@ -85,11 +85,8 @@ export default async function SecureProductManagerLayout({
       </aside>
 
       {/* ── Main Work Area ── */}
-      <div className="pm-main">
-        
-
-        <div className="pm-container">{children}</div>
-      </div>
+      
+      <div className="pm-container">{children}</div>
     </div>
   )
 }

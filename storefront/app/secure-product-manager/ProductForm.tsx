@@ -4,7 +4,13 @@ import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import type { Product, ProductMediaItem, ProductVideoItem } from "@/lib/sheets"
+import type {
+  Product,
+  ProductMediaItem,
+  ProductVideoItem,
+  ProductReviewItem,
+  ProductHowToStep,
+} from "@/lib/sheets"
 
 interface ProductFormProps {
   initialData?: Product
@@ -38,10 +44,10 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
   const [shortDescription, setShortDescription] = useState(initialData?.shortDescription || "")
   const [description, setDescription] = useState(initialData?.description || "")
   const [price, setPrice] = useState(
-    initialData?.price ? (initialData.price / 100).toString() : ""
+    initialData?.price != null ? initialData.price.toString() : ""
   )
   const [discountPrice, setDiscountPrice] = useState(
-    initialData?.discountPrice ? (initialData.discountPrice / 100).toString() : ""
+    initialData?.discountPrice != null ? initialData.discountPrice.toString() : ""
   )
   const [stock, setStock] = useState(
     initialData?.stock !== undefined ? initialData.stock.toString() : "50"
@@ -70,6 +76,28 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     }
     return []
   })
+
+  // Reviews State
+  const [reviews, setReviews] = useState<ProductReviewItem[]>(
+    () => (Array.isArray(initialData?.reviews) ? initialData.reviews : [])
+  )
+  const [reviewerName, setReviewerName] = useState("")
+  const [reviewTitle, setReviewTitle] = useState("")
+  const [reviewDescription, setReviewDescription] = useState("")
+  const [reviewRating, setReviewRating] = useState<number>(5)
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
+  const [reviewFormError, setReviewFormError] = useState("")
+
+  // How to Use State
+  const [howToUse, setHowToUse] = useState<ProductHowToStep[]>(() =>
+    Array.isArray(initialData?.howToUse)
+      ? initialData.howToUse.map((s, idx) => ({ ...s, stepNumber: idx + 1 }))
+      : []
+  )
+  const [stepTitle, setStepTitle] = useState("")
+  const [stepInstruction, setStepInstruction] = useState("")
+  const [editingStepId, setEditingStepId] = useState<string | null>(null)
+  const [stepFormError, setStepFormError] = useState("")
 
   // Uploading / saving state
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -252,6 +280,132 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     }
   }
 
+  // Review Handlers
+  const resetReviewForm = () => {
+    setReviewerName("")
+    setReviewTitle("")
+    setReviewDescription("")
+    setReviewRating(5)
+    setEditingReviewId(null)
+    setReviewFormError("")
+  }
+
+  const handleSaveReview = () => {
+    setReviewFormError("")
+    if (!reviewerName.trim() || !reviewTitle.trim() || !reviewDescription.trim()) {
+      setReviewFormError("Please enter reviewer name, review title, and review description.")
+      return
+    }
+    if (editingReviewId) {
+      setReviews((prev) =>
+        prev.map((r) =>
+          r.id === editingReviewId
+            ? {
+                ...r,
+                reviewerName: reviewerName.trim(),
+                title: reviewTitle.trim(),
+                description: reviewDescription.trim(),
+                rating: reviewRating,
+              }
+            : r
+        )
+      )
+    } else {
+      const newReview: ProductReviewItem = {
+        id: `rev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        reviewerName: reviewerName.trim(),
+        title: reviewTitle.trim(),
+        description: reviewDescription.trim(),
+        rating: reviewRating,
+        createdAt: new Date().toISOString(),
+      }
+      setReviews((prev) => [...prev, newReview])
+    }
+    resetReviewForm()
+  }
+
+  const handleEditReview = (review: ProductReviewItem) => {
+    setEditingReviewId(review.id)
+    setReviewerName(review.reviewerName)
+    setReviewTitle(review.title)
+    setReviewDescription(review.description)
+    setReviewRating(review.rating)
+    setReviewFormError("")
+  }
+
+  const handleDeleteReview = (id: string) => {
+    setReviews((prev) => prev.filter((r) => r.id !== id))
+    if (editingReviewId === id) resetReviewForm()
+  }
+
+  // How to Use Handlers
+  const resetStepForm = () => {
+    setStepTitle("")
+    setStepInstruction("")
+    setEditingStepId(null)
+    setStepFormError("")
+  }
+
+  const handleSaveStep = () => {
+    setStepFormError("")
+    if (!stepInstruction.trim()) {
+      setStepFormError("Please enter the usage instruction for this step.")
+      return
+    }
+    if (editingStepId) {
+      setHowToUse((prev) =>
+        prev.map((s) =>
+          s.id === editingStepId
+            ? {
+                ...s,
+                title: stepTitle.trim() || undefined,
+                instruction: stepInstruction.trim(),
+              }
+            : s
+        )
+      )
+    } else {
+      setHowToUse((prev) => [
+        ...prev,
+        {
+          id: `step_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          stepNumber: prev.length + 1,
+          title: stepTitle.trim() || undefined,
+          instruction: stepInstruction.trim(),
+        },
+      ])
+    }
+    resetStepForm()
+  }
+
+  const handleEditStep = (step: ProductHowToStep) => {
+    setEditingStepId(step.id)
+    setStepTitle(step.title || "")
+    setStepInstruction(step.instruction)
+    setStepFormError("")
+  }
+
+  const handleDeleteStep = (id: string) => {
+    setHowToUse((prev) =>
+      prev
+        .filter((s) => s.id !== id)
+        .map((s, idx) => ({ ...s, stepNumber: idx + 1 }))
+    )
+    if (editingStepId === id) resetStepForm()
+  }
+
+  const moveStep = (index: number, direction: "up" | "down") => {
+    setHowToUse((prev) => {
+      const targetIndex = direction === "up" ? index - 1 : index + 1
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev
+      const arr = [...prev]
+      const temp = arr[index]
+      arr[index] = arr[targetIndex]
+      arr[targetIndex] = temp
+      return arr.map((s, idx) => ({ ...s, stepNumber: idx + 1 }))
+    })
+  }
+
   // Form Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -264,20 +418,20 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
       return
     }
 
-    const regularPriceCents = Math.round(parseFloat(price || "0") * 100)
-    if (isNaN(regularPriceCents) || regularPriceCents < 0) {
-      setErrorMessage("Please enter a valid regular price.")
+    const regularPriceInr = Math.round(parseFloat(price || "0") * 100) / 100
+    if (isNaN(regularPriceInr) || regularPriceInr < 0) {
+      setErrorMessage("Please enter a valid regular price in INR.")
       return
     }
 
-    let discountCents: number | undefined = undefined
+    let discountInr: number | undefined = undefined
     if (discountPrice && discountPrice.trim() !== "") {
-      discountCents = Math.round(parseFloat(discountPrice) * 100)
-      if (isNaN(discountCents) || discountCents < 0) {
-        setErrorMessage("Please enter a valid discount price.")
+      discountInr = Math.round(parseFloat(discountPrice) * 100) / 100
+      if (isNaN(discountInr) || discountInr < 0) {
+        setErrorMessage("Please enter a valid discount price in INR.")
         return
       }
-      if (discountCents > regularPriceCents) {
+      if (discountInr > regularPriceInr) {
         setErrorMessage("Discounted price cannot exceed regular price.")
         return
       }
@@ -303,14 +457,16 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         category: finalCategory,
         shortDescription: shortDescription.trim(),
         description: description.trim(),
-        price: regularPriceCents,
-        discountPrice: discountCents,
+        price: regularPriceInr,
+        discountPrice: discountInr,
         stock: stockNumber,
         status,
         primaryImage: primaryItem ? primaryItem.url : "",
         additionalImages: images,
         primaryVideo: videos.length > 0 ? videos[0].url : "",
         additionalVideos: videos,
+        reviews,
+        howToUse: howToUse.map((s, idx) => ({ ...s, stepNumber: idx + 1 })),
       }
 
       const endpoint = isEdit
@@ -814,6 +970,335 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                 </div>
               )}
             </div>
+
+            {/* ── How to Use Section ── */}
+            <div className="pm-card" style={{ padding: "28px", marginTop: 28 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, color: "#17191C", margin: "0 0 4px" }}>
+                    How to Use ({howToUse.length} {howToUse.length === 1 ? "Step" : "Steps"})
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
+                    Add numbered usage instructions. Customers will see these steps on the product page.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: 18, marginBottom: 20 }}>
+                <div className="pm-field-group">
+                  <label className="pm-label">Step Title (Optional)</label>
+                  <input
+                    type="text"
+                    className="pm-input"
+                    placeholder="e.g. Connect the Power Harness"
+                    value={stepTitle}
+                    onChange={(e) => setStepTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="pm-field-group">
+                  <label className="pm-label">
+                    Usage Instruction <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <textarea
+                    className="pm-textarea"
+                    rows={3}
+                    placeholder="Describe this step clearly for the customer…"
+                    value={stepInstruction}
+                    onChange={(e) => setStepInstruction(e.target.value)}
+                  />
+                </div>
+
+                {stepFormError && (
+                  <div style={{ color: "#DC2626", fontSize: 12.5, fontWeight: 600, marginBottom: 12 }}>
+                    {stepFormError}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={handleSaveStep}
+                    className="pm-btn pm-btn-primary"
+                    style={{ fontSize: 13, padding: "8px 16px" }}
+                  >
+                    {editingStepId ? "Update Step" : "+ Add Step"}
+                  </button>
+                  {editingStepId && (
+                    <button
+                      type="button"
+                      onClick={resetStepForm}
+                      className="pm-btn pm-btn-secondary"
+                      style={{ fontSize: 13, padding: "8px 16px" }}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {howToUse.length > 0 && (
+                <div style={{ display: "grid", gap: 12 }}>
+                  {howToUse.map((step, idx) => (
+                    <div
+                      key={step.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 14,
+                        padding: 14,
+                        background: "#FFFFFF",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: "50%",
+                          background: "#F36B12",
+                          color: "#FFFFFF",
+                          fontSize: 13,
+                          fontWeight: 800,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          marginTop: 2,
+                        }}
+                      >
+                        {idx + 1}
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {step.title && (
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#17191C", marginBottom: 4 }}>
+                            {step.title}
+                          </div>
+                        )}
+                        <div style={{ fontSize: 13.5, color: "#4B5563", lineHeight: 1.5, whiteSpace: "pre-line" }}>
+                          {step.instruction}
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          onClick={() => moveStep(idx, "up")}
+                          disabled={idx === 0}
+                          className="pm-btn pm-btn-secondary"
+                          style={{ padding: "5px 9px", fontSize: 12 }}
+                          title="Move Up"
+                        >
+                          ▲
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveStep(idx, "down")}
+                          disabled={idx === howToUse.length - 1}
+                          className="pm-btn pm-btn-secondary"
+                          style={{ padding: "5px 9px", fontSize: 12 }}
+                          title="Move Down"
+                        >
+                          ▼
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEditStep(step)}
+                          className="pm-btn pm-btn-secondary"
+                          style={{ padding: "5px 10px", fontSize: 12 }}
+                          title="Edit Step"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteStep(step.id)}
+                          className="pm-btn pm-btn-danger"
+                          style={{ padding: "5px 9px", fontSize: 12 }}
+                          title="Delete Step"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Product Reviews Section ── */}
+            <div className="pm-card" style={{ padding: "28px", marginTop: 28 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+                <div>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, color: "#17191C", margin: "0 0 4px" }}>
+                    Product Reviews ({reviews.length})
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
+                    Add curated or verified customer reviews to display on the product detail page.
+                  </p>
+                </div>
+                {reviews.length > 0 && (
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#17191C", background: "#FFF4ED", border: "1px solid #FED7AA", padding: "5px 12px", borderRadius: 20 }}>
+                    ★ {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)} avg ({reviews.length})
+                  </div>
+                )}
+              </div>
+
+              <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: 18, marginBottom: 20 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div className="pm-field-group">
+                    <label className="pm-label">
+                      Reviewer Name <span style={{ color: "#EF4444" }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="pm-input"
+                      placeholder="e.g. Rajesh Sharma"
+                      value={reviewerName}
+                      onChange={(e) => setReviewerName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="pm-field-group">
+                    <label className="pm-label">
+                      Rating (1–5 Stars) <span style={{ color: "#EF4444" }}>*</span>
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, height: 40 }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: 22,
+                            lineHeight: 1,
+                            padding: "2px 4px",
+                            color: star <= reviewRating ? "#F36B12" : "#D1D5DB",
+                          }}
+                          title={`${star} Star${star > 1 ? "s" : ""}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginLeft: 6 }}>
+                        {reviewRating}/5
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pm-field-group">
+                  <label className="pm-label">
+                    Review Title <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="pm-input"
+                    placeholder="e.g. Excellent build quality and durability"
+                    value={reviewTitle}
+                    onChange={(e) => setReviewTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="pm-field-group">
+                  <label className="pm-label">
+                    Review Description <span style={{ color: "#EF4444" }}>*</span>
+                  </label>
+                  <textarea
+                    className="pm-textarea"
+                    rows={3}
+                    placeholder="Write the detailed product review…"
+                    value={reviewDescription}
+                    onChange={(e) => setReviewDescription(e.target.value)}
+                  />
+                </div>
+
+                {reviewFormError && (
+                  <div style={{ color: "#DC2626", fontSize: 12.5, fontWeight: 600, marginBottom: 12 }}>
+                    {reviewFormError}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={handleSaveReview}
+                    className="pm-btn pm-btn-primary"
+                    style={{ fontSize: 13, padding: "8px 16px" }}
+                  >
+                    {editingReviewId ? "Update Review" : "+ Add Review"}
+                  </button>
+                  {editingReviewId && (
+                    <button
+                      type="button"
+                      onClick={resetReviewForm}
+                      className="pm-btn pm-btn-secondary"
+                      style={{ fontSize: 13, padding: "8px 16px" }}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {reviews.length > 0 && (
+                <div style={{ display: "grid", gap: 12 }}>
+                  {reviews.map((rev) => (
+                    <div
+                      key={rev.id}
+                      style={{
+                        padding: 16,
+                        background: "#FFFFFF",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: 10,
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 6 }}>
+                        <div>
+                          <div style={{ color: "#F36B12", fontSize: 14, letterSpacing: 1, marginBottom: 4 }}>
+                            {"★".repeat(rev.rating)}
+                            <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - rev.rating)}</span>
+                          </div>
+                          <div style={{ fontSize: 14.5, fontWeight: 700, color: "#17191C" }}>
+                            {rev.title}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                            By <strong style={{ color: "#374151" }}>{rev.reviewerName}</strong>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                          <button
+                            type="button"
+                            onClick={() => handleEditReview(rev)}
+                            className="pm-btn pm-btn-secondary"
+                            style={{ padding: "5px 10px", fontSize: 12 }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteReview(rev.id)}
+                            className="pm-btn pm-btn-danger"
+                            style={{ padding: "5px 9px", fontSize: 12 }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 13.5, color: "#4B5563", margin: "8px 0 0", lineHeight: 1.5, whiteSpace: "pre-line" }}>
+                        {rev.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column: Pricing, Inventory & Status */}
@@ -845,19 +1330,19 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
             {/* Pricing Card */}
             <div className="pm-card" style={{ padding: "24px", marginBottom: 24 }}>
               <h2 style={{ fontSize: 15, fontWeight: 800, color: "#17191C", margin: "0 0 16px" }}>
-                Pricing & Valuation
+                Pricing & Valuation (INR)
               </h2>
 
               <div className="pm-field-group">
                 <label className="pm-label">
-                  Regular Price ($) <span style={{ color: "#EF4444" }}>*</span>
+                  Regular Price (₹) <span style={{ color: "#EF4444" }}>*</span>
                 </label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   className="pm-input"
-                  placeholder="29.99"
+                  placeholder="499"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   required
@@ -865,18 +1350,18 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
               </div>
 
               <div className="pm-field-group" style={{ marginBottom: 0 }}>
-                <label className="pm-label">Discounted / Sale Price ($)</label>
+                <label className="pm-label">Discounted / Sale Price (₹)</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   className="pm-input"
-                  placeholder="24.99"
+                  placeholder="399"
                   value={discountPrice}
                   onChange={(e) => setDiscountPrice(e.target.value)}
                 />
                 <span style={{ fontSize: 11.5, color: "#6B7280", marginTop: 4, display: "block" }}>
-                  Optional sale price. Must be lower than regular price.
+                  Optional sale price in INR. Must be lower than regular price.
                 </span>
               </div>
             </div>

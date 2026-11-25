@@ -8,7 +8,7 @@
  * 1. Global State: Uses the `useCart` context to read and modify cart items.
  * 2. MOQ (Minimum Order Quantity): Wires and Cables have a strict MOQ of 5 items. 
  *    The `updateQuantity` function intercepts reductions below 5 and alerts the user.
- * 3. Shipping Calculation: Adds a flat $15.00 shipping rate to the subtotal.
+ * 3. Shipping Calculation: Adds a flat ₹99 shipping rate to the subtotal.
  */
 
 import { useEffect } from "react"
@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 
-import { formatPrice } from "@/lib/format"
+import { formatPrice, FLAT_SHIPPING_INR } from "@/lib/format"
 
 function ArrowIcon() {
   return (
@@ -169,13 +169,13 @@ export default function CartClient() {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, fontSize: 13, color: "var(--text2)" }}>
                 <span>Shipping (Flat Rate)</span>
-                <span>$15.00</span>
+                <span>{formatPrice(FLAT_SHIPPING_INR)}</span>
               </div>
 
               <div style={{ borderTop: "1px solid var(--bd)", paddingTop: 20, marginBottom: 24, display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 22, color: "var(--acc)" }}>
-                  {formatPrice(subtotal + 15)}
+                  {formatPrice(subtotal + FLAT_SHIPPING_INR)}
                 </span>
               </div>
 

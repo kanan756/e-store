@@ -307,7 +307,11 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
             <StarIcon />
-            <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#17191C" }}>5.0</span>
+            <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#17191C" }}>
+              {product.reviews && product.reviews.length > 0
+                ? `${(product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length).toFixed(1)} (${product.reviews.length})`
+                : "5.0"}
+            </span>
           </div>
         </div>
 

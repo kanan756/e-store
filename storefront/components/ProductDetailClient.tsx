@@ -173,6 +173,21 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const isInactive = product.status === "Inactive"
   const isOutOfStock = !product.inStock || (product.stock !== undefined && product.stock <= 0)
 
+  const reviews = useMemo(() => (Array.isArray(product.reviews) ? product.reviews : []), [product.reviews])
+  const reviewCount = reviews.length
+  const averageRating = useMemo(() => {
+    if (reviewCount === 0) return 0
+    return reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / reviewCount
+  }, [reviews, reviewCount])
+
+  const howToUseSteps = useMemo(
+    () =>
+      Array.isArray(product.howToUse)
+        ? [...product.howToUse].sort((a, b) => (a.stepNumber ?? 0) - (b.stepNumber ?? 0))
+        : [],
+    [product.howToUse]
+  )
+
   return (
     <div className="pd-shell">
       {/* ── Product Header ── */}
@@ -356,6 +371,35 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
               {/* Pricing & CTA Column */}
               <div className="pd-overview-info">
+                {reviewCount > 0 && (
+                  <a
+                    href="#pd-reviews"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 14,
+                      padding: "6px 12px",
+                      borderRadius: 20,
+                      background: "#FFF4ED",
+                      border: "1px solid #FED7AA",
+                      textDecoration: "none",
+                      color: "#17191C",
+                      fontSize: 13,
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span style={{ color: "#F36B12", letterSpacing: 1 }}>
+                      {"★".repeat(Math.round(averageRating))}
+                      <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating))}</span>
+                    </span>
+                    <span>{averageRating.toFixed(1)}</span>
+                    <span style={{ color: "#6B7280", fontWeight: 500 }}>
+                      ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
+                    </span>
+                  </a>
+                )}
+
                 {product.shortDescription && (
                   <p style={{ fontSize: 16, fontWeight: 600, color: "#303638", marginBottom: 16, lineHeight: 1.5 }}>
                     {product.shortDescription}
@@ -601,6 +645,162 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           )}
         </div>
       </div>
+
+      {/* ── Dedicated How to Use Section ── */}
+      {howToUseSteps.length > 0 && (
+        <section id="pd-how-to-use" style={{ padding: "56px 0", borderTop: "1px solid var(--bd)", background: "#FFFFFF" }}>
+          <div className="W">
+            <div style={{ marginBottom: 32 }}>
+              <div className="lbl" style={{ marginBottom: 10 }}>STEP-BY-STEP GUIDE</div>
+              <h2 className="D3" style={{ fontSize: "clamp(24px, 3vw, 36px)", color: "#17191C", margin: 0 }}>
+                How to Use
+              </h2>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: 20,
+              }}
+            >
+              {howToUseSteps.map((step, idx) => (
+                <div
+                  key={step.id || idx}
+                  style={{
+                    background: "#FAFAFA",
+                    border: "1px solid #E5E5E5",
+                    borderRadius: 12,
+                    padding: 24,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: "50%",
+                        background: "#F36B12",
+                        color: "#FFFFFF",
+                        fontSize: 15,
+                        fontWeight: 800,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                      Step {idx + 1}
+                    </span>
+                  </div>
+
+                  {step.title && (
+                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#17191C", margin: 0 }}>
+                      {step.title}
+                    </h3>
+                  )}
+
+                  <p style={{ fontSize: 14.5, color: "#4B5563", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line" }}>
+                    {step.instruction}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Dedicated Customer Reviews Section ── */}
+      {reviewCount > 0 && (
+        <section id="pd-reviews" style={{ padding: "56px 0", borderTop: "1px solid var(--bd)", background: "#FAFAFA" }}>
+          <div className="W">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 32 }}>
+              <div>
+                <div className="lbl" style={{ marginBottom: 10 }}>CUSTOMER FEEDBACK</div>
+                <h2 className="D3" style={{ fontSize: "clamp(24px, 3vw, 36px)", color: "#17191C", margin: 0 }}>
+                  Product Reviews
+                </h2>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 16,
+                  background: "#FFFFFF",
+                  border: "1px solid #E5E5E5",
+                  borderRadius: 12,
+                  padding: "14px 20px",
+                }}
+              >
+                <div style={{ fontSize: 32, fontWeight: 900, color: "#17191C", lineHeight: 1 }}>
+                  {averageRating.toFixed(1)}
+                </div>
+                <div>
+                  <div style={{ color: "#F36B12", fontSize: 16, letterSpacing: 1.5 }}>
+                    {"★".repeat(Math.round(averageRating))}
+                    <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating))}</span>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: "#747474", marginTop: 2 }}>
+                    Based on {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: 20,
+              }}
+            >
+              {reviews.map((rev) => (
+                <article
+                  key={rev.id}
+                  style={{
+                    background: "#FFFFFF",
+                    border: "1px solid #E5E5E5",
+                    borderRadius: 12,
+                    padding: 24,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                    <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
+                      {"★".repeat(rev.rating)}
+                      <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - rev.rating)}</span>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>
+                      {rev.rating}.0 / 5
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#17191C", margin: 0 }}>
+                    {rev.title}
+                  </h3>
+
+                  <p style={{ fontSize: 14.5, color: "#4B5563", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line", flex: 1 }}>
+                    {rev.description}
+                  </p>
+
+                  <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 12, marginTop: 4, fontSize: 13, fontWeight: 600, color: "#303638" }}>
+                    — {rev.reviewerName}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Full-Screen Lightbox Modal ── */}
       {lightboxOpen && currentMedia && currentMedia.type === "image" && (

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { formatPrice } from "@/lib/format"
 import type { Product } from "@/lib/sheets"
 
 interface DashboardClientProps {
@@ -320,11 +321,11 @@ export default function DashboardClient({
 
                       <td>
                         <div style={{ fontWeight: 700, color: "#17191C" }}>
-                          ${(p.price / 100).toFixed(2)}
+                          {formatPrice(p.price)}
                         </div>
                         {p.discountPrice != null && p.discountPrice > 0 && (
                           <div style={{ fontSize: 12, color: "#059669" }}>
-                            Discount: ${(p.discountPrice / 100).toFixed(2)}
+                            Discount: {formatPrice(p.discountPrice)}
                           </div>
                         )}
                       </td>

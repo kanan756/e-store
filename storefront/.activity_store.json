@@ -12,5 +12,19 @@
     "activityType": "USER_LOGIN",
     "description": "Customer logged in with email hir@miraclecloud-technology.com",
     "createdAt": "2026-11-24T07:20:03.982Z"
+  },
+  {
+    "activityId": "act_1795581820751_jf5js",
+    "userId": "usr_1795581820318_4qvh2",
+    "activityType": "USER_REGISTER",
+    "description": "Customer registered with email rushik@gmail.com",
+    "createdAt": "2026-11-25T04:43:40.751Z"
+  },
+  {
+    "activityId": "act_1795581822108_6q91u",
+    "userId": "usr_1795581820318_4qvh2",
+    "activityType": "USER_LOGIN",
+    "description": "Customer logged in with email rushik@gmail.com",
+    "createdAt": "2026-11-25T04:43:42.108Z"
   }
 ]

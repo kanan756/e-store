@@ -231,7 +231,12 @@ export async function sendOrderConfirmationEmail({
   const eProduct  = escapeHtml(product)
   const eFromName = escapeHtml(fromName)
 
-  const formattedAmount = `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formattedAmount = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 
   const html = `
 <!DOCTYPE html>

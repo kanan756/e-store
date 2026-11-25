@@ -1,0 +1,15 @@
+[
+  {
+    "userId": "usr_1795581820318_4qvh2",
+    "fullName": "Rushik",
+    "username": "rushik",
+    "phoneNumber": "+91 1234567890",
+    "email": "rushik@gmail.com",
+    "passwordHash": "$2b$10$gce0hqobIOgcvrKOE0.XRu.7OFOP6RQ8nE0Xr/P/e3d2UXHskE9lC",
+    "provider": "credentials",
+    "profileImage": "",
+    "emailVerified": "",
+    "createdAt": "2026-11-25T04:43:40.318Z",
+    "updatedAt": "2026-11-25T04:43:40.318Z"
+  }
+]
