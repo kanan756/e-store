@@ -73,6 +73,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https: http://localhost:* http://127.0.0.1:* http://192.168.*:*",
+      "media-src 'self' data: blob: https:",
       // Frames: Google OAuth
       "frame-src https://accounts.google.com https://*.stripe.com",
       // Fetch/XHR/WebSockets: own API + Google OAuth + GA + dev HMR WebSockets

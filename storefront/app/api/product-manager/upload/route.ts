@@ -24,9 +24,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
     }
 
-    const mimeType = file.type.toLowerCase()
-    const isImage = ALLOWED_IMAGE_TYPES.includes(mimeType)
-    const isVideo = ALLOWED_VIDEO_TYPES.includes(mimeType)
+    const mimeType = (file.type || "").toLowerCase()
+    const ext = (file.name || "").split(".").pop()?.toLowerCase() || ""
+    const isImage =
+      ALLOWED_IMAGE_TYPES.includes(mimeType) ||
+      (!mimeType && ["jpg", "jpeg", "png", "webp"].includes(ext))
+    const isVideo =
+      ALLOWED_VIDEO_TYPES.includes(mimeType) ||
+      (["mp4", "mov", "webm"].includes(ext) && (!mimeType || mimeType === "application/octet-stream"))
 
     if (!isImage && !isVideo) {
       return NextResponse.json(

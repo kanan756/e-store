@@ -915,7 +915,9 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                       <div className="pm-video-thumb">
                         <video
                           src={vid.url}
+                          poster={vid.thumbnail}
                           controls
+                          playsInline
                           preload="metadata"
                           style={{ width: "100%", height: "100%", objectFit: "contain" }}
                         />

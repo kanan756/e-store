@@ -60,6 +60,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [videoError, setVideoError] = useState(false)
 
   // Tabbed Content Section state
   const [activeTab, setActiveTab] = useState<DetailTab>("how-to-use")
@@ -385,16 +386,33 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               >
                 {currentMedia ? (
                   currentMedia.type === "video" ? (
-                    <div style={{ width: "100%", height: "100%", background: "#000000", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <video
-                        key={currentMedia.url}
-                        src={currentMedia.url}
-                        controls
-                        autoPlay
-                        playsInline
-                        preload="metadata"
-                        style={{ width: "100%", height: "100%", maxHeight: 500, objectFit: "contain" }}
-                      />
+                    <div style={{ width: "100%", height: "100%", background: "#000000", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      {videoError ? (
+                        <div style={{ padding: 24, textAlign: "center", color: "#FFFFFF" }}>
+                          <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
+                            Unable to play this video in your browser
+                          </div>
+                          <a
+                            href={currentMedia.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#F36B12", fontWeight: 700, textDecoration: "underline", fontSize: 13.5 }}
+                          >
+                            Open video directly ↗
+                          </a>
+                        </div>
+                      ) : (
+                        <video
+                          key={currentMedia.url}
+                          src={currentMedia.url}
+                          poster={currentMedia.thumbnail}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          onError={() => setVideoError(true)}
+                          style={{ width: "100%", height: "100%", maxHeight: 500, objectFit: "contain" }}
+                        />
+                      )}
                     </div>
                   ) : (
                     <>
@@ -455,6 +473,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       className="pd-img-arrow pd-img-arrow--l"
                       onClick={() => {
                         setIsZoomed(false)
+                        setVideoError(false)
                         setActiveMediaIndex((prev) => (prev === 0 ? mediaItems.length - 1 : prev - 1))
                       }}
                       aria-label="Previous media"
@@ -466,6 +485,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       className="pd-img-arrow pd-img-arrow--r"
                       onClick={() => {
                         setIsZoomed(false)
+                        setVideoError(false)
                         setActiveMediaIndex((prev) => (prev === mediaItems.length - 1 ? 0 : prev + 1))
                       }}
                       aria-label="Next media"
@@ -486,6 +506,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       className={`pd-thumb${activeMediaIndex === idx ? " active" : ""}`}
                       onClick={() => {
                         setIsZoomed(false)
+                        setVideoError(false)
                         setActiveMediaIndex(idx)
                       }}
                       style={{ position: "relative", overflow: "hidden" }}

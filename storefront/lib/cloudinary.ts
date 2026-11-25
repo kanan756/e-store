@@ -97,10 +97,11 @@ export async function uploadProductMedia(
 
         let thumbnailUrl: string | undefined = undefined
         if (resourceType === "video") {
-          // Cloudinary automatic video thumbnail URL
+          // Cloudinary automatic video thumbnail URL (HTTPS)
           thumbnailUrl = cloudinary.url(result.public_id, {
             resource_type: "video",
             format: "jpg",
+            secure: true,
             transformation: [{ width: 640, crop: "scale" }],
           })
         }
