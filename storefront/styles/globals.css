@@ -2478,6 +2478,62 @@ button {
   min-height: 100vh;
 }
 
+/* ── Product Detail Bottom Sticky Order Summary Panel ── */
+.pd-sticky-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  background: #FFFFFF;
+  border-top: 2px solid #F36B12;
+  box-shadow: 0 -8px 30px rgba(23, 25, 28, 0.12);
+  padding: 14px 0;
+}
+
+.pd-sticky-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.pd-sticky-metrics {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.pd-sticky-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .pd-sticky-bar {
+    padding: 12px 0;
+  }
+  .pd-sticky-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .pd-sticky-metrics {
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .pd-sticky-hide-sm {
+    display: none !important;
+  }
+  .pd-sticky-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+}
+
 /* Product name header */
 .pd-hdr {
   background: var(--bg2);

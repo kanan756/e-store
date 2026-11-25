@@ -2,14 +2,14 @@
 
 /**
  * @file ProductDetailClient.tsx
- * @description Single-page Product Detail experience for CLASPO:
- *   1. Product Image & Video Gallery (Cloudinary media, zoom, fullscreen, video playback)
- *   2. Product Name, Average Rating, Review Count, Price in INR (₹), Discount Price, Stock Status
- *   3. Product Description
- *   4. How to Use (numbered steps from Google Sheets)
- *   5. Product Reviews (average rating, total count, individual reviews with dates)
- *   6. Add Your Review (verified-purchase, duplicate-protected review submission)
- *   7. Add to Cart & Place Order purchasing options
+ * @description CLASPO Product Detail Page:
+ *   1. Top Product Section: Media gallery (images + videos, zoom, fullscreen) + Product info (name, rating, review count, INR price/discount, availability, description).
+ *   2. Tabbed Content Section: Single container with 3 tabs:
+ *      - Tab 1: How to Use (numbered steps from Google Sheets)
+ *      - Tab 2: Product Reviews (average rating, total count, individual reviews with dates)
+ *      - Tab 3: Add Review (verified-purchase 1–5 star form)
+ *   3. Bottom Sticky Order Summary Panel: Horizontal sticky bar at the bottom of the viewport
+ *      that stops cleanly before the website footer.
  */
 
 import { useState, useCallback, useMemo, useEffect } from "react"
@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 import type { Product, ProductReviewItem } from "@/lib/sheets"
-import { formatPrice } from "@/lib/format"
+import { formatPrice, FLAT_SHIPPING_INR } from "@/lib/format"
 
 export interface UnifiedMediaItem {
   type: "image" | "video"
@@ -34,6 +34,8 @@ interface ReviewEligibility {
   alreadyReviewed: boolean
   canReview: boolean
 }
+
+type DetailTab = "how-to-use" | "reviews" | "add-review"
 
 function formatReviewDate(iso?: string): string {
   if (!iso) return ""
@@ -59,7 +61,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [isZoomed, setIsZoomed] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
-  // Reviews state (seeded from Google Sheets, updated live on customer submission)
+  // Tabbed Content Section state
+  const [activeTab, setActiveTab] = useState<DetailTab>("how-to-use")
+
+  // Reviews state
   const [reviews, setReviews] = useState<ProductReviewItem[]>(() =>
     Array.isArray(product.reviews) ? product.reviews : []
   )
@@ -81,7 +86,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const productUrl = `/products/${productHandle}`
   const loginMessage = "Please log in to your CLASPO account to continue."
 
-  // ── Check verified-purchase review eligibility ─────────────────────────────
+  // Check verified-purchase review eligibility
   useEffect(() => {
     if (sessionStatus === "loading") return
     if (!session?.user?.email) {
@@ -120,7 +125,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     }
   }, [session?.user?.email, sessionStatus, productHandle])
 
-  // ── Unified Media Extractor (Images + Videos) ──────────────────────────────
+  // Unified Media Extractor (Cloudinary Images + Videos)
   const mediaItems: UnifiedMediaItem[] = useMemo(() => {
     const list: UnifiedMediaItem[] = []
     const seenUrls = new Set<string>()
@@ -211,8 +216,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const hasDiscount = product.discountPrice != null && product.discountPrice > 0 && product.discountPrice < product.price
   const effectivePrice = hasDiscount ? product.discountPrice! : product.price
   const maxStock = product.stock && product.stock > 0 ? product.stock : 999
+  const itemsSubtotal = effectivePrice * quantity
+  const shippingCharge = FLAT_SHIPPING_INR
+  const totalWithShipping = effectivePrice > 0 ? itemsSubtotal + shippingCharge : 0
 
-  // ── Purchasing Actions ─────────────────────────────────────────────────────
   const handleAddToCart = useCallback(() => {
     if (!session?.user) {
       router.push(`/login?callbackUrl=${encodeURIComponent(productUrl)}&message=${encodeURIComponent(loginMessage)}`)
@@ -251,7 +258,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     router.push("/checkout")
   }, [addItem, effectivePrice, mediaItems, product.category, product.imageUrl, product.name, productHandle, productUrl, quantity, router, session])
 
-  // ── Customer Review Submission ─────────────────────────────────────────────
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault()
     setReviewError("")
@@ -300,9 +306,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     }
   }
 
+  const jumpToTab = (tab: DetailTab) => {
+    setActiveTab(tab)
+    const el = document.getElementById("pd-tabs-container")
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
+
   return (
     <div className="pd-shell" style={{ background: "#FFFFFF" }}>
-      {/* ── Breadcrumb & Section Quick Nav ── */}
+      {/* ── Breadcrumb Bar ── */}
       <div style={{ borderBottom: "1px solid #E5E5E5", background: "#FAFAFA", padding: "14px 0" }}>
         <div className="W" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div style={{ fontSize: 13, color: "#747474", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -314,25 +328,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <span>/</span>
             <span style={{ color: "#17191C", fontWeight: 700 }}>{product.name}</span>
           </div>
-
-          <nav style={{ display: "flex", gap: 18, fontSize: 13, fontWeight: 600, flexWrap: "wrap" }}>
-            <a href="#pd-description" style={{ color: "#303638", textDecoration: "none" }}>Description</a>
-            {howToUseSteps.length > 0 && (
-              <a href="#pd-how-to-use" style={{ color: "#303638", textDecoration: "none" }}>How to Use</a>
-            )}
-            <a href="#pd-reviews" style={{ color: "#303638", textDecoration: "none" }}>
-              Reviews ({reviewCount})
-            </a>
-            <a href="#pd-add-review" style={{ color: "#F36B12", textDecoration: "none" }}>Write a Review</a>
-          </nav>
         </div>
       </div>
 
-      {/* ── 1 & 2. Hero: Media Gallery + Product Info & Purchasing ── */}
-      <section style={{ padding: "40px 0 56px", borderBottom: "1px solid #E5E5E5" }}>
+      {/* ── 1. TOP PRODUCT SECTION (Media Gallery + Product Information) ── */}
+      <section style={{ padding: "40px 0 48px", borderBottom: "1px solid #E5E5E5" }}>
         <div className="W">
           <div className="pd-overview-grid" style={{ gap: 48, alignItems: "start" }}>
-            {/* 1. Product Image & Video Gallery */}
+            {/* Left: Images & Videos Gallery */}
             <div>
               <div
                 className="pd-img-main"
@@ -345,7 +348,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  minHeight: 420,
+                  minHeight: 400,
                   aspectRatio: "4 / 3",
                 }}
               >
@@ -477,7 +480,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               )}
             </div>
 
-            {/* 2. Product Information & Purchasing Controls */}
+            {/* Right: Product Information Only (Order summary is in bottom sticky panel) */}
             <div className="pd-overview-info">
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
                 <span className="lbl" style={{ margin: 0 }}>{product.category || "Product"}</span>
@@ -492,10 +495,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 {product.name}
               </h1>
 
-              {/* Average Star Rating & Total Review Count */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
-                <a
-                  href="#pd-reviews"
+              {/* Rating, Review Count & Stock Availability */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+                <button
+                  type="button"
+                  onClick={() => jumpToTab("reviews")}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -504,7 +508,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     borderRadius: 20,
                     background: "#FFF4ED",
                     border: "1px solid #FED7AA",
-                    textDecoration: "none",
+                    cursor: "pointer",
                     color: "#17191C",
                     fontSize: 13.5,
                     fontWeight: 700,
@@ -518,9 +522,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   <span style={{ color: "#747474", fontWeight: 500 }}>
                     ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
                   </span>
-                </a>
+                </button>
 
-                {/* Stock / Availability Badge */}
                 {isInactive ? (
                   <span style={{ background: "#F3F4F6", color: "#6B7280", padding: "5px 12px", borderRadius: 20, fontSize: 12.5, fontWeight: 700 }}>
                     Currently Unavailable
@@ -536,8 +539,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 )}
               </div>
 
-              {/* Price in INR (₹) & Discount Price */}
-              <div style={{ marginBottom: 18, padding: "16px 20px", background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 10 }}>
+              {/* Price & Discount Price in INR (₹) */}
+              <div style={{ marginBottom: 22, padding: "16px 20px", background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 10 }}>
                 {hasDiscount ? (
                   <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap" }}>
                     <span style={{ color: "#F36B12", fontSize: "34px", fontWeight: 900 }}>
@@ -556,541 +559,568 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   </div>
                 )}
                 <div style={{ fontSize: 12.5, color: "#747474", marginTop: 4 }}>
-                  Inclusive of standard packaging • Prices in INR (₹)
+                  Price in INR (₹) • Flat shipping {formatPrice(shippingCharge)}
                 </div>
               </div>
 
-              {/* Short Summary */}
+              {/* Product Description */}
               {product.shortDescription && (
-                <p style={{ fontSize: 15.5, fontWeight: 500, color: "#303638", marginBottom: 20, lineHeight: 1.6 }}>
+                <p style={{ fontSize: 16, fontWeight: 600, color: "#17191C", marginBottom: 12, lineHeight: 1.55 }}>
                   {product.shortDescription}
                 </p>
               )}
 
-              {/* Quantity Selector */}
-              {!isInactive && !isOutOfStock && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, marginBottom: 20 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#17191C", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Quantity:
-                    </span>
-                    <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        aria-label="Decrease quantity"
-                        style={{ width: 38, height: 38, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
-                      >
-                        -
-                      </button>
-                      <span style={{ minWidth: 44, textAlign: "center", fontSize: 15, fontWeight: 700, color: "#17191C" }}>
-                        {quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => Math.min(maxStock, q + 1))}
-                        aria-label="Increase quantity"
-                        style={{ width: 38, height: 38, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  {effectivePrice > 0 && (
-                    <div style={{ fontSize: 14, color: "#303638", fontWeight: 600 }}>
-                      Subtotal:{" "}
-                      <span style={{ color: "#17191C", fontWeight: 800, fontSize: 17 }}>
-                        {formatPrice(effectivePrice * quantity)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Confirmation Toast */}
-              {added && (
-                <div
-                  role="status"
-                  style={{
-                    marginBottom: 14,
-                    padding: "11px 16px",
-                    borderRadius: 8,
-                    background: "#ECFDF5",
-                    border: "1px solid #A7F3D0",
-                    color: "#065F46",
-                    fontSize: 13.5,
-                    fontWeight: 700,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                  }}
-                >
-                  <span>✓ Added {quantity} × {product.name} to your cart!</span>
-                  <Link href="/cart" style={{ color: "#059669", textDecoration: "underline", fontWeight: 800, whiteSpace: "nowrap" }}>
-                    View Cart →
-                  </Link>
-                </div>
-              )}
-
-              {/* Add to Cart & Place Order Buttons */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={adding || isOutOfStock || isInactive}
-                  style={{
-                    padding: "14px 20px",
-                    borderRadius: 8,
-                    background: isInactive || isOutOfStock ? "#F5F5F5" : "#F36B12",
-                    color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
-                    cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
-                    border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #F36B12",
-                    fontWeight: 700,
-                    fontSize: 14.5,
-                    boxShadow: isInactive || isOutOfStock ? "none" : "0 4px 14px rgba(243, 107, 18, 0.28)",
-                  }}
-                >
-                  {isInactive
-                    ? "Unavailable"
-                    : isOutOfStock
-                    ? "Out of Stock"
-                    : added
-                    ? "✓ Added to Cart"
-                    : adding
-                    ? "Adding…"
-                    : "Add to Cart"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePlaceOrder}
-                  disabled={placingOrder || isOutOfStock || isInactive}
-                  style={{
-                    padding: "14px 20px",
-                    borderRadius: 8,
-                    background: isInactive || isOutOfStock ? "#F5F5F5" : "#303638",
-                    color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
-                    cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
-                    border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #303638",
-                    fontWeight: 700,
-                    fontSize: 14.5,
-                  }}
-                >
-                  {placingOrder ? "Redirecting…" : "Place Order"}
-                </button>
+              <div style={{ color: "#4B5563", fontSize: 15, lineHeight: 1.75, whiteSpace: "pre-line" }}>
+                {product.description ||
+                  "Thoughtfully engineered everyday solutions from CLASPO. Built for enduring performance, functional convenience, and lasting satisfaction."}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 3. Product Description Section ── */}
-      <section id="pd-description" style={{ padding: "52px 0", borderBottom: "1px solid #E5E5E5", background: "#FAFAFA" }}>
+      {/* ── 2. TABBED CONTENT SECTION (Single Container with 3 Tabs) ── */}
+      <section id="pd-tabs-container" style={{ padding: "48px 0 72px", background: "#FAFAFA" }}>
         <div className="W">
-          <div className="lbl" style={{ marginBottom: 10 }}>PRODUCT DETAILS</div>
-          <h2 className="D3" style={{ fontSize: "clamp(22px, 2.8vw, 32px)", color: "#17191C", margin: "0 0 18px" }}>
-            Product Description
-          </h2>
           <div
             style={{
               background: "#FFFFFF",
               border: "1px solid #E5E5E5",
-              borderRadius: 12,
-              padding: "28px 32px",
-              color: "#303638",
-              fontSize: 15.5,
-              lineHeight: 1.75,
-              whiteSpace: "pre-line",
+              borderRadius: 14,
+              overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)",
             }}
           >
-            {product.description ||
-              "Thoughtfully engineered everyday solutions from CLASPO. Built for enduring performance, functional convenience, and lasting satisfaction."}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. How to Use Section ── */}
-      {howToUseSteps.length > 0 && (
-        <section id="pd-how-to-use" style={{ padding: "56px 0", borderBottom: "1px solid #E5E5E5", background: "#FFFFFF" }}>
-          <div className="W">
-            <div style={{ marginBottom: 28 }}>
-              <div className="lbl" style={{ marginBottom: 10 }}>STEP-BY-STEP GUIDE</div>
-              <h2 className="D3" style={{ fontSize: "clamp(22px, 2.8vw, 32px)", color: "#17191C", margin: 0 }}>
-                How to Use
-              </h2>
-            </div>
-
+            {/* Tab Header Bar */}
             <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                gap: 20,
-              }}
-            >
-              {howToUseSteps.map((step, idx) => (
-                <div
-                  key={step.id || idx}
-                  style={{
-                    background: "#FAFAFA",
-                    border: "1px solid #E5E5E5",
-                    borderRadius: 12,
-                    padding: 24,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span
-                      style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: "50%",
-                        background: "#F36B12",
-                        color: "#FFFFFF",
-                        fontSize: 15,
-                        fontWeight: 800,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
-                      Step {idx + 1}
-                    </span>
-                  </div>
-
-                  {step.title && (
-                    <h3 style={{ fontSize: 16, fontWeight: 700, color: "#17191C", margin: 0 }}>
-                      {step.title}
-                    </h3>
-                  )}
-
-                  <p style={{ fontSize: 14.5, color: "#4B5563", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line" }}>
-                    {step.instruction}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── 5. Product Reviews Section ── */}
-      <section id="pd-reviews" style={{ padding: "56px 0", borderBottom: "1px solid #E5E5E5", background: "#FAFAFA" }}>
-        <div className="W">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 32 }}>
-            <div>
-              <div className="lbl" style={{ marginBottom: 10 }}>CUSTOMER FEEDBACK</div>
-              <h2 className="D3" style={{ fontSize: "clamp(22px, 2.8vw, 32px)", color: "#17191C", margin: 0 }}>
-                Product Reviews
-              </h2>
-            </div>
-
-            <div
+              role="tablist"
+              aria-label="Product details tabs"
               style={{
                 display: "flex",
-                alignItems: "center",
-                gap: 16,
-                background: "#FFFFFF",
-                border: "1px solid #E5E5E5",
-                borderRadius: 12,
-                padding: "14px 20px",
+                borderBottom: "1px solid #E5E5E5",
+                background: "#303638",
+                overflowX: "auto",
               }}
             >
-              <div style={{ fontSize: 32, fontWeight: 900, color: "#17191C", lineHeight: 1 }}>
-                {reviewCount > 0 ? averageRating.toFixed(1) : "—"}
-              </div>
-              <div>
-                <div style={{ color: "#F36B12", fontSize: 16, letterSpacing: 1.5 }}>
-                  {"★".repeat(Math.round(averageRating || 0))}
-                  <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating || 0))}</span>
+              {(
+                [
+                  { id: "how-to-use", label: `How to Use (${howToUseSteps.length})` },
+                  { id: "reviews", label: `Product Reviews (${reviewCount})` },
+                  { id: "add-review", label: "Add Review" },
+                ] as const
+              ).map((tab) => {
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      padding: "16px 28px",
+                      border: "none",
+                      borderBottom: isActive ? "3px solid #F36B12" : "3px solid transparent",
+                      background: isActive ? "#FFFFFF" : "transparent",
+                      color: isActive ? "#17191C" : "#E5E7EB",
+                      fontSize: 14.5,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Tab Panels */}
+            <div style={{ padding: "32px 28px" }}>
+              {/* TAB 1: HOW TO USE */}
+              {activeTab === "how-to-use" && (
+                <div>
+                  <div style={{ marginBottom: 24 }}>
+                    <div className="lbl" style={{ marginBottom: 8 }}>STEP-BY-STEP GUIDE</div>
+                    <h2 className="D3" style={{ fontSize: "clamp(20px, 2.5vw, 28px)", color: "#17191C", margin: 0 }}>
+                      How to Use
+                    </h2>
+                  </div>
+
+                  {howToUseSteps.length > 0 ? (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                        gap: 18,
+                      }}
+                    >
+                      {howToUseSteps.map((step, idx) => (
+                        <div
+                          key={step.id || idx}
+                          style={{
+                            background: "#FAFAFA",
+                            border: "1px solid #E5E5E5",
+                            borderRadius: 12,
+                            padding: 22,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 10,
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: "50%",
+                                background: "#F36B12",
+                                color: "#FFFFFF",
+                                fontSize: 14,
+                                fontWeight: 800,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {idx + 1}
+                            </span>
+                            <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                              Step {idx + 1}
+                            </span>
+                          </div>
+
+                          {step.title && (
+                            <h3 style={{ fontSize: 15.5, fontWeight: 700, color: "#17191C", margin: 0 }}>
+                              {step.title}
+                            </h3>
+                          )}
+
+                          <p style={{ fontSize: 14.5, color: "#4B5563", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line" }}>
+                            {step.instruction}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ color: "#747474", fontSize: 14.5, margin: 0 }}>
+                      Usage instructions for this product will be added soon.
+                    </p>
+                  )}
                 </div>
-                <div style={{ fontSize: 12.5, color: "#747474", marginTop: 2 }}>
-                  {reviewCount === 0
-                    ? "No reviews yet"
-                    : `Based on ${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}`}
+              )}
+
+              {/* TAB 2: PRODUCT REVIEWS */}
+              {activeTab === "reviews" && (
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 28 }}>
+                    <div>
+                      <div className="lbl" style={{ marginBottom: 8 }}>CUSTOMER FEEDBACK</div>
+                      <h2 className="D3" style={{ fontSize: "clamp(20px, 2.5vw, 28px)", color: "#17191C", margin: 0 }}>
+                        Product Reviews
+                      </h2>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 14,
+                        background: "#FAFAFA",
+                        border: "1px solid #E5E5E5",
+                        borderRadius: 12,
+                        padding: "12px 18px",
+                      }}
+                    >
+                      <div style={{ fontSize: 30, fontWeight: 900, color: "#17191C", lineHeight: 1 }}>
+                        {reviewCount > 0 ? averageRating.toFixed(1) : "—"}
+                      </div>
+                      <div>
+                        <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
+                          {"★".repeat(Math.round(averageRating || 0))}
+                          <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating || 0))}</span>
+                        </div>
+                        <div style={{ fontSize: 12.5, color: "#747474", marginTop: 2 }}>
+                          {reviewCount === 0
+                            ? "No reviews yet"
+                            : `Based on ${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}`}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {reviewCount > 0 ? (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                        gap: 18,
+                      }}
+                    >
+                      {reviews.map((rev) => (
+                        <article
+                          key={rev.id}
+                          style={{
+                            background: "#FAFAFA",
+                            border: "1px solid #E5E5E5",
+                            borderRadius: 12,
+                            padding: 22,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 10,
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                            <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
+                              {"★".repeat(rev.rating)}
+                              <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - rev.rating)}</span>
+                            </div>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>
+                              {rev.rating}.0 / 5
+                            </span>
+                          </div>
+
+                          <h3 style={{ fontSize: 15.5, fontWeight: 700, color: "#17191C", margin: 0 }}>
+                            {rev.title}
+                          </h3>
+
+                          <p style={{ fontSize: 14.5, color: "#4B5563", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line", flex: 1 }}>
+                            {rev.description}
+                          </p>
+
+                          <div style={{ borderTop: "1px solid #E5E5E5", paddingTop: 10, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, fontSize: 12.5, color: "#747474" }}>
+                            <span style={{ fontWeight: 700, color: "#303638" }}>
+                              {rev.reviewerName}
+                            </span>
+                            {rev.createdAt && (
+                              <span>{formatReviewDate(rev.createdAt)}</span>
+                            )}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, padding: 24, color: "#747474", fontSize: 14.5 }}>
+                      No customer reviews yet. Verified buyers can share their experience in the Add Review tab.
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
+
+              {/* TAB 3: ADD REVIEW */}
+              {activeTab === "add-review" && (
+                <div style={{ maxWidth: 680 }}>
+                  <div className="lbl" style={{ marginBottom: 8 }}>SHARE YOUR EXPERIENCE</div>
+                  <h2 className="D3" style={{ fontSize: "clamp(20px, 2.5vw, 28px)", color: "#17191C", margin: "0 0 18px" }}>
+                    Add Review
+                  </h2>
+
+                  {reviewSuccess && (
+                    <div
+                      role="status"
+                      style={{
+                        marginBottom: 18,
+                        padding: "14px 18px",
+                        background: "#ECFDF5",
+                        border: "1px solid #A7F3D0",
+                        borderRadius: 10,
+                        color: "#065F46",
+                        fontSize: 14,
+                        fontWeight: 700,
+                      }}
+                    >
+                      ✓ {reviewSuccess}
+                    </div>
+                  )}
+
+                  {sessionStatus === "loading" || eligibility.loading ? (
+                    <div style={{ padding: 22, background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, color: "#747474", fontSize: 14 }}>
+                      Checking your review eligibility…
+                    </div>
+                  ) : !session?.user ? (
+                    <div style={{ padding: 24, background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12 }}>
+                      <p style={{ margin: "0 0 16px", fontSize: 14.5, color: "#303638", lineHeight: 1.6 }}>
+                        Please log in to your CLASPO account to leave a verified customer review.
+                      </p>
+                      <Link
+                        href={`/login?callbackUrl=${encodeURIComponent(productUrl)}&message=${encodeURIComponent("Please log in to submit a product review.")}`}
+                        className="btn bp"
+                        style={{ display: "inline-flex" }}
+                      >
+                        Log In to Review
+                      </Link>
+                    </div>
+                  ) : eligibility.alreadyReviewed ? (
+                    <div style={{ padding: 22, background: "#FFF4ED", border: "1px solid #FED7AA", borderRadius: 12, color: "#9A3412", fontSize: 14.5, fontWeight: 600 }}>
+                      You have already submitted a review for this product. Thank you for your feedback!
+                    </div>
+                  ) : !eligibility.hasPurchased ? (
+                    <div style={{ padding: 22, background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, color: "#4B5563", fontSize: 14.5, lineHeight: 1.6 }}>
+                      Only verified customers who have purchased <strong>{product.name}</strong> can submit a review.
+                    </div>
+                  ) : (
+                    <form
+                      onSubmit={handleSubmitReview}
+                      style={{
+                        background: "#FAFAFA",
+                        border: "1px solid #E5E5E5",
+                        borderRadius: 12,
+                        padding: 24,
+                      }}
+                    >
+                      <div style={{ marginBottom: 16 }}>
+                        <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 8 }}>
+                          Your Rating <span style={{ color: "#EF4444" }}>*</span>
+                        </label>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setReviewRating(star)}
+                              aria-label={`Rate ${star} out of 5 stars`}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: 28,
+                                lineHeight: 1,
+                                padding: "2px 4px",
+                                color: star <= reviewRating ? "#F36B12" : "#D1D5DB",
+                              }}
+                            >
+                              ★
+                            </button>
+                          ))}
+                          <span style={{ marginLeft: 8, fontSize: 14, fontWeight: 700, color: "#303638" }}>
+                            {reviewRating} / 5
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ marginBottom: 16 }}>
+                        <label htmlFor="review-title-input" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 8 }}>
+                          Review Title <span style={{ color: "#EF4444" }}>*</span>
+                        </label>
+                        <input
+                          id="review-title-input"
+                          type="text"
+                          required
+                          maxLength={150}
+                          placeholder="Summarize your experience"
+                          value={reviewTitle}
+                          onChange={(e) => setReviewTitle(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "12px 14px",
+                            borderRadius: 8,
+                            border: "1px solid #D1D5DB",
+                            background: "#FFFFFF",
+                            color: "#17191C",
+                            fontSize: 14.5,
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: 18 }}>
+                        <label htmlFor="review-desc-input" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 8 }}>
+                          Review Description <span style={{ color: "#EF4444" }}>*</span>
+                        </label>
+                        <textarea
+                          id="review-desc-input"
+                          required
+                          rows={4}
+                          maxLength={2000}
+                          placeholder="What did you like or dislike about this product?"
+                          value={reviewDescription}
+                          onChange={(e) => setReviewDescription(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "12px 14px",
+                            borderRadius: 8,
+                            border: "1px solid #D1D5DB",
+                            background: "#FFFFFF",
+                            color: "#17191C",
+                            fontSize: 14.5,
+                            resize: "vertical",
+                          }}
+                        />
+                      </div>
+
+                      {reviewError && (
+                        <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FCA5A5", color: "#DC2626", fontSize: 13.5, fontWeight: 600 }}>
+                          {reviewError}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={submittingReview}
+                        className="btn bp"
+                        style={{ padding: "12px 26px", fontSize: 14.5 }}
+                      >
+                        {submittingReview ? "Submitting Review…" : "Submit Review"}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
           </div>
+        </div>
+      </section>
 
-          {reviewCount > 0 ? (
+      {/* ── 3. BOTTOM STICKY ORDER SUMMARY PANEL (Stops before Footer) ── */}
+      <div className="pd-sticky-bar" role="region" aria-label="Order summary">
+        <div className="W">
+          {added && (
             <div
+              role="status"
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: 20,
+                marginBottom: 10,
+                padding: "8px 14px",
+                borderRadius: 6,
+                background: "#ECFDF5",
+                border: "1px solid #A7F3D0",
+                color: "#065F46",
+                fontSize: 13,
+                fontWeight: 700,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 10,
               }}
             >
-              {reviews.map((rev) => (
-                <article
-                  key={rev.id}
-                  style={{
-                    background: "#FFFFFF",
-                    border: "1px solid #E5E5E5",
-                    borderRadius: 12,
-                    padding: 24,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                    <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
-                      {"★".repeat(rev.rating)}
-                      <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - rev.rating)}</span>
-                    </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>
-                      {rev.rating}.0 / 5
-                    </span>
-                  </div>
-
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: "#17191C", margin: 0 }}>
-                    {rev.title}
-                  </h3>
-
-                  <p style={{ fontSize: 14.5, color: "#4B5563", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line", flex: 1 }}>
-                    {rev.description}
-                  </p>
-
-                  <div style={{ borderTop: "1px solid #F3F4F6", paddingTop: 12, marginTop: 4, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, fontSize: 12.5, color: "#747474" }}>
-                    <span style={{ fontWeight: 700, color: "#303638" }}>
-                      {rev.reviewerName}
-                    </span>
-                    {rev.createdAt && (
-                      <span>{formatReviewDate(rev.createdAt)}</span>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div style={{ background: "#FFFFFF", border: "1px solid #E5E5E5", borderRadius: 12, padding: 28, color: "#747474", fontSize: 14.5 }}>
-              No customer reviews yet. Verified buyers can share their experience below.
+              <span>✓ Added {quantity} × {product.name} to your cart!</span>
+              <Link href="/cart" style={{ color: "#059669", textDecoration: "underline", fontWeight: 800 }}>
+                View Cart →
+              </Link>
             </div>
           )}
-        </div>
-      </section>
 
-      {/* ── 6. Add Your Review Form ── */}
-      <section id="pd-add-review" style={{ padding: "56px 0", borderBottom: "1px solid #E5E5E5", background: "#FFFFFF" }}>
-        <div className="W">
-          <div style={{ maxWidth: 720 }}>
-            <div className="lbl" style={{ marginBottom: 10 }}>SHARE YOUR EXPERIENCE</div>
-            <h2 className="D3" style={{ fontSize: "clamp(22px, 2.8vw, 32px)", color: "#17191C", margin: "0 0 20px" }}>
-              Add Your Review
-            </h2>
-
-            {reviewSuccess && (
-              <div
-                role="status"
-                style={{
-                  marginBottom: 20,
-                  padding: "14px 18px",
-                  background: "#ECFDF5",
-                  border: "1px solid #A7F3D0",
-                  borderRadius: 10,
-                  color: "#065F46",
-                  fontSize: 14,
-                  fontWeight: 700,
-                }}
-              >
-                ✓ {reviewSuccess}
-              </div>
-            )}
-
-            {sessionStatus === "loading" || eligibility.loading ? (
-              <div style={{ padding: 24, background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, color: "#747474", fontSize: 14 }}>
-                Checking your review eligibility…
-              </div>
-            ) : !session?.user ? (
-              <div style={{ padding: 28, background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12 }}>
-                <p style={{ margin: "0 0 16px", fontSize: 15, color: "#303638", lineHeight: 1.6 }}>
-                  Please log in to your CLASPO account to leave a verified customer review.
-                </p>
-                <Link
-                  href={`/login?callbackUrl=${encodeURIComponent(productUrl + "#pd-add-review")}&message=${encodeURIComponent("Please log in to submit a product review.")}`}
-                  className="btn bp"
-                  style={{ display: "inline-flex" }}
-                >
-                  Log In to Review
-                </Link>
-              </div>
-            ) : eligibility.alreadyReviewed ? (
-              <div style={{ padding: 24, background: "#FFF4ED", border: "1px solid #FED7AA", borderRadius: 12, color: "#9A3412", fontSize: 14.5, fontWeight: 600 }}>
-                You have already submitted a review for this product. Thank you for your feedback!
-              </div>
-            ) : !eligibility.hasPurchased ? (
-              <div style={{ padding: 24, background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, color: "#4B5563", fontSize: 14.5, lineHeight: 1.6 }}>
-                Only verified customers who have purchased <strong>{product.name}</strong> can submit a review.
-              </div>
-            ) : (
-              <form
-                onSubmit={handleSubmitReview}
-                style={{
-                  background: "#FAFAFA",
-                  border: "1px solid #E5E5E5",
-                  borderRadius: 12,
-                  padding: 28,
-                }}
-              >
-                <div style={{ marginBottom: 18 }}>
-                  <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 8 }}>
-                    Your Rating <span style={{ color: "#EF4444" }}>*</span>
-                  </label>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setReviewRating(star)}
-                        aria-label={`Rate ${star} out of 5 stars`}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: 28,
-                          lineHeight: 1,
-                          padding: "2px 4px",
-                          color: star <= reviewRating ? "#F36B12" : "#D1D5DB",
-                        }}
-                      >
-                        ★
-                      </button>
-                    ))}
-                    <span style={{ marginLeft: 8, fontSize: 14, fontWeight: 700, color: "#303638" }}>
-                      {reviewRating} / 5
+          <div className="pd-sticky-inner">
+            {/* Price, Discount, Quantity, Shipping, Total */}
+            <div className="pd-sticky-metrics">
+              <div className="pd-sticky-hide-sm">
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#747474" }}>
+                  Unit Price
+                </div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: "#17191C" }}>
+                    {effectivePrice > 0 ? formatPrice(effectivePrice) : "N/A"}
+                  </span>
+                  {hasDiscount && (
+                    <span style={{ fontSize: 12.5, color: "#9CA3AF", textDecoration: "line-through" }}>
+                      {formatPrice(product.price)}
                     </span>
-                  </div>
+                  )}
                 </div>
-
-                <div style={{ marginBottom: 18 }}>
-                  <label htmlFor="review-title-input" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 8 }}>
-                    Review Title <span style={{ color: "#EF4444" }}>*</span>
-                  </label>
-                  <input
-                    id="review-title-input"
-                    type="text"
-                    required
-                    maxLength={150}
-                    placeholder="Summarize your experience"
-                    value={reviewTitle}
-                    onChange={(e) => setReviewTitle(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "12px 14px",
-                      borderRadius: 8,
-                      border: "1px solid #D1D5DB",
-                      background: "#FFFFFF",
-                      color: "#17191C",
-                      fontSize: 14.5,
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: 20 }}>
-                  <label htmlFor="review-desc-input" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 8 }}>
-                    Review Description <span style={{ color: "#EF4444" }}>*</span>
-                  </label>
-                  <textarea
-                    id="review-desc-input"
-                    required
-                    rows={4}
-                    maxLength={2000}
-                    placeholder="What did you like or dislike about this product?"
-                    value={reviewDescription}
-                    onChange={(e) => setReviewDescription(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "12px 14px",
-                      borderRadius: 8,
-                      border: "1px solid #D1D5DB",
-                      background: "#FFFFFF",
-                      color: "#17191C",
-                      fontSize: 14.5,
-                      resize: "vertical",
-                    }}
-                  />
-                </div>
-
-                {reviewError && (
-                  <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FCA5A5", color: "#DC2626", fontSize: 13.5, fontWeight: 600 }}>
-                    {reviewError}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={submittingReview}
-                  className="btn bp"
-                  style={{ padding: "13px 28px", fontSize: 14.5 }}
-                >
-                  {submittingReview ? "Submitting Review…" : "Submit Review"}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 7. Bottom Purchasing Bar ── */}
-      {!isInactive && !isOutOfStock && (
-        <section style={{ padding: "40px 0", background: "#303638", color: "#FFFFFF" }}>
-          <div className="W" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#F36B12", marginBottom: 4 }}>
-                READY TO ORDER
               </div>
-              <div style={{ fontSize: 20, fontWeight: 800 }}>
-                {product.name} — {effectivePrice > 0 ? formatPrice(effectivePrice * quantity) : "Contact for price"}
+
+              {/* Quantity Selector */}
+              {!isInactive && !isOutOfStock && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="pd-sticky-hide-sm" style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>
+                    Qty:
+                  </span>
+                  <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      aria-label="Decrease quantity"
+                      style={{ width: 34, height: 34, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                    >
+                      -
+                    </button>
+                    <span style={{ minWidth: 34, textAlign: "center", fontSize: 14, fontWeight: 700, color: "#17191C" }}>
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(maxStock, q + 1))}
+                      aria-label="Increase quantity"
+                      style={{ width: 34, height: 34, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="pd-sticky-hide-sm">
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#747474" }}>
+                  Shipping
+                </div>
+                <div style={{ fontSize: 14.5, fontWeight: 700, color: "#303638" }}>
+                  {formatPrice(shippingCharge)}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#747474" }}>
+                  Total (incl. shipping)
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "#F36B12" }}>
+                  {totalWithShipping > 0 ? formatPrice(totalWithShipping) : "Contact for price"}
+                </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            {/* Action Buttons */}
+            <div className="pd-sticky-actions">
               <button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={adding}
+                disabled={adding || isOutOfStock || isInactive}
                 style={{
-                  padding: "13px 26px",
+                  padding: "12px 22px",
                   borderRadius: 8,
-                  background: "#F36B12",
-                  color: "#FFFFFF",
-                  border: "none",
+                  background: isInactive || isOutOfStock ? "#F5F5F5" : "#F36B12",
+                  color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
+                  border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #F36B12",
                   fontWeight: 700,
-                  fontSize: 14.5,
-                  cursor: "pointer",
+                  fontSize: 14,
+                  cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
+                  whiteSpace: "nowrap",
+                  minHeight: 44,
                 }}
               >
-                {added ? "✓ Added to Cart" : "Add to Cart"}
+                {isInactive
+                  ? "Unavailable"
+                  : isOutOfStock
+                  ? "Out of Stock"
+                  : added
+                  ? "✓ Added to Cart"
+                  : adding
+                  ? "Adding…"
+                  : "Add to Cart"}
               </button>
+
               <button
                 type="button"
                 onClick={handlePlaceOrder}
-                disabled={placingOrder}
+                disabled={placingOrder || isOutOfStock || isInactive}
                 style={{
-                  padding: "13px 26px",
+                  padding: "12px 22px",
                   borderRadius: 8,
-                  background: "#FFFFFF",
-                  color: "#17191C",
-                  border: "none",
+                  background: isInactive || isOutOfStock ? "#F5F5F5" : "#303638",
+                  color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
+                  border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #303638",
                   fontWeight: 700,
-                  fontSize: 14.5,
-                  cursor: "pointer",
+                  fontSize: 14,
+                  cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
+                  whiteSpace: "nowrap",
+                  minHeight: 44,
                 }}
               >
                 {placingOrder ? "Redirecting…" : "Place Order"}
               </button>
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </div>
 
       {/* ── Full-Screen Lightbox Modal ── */}
       {lightboxOpen && currentMedia && currentMedia.type === "image" && (
