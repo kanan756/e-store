@@ -489,7 +489,7 @@ export default function Header() {
 
             {/* Wishlist Icon with Item Count */}
             <Link
-              href="/products"
+              href="/wishlist"
               aria-label="Wishlist"
               title="Wishlist"
               style={{
