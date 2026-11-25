@@ -536,10 +536,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   }}
                 >
                   <span style={{ color: "#F36B12", letterSpacing: 1 }}>
-                    {"★".repeat(Math.round(averageRating || 5))}
-                    <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating || 5))}</span>
+                    {"★".repeat(Math.round(reviewCount > 0 ? averageRating : 0))}
+                    <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(reviewCount > 0 ? averageRating : 0))}</span>
                   </span>
-                  <span>{reviewCount > 0 ? averageRating.toFixed(1) : "No ratings yet"}</span>
+                  <span>{reviewCount > 0 ? averageRating.toFixed(1) : "No reviews yet"}</span>
                   <span style={{ color: "#747474", fontWeight: 500 }}>
                     ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
                   </span>

@@ -96,6 +96,13 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     : 0
   const hasPrice = sellingPrice > 0
 
+  const reviews = Array.isArray(product.reviews) ? product.reviews : []
+  const reviewCount = reviews.length
+  const averageRating =
+    reviewCount > 0
+      ? reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / reviewCount
+      : 0
+
   const handleAddToCart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -310,13 +317,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.category || "Home Solution"}
           </span>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-            <StarIcon />
-            <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#17191C" }}>
-              {product.reviews && product.reviews.length > 0
-                ? `${(product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length).toFixed(1)} (${product.reviews.length})`
-                : "5.0"}
-            </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {reviewCount > 0 ? (
+              <>
+                <StarIcon />
+                <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#17191C" }}>
+                  {averageRating.toFixed(1)} ({reviewCount})
+                </span>
+              </>
+            ) : (
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "#747474" }}>
+                No reviews yet
+              </span>
+            )}
           </div>
         </div>
 
