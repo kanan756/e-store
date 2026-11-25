@@ -36,6 +36,7 @@ interface ReviewEligibility {
 }
 
 type DetailTab = "how-to-use" | "reviews" | "add-review"
+type ReviewSortOption = "newest" | "highest" | "lowest"
 
 function formatReviewDate(iso?: string): string {
   if (!iso) return ""
@@ -66,10 +67,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [activeTab, setActiveTab] = useState<DetailTab>("how-to-use")
   const [footerVisible, setFooterVisible] = useState(false)
 
+  const targetProductId = product.productId || product.id
+
   // Reviews state
   const [reviews, setReviews] = useState<ProductReviewItem[]>(() =>
-    Array.isArray(product.reviews) ? product.reviews : []
+    Array.isArray(product.reviews)
+      ? product.reviews.filter((r) => !r.productId || r.productId === targetProductId)
+      : []
   )
+  const [reviewSort, setReviewSort] = useState<ReviewSortOption>("newest")
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [reviewsFetchError, setReviewsFetchError] = useState("")
   const [eligibility, setEligibility] = useState<ReviewEligibility>({
     loading: false,
     authenticated: false,
@@ -87,6 +95,34 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const productHandle = product.handle || product.id
   const productUrl = `/products/${productHandle}`
   const loginMessage = "Please log in to your CLASPO account to continue."
+
+  const fetchProductReviews = useCallback(async () => {
+    if (!targetProductId) return
+    setReviewsLoading(true)
+    setReviewsFetchError("")
+    try {
+      const res = await fetch(`/api/reviews?productId=${encodeURIComponent(targetProductId)}`, {
+        cache: "no-store",
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || "Unable to load product reviews.")
+      }
+      if (Array.isArray(data.reviews)) {
+        setReviews(
+          data.reviews.filter((r: ProductReviewItem) => !r.productId || r.productId === targetProductId)
+        )
+      }
+    } catch (err: any) {
+      setReviewsFetchError(err.message || "Unable to load latest reviews.")
+    } finally {
+      setReviewsLoading(false)
+    }
+  }, [targetProductId])
+
+  useEffect(() => {
+    void fetchProductReviews()
+  }, [fetchProductReviews])
 
   // Hide fixed bottom order panel when website footer enters viewport
   useEffect(() => {
@@ -224,6 +260,22 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     return reviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0) / reviewCount
   }, [reviews, reviewCount])
 
+  const sortedReviews = useMemo(() => {
+    const list = [...reviews]
+    if (reviewSort === "highest") {
+      return list.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0))
+    }
+    if (reviewSort === "lowest") {
+      return list.sort((a, b) => (Number(a.rating) || 0) - (Number(b.rating) || 0))
+    }
+    // newest first
+    return list.sort((a, b) => {
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0
+      return tb - ta
+    })
+  }, [reviews, reviewSort])
+
   const howToUseSteps = useMemo(
     () =>
       Array.isArray(product.howToUse)
@@ -356,10 +408,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       }
 
       if (Array.isArray(data.reviews)) {
-        setReviews(data.reviews)
+        setReviews(
+          data.reviews.filter((r: ProductReviewItem) => !r.productId || r.productId === targetProductId)
+        )
       } else if (data.review) {
         setReviews((prev) => [data.review, ...prev])
       }
+
+      // Re-fetch latest reviews for this exact Product ID from Google Sheets
+      await fetchProductReviews()
 
       setReviewTitle("")
       setReviewDescription("")
@@ -906,7 +963,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               {/* TAB 2: PRODUCT REVIEWS */}
               {activeTab === "reviews" && (
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 28 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 20, marginBottom: 24 }}>
                     <div>
                       <div className="lbl" style={{ marginBottom: 8 }}>CUSTOMER FEEDBACK</div>
                       <h2 className="D3" style={{ fontSize: "clamp(20px, 2.5vw, 28px)", color: "#17191C", margin: 0 }}>
@@ -914,35 +971,89 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       </h2>
                     </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 14,
-                        background: "#FAFAFA",
-                        border: "1px solid #E5E5E5",
-                        borderRadius: 12,
-                        padding: "12px 18px",
-                      }}
-                    >
-                      <div style={{ fontSize: 30, fontWeight: 900, color: "#17191C", lineHeight: 1 }}>
-                        {reviewCount > 0 ? averageRating.toFixed(1) : "—"}
-                      </div>
-                      <div>
-                        <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
-                          {"★".repeat(Math.round(averageRating || 0))}
-                          <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating || 0))}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+                      {reviewCount > 1 && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <label
+                            htmlFor="pd-review-sort"
+                            style={{ fontSize: 12.5, fontWeight: 700, color: "#4B5563", whiteSpace: "nowrap" }}
+                          >
+                            Sort by:
+                          </label>
+                          <select
+                            id="pd-review-sort"
+                            value={reviewSort}
+                            onChange={(e) => setReviewSort(e.target.value as ReviewSortOption)}
+                            style={{
+                              padding: "8px 12px",
+                              borderRadius: 8,
+                              border: "1px solid #D1D5DB",
+                              background: "#FFFFFF",
+                              color: "#17191C",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <option value="newest">Newest First</option>
+                            <option value="highest">Highest Rating</option>
+                            <option value="lowest">Lowest Rating</option>
+                          </select>
                         </div>
-                        <div style={{ fontSize: 12.5, color: "#747474", marginTop: 2 }}>
-                          {reviewCount === 0
-                            ? "No reviews yet"
-                            : `Based on ${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}`}
+                      )}
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 14,
+                          background: "#FAFAFA",
+                          border: "1px solid #E5E5E5",
+                          borderRadius: 12,
+                          padding: "12px 18px",
+                        }}
+                      >
+                        <div style={{ fontSize: 30, fontWeight: 900, color: "#17191C", lineHeight: 1 }}>
+                          {reviewCount > 0 ? averageRating.toFixed(1) : "—"}
+                        </div>
+                        <div>
+                          <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
+                            {"★".repeat(Math.round(averageRating || 0))}
+                            <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - Math.round(averageRating || 0))}</span>
+                          </div>
+                          <div style={{ fontSize: 12.5, color: "#747474", marginTop: 2 }}>
+                            {reviewCount === 0
+                              ? "No reviews yet"
+                              : `Based on ${reviewCount} ${reviewCount === 1 ? "review" : "reviews"}`}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {reviewCount > 0 ? (
+                  {reviewsFetchError && (
+                    <div
+                      role="alert"
+                      style={{
+                        marginBottom: 16,
+                        padding: "10px 14px",
+                        borderRadius: 8,
+                        background: "#FEF2F2",
+                        border: "1px solid #FECACA",
+                        color: "#DC2626",
+                        fontSize: 13,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {reviewsFetchError}
+                    </div>
+                  )}
+
+                  {reviewsLoading && reviewCount === 0 ? (
+                    <div style={{ background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, padding: 24, color: "#747474", fontSize: 14.5 }}>
+                      Loading customer reviews…
+                    </div>
+                  ) : reviewCount > 0 ? (
                     <div
                       style={{
                         display: "grid",
@@ -950,7 +1061,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         gap: 18,
                       }}
                     >
-                      {reviews.map((rev) => (
+                      {sortedReviews.map((rev) => (
                         <article
                           key={rev.id}
                           style={{
@@ -963,14 +1074,31 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                             gap: 10,
                           }}
                         >
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                             <div style={{ color: "#F36B12", fontSize: 15, letterSpacing: 1.5 }}>
                               {"★".repeat(rev.rating)}
                               <span style={{ color: "#D1D5DB" }}>{"★".repeat(5 - rev.rating)}</span>
                             </div>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>
-                              {rev.rating}.0 / 5
-                            </span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              {(rev.verified ?? Boolean(rev.orderId)) && (
+                                <span
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: "#059669",
+                                    background: "#ECFDF5",
+                                    border: "1px solid #A7F3D0",
+                                    padding: "2px 8px",
+                                    borderRadius: 999,
+                                  }}
+                                >
+                                  ✓ Verified Purchase
+                                </span>
+                              )}
+                              <span style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>
+                                {rev.rating}.0 / 5
+                              </span>
+                            </div>
                           </div>
 
                           <h3 style={{ fontSize: 15.5, fontWeight: 700, color: "#17191C", margin: 0 }}>
@@ -994,7 +1122,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     </div>
                   ) : (
                     <div style={{ background: "#FAFAFA", border: "1px solid #E5E5E5", borderRadius: 12, padding: 24, color: "#747474", fontSize: 14.5 }}>
-                      No customer reviews yet. Verified buyers can share their experience in the Add Review tab.
+                      No reviews yet. Verified buyers can share their experience in the Add Review tab.
                     </div>
                   )}
                 </div>

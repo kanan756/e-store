@@ -29,7 +29,13 @@ function orderContainsProduct(order: Order, product: Product): boolean {
   const productNameLower = product.name.trim().toLowerCase()
   const segments = raw
     .split(",")
-    .map((s) => s.trim().replace(/\s+x\d+$/i, "").trim())
+    .map((s) =>
+      s
+        .trim()
+        .replace(/\s+x\d+$/i, "")
+        .replace(/\s*\([^)]+\)\s*$/i, "")
+        .trim()
+    )
     .filter(Boolean)
 
   return segments.some((seg) => seg === productNameLower) || raw.includes(productNameLower)
@@ -135,11 +141,15 @@ export async function POST(
       )
     }
 
+    const resolvedProductId = product.productId || product.id
     const newReview: ProductReviewItem = {
       id: `rev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      productId: resolvedProductId,
+      customerId: (session.user as any)?.id || undefined,
       reviewerName: session.user.name?.trim() || email.split("@")[0] || "CLASPO Customer",
       reviewerEmail: email,
       orderId: matchingOrder.orderId,
+      verified: true,
       title: parsed.data.title,
       description: parsed.data.description,
       rating: parsed.data.rating,
@@ -156,11 +166,25 @@ export async function POST(
     revalidatePath(`/products/${product.handle}`)
     revalidatePath(`/products`)
 
+    const publicReviews = updatedReviews
+      .filter((r) => !r.productId || r.productId === resolvedProductId)
+      .map((r) => ({
+        id: r.id,
+        productId: r.productId || resolvedProductId,
+        customerId: r.customerId,
+        reviewerName: r.reviewerName,
+        verified: r.verified ?? Boolean(r.orderId),
+        title: r.title,
+        description: r.description,
+        rating: r.rating,
+        createdAt: r.createdAt,
+      }))
+
     return NextResponse.json({
       success: true,
       message: "Thank you! Your review has been published.",
-      review: newReview,
-      reviews: updatedReviews,
+      review: publicReviews[0],
+      reviews: publicReviews,
     })
   } catch (err: any) {
     console.error("Submit review error:", err)

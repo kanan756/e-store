@@ -304,9 +304,12 @@ export interface ProductVideoItem {
 
 export interface ProductReviewItem {
   id: string
+  productId?: string
+  customerId?: string
   reviewerName: string
   reviewerEmail?: string
   orderId?: string
+  verified?: boolean
   title: string
   description: string
   rating: number
@@ -1368,7 +1371,15 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
             try {
               if (r[17]) {
                 const parsed = JSON.parse(r[17])
-                if (Array.isArray(parsed)) reviews = parsed
+                if (Array.isArray(parsed)) {
+                  reviews = parsed
+                    .filter((rev): rev is ProductReviewItem => Boolean(rev && typeof rev === "object" && (!rev.productId || rev.productId === productId)))
+                    .map((rev) => ({
+                      ...rev,
+                      productId: rev.productId || productId,
+                      verified: rev.verified ?? Boolean(rev.orderId),
+                    }))
+                }
               }
             } catch {}
 
