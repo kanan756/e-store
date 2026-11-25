@@ -223,7 +223,7 @@ export default function AccountClient() {
                 </span>
               </div>
               <div style={{ fontSize: 14, color: "#747474", marginTop: 4 }}>
-                {profile.email} &middot; @{profile.username || "user"}
+                {profile.email}
               </div>
             </div>
           </div>
@@ -465,46 +465,24 @@ export default function AccountClient() {
                 )}
 
                 <form onSubmit={handleUpdateProfile} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
-                        Full Name
-                      </label>
-                      <input
-                        type="text"
-                        value={profile.fullName}
-                        onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "12px 14px",
-                          borderRadius: 10,
-                          border: "1.5px solid #E5E5E5",
-                          fontSize: 14,
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
-                        Username
-                      </label>
-                      <input
-                        type="text"
-                        value={profile.username}
-                        onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                        required
-                        style={{
-                          width: "100%",
-                          padding: "12px 14px",
-                          borderRadius: 10,
-                          border: "1.5px solid #E5E5E5",
-                          fontSize: 14,
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={profile.fullName}
+                      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                      required
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        borderRadius: 10,
+                        border: "1.5px solid #E5E5E5",
+                        fontSize: 14,
+                        boxSizing: "border-box",
+                      }}
+                    />
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>

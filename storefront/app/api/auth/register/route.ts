@@ -6,13 +6,7 @@ import { rateLimit } from "@/lib/rate-limit"
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, "Full name must be at least 2 characters").max(100),
-  username: z
-    .string()
-    .trim()
-    .min(3, "Username must be at least 3 characters")
-    .max(30)
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
-  phoneNumber: z.string().trim().min(7, "Please enter a valid phone number").max(20),
+  phoneNumber: z.string().trim().max(20).optional().default(""),
   email: z.string().trim().email("Please enter a valid email address").max(254),
   password: z
     .string()
@@ -45,9 +39,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: firstError }, { status: 400 })
     }
 
-    const { fullName, username, phoneNumber, email, password } = parsed.data
+    const { fullName, phoneNumber, email, password } = parsed.data
     const cleanEmail = email.toLowerCase()
-    const cleanUsername = username.toLowerCase()
 
     // 1. Check duplicate email
     const existingEmail = await getUserByEmail(cleanEmail)
@@ -55,10 +48,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "An account with this email address already exists" }, { status: 409 })
     }
 
-    // 2. Check duplicate username
-    const existingUser = await getUserByUsername(cleanUsername)
-    if (existingUser) {
-      return NextResponse.json({ error: "This username is already taken. Please choose another." }, { status: 409 })
+    // 2. Generate a unique internal handle for the sheet's username column
+    const baseHandle = (fullName || cleanEmail.split("@")[0] || "user")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 18) || "user"
+    let internalUsername = baseHandle
+    const existingHandle = await getUserByUsername(internalUsername)
+    if (existingHandle) {
+      internalUsername = `${baseHandle}_${Math.random().toString(36).substring(2, 6)}`
     }
 
     // 3. Hash password using bcrypt
@@ -70,8 +68,8 @@ export async function POST(request: Request) {
     const created = await appendUser({
       userId,
       fullName,
-      username: cleanUsername,
-      phoneNumber,
+      username: internalUsername,
+      phoneNumber: phoneNumber || "",
       email: cleanEmail,
       passwordHash,
       provider: "credentials",

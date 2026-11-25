@@ -37,7 +37,7 @@ export async function GET() {
 
 const updateProfileSchema = z.object({
   fullName: z.string().trim().min(2, "Full name must be at least 2 characters").max(100),
-  phoneNumber: z.string().trim().min(7, "Valid phone number required").max(20),
+  phoneNumber: z.string().trim().max(20).optional().default(""),
   username: z.string().trim().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/).optional(),
 })
 

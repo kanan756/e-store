@@ -37,17 +37,59 @@ function getPasswordStrength(pass: string): { label: string; score: number; colo
   return { label: "Strong", score: 4, color: "#10B981" }
 }
 
+/**
+ * Generates a cryptographically secure random password using Web Crypto API
+ * containing uppercase, lowercase, digits, and special characters.
+ */
+function generateSecurePassword(length = 14): string {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+  const lower = "abcdefghijkmnopqrstuvwxyz"
+  const digits = "23456789"
+  const special = "!@#$%^&*_-+="
+  const all = upper + lower + digits + special
+
+  const pick = (charset: string): string => {
+    const buf = new Uint32Array(1)
+    window.crypto.getRandomValues(buf)
+    return charset[buf[0] % charset.length]
+  }
+
+  // Guarantee at least one character from each required category
+  const chars: string[] = [
+    pick(upper),
+    pick(lower),
+    pick(digits),
+    pick(special),
+  ]
+
+  for (let i = chars.length; i < length; i++) {
+    chars.push(pick(all))
+  }
+
+  // Fisher-Yates shuffle with crypto.getRandomValues
+  for (let i = chars.length - 1; i > 0; i--) {
+    const buf = new Uint32Array(1)
+    window.crypto.getRandomValues(buf)
+    const j = buf[0] % (i + 1)
+    const tmp = chars[i]
+    chars[i] = chars[j]
+    chars[j] = tmp
+  }
+
+  return chars.join("")
+}
+
 export default function SignupClient() {
   const router = useRouter()
   const [form, setForm] = useState({
     fullName: "",
-    username: "",
-    phoneNumber: "",
     email: "",
     password: "",
     confirmPassword: "",
     terms: false,
   })
+  const [autoGeneratePassword, setAutoGeneratePassword] = useState(false)
+  const [copiedPassword, setCopiedPassword] = useState(false)
   const [showPass, setShowPass] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -63,13 +105,53 @@ export default function SignupClient() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }))
+    if (copiedPassword && (name === "password" || name === "confirmPassword")) {
+      setCopiedPassword(false)
+    }
     if (error) setError("")
+  }
+
+  const applyGeneratedPassword = () => {
+    const generated = generateSecurePassword(14)
+    setForm((prev) => ({
+      ...prev,
+      password: generated,
+      confirmPassword: generated,
+    }))
+    setShowPass(true)
+    setCopiedPassword(false)
+    if (error) setError("")
+  }
+
+  const handleToggleAutoGenerate = (checked: boolean) => {
+    setAutoGeneratePassword(checked)
+    if (checked) {
+      applyGeneratedPassword()
+    } else {
+      setCopiedPassword(false)
+    }
+  }
+
+  const handleCopyPassword = async () => {
+    if (!form.password) return
+    try {
+      await navigator.clipboard.writeText(form.password)
+      setCopiedPassword(true)
+      setTimeout(() => setCopiedPassword(false), 2000)
+    } catch {
+      // Fallback ignored if clipboard permission denied
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setSuccess("")
+
+    if (form.fullName.trim().length < 2) {
+      setError("Please enter your full name (at least 2 characters).")
+      return
+    }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.")
@@ -87,7 +169,13 @@ export default function SignupClient() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          fullName: form.fullName,
+          email: form.email,
+          password: form.password,
+          confirmPassword: form.confirmPassword,
+          terms: form.terms,
+        }),
       })
 
       const data = await res.json()
@@ -98,7 +186,6 @@ export default function SignupClient() {
 
       setSuccess("Account created successfully! Logging you in…")
 
-      // Automatically sign in the customer with Credentials
       const loginRes = await signIn("credentials", {
         email: form.email,
         password: form.password,
@@ -250,17 +337,18 @@ export default function SignupClient() {
 
           {/* Registration Form */}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            {/* Full Name */}
+            {/* 1. Full Name */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
+              <label htmlFor="signup-fullname" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
                 Full Name <span style={{ color: "#F36B12" }}>*</span>
               </label>
               <input
+                id="signup-fullname"
                 type="text"
                 name="fullName"
                 value={form.fullName}
                 onChange={handleChange}
-                placeholder="e.g. John Doe"
+                placeholder="e.g. Aarav Sharma"
                 required
                 style={{
                   width: "100%",
@@ -275,63 +363,13 @@ export default function SignupClient() {
               />
             </div>
 
-            {/* Username & Phone Number in 2 Cols */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
-                  Username <span style={{ color: "#F36B12" }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={form.username}
-                  onChange={handleChange}
-                  placeholder="johndoe"
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "12px 14px",
-                    borderRadius: 10,
-                    border: "1.5px solid #E5E5E5",
-                    fontSize: 14,
-                    outline: "none",
-                    boxSizing: "border-box",
-                    fontFamily: "inherit",
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
-                  Phone Number <span style={{ color: "#F36B12" }}>*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={form.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="+1 (555) 000-0000"
-                  required
-                  style={{
-                    width: "100%",
-                    padding: "12px 14px",
-                    borderRadius: 10,
-                    border: "1.5px solid #E5E5E5",
-                    fontSize: 14,
-                    outline: "none",
-                    boxSizing: "border-box",
-                    fontFamily: "inherit",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Email Address */}
+            {/* 2. Email Address */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
+              <label htmlFor="signup-email" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
                 Email Address <span style={{ color: "#F36B12" }}>*</span>
               </label>
               <input
+                id="signup-email"
                 type="email"
                 name="email"
                 value={form.email}
@@ -351,13 +389,79 @@ export default function SignupClient() {
               />
             </div>
 
-            {/* Password */}
+            {/* 3. Generate Password Automatically Option */}
+            <div
+              style={{
+                background: "#FAFAFA",
+                border: "1.5px solid #E5E5E5",
+                borderRadius: 10,
+                padding: "12px 14px",
+              }}
+            >
+              <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, cursor: "pointer" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <input
+                    type="checkbox"
+                    checked={autoGeneratePassword}
+                    onChange={(e) => handleToggleAutoGenerate(e.target.checked)}
+                    style={{ width: 17, height: 17, accentColor: "#F36B12", cursor: "pointer" }}
+                  />
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: "#17191C" }}>
+                    Generate Password Automatically
+                  </span>
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#F36B12", background: "#FFF0E5", padding: "2px 8px", borderRadius: 20 }}>
+                  Strong
+                </span>
+              </label>
+
+              {autoGeneratePassword && (
+                <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={applyGeneratedPassword}
+                    style={{
+                      padding: "7px 12px",
+                      borderRadius: 8,
+                      border: "1.5px solid #E5E5E5",
+                      background: "#FFFFFF",
+                      color: "#17191C",
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ↻ Regenerate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyPassword}
+                    disabled={!form.password}
+                    style={{
+                      padding: "7px 12px",
+                      borderRadius: 8,
+                      border: "1.5px solid #F36B12",
+                      background: copiedPassword ? "#ECFDF5" : "#FFF0E5",
+                      color: copiedPassword ? "#059669" : "#D9570A",
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: form.password ? "pointer" : "not-allowed",
+                    }}
+                  >
+                    {copiedPassword ? "✓ Copied!" : "Copy Password"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 4. Password */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
+              <label htmlFor="signup-password" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
                 Password <span style={{ color: "#F36B12" }}>*</span>
               </label>
               <div style={{ position: "relative" }}>
                 <input
+                  id="signup-password"
                   type={showPass ? "text" : "password"}
                   name="password"
                   value={form.password}
@@ -378,6 +482,7 @@ export default function SignupClient() {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
+                  aria-label={showPass ? "Hide password" : "Show password"}
                   style={{
                     position: "absolute",
                     right: 12,
@@ -418,13 +523,14 @@ export default function SignupClient() {
               )}
             </div>
 
-            {/* Confirm Password */}
+            {/* 5. Confirm Password */}
             <div>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
+              <label htmlFor="signup-confirm-password" style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
                 Confirm Password <span style={{ color: "#F36B12" }}>*</span>
               </label>
               <div style={{ position: "relative" }}>
                 <input
+                  id="signup-confirm-password"
                   type={showConfirm ? "text" : "password"}
                   name="confirmPassword"
                   value={form.confirmPassword}
@@ -445,6 +551,7 @@ export default function SignupClient() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
+                  aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
                   style={{
                     position: "absolute",
                     right: 12,
@@ -487,7 +594,7 @@ export default function SignupClient() {
               </span>
             </label>
 
-            {/* Submit Button */}
+            {/* 6. Register Button */}
             <button
               type="submit"
               disabled={loading}
@@ -509,7 +616,7 @@ export default function SignupClient() {
               onMouseEnter={(e) => !loading && (e.currentTarget.style.background = "#D9570A")}
               onMouseLeave={(e) => !loading && (e.currentTarget.style.background = "#F36B12")}
             >
-              {loading ? "Creating Account…" : "Create Account"}
+              {loading ? "Registering…" : "Register"}
             </button>
           </form>
 
