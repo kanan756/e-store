@@ -43,7 +43,7 @@ export default function Hero() {
         background: "linear-gradient(180deg, #FFFFFF 0%, #FFF8F3 100%)",
         position: "relative",
         overflow: "hidden",
-        padding: "64px 0 84px",
+        padding: "clamp(108px, 10vw, 128px) 0 84px",
         borderBottom: "1px solid #E5E5E5",
       }}
     >
