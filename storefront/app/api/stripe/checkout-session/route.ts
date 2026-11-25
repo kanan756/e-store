@@ -21,6 +21,7 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { generateInvoiceToken } from "@/lib/invoice-token"
 import { FLAT_SHIPPING_INR } from "@/lib/format"
+import { getEffectivePricing } from "@/lib/pricing"
 import { stripEmoji } from "@/lib/sanitize"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
@@ -33,11 +34,13 @@ const checkoutSessionSchema = z.object({
   // Array of cart items — price is resolved server-side, never trusted from client
   items: z.array(
     z.object({
-      handle:   z.string().min(1),
-      name:     z.string().min(1).transform(stripEmoji),
-      quantity: z.number().int().positive().max(1000),
+      handle:    z.string().min(1),
+      productId: z.string().optional(),
+      name:      z.string().min(1).transform(stripEmoji),
+      quantity:  z.number().int().positive().max(1000),
     })
   ).min(1, "Cart is empty"),
+  expectedTotal: z.number().min(0).optional(),
   successUrl: z.url(),
   cancelUrl:  z.url(),
 })
@@ -62,7 +65,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request data" }, { status: 400 })
     }
 
-    const { customerName, items, successUrl, cancelUrl } = parsed.data
+    const { customerName, items, expectedTotal, successUrl, cancelUrl } = parsed.data
     // Always bind order to verified session customer email rather than unverified client payload
     const verifiedEmail = authSession.user.email.toLowerCase()
 
@@ -70,31 +73,57 @@ export async function POST(request: Request) {
     const { getProducts, getUserByEmail } = await import("@/lib/sheets")
     const dbUser = await getUserByEmail(verifiedEmail).catch(() => null)
     const verifiedUserId = dbUser?.userId || (authSession.user as any).id || `usr_${verifiedEmail}`
-    const products = await getProducts()
-    const productMap = new Map(products.map((p) => [p.handle, p]))
+    const allProducts = await getProducts(true)
 
     let serverAmount = 0
     const productSummaryParts: string[] = []
 
     for (const item of items) {
-      const product = productMap.get(item.handle)
+      const product =
+        (item.productId
+          ? allProducts.find((p) => p.productId === item.productId || p.id === item.productId)
+          : undefined) ||
+        allProducts.find(
+          (p) =>
+            p.id === item.handle ||
+            p.productId === item.handle ||
+            p.handle === item.handle ||
+            p.slug === item.handle
+        )
+
       if (!product) {
         return NextResponse.json(
-          { error: `Product not found: ${item.handle}` },
+          { error: `Product "${item.name}" is no longer available.` },
           { status: 400 }
         )
       }
-      if (!product.inStock) {
+      if (product.status === "Inactive") {
+        return NextResponse.json(
+          { error: `"${product.name}" is currently unavailable.` },
+          { status: 400 }
+        )
+      }
+      const availableStock = product.stock ?? (product.inStock ? 100 : 0)
+      if (!product.inStock || availableStock <= 0) {
         return NextResponse.json(
           { error: `"${product.name}" is currently out of stock.` },
           { status: 400 }
         )
       }
-      const unitPrice =
-        product.discountPrice != null && product.discountPrice > 0
-          ? product.discountPrice
-          : product.price
-      serverAmount += unitPrice * item.quantity
+      if (item.quantity > availableStock) {
+        return NextResponse.json(
+          { error: `Only ${availableStock} unit(s) of "${product.name}" are available in stock.` },
+          { status: 400 }
+        )
+      }
+      const { sellingPrice } = getEffectivePricing(product)
+      if (sellingPrice <= 0) {
+        return NextResponse.json(
+          { error: `"${product.name}" does not have a valid online price.` },
+          { status: 400 }
+        )
+      }
+      serverAmount += sellingPrice * item.quantity
       productSummaryParts.push(`${product.name} x${item.quantity}`)
     }
 
@@ -105,6 +134,20 @@ export async function POST(request: Request) {
     const productSummary = productSummaryParts.join(", ").substring(0, 500)
     const shippingAmount = FLAT_SHIPPING_INR
     const totalAmountInr = serverAmount + shippingAmount
+
+    if (
+      expectedTotal != null &&
+      Math.round(expectedTotal * 100) !== Math.round(totalAmountInr * 100)
+    ) {
+      return NextResponse.json(
+        {
+          error: "Product prices have been updated. Please review and confirm the updated total before paying.",
+          code: "PRICE_CHANGED",
+          serverTotal: totalAmountInr,
+        },
+        { status: 409 }
+      )
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

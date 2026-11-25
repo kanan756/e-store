@@ -116,8 +116,13 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     setAdding(true)
     addItem({
       id: product.handle || product.id,
+      productId: product.productId || product.id,
       name: product.name,
       price: sellingPrice,
+      regularPrice,
+      discountPrice: hasDiscount ? parsedDiscount : null,
+      stock: product.stock,
+      inStock: product.inStock,
       imageUrl: primaryImage || "",
       category: product.category,
     })

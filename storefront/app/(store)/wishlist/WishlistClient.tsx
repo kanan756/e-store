@@ -55,8 +55,16 @@ export default function WishlistClient({ products }: { products: Product[] }) {
         : product.price
     addItem({
       id: product.handle || product.id,
+      productId: product.productId || product.id,
       name: product.name,
       price: effectivePrice,
+      regularPrice: product.price,
+      discountPrice:
+        product.discountPrice != null && product.discountPrice > 0 && product.discountPrice < product.price
+          ? product.discountPrice
+          : null,
+      stock: product.stock,
+      inStock: product.inStock,
       imageUrl: product.imageUrl || product.primaryImage || "",
       category: product.category,
     })

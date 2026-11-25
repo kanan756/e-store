@@ -249,8 +249,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: productHandle,
+        productId: product.productId || product.id,
         name: product.name,
         price: effectivePrice,
+        regularPrice: product.price,
+        discountPrice: hasDiscount ? product.discountPrice : null,
+        stock: product.stock,
+        inStock: product.inStock,
         imageUrl: product.imageUrl || mediaItems[0]?.url || "",
         category: product.category,
       })
@@ -269,8 +274,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     for (let i = 0; i < quantity; i++) {
       addItem({
         id: productHandle,
+        productId: product.productId || product.id,
         name: product.name,
         price: effectivePrice,
+        regularPrice: product.price,
+        discountPrice: hasDiscount ? product.discountPrice : null,
+        stock: product.stock,
+        inStock: product.inStock,
         imageUrl: product.imageUrl || mediaItems[0]?.url || "",
         category: product.category,
       })

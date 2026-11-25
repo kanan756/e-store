@@ -2,22 +2,14 @@
 
 /**
  * @file CartClient.tsx
- * @description Manages the shopping cart user interface.
- * 
- * Logic Highlights:
- * 1. Global State: Uses the `useCart` context to read and modify cart items.
- * 2. MOQ (Minimum Order Quantity): Wires and Cables have a strict MOQ of 5 items. 
- *    The `updateQuantity` function intercepts reductions below 5 and alerts the user.
- * 3. Shipping Calculation: Adds a flat ₹99 shipping rate to the subtotal.
+ * @description Manages the shopping cart user interface with live server synchronization.
  */
 
 import { useEffect } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
-
 import { formatPrice, FLAT_SHIPPING_INR } from "@/lib/format"
 
 function ArrowIcon() {
@@ -42,20 +34,40 @@ function TrashIcon() {
 
 export default function CartClient() {
   const router = useRouter()
-  const { data: session, status } = useSession()
-  const { items, loading, subtotal, removeItem, updateQuantity } = useCart()
+  const { status } = useSession()
+  const {
+    items,
+    loading,
+    syncing,
+    subtotal,
+    priceChanges,
+    stockAdjustments,
+    hasUnavailableItems,
+    priceChangeConfirmed,
+    confirmPriceChanges,
+    syncCart,
+    removeItem,
+    updateQuantity,
+  } = useCart()
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login?callbackUrl=" + encodeURIComponent("/cart") + "&message=" + encodeURIComponent("Please log in to your CLASPO account to view your cart."))
+      router.push(
+        "/login?callbackUrl=" +
+          encodeURIComponent("/cart") +
+          "&message=" +
+          encodeURIComponent("Please log in to your CLASPO account to view your cart.")
+      )
+    } else if (status === "authenticated") {
+      void syncCart()
     }
-  }, [status, router])
+  }, [status, router, syncCart])
 
   if (status === "loading" || loading) {
     return (
       <div className="cart-page" style={{ padding: "100px 0", textAlign: "center" }}>
         <div className="W">
-          <p style={{ color: "#747474", fontSize: 16 }}>Loading your cart...</p>
+          <p style={{ color: "#747474", fontSize: 16 }}>Loading your cart…</p>
         </div>
       </div>
     )
@@ -66,98 +78,248 @@ export default function CartClient() {
   }
 
   const isEmpty = items.length === 0
+  const changedIds = new Set(priceChanges.map((c) => c.id))
+  const checkoutBlocked = syncing || hasUnavailableItems || !priceChangeConfirmed || subtotal <= 0
 
   return (
     <div className="cart-page">
       <div className="W">
-        <div style={{ marginBottom: 48 }}>
-          <div className="lbl" style={{ marginBottom: 16 }}>YOUR CART</div>
-          <h1 className="D3">Shopping Cart</h1>
+        <div style={{ marginBottom: 36, display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div className="lbl" style={{ marginBottom: 12 }}>YOUR CART</div>
+            <h1 className="D3">Shopping Cart</h1>
+          </div>
+          {syncing && (
+            <span style={{ fontSize: 13, color: "#747474", fontWeight: 600 }}>
+              Syncing latest prices &amp; stock…
+            </span>
+          )}
         </div>
 
-        {/* Note Banner */}
+        {/* Price Change Notification Banner */}
+        {priceChanges.length > 0 && !priceChangeConfirmed && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 24,
+              padding: "16px 20px",
+              borderRadius: 12,
+              background: "#FFF4ED",
+              border: "1.5px solid #F36B12",
+              color: "#17191C",
+            }}
+          >
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#D9570A", marginBottom: 6 }}>
+              Cart Prices Updated
+            </div>
+            <ul style={{ margin: "0 0 12px 18px", padding: 0, fontSize: 14, lineHeight: 1.6 }}>
+              {priceChanges.map((c) => (
+                <li key={c.id}>
+                  <strong>{c.name}</strong>: Product price updated from{" "}
+                  <span style={{ textDecoration: "line-through", color: "#747474" }}>
+                    {formatPrice(c.previousPrice)}
+                  </span>{" "}
+                  to <strong style={{ color: "#F36B12" }}>{formatPrice(c.newPrice)}</strong>.
+                </li>
+              ))}
+            </ul>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <span style={{ fontSize: 13.5, color: "#303638", fontWeight: 600 }}>
+                Your cart total has been updated to {formatPrice(subtotal + FLAT_SHIPPING_INR)}. Please confirm before proceeding to checkout.
+              </span>
+              <button
+                type="button"
+                onClick={confirmPriceChanges}
+                style={{
+                  padding: "9px 18px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#F36B12",
+                  color: "#FFFFFF",
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Confirm Updated Total
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Stock Adjustment Notice */}
+        {stockAdjustments.length > 0 && (
+          <div
+            style={{
+              marginBottom: 20,
+              padding: "12px 18px",
+              borderRadius: 10,
+              background: "#FEF3C7",
+              border: "1px solid #F59E0B",
+              color: "#92400E",
+              fontSize: 13.5,
+              fontWeight: 600,
+            }}
+          >
+            {stockAdjustments.map((s) => (
+              <div key={s.id}>
+                Quantity for <strong>{s.name}</strong> was adjusted from {s.previousQty} to {s.newQty} based on available stock.
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Unavailable Items Warning */}
+        {hasUnavailableItems && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 24,
+              padding: "14px 18px",
+              borderRadius: 10,
+              background: "#FEF2F2",
+              border: "1px solid #FCA5A5",
+              color: "#DC2626",
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            One or more items in your cart are currently unavailable or out of stock. Please remove them to proceed to checkout.
+          </div>
+        )}
+
         {isEmpty ? (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <p style={{ color: "#777777", fontSize: 18, marginBottom: 32 }}>
               Your cart is empty.
             </p>
-            <Link href="/shop" className="btn bp">
+            <Link href="/products" className="btn bp">
               Continue Shopping <ArrowIcon />
             </Link>
           </div>
         ) : (
           <div className="cart-layout" style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
-
-            {/* ── Line items ─────────────────────────────────────────── */}
+            {/* ── Line items ── */}
             <div>
-              {items.map((item) => (
-                <div key={item.id} className="cart-item">
-                  {/* Thumbnail */}
-                  <div style={{ borderRadius: 8, overflow: "hidden", background: "#F5F5F5", border: "1px solid #E5E5E5", aspectRatio: "1", position: "relative" }}>
-                    {(() => {
-                      const firstUrl = item.imageUrl ? item.imageUrl.split(",")[0].trim() : ""
-                      if (!firstUrl || firstUrl === "-") return false
-                      if (firstUrl.startsWith("/")) return firstUrl
-                      try { new URL(firstUrl); return firstUrl } catch { return false }
-                    })() ? (
-                      <img src={item.imageUrl.split(",")[0].trim()} alt={item.name} style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", padding: "8px" }} />
-                    ) : (
-                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#747474", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
+              {items.map((item) => {
+                const isUnavailable = item.inStock === false || Boolean(item.unavailableReason)
+                const isPriceUpdated = changedIds.has(item.id)
+                const atMaxStock = item.stock != null && item.stock > 0 && item.quantity >= item.stock
+                const hasRegularStrike =
+                  item.regularPrice != null && item.regularPrice > item.price
+
+                return (
+                  <div
+                    key={item.productId || item.id}
+                    className="cart-item"
+                    style={{
+                      border: isUnavailable
+                        ? "1.5px solid #FCA5A5"
+                        : isPriceUpdated
+                        ? "1.5px solid #F36B12"
+                        : undefined,
+                      background: isUnavailable
+                        ? "#FEF2F2"
+                        : isPriceUpdated
+                        ? "#FFF9F5"
+                        : undefined,
+                      borderRadius: isUnavailable || isPriceUpdated ? 10 : undefined,
+                      padding: isUnavailable || isPriceUpdated ? "16px" : undefined,
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div style={{ borderRadius: 8, overflow: "hidden", background: "#F5F5F5", border: "1px solid #E5E5E5", aspectRatio: "1", position: "relative" }}>
+                      {(() => {
+                        const firstUrl = item.imageUrl ? item.imageUrl.split(",")[0].trim() : ""
+                        if (!firstUrl || firstUrl === "-") return false
+                        if (firstUrl.startsWith("/")) return firstUrl
+                        try { new URL(firstUrl); return firstUrl } catch { return false }
+                      })() ? (
+                        <img src={item.imageUrl.split(",")[0].trim()} alt={item.name} style={{ width: "100%", height: "100%", display: "block", objectFit: "contain", padding: "8px" }} />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#747474", fontFamily: "monospace", padding: 8, textAlign: "center" }}>
+                          {item.name}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Details */}
+                    <div>
+                      <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4, color: "#17191C" }}>
                         {item.name}
                       </div>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div>
-                    <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4, color: "#17191C" }}>
-                      {item.name}
+                      <div style={{ fontSize: 13, color: "#747474", marginBottom: 6 }}>{item.category}</div>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontSize: 14.5, color: "#F36B12", fontWeight: 800 }}>
+                          {formatPrice(item.price)}
+                        </span>
+                        {hasRegularStrike && (
+                          <span style={{ fontSize: 12.5, color: "#9CA3AF", textDecoration: "line-through" }}>
+                            {formatPrice(item.regularPrice!)}
+                          </span>
+                        )}
+                        {isPriceUpdated && (
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "#D9570A", background: "#FFE4D1", padding: "2px 6px", borderRadius: 4 }}>
+                            Price Updated
+                          </span>
+                        )}
+                      </div>
+                      {isUnavailable && (
+                        <div style={{ marginTop: 6, fontSize: 12.5, fontWeight: 700, color: "#DC2626" }}>
+                          {item.unavailableReason === "deleted"
+                            ? "This product is no longer available."
+                            : item.unavailableReason === "inactive"
+                            ? "This product is currently unavailable."
+                            : "Out of stock."}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ fontSize: 13, color: "#747474", marginBottom: 8 }}>{item.category}</div>
-                    <div style={{ fontSize: 14, color: "#F36B12", fontWeight: 800 }}>
-                      {formatPrice(item.price)}
+
+                    {/* Qty controls */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", padding: "4px 8px", opacity: isUnavailable ? 0.5 : 1 }}>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        disabled={loading || isUnavailable}
+                        style={{ color: "#17191C", display: "flex", padding: 4, cursor: isUnavailable ? "not-allowed" : "pointer", background: "none", border: "none" }}
+                      >
+                        <MinusIcon />
+                      </button>
+                      <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 14, minWidth: 20, textAlign: "center", color: "#17191C" }}>
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        disabled={loading || isUnavailable || atMaxStock}
+                        title={atMaxStock ? `Max available stock: ${item.stock}` : "Increase quantity"}
+                        style={{ color: "#17191C", display: "flex", padding: 4, cursor: isUnavailable || atMaxStock ? "not-allowed" : "pointer", opacity: atMaxStock ? 0.35 : 1, background: "none", border: "none" }}
+                      >
+                        <PlusIcon />
+                      </button>
+                    </div>
+
+                    {/* Subtotal + Remove */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                      <div style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 18 }}>
+                        {formatPrice(item.price * item.quantity)}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.productId || item.id)}
+                        disabled={loading}
+                        aria-label={`Remove ${item.name}`}
+                        style={{ color: "var(--text2)", display: "flex", opacity: 0.7, transition: "opacity 0.2s", background: "none", border: "none", cursor: "pointer" }}
+                      >
+                        <TrashIcon />
+                      </button>
                     </div>
                   </div>
-
-                  {/* Qty controls */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", padding: "4px 8px" }}>
-                    <button
-                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                      disabled={loading}
-                      style={{ color: "#17191C", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
-                    >
-                      <MinusIcon />
-                    </button>
-                    <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 14, minWidth: 20, textAlign: "center", color: "#17191C" }}>
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      disabled={loading}
-                      style={{ color: "#17191C", display: "flex", padding: 4, cursor: "pointer", background: "none", border: "none" }}
-                    >
-                      <PlusIcon />
-                    </button>
-                  </div>
-
-                  {/* Remove */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <div style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 18 }}>
-                      {formatPrice(item.price * item.quantity)}
-                    </div>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      disabled={loading}
-                      style={{ color: "var(--text2)", display: "flex", opacity: 0.6, transition: "opacity 0.2s" }}
-                    >
-                      <TrashIcon />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
-            {/* ── Summary ─────────────────────────────────────────────── */}
+            {/* ── Summary ── */}
             <div className="cart-summary" style={{ background: "var(--cBg)", border: "1px solid var(--bd)", borderRadius: "var(--rL)", padding: 32, position: "sticky", top: 100 }}>
               <div style={{ fontFamily: "var(--font-sora)", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 24, color: "var(--text2)" }}>
                 Order Summary
@@ -169,20 +331,36 @@ export default function CartClient() {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, fontSize: 13, color: "var(--text2)" }}>
                 <span>Shipping (Flat Rate)</span>
-                <span>{formatPrice(FLAT_SHIPPING_INR)}</span>
+                <span>{formatPrice(subtotal > 0 ? FLAT_SHIPPING_INR : 0)}</span>
               </div>
 
               <div style={{ borderTop: "1px solid var(--bd)", paddingTop: 20, marginBottom: 24, display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 22, color: "var(--acc)" }}>
-                  {formatPrice(subtotal + FLAT_SHIPPING_INR)}
+                  {formatPrice(subtotal > 0 ? subtotal + FLAT_SHIPPING_INR : 0)}
                 </span>
               </div>
 
-              <Link href="/checkout" className="btn bp" style={{ width: "100%", justifyContent: "center" }}>
-                Proceed to Checkout <ArrowIcon />
-              </Link>
-              <Link href="/shop" style={{ display: "block", textAlign: "center", marginTop: 16, fontSize: 13, color: "var(--text2)" }}>
+              {checkoutBlocked ? (
+                <button
+                  type="button"
+                  disabled
+                  className="btn bp"
+                  style={{ width: "100%", justifyContent: "center", opacity: 0.5, cursor: "not-allowed" }}
+                >
+                  {!priceChangeConfirmed
+                    ? "Confirm Updated Total First"
+                    : hasUnavailableItems
+                    ? "Remove Unavailable Items"
+                    : "Proceed to Checkout"}
+                </button>
+              ) : (
+                <Link href="/checkout" className="btn bp" style={{ width: "100%", justifyContent: "center" }}>
+                  Proceed to Checkout <ArrowIcon />
+                </Link>
+              )}
+
+              <Link href="/products" style={{ display: "block", textAlign: "center", marginTop: 16, fontSize: 13, color: "var(--text2)" }}>
                 Continue Shopping
               </Link>
             </div>

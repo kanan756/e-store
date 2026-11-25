@@ -12,19 +12,47 @@ import { useSession } from "next-auth/react"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface CartItem {
-  id: string         // product handle used as stable ID
+  id: string         // product handle or id
+  productId?: string // immutable Google Sheets productId (prod_...)
   name: string
-  price: number      // in paise (e.g. 10000 = ₹100)
+  price: number      // effective selling price in INR
+  regularPrice?: number
+  discountPrice?: number | null
   quantity: number
   imageUrl: string
   category: string
+  stock?: number
+  inStock?: boolean
+  unavailableReason?: "deleted" | "inactive" | "out_of_stock" | null
+}
+
+export interface CartPriceChange {
+  id: string
+  productId: string
+  name: string
+  previousPrice: number
+  newPrice: number
+}
+
+export interface CartStockAdjustment {
+  id: string
+  name: string
+  previousQty: number
+  newQty: number
 }
 
 interface CartContextValue {
   items: CartItem[]
   loading: boolean
+  syncing: boolean
   totalItems: number
   subtotal: number
+  priceChanges: CartPriceChange[]
+  stockAdjustments: CartStockAdjustment[]
+  hasUnavailableItems: boolean
+  priceChangeConfirmed: boolean
+  confirmPriceChanges: () => void
+  syncCart: () => Promise<void>
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
@@ -40,16 +68,126 @@ export function useCart(): CartContextValue {
   return ctx
 }
 
+function sameCartItem(a: Pick<CartItem, "id" | "productId">, b: Pick<CartItem, "id" | "productId">): boolean {
+  if (a.productId && b.productId && a.productId === b.productId) return true
+  return a.id === b.id
+}
+
 // ── Provider ──────────────────────────────────────────────────────────────────
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
   const [items, setItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState(false)
+  const [priceChanges, setPriceChanges] = useState<CartPriceChange[]>([])
+  const [stockAdjustments, setStockAdjustments] = useState<CartStockAdjustment[]>([])
+  const [priceChangeConfirmed, setPriceChangeConfirmed] = useState(true)
   const isInitialLoad = useRef(true)
+  const itemsRef = useRef<CartItem[]>([])
+  itemsRef.current = items
 
-  // Derived user storage key
   const userId = (session?.user as any)?.id || session?.user?.email || null
   const userCartKey = userId ? `claspo_cart_${userId}` : null
+
+  const syncWithServer = useCallback(async (sourceItems?: CartItem[]) => {
+    const target = sourceItems ?? itemsRef.current
+    if (!target || target.length === 0) {
+      setPriceChanges([])
+      setStockAdjustments([])
+      setPriceChangeConfirmed(true)
+      return
+    }
+
+    setSyncing(true)
+    try {
+      const res = await fetch("/api/cart/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: target.map((i) => ({
+            id: i.id,
+            productId: i.productId,
+            price: i.price,
+            quantity: i.quantity,
+          })),
+        }),
+      })
+      if (!res.ok) return
+
+      const data = await res.json()
+      if (!Array.isArray(data.items)) return
+
+      const detectedPriceChanges: CartPriceChange[] = []
+      const detectedStockAdjustments: CartStockAdjustment[] = []
+
+      const updated: CartItem[] = target.map((existing) => {
+        const match = data.items.find(
+          (s: any) =>
+            (existing.productId && s.productId === existing.productId) ||
+            s.legacyId === existing.id ||
+            s.id === existing.id
+        )
+        if (!match) return existing
+
+        if (match.priceChanged && match.found) {
+          detectedPriceChanges.push({
+            id: match.id,
+            productId: match.productId,
+            name: match.name || existing.name,
+            previousPrice: match.previousPrice,
+            newPrice: match.newPrice,
+          })
+        }
+
+        if (match.stockAdjusted) {
+          detectedStockAdjustments.push({
+            id: match.id,
+            name: match.name || existing.name,
+            previousQty: existing.quantity,
+            newQty: match.adjustedQuantity,
+          })
+        }
+
+        if (!match.found) {
+          return {
+            ...existing,
+            inStock: false,
+            stock: 0,
+            unavailableReason: "deleted",
+          }
+        }
+
+        return {
+          ...existing,
+          id: match.id,
+          productId: match.productId,
+          name: match.name,
+          category: match.category,
+          imageUrl: match.imageUrl || existing.imageUrl,
+          regularPrice: match.regularPrice,
+          discountPrice: match.discountPrice,
+          price: match.price,
+          stock: match.stock,
+          inStock: match.available,
+          unavailableReason: match.unavailableReason ?? null,
+          quantity: match.stockAdjusted ? match.adjustedQuantity : existing.quantity,
+        }
+      })
+
+      setItems(updated)
+      if (detectedPriceChanges.length > 0) {
+        setPriceChanges(detectedPriceChanges)
+        setPriceChangeConfirmed(false)
+      }
+      if (detectedStockAdjustments.length > 0) {
+        setStockAdjustments(detectedStockAdjustments)
+      }
+    } catch {
+      // Keep existing items if offline
+    } finally {
+      setSyncing(false)
+    }
+  }, [])
 
   // Hydrate cart when authentication status changes
   useEffect(() => {
@@ -67,7 +205,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (!Array.isArray(loadedItems)) loadedItems = []
         }
 
-        // Migrate any legacy guest cart data safely without contaminating other users
         const legacyGuest = localStorage.getItem("cs_cart_v2") || localStorage.getItem("claspo_cart_guest")
         if (legacyGuest) {
           try {
@@ -75,7 +212,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             if (Array.isArray(guestItems) && guestItems.length > 0) {
               const merged = [...loadedItems]
               for (const gItem of guestItems) {
-                const idx = merged.findIndex((i) => i.id === gItem.id)
+                const idx = merged.findIndex((i) => sameCartItem(i, gItem))
                 if (idx >= 0) {
                   merged[idx] = { ...merged[idx], quantity: Math.max(merged[idx].quantity, gItem.quantity) }
                 } else {
@@ -94,6 +231,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
 
         setItems(loadedItems)
+        if (loadedItems.length > 0) {
+          void syncWithServer(loadedItems)
+        }
       } catch {
         setItems([])
       } finally {
@@ -101,12 +241,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isInitialLoad.current = false
       }
     } else {
-      // Unauthenticated / logged out: cart is empty, never reveal previous user's cart
       setItems([])
+      setPriceChanges([])
+      setStockAdjustments([])
+      setPriceChangeConfirmed(true)
       setLoading(false)
       isInitialLoad.current = false
     }
-  }, [status, userCartKey])
+  }, [status, userCartKey, syncWithServer])
 
   // Persist to user-scoped localStorage on every cart change (only when authenticated)
   useEffect(() => {
@@ -122,32 +264,48 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((product: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === product.id)
+      const existing = prev.find((i) => sameCartItem(i, product))
       if (existing) {
+        const nextQty =
+          product.stock != null && product.stock > 0
+            ? Math.min(existing.quantity + quantity, product.stock)
+            : existing.quantity + quantity
         return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
+          sameCartItem(i, product) ? { ...i, ...product, quantity: nextQty } : i
         )
       }
-      return [...prev, { ...product, quantity }]
+      const initialQty =
+        product.stock != null && product.stock > 0
+          ? Math.min(quantity, product.stock)
+          : quantity
+      return [...prev, { ...product, quantity: initialQty }]
     })
   }, [])
 
   const removeItem = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id))
+    setItems((prev) => prev.filter((i) => i.id !== id && i.productId !== id))
+    setPriceChanges((prev) => prev.filter((c) => c.id !== id && c.productId !== id))
   }, [])
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
     if (quantity < 1) {
-      setItems((prev) => prev.filter((i) => i.id !== id))
+      setItems((prev) => prev.filter((i) => i.id !== id && i.productId !== id))
     } else {
       setItems((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+        prev.map((i) => {
+          if (i.id !== id && i.productId !== id) return i
+          const capped = i.stock != null && i.stock > 0 ? Math.min(quantity, i.stock) : quantity
+          return { ...i, quantity: capped }
+        })
       )
     }
   }, [])
 
   const clearCart = useCallback(() => {
     setItems([])
+    setPriceChanges([])
+    setStockAdjustments([])
+    setPriceChangeConfirmed(true)
     if (userCartKey) {
       try {
         localStorage.removeItem(userCartKey)
@@ -157,12 +315,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [userCartKey])
 
+  const confirmPriceChanges = useCallback(() => {
+    setPriceChangeConfirmed(true)
+    setPriceChanges([])
+    setStockAdjustments([])
+  }, [])
+
+  const syncCart = useCallback(async () => {
+    await syncWithServer()
+  }, [syncWithServer])
+
+  const hasUnavailableItems = items.some(
+    (i) => i.inStock === false || Boolean(i.unavailableReason)
+  )
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0)
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const subtotal = items
+    .filter((i) => i.inStock !== false && !i.unavailableReason)
+    .reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   return (
     <CartContext.Provider
-      value={{ items, loading, totalItems, subtotal, addItem, removeItem, updateQuantity, clearCart }}
+      value={{
+        items,
+        loading,
+        syncing,
+        totalItems,
+        subtotal,
+        priceChanges,
+        stockAdjustments,
+        hasUnavailableItems,
+        priceChangeConfirmed,
+        confirmPriceChanges,
+        syncCart,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

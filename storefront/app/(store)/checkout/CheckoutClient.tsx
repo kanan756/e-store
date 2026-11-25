@@ -71,7 +71,17 @@ const EMPTY_FORM: FormData = {
 }
 
 export default function CheckoutClient() {
-  const { items, subtotal, clearCart } = useCart()
+  const {
+    items,
+    subtotal,
+    clearCart,
+    syncCart,
+    syncing,
+    priceChanges,
+    hasUnavailableItems,
+    priceChangeConfirmed,
+    confirmPriceChanges,
+  } = useCart()
   const router = useRouter()
   const { data: session, status } = useSession()
   const [form, setForm] = useState<FormData>(EMPTY_FORM)
@@ -80,12 +90,14 @@ export default function CheckoutClient() {
   const [error, setError] = useState("")
   const [saveInfo, setSaveInfo] = useState(false)
 
-  // Redirect to login if not authenticated
+  // Redirect to login if not authenticated, otherwise sync latest prices/stock
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?callbackUrl=" + encodeURIComponent("/checkout") + "&message=" + encodeURIComponent("Please log in to your CLASPO account to complete checkout."))
+    } else if (status === "authenticated") {
+      void syncCart()
     }
-  }, [status, router])
+  }, [status, router, syncCart])
 
   // Load saved address or prefill from user session
   useEffect(() => {
@@ -115,7 +127,7 @@ export default function CheckoutClient() {
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault()
-      if (items.length === 0 || isSubmitting.current) return
+      if (items.length === 0 || isSubmitting.current || syncing || hasUnavailableItems || !priceChangeConfirmed) return
 
       isSubmitting.current = true
       setLoading(true)
@@ -138,6 +150,7 @@ export default function CheckoutClient() {
           localStorage.removeItem("clientStore_savedInfo")
         }
 
+        const expectedTotal = subtotal + FLAT_SHIPPING_INR
 
         const res = await fetch("/api/stripe/checkout-session", {
           method: "POST",
@@ -145,11 +158,13 @@ export default function CheckoutClient() {
           body: JSON.stringify({
             customerName: `${details.firstName} ${details.lastName}`,
             email: details.email,
-            // Send product handles + quantities so the server can look up
-            // prices from Google Sheets. This prevents cart price tampering.
+            expectedTotal,
+            // Send product IDs/handles + quantities so the server resolves
+            // live prices and stock from Google Sheets.
             items: items.map((i) => ({
-              handle:   i.id,   // cart id IS the product handle (see cart-context.tsx)
-              name:     i.name,
+              handle: i.id,
+              productId: i.productId,
+              name: i.name,
               quantity: i.quantity,
             })),
             successUrl: `${window.location.origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
@@ -157,6 +172,10 @@ export default function CheckoutClient() {
           }),
         })
         const data = await res.json()
+        if (res.status === 409 && data.code === "PRICE_CHANGED") {
+          await syncCart()
+          throw new Error(data.error || "Prices have changed. Please review your updated total.")
+        }
         if (!res.ok) throw new Error(data.error || "Failed to initialize Stripe checkout")
         if (data.url) {
           // Store token in sessionStorage so order-confirmed can build the
@@ -175,7 +194,7 @@ export default function CheckoutClient() {
         isSubmitting.current = false
       }
     },
-    [items, form, clearCart, router, saveInfo]
+    [items, form, clearCart, saveInfo, syncing, hasUnavailableItems, priceChangeConfirmed, subtotal, syncCart]
   )
 
   if (status === "loading") {
@@ -209,6 +228,66 @@ export default function CheckoutClient() {
           <div className="lbl" style={{ marginBottom: 16 }}>SECURE CHECKOUT</div>
           <h1 className="D3">Complete Your Order</h1>
         </div>
+
+        {priceChanges.length > 0 && !priceChangeConfirmed && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 24,
+              padding: "16px 20px",
+              borderRadius: 12,
+              background: "#FFF4ED",
+              border: "1.5px solid #F36B12",
+              color: "#17191C",
+            }}
+          >
+            <div style={{ fontWeight: 800, fontSize: 15, color: "#D9570A", marginBottom: 6 }}>
+              Prices Updated Since Adding to Cart
+            </div>
+            <ul style={{ margin: "0 0 12px 18px", padding: 0, fontSize: 14, lineHeight: 1.6 }}>
+              {priceChanges.map((c) => (
+                <li key={c.id}>
+                  <strong>{c.name}</strong>: updated from {formatPrice(c.previousPrice)} to{" "}
+                  <strong style={{ color: "#F36B12" }}>{formatPrice(c.newPrice)}</strong>.
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              onClick={confirmPriceChanges}
+              style={{
+                padding: "9px 18px",
+                borderRadius: 8,
+                border: "none",
+                background: "#F36B12",
+                color: "#FFFFFF",
+                fontSize: 13.5,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Confirm Updated Total ({formatPrice(subtotal + FLAT_SHIPPING_INR)})
+            </button>
+          </div>
+        )}
+
+        {hasUnavailableItems && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 24,
+              padding: "14px 18px",
+              borderRadius: 10,
+              background: "#FEF2F2",
+              border: "1px solid #FCA5A5",
+              color: "#DC2626",
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            Some items in your cart are unavailable or out of stock. Please return to your cart to remove them before paying.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="checkout-layout" style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 64, alignItems: "start" }}>
@@ -283,10 +362,21 @@ export default function CheckoutClient() {
               <button
                 type="submit"
                 className="btn bp"
-                disabled={loading}
-                style={{ width: "100%", justifyContent: "center", marginTop: 24 }}
+                disabled={loading || syncing || hasUnavailableItems || !priceChangeConfirmed}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  marginTop: 24,
+                  opacity: loading || syncing || hasUnavailableItems || !priceChangeConfirmed ? 0.55 : 1,
+                }}
               >
-                {loading ? "Processing…" : "Pay Now"}
+                {syncing
+                  ? "Syncing Prices…"
+                  : loading
+                  ? "Processing…"
+                  : !priceChangeConfirmed
+                  ? "Confirm Updated Total Above"
+                  : `Pay Now (${formatPrice(subtotal + FLAT_SHIPPING_INR)})`}
               </button>
 
               <p style={{ textAlign: "center", marginTop: 12, fontSize: 12, color: "var(--textM)" }}>
