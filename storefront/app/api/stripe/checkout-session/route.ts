@@ -78,13 +78,16 @@ export async function POST(request: Request) {
     const verifiedEmail = authSession.user.email.toLowerCase()
 
     // ── Lookup Verified User Record ──────────────────────────────────────────
-    const { getProducts, getUserByEmail } = await import("@/lib/sheets")
+    const { getProducts, getUserByEmail, invalidateProductsCache } = await import("@/lib/sheets")
     const dbUser = await getUserByEmail(verifiedEmail).catch(() => null)
     const verifiedUserId = dbUser?.userId || (authSession.user as any).id || `usr_${verifiedEmail}`
+    invalidateProductsCache()
     const allProducts = await getProducts(true)
 
     let serverAmount = 0
     const productSummaryParts: string[] = []
+    const resolvedOrderItems: Array<{ pid: string; qty: number; cid?: string; cname?: string }> = []
+    const cumulativeProductQty = new Map<string, number>()
 
     for (const item of items) {
       const product =
@@ -151,6 +154,17 @@ export async function POST(request: Request) {
         }
       }
 
+      const resolvedPid = product.productId || product.id
+      const nextCumulativeQty = (cumulativeProductQty.get(resolvedPid) || 0) + item.quantity
+      cumulativeProductQty.set(resolvedPid, nextCumulativeQty)
+
+      if (nextCumulativeQty > availableStock) {
+        return NextResponse.json(
+          { error: `Only ${availableStock} unit(s) of "${product.name}" are available in stock.` },
+          { status: 400 }
+        )
+      }
+
       if (item.quantity > effectiveStock) {
         return NextResponse.json(
           { error: `Only ${effectiveStock} unit(s) of "${product.name}"${resolvedColorName ? ` (${resolvedColorName})` : ""} are available in stock.` },
@@ -168,6 +182,11 @@ export async function POST(request: Request) {
       productSummaryParts.push(
         `${product.name}${resolvedColorName ? ` (${resolvedColorName})` : ""} x${item.quantity}`
       )
+      resolvedOrderItems.push({
+        pid: resolvedPid,
+        qty: item.quantity,
+        ...(resolvedColorName ? { cname: resolvedColorName } : {}),
+      })
     }
 
     if (serverAmount <= 0) {
@@ -226,6 +245,7 @@ export async function POST(request: Request) {
         customerName: customerName || dbUser?.fullName || authSession.user.name || "Customer",
         email: verifiedEmail,
         productSummary,
+        orderItems: JSON.stringify(resolvedOrderItems).slice(0, 500),
         subtotal: serverAmount.toString(),
         shippingCharge: shippingAmount.toString(),
         amount: totalAmountInr.toString(), // server-computed INR total, stored for reference only

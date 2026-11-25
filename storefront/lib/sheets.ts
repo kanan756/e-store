@@ -143,6 +143,21 @@ export const REQUIRED_SHEETS = {
     "used",
     "createdAt",
   ],
+  "Stock Transactions": [
+    "transactionId",
+    "eventId",
+    "orderId",
+    "paymentId",
+    "productId",
+    "productName",
+    "colorName",
+    "action",
+    "quantity",
+    "previousStock",
+    "updatedStock",
+    "status",
+    "createdAt",
+  ],
 } as const
 
 export const STORE_SHEETS = {
@@ -940,6 +955,7 @@ export async function markPasswordResetAsUsed(resetId: string): Promise<boolean>
 
 // ── Orders Management (Sheet 2: Orders) ───────────────────────────────────────
 export async function appendOrder(orderData: {
+  orderId?: string
   customerName: string
   email: string
   userId?: string
@@ -959,7 +975,7 @@ export async function appendOrder(orderData: {
   transactionId?: string
   paymentId?: string
 }): Promise<string> {
-  const orderId = `ORD-${Date.now()}`
+  const orderId = orderData.orderId || `ORD-${Date.now()}`
   const orderNumber = orderData.orderNumber || `CLS-${Date.now().toString().slice(-6)}`
   const cleanEmail = orderData.email.trim().toLowerCase()
 
@@ -2207,6 +2223,446 @@ export async function appendVisitorEvent(event: VisitorEvent): Promise<void> {
     })
   } catch (err) {
     console.warn("[visitor-event] Failed to record visitor event:", err instanceof Error ? err.message : err)
+  }
+}
+
+// ── Inventory / Stock Transactions ────────────────────────────────────────────
+const LOCAL_STOCK_TX_FILE = path.join(process.cwd(), "data", "stock-transactions.json")
+
+export interface StockTransactionItem {
+  transactionId: string
+  eventId: string
+  orderId: string
+  paymentId: string
+  productId: string
+  productName: string
+  colorName: string
+  action: "deduct" | "restore"
+  quantity: number
+  previousStock: number
+  updatedStock: number
+  status: string
+  createdAt: string
+}
+
+export interface StockOrderLineInput {
+  productId?: string
+  handle?: string
+  name?: string
+  quantity: number
+  colorId?: string
+  colorName?: string
+}
+
+let stockLockChain: Promise<void> = Promise.resolve()
+
+async function withStockLock<T>(fn: () => Promise<T>): Promise<T> {
+  let release!: () => void
+  const prev = stockLockChain
+  stockLockChain = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  await prev
+  try {
+    return await fn()
+  } finally {
+    release()
+  }
+}
+
+export async function getStockTransactions(): Promise<StockTransactionItem[]> {
+  const localTxs = loadLocalFile<StockTransactionItem>(LOCAL_STOCK_TX_FILE)
+  if (!isSheetsConfigured()) return localTxs
+
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Stock Transactions!A2:M",
+    })
+
+    const rows = res.data.values ?? []
+    const sheetTxs: StockTransactionItem[] = rows
+      .filter((r) => r[0])
+      .map((r) => ({
+        transactionId: r[0] ?? "",
+        eventId: r[1] ?? "",
+        orderId: r[2] ?? "",
+        paymentId: r[3] ?? "",
+        productId: r[4] ?? "",
+        productName: r[5] ?? "",
+        colorName: r[6] ?? "",
+        action: r[7] === "restore" ? "restore" : "deduct",
+        quantity: Number(r[8]) || 0,
+        previousStock: Number(r[9]) || 0,
+        updatedStock: Number(r[10]) || 0,
+        status: r[11] ?? "completed",
+        createdAt: r[12] ?? "",
+      }))
+
+    return sheetTxs.length > 0 ? sheetTxs : localTxs
+  } catch (err) {
+    console.error("Failed to read Stock Transactions:", err)
+    return localTxs
+  }
+}
+
+async function appendStockTransactions(txs: StockTransactionItem[]): Promise<void> {
+  if (txs.length === 0) return
+
+  const localTxs = loadLocalFile<StockTransactionItem>(LOCAL_STOCK_TX_FILE)
+  localTxs.push(...txs)
+  saveLocalFile(LOCAL_STOCK_TX_FILE, localTxs)
+
+  if (!isSheetsConfigured()) return
+  try {
+    await ensureAllSheetsInitialized()
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: "Stock Transactions!A:M",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: txs.map((tx) => [
+          tx.transactionId,
+          tx.eventId,
+          tx.orderId,
+          tx.paymentId,
+          tx.productId,
+          tx.productName,
+          tx.colorName,
+          tx.action,
+          tx.quantity,
+          tx.previousStock,
+          tx.updatedStock,
+          tx.status,
+          tx.createdAt,
+        ]),
+      },
+    })
+  } catch (err) {
+    console.error("Failed to append Stock Transactions to Google Sheets:", err)
+  }
+}
+
+function findProductForStockLine(products: Product[], line: StockOrderLineInput): Product | undefined {
+  if (line.productId) {
+    const byId = products.find((p) => p.productId === line.productId || p.id === line.productId)
+    if (byId) return byId
+  }
+  if (line.handle) {
+    const byHandle = products.find(
+      (p) => p.handle === line.handle || p.slug === line.handle || p.id === line.handle
+    )
+    if (byHandle) return byHandle
+  }
+  if (line.name) {
+    const cleanName = line.name.trim().toLowerCase()
+    return products.find((p) => p.name.trim().toLowerCase() === cleanName)
+  }
+  return undefined
+}
+
+export async function deductStockForOrder(params: {
+  eventId: string
+  orderId: string
+  paymentId: string
+  items: StockOrderLineInput[]
+}): Promise<{
+  alreadyProcessed: boolean
+  updatedProducts: Array<{ productId: string; handle: string; previousStock: number; updatedStock: number }>
+  transactions: StockTransactionItem[]
+}> {
+  return withStockLock(async () => {
+    const existingTxs = await getStockTransactions()
+    const duplicate = existingTxs.some(
+      (tx) =>
+        tx.action === "deduct" &&
+        ((params.eventId && tx.eventId === params.eventId) ||
+          (params.orderId && tx.orderId === params.orderId) ||
+          (params.paymentId && tx.paymentId === params.paymentId))
+    )
+
+    if (duplicate) {
+      return { alreadyProcessed: true, updatedProducts: [], transactions: [] }
+    }
+
+    invalidateProductsCache()
+    const products = await getProducts(true)
+    const now = new Date().toISOString()
+    const transactions: StockTransactionItem[] = []
+    const updatedProducts: Array<{
+      productId: string
+      handle: string
+      previousStock: number
+      updatedStock: number
+    }> = []
+
+    for (const line of params.items) {
+      const qty = Math.max(0, Math.floor(Number(line.quantity) || 0))
+      if (qty <= 0) continue
+
+      const product = findProductForStockLine(products, line)
+      if (!product) continue
+
+      const resolvedPid = product.productId || product.id
+      const previousStock = Math.max(0, product.stock ?? (product.inStock ? 100 : 0))
+      const updatedStock = Math.max(0, previousStock - qty)
+      const clampedZero = previousStock < qty
+
+      let updatedColors = product.colors
+      let resolvedColorName = line.colorName || ""
+      if (Array.isArray(product.colors) && product.colors.length > 0 && (line.colorId || line.colorName)) {
+        updatedColors = product.colors.map((c) => {
+          const matches =
+            (line.colorId && c.id === line.colorId) ||
+            (line.colorName && c.name.trim().toLowerCase() === line.colorName.trim().toLowerCase())
+          if (!matches) return c
+          resolvedColorName = c.name
+          if (c.stock != null) {
+            return { ...c, stock: Math.max(0, c.stock - qty) }
+          }
+          return c
+        })
+      }
+
+      const updated = await updateProductById(product.id, {
+        stock: updatedStock,
+        colors: updatedColors,
+      })
+
+      if (updated) {
+        // Keep local snapshot in sync if multiple lines reference the same product with different colours
+        product.stock = updatedStock
+        product.inStock = updated.inStock
+        product.colors = updatedColors
+      }
+
+      updatedProducts.push({
+        productId: resolvedPid,
+        handle: product.handle || product.id,
+        previousStock,
+        updatedStock,
+      })
+
+      transactions.push({
+        transactionId: `STK-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        eventId: params.eventId,
+        orderId: params.orderId,
+        paymentId: params.paymentId,
+        productId: resolvedPid,
+        productName: product.name,
+        colorName: resolvedColorName,
+        action: "deduct",
+        quantity: qty,
+        previousStock,
+        updatedStock,
+        status: clampedZero ? "clamped_zero" : "completed",
+        createdAt: now,
+      })
+    }
+
+    await appendStockTransactions(transactions)
+    invalidateProductsCache()
+
+    return {
+      alreadyProcessed: false,
+      updatedProducts,
+      transactions,
+    }
+  })
+}
+
+export async function restoreStockForOrder(params: {
+  eventId: string
+  orderId?: string
+  paymentId?: string
+  items?: StockOrderLineInput[]
+}): Promise<{
+  alreadyProcessed: boolean
+  skippedNoDeduction: boolean
+  updatedProducts: Array<{ productId: string; handle: string; previousStock: number; updatedStock: number }>
+  transactions: StockTransactionItem[]
+}> {
+  return withStockLock(async () => {
+    const existingTxs = await getStockTransactions()
+
+    const alreadyRestored = existingTxs.some(
+      (tx) =>
+        tx.action === "restore" &&
+        ((params.eventId && tx.eventId === params.eventId) ||
+          (params.orderId && tx.orderId === params.orderId) ||
+          (params.paymentId && tx.paymentId === params.paymentId))
+    )
+
+    if (alreadyRestored) {
+      return {
+        alreadyProcessed: true,
+        skippedNoDeduction: false,
+        updatedProducts: [],
+        transactions: [],
+      }
+    }
+
+    const priorDeductions = existingTxs.filter(
+      (tx) =>
+        tx.action === "deduct" &&
+        ((params.orderId && tx.orderId === params.orderId) ||
+          (params.paymentId && tx.paymentId === params.paymentId))
+    )
+
+    if (priorDeductions.length === 0 && (!params.items || params.items.length === 0)) {
+      return {
+        alreadyProcessed: false,
+        skippedNoDeduction: true,
+        updatedProducts: [],
+        transactions: [],
+      }
+    }
+
+    const targetLines: StockOrderLineInput[] =
+      params.items && params.items.length > 0
+        ? params.items
+        : priorDeductions.map((d) => ({
+            productId: d.productId,
+            name: d.productName,
+            quantity: d.quantity,
+            colorName: d.colorName,
+          }))
+
+    invalidateProductsCache()
+    const products = await getProducts(true)
+    const now = new Date().toISOString()
+    const transactions: StockTransactionItem[] = []
+    const updatedProducts: Array<{
+      productId: string
+      handle: string
+      previousStock: number
+      updatedStock: number
+    }> = []
+
+    const resolvedOrderId = params.orderId || priorDeductions[0]?.orderId || ""
+    const resolvedPaymentId = params.paymentId || priorDeductions[0]?.paymentId || ""
+
+    for (const line of targetLines) {
+      const qty = Math.max(0, Math.floor(Number(line.quantity) || 0))
+      if (qty <= 0) continue
+
+      const product = findProductForStockLine(products, line)
+      if (!product) continue
+
+      const resolvedPid = product.productId || product.id
+      const previousStock = Math.max(0, product.stock ?? 0)
+      const updatedStock = previousStock + qty
+
+      let updatedColors = product.colors
+      let resolvedColorName = line.colorName || ""
+      if (Array.isArray(product.colors) && product.colors.length > 0 && (line.colorId || line.colorName)) {
+        updatedColors = product.colors.map((c) => {
+          const matches =
+            (line.colorId && c.id === line.colorId) ||
+            (line.colorName && c.name.trim().toLowerCase() === line.colorName.trim().toLowerCase())
+          if (!matches) return c
+          resolvedColorName = c.name
+          if (c.stock != null) {
+            return { ...c, stock: Math.max(0, c.stock + qty) }
+          }
+          return c
+        })
+      }
+
+      const updated = await updateProductById(product.id, {
+        stock: updatedStock,
+        colors: updatedColors,
+      })
+
+      if (updated) {
+        product.stock = updatedStock
+        product.inStock = updated.inStock
+        product.colors = updatedColors
+      }
+
+      updatedProducts.push({
+        productId: resolvedPid,
+        handle: product.handle || product.id,
+        previousStock,
+        updatedStock,
+      })
+
+      transactions.push({
+        transactionId: `STK-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        eventId: params.eventId,
+        orderId: resolvedOrderId,
+        paymentId: resolvedPaymentId,
+        productId: resolvedPid,
+        productName: product.name,
+        colorName: resolvedColorName,
+        action: "restore",
+        quantity: qty,
+        previousStock,
+        updatedStock,
+        status: "completed",
+        createdAt: now,
+      })
+    }
+
+    await appendStockTransactions(transactions)
+    invalidateProductsCache()
+
+    return {
+      alreadyProcessed: false,
+      skippedNoDeduction: false,
+      updatedProducts,
+      transactions,
+    }
+  })
+}
+
+export async function updateOrderStatusByPaymentId(
+  paymentId: string,
+  paymentStatus: string,
+  orderStatus: string
+): Promise<boolean> {
+  if (!isSheetsConfigured() || !paymentId) return false
+  try {
+    const orders = await getAllOrders()
+    const match = orders.find(
+      (o) => o.transactionId === paymentId || (o.comments && o.comments.includes(paymentId))
+    )
+    if (!match || !match.rowIndex) return false
+
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+    const now = new Date().toISOString()
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Orders!N${match.rowIndex}:O${match.rowIndex}`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[paymentStatus, orderStatus]],
+      },
+    })
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Orders!R${match.rowIndex}`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[now]],
+      },
+    })
+    return true
+  } catch (err) {
+    console.error("Failed to update order status by paymentId:", err)
+    return false
   }
 }
 

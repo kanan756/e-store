@@ -1,12 +1,61 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import Stripe from "stripe"
-import { appendOrder, getOrderByPaymentId } from "@/lib/sheets"
+import {
+  appendOrder,
+  deductStockForOrder,
+  getOrderByPaymentId,
+  restoreStockForOrder,
+  updateOrderStatusByPaymentId,
+  type StockOrderLineInput,
+} from "@/lib/sheets"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
   apiVersion: "2025-01-27.acacia" as any,
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ""
+
+function parseOrderItemsFromMetadata(
+  rawOrderItems?: string,
+  productSummary?: string
+): StockOrderLineInput[] {
+  if (rawOrderItems) {
+    try {
+      const parsed = JSON.parse(rawOrderItems)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+          .filter((item) => item && (item.pid || item.name) && Number(item.qty) > 0)
+          .map((item) => ({
+            productId: typeof item.pid === "string" ? item.pid : undefined,
+            name: typeof item.name === "string" ? item.name : undefined,
+            quantity: Math.max(1, Math.floor(Number(item.qty))),
+            colorId: typeof item.cid === "string" && item.cid ? item.cid : undefined,
+            colorName: typeof item.cname === "string" && item.cname ? item.cname : undefined,
+          }))
+      }
+    } catch {
+      // Fall back to productSummary parsing below
+    }
+  }
+
+  if (!productSummary) return []
+  return productSummary
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const qtyMatch = part.match(/^(.*?)\s+x(\d+)$/i)
+      const base = qtyMatch ? qtyMatch[1].trim() : part
+      const quantity = qtyMatch ? Math.max(1, parseInt(qtyMatch[2], 10)) : 1
+      const colorMatch = base.match(/^(.*?)\s*\(([^)]+)\)$/)
+      return {
+        name: colorMatch ? colorMatch[1].trim() : base,
+        colorName: colorMatch ? colorMatch[2].trim() : undefined,
+        quantity,
+      }
+    })
+}
 
 export async function POST(request: Request) {
   try {
@@ -27,40 +76,59 @@ export async function POST(request: Request) {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session
-      
+
+      if (session.payment_status !== "paid") {
+        console.log(`Checkout session ${session.id} not paid (status=${session.payment_status}). Skipping stock deduction.`)
+        return NextResponse.json({ received: true, message: "Payment not settled yet" })
+      }
+
       const paymentIntentId = session.payment_intent as string
-      
       if (!paymentIntentId) {
         console.warn("Missing payment intent ID on session", session.id)
         return NextResponse.json({ received: true, message: "No payment intent" })
       }
 
-      // Idempotency check: Ensure we haven't processed this payment already
-      const existingOrder = await getOrderByPaymentId(paymentIntentId)
-      if (existingOrder) {
-        console.log(`Order for payment ${paymentIntentId} already exists. Skipping.`)
-        return NextResponse.json({ received: true, message: "Order already processed" })
-      }
-
-      const { customerName, email, productSummary, userId, subtotal, shippingCharge } = session.metadata || {}
+      const {
+        customerName,
+        email,
+        productSummary,
+        orderItems,
+        userId,
+        subtotal,
+        shippingCharge,
+      } = session.metadata || {}
 
       if (!customerName || !email) {
         console.error("Missing metadata in session", session.id)
         return NextResponse.json({ error: "Missing metadata in session" }, { status: 400 })
       }
 
-      // Use the amount Stripe actually confirmed (amount_total) rather than
-      // the client-supplied metadata value, which could have been tampered
-      // with before the checkout session was created.
-      // amount_total is in the smallest currency unit (paise for INR), so
-      // divide by 100 to get the INR amount stored in the sheet.
-      const confirmedAmount = session.amount_total != null
-        ? session.amount_total / 100
-        : 0
-      const parsedShipping = shippingCharge != null ? Number(shippingCharge) : 0
-      const parsedSubtotal = subtotal != null ? Number(subtotal) : Math.max(0, confirmedAmount - parsedShipping)
+      const existingOrder = await getOrderByPaymentId(paymentIntentId)
+      const orderId = existingOrder?.orderId || `ORD-${Date.now()}`
 
-      const orderId = await appendOrder({
+      const lineItems = parseOrderItemsFromMetadata(orderItems, productSummary)
+      const deductionResult = await deductStockForOrder({
+        eventId: event.id,
+        orderId,
+        paymentId: paymentIntentId,
+        items: lineItems,
+      })
+
+      if (existingOrder || deductionResult.alreadyProcessed) {
+        console.log(`Order/stock for payment ${paymentIntentId} already processed. Skipping duplicate.`)
+        return NextResponse.json({ received: true, message: "Order already processed" })
+      }
+
+      const confirmedAmount =
+        session.amount_total != null ? session.amount_total / 100 : 0
+      const parsedShipping = shippingCharge != null ? Number(shippingCharge) : 0
+      const parsedSubtotal =
+        subtotal != null
+          ? Number(subtotal)
+          : Math.max(0, confirmedAmount - parsedShipping)
+
+      await appendOrder({
+        orderId,
         userId: userId || undefined,
         customerName,
         email,
@@ -72,7 +140,15 @@ export async function POST(request: Request) {
         paymentId: paymentIntentId,
       })
 
-      // Send the automated bill / confirmation email
+      revalidatePath("/")
+      revalidatePath("/products")
+      revalidatePath("/shop")
+      for (const updated of deductionResult.updatedProducts) {
+        if (updated.handle) {
+          revalidatePath(`/products/${updated.handle}`)
+        }
+      }
+
       try {
         const { sendOrderConfirmationEmail } = await import("@/lib/email")
         await sendOrderConfirmationEmail({
@@ -86,7 +162,48 @@ export async function POST(request: Request) {
         console.error("Failed to send confirmation email:", emailErr)
       }
 
-      console.log(`Successfully processed order for payment ${paymentIntentId}`)
+      console.log(`Successfully processed order ${orderId} and deducted stock for payment ${paymentIntentId}`)
+    } else if (event.type === "charge.refunded") {
+      const charge = event.data.object as Stripe.Charge
+      const paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : ""
+
+      // Only restore stock automatically on full refunds.
+      // Partial refunds require explicit manager approval via /api/product-manager/orders/restock.
+      const isFullRefund =
+        Boolean(charge.refunded) &&
+        charge.amount > 0 &&
+        charge.amount_refunded >= charge.amount
+
+      if (paymentIntentId && isFullRefund) {
+        const existingOrder = await getOrderByPaymentId(paymentIntentId)
+        const restoreResult = await restoreStockForOrder({
+          eventId: event.id,
+          orderId: existingOrder?.orderId,
+          paymentId: paymentIntentId,
+        })
+
+        await updateOrderStatusByPaymentId(paymentIntentId, "Refunded", "Cancelled")
+
+        if (!restoreResult.alreadyProcessed && restoreResult.updatedProducts.length > 0) {
+          revalidatePath("/")
+          revalidatePath("/products")
+          revalidatePath("/shop")
+          for (const updated of restoreResult.updatedProducts) {
+            if (updated.handle) {
+              revalidatePath(`/products/${updated.handle}`)
+            }
+          }
+        }
+        console.log(`Processed full refund restock for payment ${paymentIntentId}`)
+      } else {
+        console.log(`Partial or unlinked refund received for charge ${charge.id}; automatic restock skipped.`)
+      }
+    } else if (
+      event.type === "checkout.session.expired" ||
+      event.type === "payment_intent.payment_failed"
+    ) {
+      // Do not deduct stock for failed or expired/cancelled payments
+      console.log(`Payment event ${event.type} received; no stock deducted.`)
     }
 
     return NextResponse.json({ received: true })
