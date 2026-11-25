@@ -622,7 +622,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                 <div className="pm-field-group">
-                  <label className="pm-label">SKU / Part Number</label>
+                  <label className="pm-label">Model Name / Number</label>
                   <input
                     type="text"
                     className="pm-input"
@@ -1335,7 +1335,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
               <div className="pm-field-group">
                 <label className="pm-label">
-                  Regular Price (₹) <span style={{ color: "#EF4444" }}>*</span>
+                  MRP (₹) <span style={{ color: "#EF4444" }}>*</span>
                 </label>
                 <input
                   type="number"
