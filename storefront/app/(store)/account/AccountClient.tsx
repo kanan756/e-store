@@ -325,7 +325,7 @@ export default function AccountClient() {
         </div>
 
         {/* Main Tabs Layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 32, alignItems: "start" }}>
+        <div className="account-layout" style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 32, alignItems: "start" }}>
           {/* Sidebar Nav */}
           <div
             style={{
@@ -485,7 +485,7 @@ export default function AccountClient() {
                     />
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                  <div className="fields-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                     <div>
                       <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#17191C", marginBottom: 6 }}>
                         Email Address (Verified)

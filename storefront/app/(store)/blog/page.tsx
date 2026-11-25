@@ -66,7 +66,7 @@ export default async function BlogListPage() {
             <p style={{ fontSize: 18 }}>No blog posts yet. Check back soon!</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 28 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(320px, 100%), 1fr))", gap: 28 }}>
             {blogs.map((blog) => (
               <Link key={blog.slug} href={`/blog/${blog.slug}`} style={{ textDecoration: "none", display: "block" }}>
                 <article className="blog-card" style={{

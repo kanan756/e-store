@@ -146,6 +146,7 @@ export default function Header() {
 
         {/* ── Main Navigation Bar ── */}
         <div
+          className="claspo-header-inner"
           style={{
             maxWidth: 1360,
             margin: "0 auto",
@@ -167,7 +168,7 @@ export default function Header() {
               flexShrink: 0,
             }}
           >
-            <div style={{ position: "relative", width: 154, height: 46 }}>
+            <div className="claspo-header-logo" style={{ position: "relative", width: 154, height: 46 }}>
               <Image
                 src="/images/claspo-latest-logo.png"
                 alt="CLASPO™ - SMART HOME SOLUTIONS"
@@ -261,7 +262,7 @@ export default function Header() {
           </nav>
 
           {/* Right Action Icons & Search */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div className="claspo-header-actions" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             {/* Search Input (Desktop) */}
             <form
               onSubmit={handleSearchSubmit}
@@ -711,6 +712,7 @@ export default function Header() {
                 <Link href="/about" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
                 <Link href="/contact" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
                 <Link href="/blog" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
+                <Link href="/wishlist" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Wishlist ({wishlistCount})</Link>
                 <Link href="/track-order" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Track Your Order</Link>
 
                 <div style={{ height: 1, background: "#E5E5E5", margin: "8px 0" }} />
@@ -752,6 +754,14 @@ export default function Header() {
 
       {/* Media query helper style for header responsiveness */}
       <style jsx global>{`
+        @media (max-width: 1120px) {
+          .claspo-nav-links {
+            gap: 18px !important;
+          }
+          .claspo-header-search {
+            width: 190px !important;
+          }
+        }
         @media (max-width: 900px) {
           .claspo-nav-links,
           .claspo-header-search {
@@ -759,6 +769,19 @@ export default function Header() {
           }
           .claspo-mobile-toggle {
             display: flex !important;
+          }
+        }
+        @media (max-width: 520px) {
+          .claspo-header-inner {
+            padding: 0 12px !important;
+            gap: 8px !important;
+          }
+          .claspo-header-logo {
+            width: 112px !important;
+            height: 34px !important;
+          }
+          .claspo-header-actions {
+            gap: 6px !important;
           }
         }
       `}</style>

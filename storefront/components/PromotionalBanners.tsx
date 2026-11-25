@@ -42,7 +42,7 @@ export default function PromotionalBanners() {
             padding: "54px 48px",
             color: "#FFFFFF",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
             gap: 40,
             alignItems: "center",
             boxShadow: "0 10px 30px rgba(243, 107, 18, 0.25)",
@@ -206,7 +206,7 @@ export default function PromotionalBanners() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))",
             gap: 28,
           }}
         >

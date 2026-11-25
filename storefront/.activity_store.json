@@ -33,5 +33,12 @@
     "activityType": "USER_LOGIN",
     "description": "Customer logged in with email hir@miraclecloud-technology.com",
     "createdAt": "2026-11-25T06:34:33.594Z"
+  },
+  {
+    "activityId": "act_1795596333764_pslfv",
+    "userId": "usr_1795502728468_q4rda",
+    "activityType": "USER_LOGIN",
+    "description": "Customer logged in with email hir@miraclecloud-technology.com",
+    "createdAt": "2026-11-25T08:45:33.764Z"
   }
 ]

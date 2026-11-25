@@ -1659,6 +1659,12 @@ button {
   .hdr__bar { padding: 0 16px; height: 72px; }
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 @media (max-width: 1024px) {
   .W { padding: 0 20px; }
   .hdr { padding-left: 20px; padding-right: 20px; }
@@ -1718,6 +1724,14 @@ button {
   .about-services-grid { grid-template-columns: 1fr !important; }
   .about-industries-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .about-hero-grid { grid-template-columns: 1fr !important; }
+
+  /* ── Account ──────────────────────────────────────────── */
+  .account-layout { grid-template-columns: 1fr !important; gap: 24px !important; }
+
+  /* ── Product Detail Overview ──────────────────────────── */
+  .pd-overview-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+  .pd-overview-grid > * { min-width: 0; }
+  .pd-img-main { min-height: 280px !important; }
 
   /* Note: header breakpoints moved to 1024px */
 }

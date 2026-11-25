@@ -131,7 +131,7 @@ export default function ContactClient() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "grid", gap: 22 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                <div className="fields-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                   <div>
                     <label style={s.label}>Full Name *</label>
                     <input style={s.input} value={form.name} onChange={set("name")} required placeholder="John Doe" />
@@ -142,7 +142,7 @@ export default function ContactClient() {
                   </div>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                <div className="fields-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
                   <div>
                     <label style={s.label}>Phone Number *</label>
                     <input style={s.input} type="tel" name="phone" value={form.phone} onChange={set("phone")} required placeholder="+1 (000) 000-0000" />

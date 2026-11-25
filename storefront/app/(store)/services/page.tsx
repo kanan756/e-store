@@ -106,7 +106,7 @@ export default function ServicesPage() {
 
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))",
             gap: 24,
           }}>
             {SERVICES.map(({ title, desc, icon, highlights }) => (
@@ -162,7 +162,7 @@ export default function ServicesPage() {
             <h2 className="D3">Typical Lead Times</h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1, background: "var(--bd)", border: "1px solid var(--bd)", borderRadius: 10, overflow: "hidden" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: 1, background: "var(--bd)", border: "1px solid var(--bd)", borderRadius: 10, overflow: "hidden" }}>
             {DELIVERY.map(({ label, time, desc }) => (
               <div key={label} style={{
                 background: "var(--bg)",

@@ -119,7 +119,7 @@ export default function LoginClient() {
             borderRadius: 20,
             border: "1px solid #E5E5E5",
             boxShadow: "0 12px 40px rgba(0, 0, 0, 0.05)",
-            padding: "44px 36px",
+            padding: "clamp(24px, 5vw, 44px) clamp(18px, 5vw, 36px)",
           }}
         >
           {/* Logo & Header */}
