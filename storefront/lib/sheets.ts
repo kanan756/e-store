@@ -304,6 +304,8 @@ export interface ProductVideoItem {
 export interface ProductReviewItem {
   id: string
   reviewerName: string
+  reviewerEmail?: string
+  orderId?: string
   title: string
   description: string
   rating: number
