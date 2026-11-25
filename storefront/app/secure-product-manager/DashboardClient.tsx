@@ -91,7 +91,7 @@ export default function DashboardClient({
   return (
     <div>
       {/* ── Page Header ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14, marginBottom: 28 }}>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: "#17191C", margin: "0 0 6px" }}>
             Product Catalog Overview
@@ -193,9 +193,9 @@ export default function DashboardClient({
       {/* ── Filters & Search Bar ── */}
       <div
         className="pm-card"
-        style={{ padding: "18px 24px", marginBottom: 24, display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}
+        style={{ padding: "16px 20px", marginBottom: 24, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}
       >
-        <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
+        <div style={{ flex: "1 1 220px", minWidth: 0, position: "relative" }}>
           <input
             type="text"
             className="pm-input"
@@ -218,7 +218,7 @@ export default function DashboardClient({
           </svg>
         </div>
 
-        <div style={{ minWidth: 200 }}>
+        <div style={{ flex: "0 1 220px", minWidth: 0, width: "100%", maxWidth: 260 }}>
           <select
             className="pm-select"
             value={selectedCategory}
@@ -250,8 +250,9 @@ export default function DashboardClient({
             </Link>
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="pm-table">
+          <>
+            <div className="pm-desktop-table">
+              <table className="pm-table">
               <thead>
                 <tr>
                   <th style={{ width: 64 }}>Preview</th>
@@ -396,7 +397,124 @@ export default function DashboardClient({
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+
+            {/* Mobile Product Cards */}
+            <div className="pm-mobile-cards">
+              {filteredProducts.map((p) => {
+                const imageCount = (p.additionalImages?.length || 0) + (p.primaryImage ? 1 : 0)
+                const videoCount = (p.additionalVideos?.length || 0) + (p.primaryVideo ? 1 : 0)
+                const isInactive = p.status === "Inactive"
+                const isOutOfStock = (p.stock ?? 0) <= 0
+
+                return (
+                  <div
+                    key={p.id}
+                    style={{
+                      border: "1px solid #E5E7EB",
+                      borderRadius: 12,
+                      padding: 14,
+                      background: "#FFFFFF",
+                      opacity: isInactive ? 0.68 : 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                      <div
+                        style={{
+                          width: 56,
+                          height: 56,
+                          borderRadius: 8,
+                          background: "#F3F4F6",
+                          position: "relative",
+                          overflow: "hidden",
+                          border: "1px solid #E5E7EB",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {p.imageUrl ? (
+                          <Image
+                            src={p.imageUrl}
+                            alt={p.name}
+                            fill
+                            style={{ objectFit: "cover" }}
+                            unoptimized
+                          />
+                        ) : null}
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, color: "#17191C", fontSize: 14.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {p.name}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                          {p.category} {p.sku ? `• ${p.sku}` : ""}
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+                          <span className={`pm-badge ${isInactive ? "pm-badge-inactive" : "pm-badge-active"}`}>
+                            {p.status || "Active"}
+                          </span>
+                          <span className="pm-badge pm-badge-media">📷 {imageCount}</span>
+                          {videoCount > 0 && (
+                            <span className="pm-badge" style={{ background: "#EEF2FF", color: "#4F46E5", border: "1px solid #C7D2FE", fontSize: 11 }}>
+                              🎬 {videoCount}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: "1px solid #F3F4F6", fontSize: 13 }}>
+                      <div>
+                        <span style={{ fontWeight: 800, color: "#17191C", fontSize: 15 }}>
+                          {formatPrice(p.price)}
+                        </span>
+                        {p.discountPrice != null && p.discountPrice > 0 && (
+                          <span style={{ fontSize: 12, color: "#059669", marginLeft: 8, fontWeight: 600 }}>
+                            Sale: {formatPrice(p.discountPrice)}
+                          </span>
+                        )}
+                      </div>
+                      <span style={{ fontWeight: 700, color: isOutOfStock ? "#DC2626" : "#374151" }}>
+                        {isOutOfStock ? "Out of Stock" : `${p.stock ?? 0} units`}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <Link
+                        href={`/secure-product-manager/products/edit/${p.id}`}
+                        className="pm-btn pm-btn-secondary"
+                        style={{ padding: "9px 12px", fontSize: 13 }}
+                      >
+                        Edit
+                      </Link>
+                      {isInactive ? (
+                        <button
+                          onClick={() => handleDelete(p.id, false)}
+                          className="pm-btn pm-btn-secondary"
+                          style={{ padding: "9px 12px", fontSize: 13, color: "#059669" }}
+                          disabled={deletingId === p.id}
+                        >
+                          Activate
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setShowConfirmModal(p.id)}
+                          className="pm-btn pm-btn-danger"
+                          style={{ padding: "9px 12px", fontSize: 13 }}
+                          disabled={deletingId === p.id}
+                        >
+                          Deactivate
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -432,7 +550,7 @@ export default function DashboardClient({
               Permanent deletion will completely remove the row from Google Sheets.
             </p>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
               <button
                 onClick={() => setShowConfirmModal(null)}
                 className="pm-btn pm-btn-secondary"

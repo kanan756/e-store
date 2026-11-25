@@ -54,7 +54,7 @@ function LoginFormContent() {
         background: "#FFFFFF",
         borderRadius: 16,
         boxShadow: "0 20px 50px rgba(0, 0, 0, 0.4)",
-        padding: "40px 36px",
+        padding: "clamp(24px, 5vw, 40px) clamp(18px, 5vw, 36px)",
         boxSizing: "border-box",
       }}
     >

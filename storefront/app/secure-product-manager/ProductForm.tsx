@@ -503,7 +503,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
   return (
     <div>
       {/* ── Breadcrumb & Top Bar ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 14, marginBottom: 28 }}>
         <div>
           <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 6 }}>
             <Link href="/secure-product-manager/products" style={{ color: "#F36B12", textDecoration: "none" }}>
@@ -591,7 +591,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              <div className="pm-2col">
                 <div className="pm-field-group">
                   <label className="pm-label">
                     Product ID <span style={{ color: "#9CA3AF", fontSize: 12 }}>(Unique)</span>
@@ -620,7 +620,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+              <div className="pm-2col">
                 <div className="pm-field-group">
                   <label className="pm-label">Model Name / Number</label>
                   <input
@@ -684,7 +684,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
             {/* ── Multiple Image Management ── */}
             <div className="pm-card" style={{ padding: "28px", marginBottom: 28 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
                 <div>
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "#17191C", margin: "0 0 4px" }}>
                     Product Images ({images.length})
@@ -826,7 +826,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
             {/* ── Multiple Video Management ── */}
             <div className="pm-card" style={{ padding: "28px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
                 <div>
                   <h2 style={{ fontSize: 16, fontWeight: 800, color: "#17191C", margin: "0 0 4px" }}>
                     Product Videos ({videos.length})
@@ -893,27 +893,9 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                   {videos.map((vid, idx) => (
                     <div
                       key={vid.id || vid.url + idx}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 16,
-                        padding: 12,
-                        background: "#F9FAFB",
-                        border: "1px solid #E5E7EB",
-                        borderRadius: 10,
-                      }}
+                      className="pm-video-row"
                     >
-                      <div
-                        style={{
-                          width: 140,
-                          height: 80,
-                          borderRadius: 8,
-                          overflow: "hidden",
-                          background: "#000000",
-                          position: "relative",
-                          flexShrink: 0,
-                        }}
-                      >
+                      <div className="pm-video-thumb">
                         <video
                           src={vid.url}
                           controls
@@ -1045,6 +1027,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                       style={{
                         display: "flex",
                         alignItems: "flex-start",
+                        flexWrap: "wrap",
                         gap: 14,
                         padding: 14,
                         background: "#FFFFFF",
@@ -1147,7 +1130,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
               </div>
 
               <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 10, padding: 18, marginBottom: 20 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className="pm-2col">
                   <div className="pm-field-group">
                     <label className="pm-label">
                       Reviewer Name <span style={{ color: "#EF4444" }}>*</span>
@@ -1258,7 +1241,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                         borderRadius: 10,
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 6 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12, marginBottom: 6 }}>
                         <div>
                           <div style={{ color: "#F36B12", fontSize: 14, letterSpacing: 1, marginBottom: 4 }}>
                             {"★".repeat(rev.rating)}
