@@ -42,6 +42,14 @@ const howToStepSchema = z.object({
   instruction: z.string().trim().min(1, "Step instruction is required").max(2000),
 })
 
+const colorVariantSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1, "Colour name is required").max(50),
+  hex: z.string().trim().regex(/^#[0-9a-fA-F]{3,8}$/, "Valid hex colour code is required"),
+  available: z.boolean().default(true),
+  stock: z.number().int().min(0, "Colour stock cannot be negative").optional().nullable(),
+})
+
 const updateProductSchema = z
   .object({
     productName: z.string().trim().min(2).max(150).optional(),
@@ -60,6 +68,22 @@ const updateProductSchema = z
     additionalVideos: z.array(videoItemSchema).optional(),
     reviews: z.array(reviewItemSchema).optional(),
     howToUse: z.array(howToStepSchema).optional(),
+    colors: z
+      .array(colorVariantSchema)
+      .optional()
+      .refine(
+        (colors) => {
+          if (!colors) return true
+          const seen = new Set<string>()
+          for (const c of colors) {
+            const key = c.name.trim().toLowerCase()
+            if (seen.has(key)) return false
+            seen.add(key)
+          }
+          return true
+        },
+        { message: "Duplicate colour names are not allowed." }
+      ),
   })
   .refine(
     (data) => {
@@ -152,6 +176,7 @@ export async function PUT(
       discountPrice: data.discountPrice === null ? null : (data.discountPrice ?? undefined),
       primaryImage: primaryImage ?? existing.primaryImage,
       imageUrl: primaryImage ?? existing.imageUrl,
+      colors: data.colors,
     })
 
     if (!updated) {

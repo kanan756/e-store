@@ -166,6 +166,7 @@ export const STORE_SHEETS = {
     "updatedAt",
     "reviews",
     "howToUse",
+    "colors",
   ],
   Blogs: [
     "title",
@@ -319,6 +320,14 @@ export interface ProductHowToStep {
   instruction: string
 }
 
+export interface ProductColorVariant {
+  id: string
+  name: string
+  hex: string
+  available: boolean
+  stock?: number | null
+}
+
 export interface Product {
   rowIndex?: number
   id: string              // productId (e.g. prod_...)
@@ -343,6 +352,7 @@ export interface Product {
   additionalVideos?: ProductVideoItem[]
   reviews?: ProductReviewItem[]
   howToUse?: ProductHowToStep[]
+  colors?: ProductColorVariant[]
   averageRating?: number
   reviewCount?: number
   status?: "Active" | "Inactive" | string
@@ -1302,7 +1312,7 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
 
       const res = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: "Products!A1:S",
+        range: "Products!A1:T",
       })
 
       const allRows = res.data.values ?? []
@@ -1370,6 +1380,26 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
               }
             } catch {}
 
+            let colors: ProductColorVariant[] = []
+            try {
+              if (r[19]) {
+                const parsed = JSON.parse(r[19])
+                if (Array.isArray(parsed)) {
+                  colors = parsed
+                    .filter((c): c is Record<string, unknown> => Boolean(c && typeof c === "object" && c.name))
+                    .map((c, idx) => ({
+                      id: typeof c.id === "string" && c.id ? c.id : `color_${idx}_${String(c.name).toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+                      name: String(c.name).trim(),
+                      hex: typeof c.hex === "string" && /^#[0-9a-fA-F]{3,8}$/.test(c.hex.trim()) ? c.hex.trim() : "#17191C",
+                      available: c.available !== false,
+                      stock: c.stock !== undefined && c.stock !== null && c.stock !== "" && Number.isFinite(Number(c.stock))
+                        ? Math.max(0, Math.floor(Number(c.stock)))
+                        : null,
+                    }))
+                }
+              }
+            } catch {}
+
             const reviewCount = reviews.length
             const averageRating =
               reviewCount > 0
@@ -1404,6 +1434,7 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
               additionalVideos,
               reviews,
               howToUse,
+              colors,
               averageRating,
               reviewCount,
               status,
@@ -1526,6 +1557,7 @@ export async function createProduct(product: {
   additionalVideos?: ProductVideoItem[]
   reviews?: ProductReviewItem[]
   howToUse?: ProductHowToStep[]
+  colors?: ProductColorVariant[]
   status?: "Active" | "Inactive"
 }): Promise<Product> {
   if (!isSheetsConfigured()) throw new Error("Google Sheets not configured")
@@ -1549,12 +1581,13 @@ export async function createProduct(product: {
   const additionalVideosJson = product.additionalVideos ? JSON.stringify(product.additionalVideos) : "[]"
   const reviewsJson = product.reviews ? JSON.stringify(product.reviews) : "[]"
   const howToUseJson = product.howToUse ? JSON.stringify(product.howToUse) : "[]"
+  const colorsJson = product.colors ? JSON.stringify(product.colors) : "[]"
   const status = product.status || "Active"
   const now = new Date().toISOString()
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "Products!A:S",
+    range: "Products!A:T",
     valueInputOption: "RAW",
     requestBody: {
       values: [
@@ -1578,6 +1611,7 @@ export async function createProduct(product: {
           now,
           reviewsJson,
           howToUseJson,
+          colorsJson,
         ],
       ],
     },
@@ -1608,6 +1642,7 @@ export async function createProduct(product: {
     additionalVideos: product.additionalVideos,
     reviews: product.reviews ?? [],
     howToUse: product.howToUse ?? [],
+    colors: product.colors ?? [],
     status,
     createdAt: now,
     updatedAt: now,
@@ -1642,6 +1677,7 @@ export async function updateProductById(
   const updatedAdditionalVideos = updates.additionalVideos ?? existing.additionalVideos ?? []
   const updatedReviews = updates.reviews ?? existing.reviews ?? []
   const updatedHowToUse = updates.howToUse ?? existing.howToUse ?? []
+  const updatedColors = updates.colors !== undefined ? updates.colors : (existing.colors ?? [])
   const updatedStatus = updates.status ?? existing.status ?? "Active"
   const now = new Date().toISOString()
 
@@ -1665,11 +1701,12 @@ export async function updateProductById(
     now,
     JSON.stringify(updatedReviews),
     JSON.stringify(updatedHowToUse),
+    JSON.stringify(updatedColors),
   ]
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `Products!A${existing.rowIndex}:S${existing.rowIndex}`,
+    range: `Products!A${existing.rowIndex}:T${existing.rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
       values: [rowValues],
@@ -1700,6 +1737,7 @@ export async function updateProductById(
     additionalVideos: updatedAdditionalVideos,
     reviews: updatedReviews,
     howToUse: updatedHowToUse,
+    colors: updatedColors,
     status: updatedStatus,
     updatedAt: now,
   }

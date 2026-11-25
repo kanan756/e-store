@@ -166,6 +166,7 @@ export default function CheckoutClient() {
               productId: i.productId,
               name: i.name,
               quantity: i.quantity,
+              selectedColor: i.selectedColor ?? null,
             })),
             successUrl: `${window.location.origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
             cancelUrl: `${window.location.origin}/checkout`,
@@ -337,11 +338,27 @@ export default function CheckoutClient() {
               </div>
 
               {items.map((item) => (
-                <div key={item.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, fontSize: 14 }}>
-                  <span style={{ color: "var(--text2)" }}>
-                    {item.name} × {item.quantity}
+                <div key={`${item.productId || item.id}::${item.selectedColor?.name || ""}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12, fontSize: 14 }}>
+                  <span style={{ color: "var(--text2)", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <span>{item.name}</span>
+                    {item.selectedColor && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, color: "#374151", background: "#F3F4F6", padding: "1px 7px", borderRadius: 999 }}>
+                        <span
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            backgroundColor: item.selectedColor.hex,
+                            border: "1px solid #D1D5DB",
+                            display: "inline-block",
+                          }}
+                        />
+                        {item.selectedColor.name}
+                      </span>
+                    )}
+                    <span>× {item.quantity}</span>
                   </span>
-                  <span style={{ fontWeight: 600 }}>
+                  <span style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>

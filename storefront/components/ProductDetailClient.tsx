@@ -232,20 +232,48 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     [product.howToUse]
   )
 
+  const productColors = useMemo(
+    () => (Array.isArray(product.colors) ? product.colors : []),
+    [product.colors]
+  )
+  const availableColors = useMemo(
+    () => productColors.filter((c) => c.available !== false && (c.stock == null || c.stock > 0)),
+    [productColors]
+  )
+  const hasColorOptions = productColors.length > 0
+  const allColorsUnavailable = hasColorOptions && availableColors.length === 0
+
+  const [selectedColorId, setSelectedColorId] = useState<string>(() =>
+    availableColors.length === 1 ? availableColors[0].id : ""
+  )
+  const [colorError, setColorError] = useState<string>("")
+
+  const selectedColor = useMemo(
+    () => availableColors.find((c) => c.id === selectedColorId) || null,
+    [availableColors, selectedColorId]
+  )
+
   const isInactive = product.status === "Inactive"
-  const isOutOfStock = !product.inStock || (product.stock !== undefined && product.stock <= 0)
+  const isOutOfStock = !product.inStock || (product.stock !== undefined && product.stock <= 0) || allColorsUnavailable
   const hasDiscount = product.discountPrice != null && product.discountPrice > 0 && product.discountPrice < product.price
   const effectivePrice = hasDiscount ? product.discountPrice! : product.price
-  const maxStock = product.stock && product.stock > 0 ? product.stock : 999
+  const baseMaxStock = product.stock && product.stock > 0 ? product.stock : 999
+  const maxStock = selectedColor?.stock != null ? Math.min(baseMaxStock, Math.max(1, selectedColor.stock)) : baseMaxStock
   const itemsSubtotal = effectivePrice * quantity
   const shippingCharge = FLAT_SHIPPING_INR
   const totalWithShipping = effectivePrice > 0 ? itemsSubtotal + shippingCharge : 0
 
   const handleAddToCart = useCallback(() => {
+    if (availableColors.length > 0 && !selectedColor) {
+      setColorError("Please select a colour before adding to cart.")
+      document.getElementById("pd-colors-section")?.scrollIntoView({ behavior: "smooth", block: "center" })
+      return
+    }
     if (!session?.user) {
       router.push(`/login?callbackUrl=${encodeURIComponent(productUrl)}&message=${encodeURIComponent(loginMessage)}`)
       return
     }
+    setColorError("")
     setAdding(true)
     for (let i = 0; i < quantity; i++) {
       addItem({
@@ -255,22 +283,31 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         price: effectivePrice,
         regularPrice: product.price,
         discountPrice: hasDiscount ? product.discountPrice : null,
-        stock: product.stock,
+        stock: selectedColor?.stock != null ? selectedColor.stock : product.stock,
         inStock: product.inStock,
         imageUrl: product.imageUrl || mediaItems[0]?.url || "",
         category: product.category,
+        selectedColor: selectedColor
+          ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex }
+          : null,
       })
     }
     setAdding(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2500)
-  }, [addItem, effectivePrice, mediaItems, product.category, product.imageUrl, product.name, productHandle, productUrl, quantity, router, session])
+  }, [addItem, availableColors.length, effectivePrice, hasDiscount, mediaItems, product.category, product.discountPrice, product.id, product.imageUrl, product.inStock, product.name, product.price, product.productId, product.stock, productHandle, productUrl, quantity, router, selectedColor, session])
 
   const handlePlaceOrder = useCallback(() => {
+    if (availableColors.length > 0 && !selectedColor) {
+      setColorError("Please select a colour before placing your order.")
+      document.getElementById("pd-colors-section")?.scrollIntoView({ behavior: "smooth", block: "center" })
+      return
+    }
     if (!session?.user) {
       router.push(`/login?callbackUrl=${encodeURIComponent(productUrl)}&message=${encodeURIComponent(loginMessage)}`)
       return
     }
+    setColorError("")
     setPlacingOrder(true)
     for (let i = 0; i < quantity; i++) {
       addItem({
@@ -280,14 +317,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         price: effectivePrice,
         regularPrice: product.price,
         discountPrice: hasDiscount ? product.discountPrice : null,
-        stock: product.stock,
+        stock: selectedColor?.stock != null ? selectedColor.stock : product.stock,
         inStock: product.inStock,
         imageUrl: product.imageUrl || mediaItems[0]?.url || "",
         category: product.category,
+        selectedColor: selectedColor
+          ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex }
+          : null,
       })
     }
     router.push("/checkout")
-  }, [addItem, effectivePrice, mediaItems, product.category, product.imageUrl, product.name, productHandle, productUrl, quantity, router, session])
+  }, [addItem, availableColors.length, effectivePrice, hasDiscount, mediaItems, product.category, product.discountPrice, product.id, product.imageUrl, product.inStock, product.name, product.price, product.productId, product.stock, productHandle, productUrl, quantity, router, selectedColor, session])
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -614,6 +654,105 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   Price in INR (₹) • Flat shipping {formatPrice(shippingCharge)}
                 </div>
               </div>
+
+              {/* Available Colours Selector */}
+              {hasColorOptions && (
+                <div
+                  id="pd-colors-section"
+                  style={{
+                    marginBottom: 22,
+                    padding: "16px 18px",
+                    background: "#FFFFFF",
+                    border: colorError ? "1.5px solid #DC2626" : "1px solid #E5E5E5",
+                    borderRadius: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 800, color: "#17191C" }}>
+                      Available Colours
+                    </span>
+                    {selectedColor ? (
+                      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#F36B12" }}>
+                        Selected: {selectedColor.name}
+                      </span>
+                    ) : availableColors.length > 0 ? (
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#6B7280" }}>
+                        Please select a colour
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#DC2626" }}>
+                        All colours currently unavailable
+                      </span>
+                    )}
+                  </div>
+
+                  <div role="radiogroup" aria-label="Available Colours" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                    {productColors.map((c) => {
+                      const isAvail = c.available !== false && (c.stock == null || c.stock > 0)
+                      const isSelected = selectedColorId === c.id && isAvail
+                      return (
+                        <label
+                          key={c.id}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "8px 14px",
+                            borderRadius: 8,
+                            border: isSelected ? "2px solid #F36B12" : "1px solid #D1D5DB",
+                            backgroundColor: isSelected ? "#FFF7F2" : isAvail ? "#FFFFFF" : "#F3F4F6",
+                            cursor: isAvail ? "pointer" : "not-allowed",
+                            opacity: isAvail ? 1 : 0.55,
+                            transition: "all 0.15s ease",
+                            userSelect: "none",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="product-color"
+                            value={c.id}
+                            checked={isSelected}
+                            disabled={!isAvail}
+                            onChange={() => {
+                              setSelectedColorId(c.id)
+                              setColorError("")
+                              if (c.stock != null && quantity > c.stock) {
+                                setQuantity(Math.max(1, c.stock))
+                              }
+                            }}
+                            style={{ accentColor: "#F36B12", margin: 0, cursor: isAvail ? "pointer" : "not-allowed" }}
+                          />
+                          <span
+                            style={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: "50%",
+                              backgroundColor: c.hex,
+                              border: "1.5px solid #D1D5DB",
+                              boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span style={{ fontSize: 13.5, fontWeight: isSelected ? 700 : 600, color: "#17191C" }}>
+                            {c.name}
+                          </span>
+                          {!isAvail && (
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#DC2626" }}>
+                              (Unavailable)
+                            </span>
+                          )}
+                        </label>
+                      )
+                    })}
+                  </div>
+
+                  {colorError && (
+                    <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 700, color: "#DC2626" }}>
+                      {colorError}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Product Description */}
               {product.shortDescription && (
@@ -1057,6 +1196,27 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 </div>
               </div>
 
+              {selectedColor && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                    Colour
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, color: "#17191C" }}>
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: selectedColor.hex,
+                        border: "1px solid #D1D5DB",
+                        display: "inline-block",
+                      }}
+                    />
+                    {selectedColor.name}
+                  </div>
+                </div>
+              )}
+
               {!isInactive && !isOutOfStock && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 12.5, fontWeight: 700, color: "#303638" }}>
@@ -1210,7 +1370,47 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 </div>
               </div>
 
+              {/* Selected Colour in Sticky Bar */}
+              {selectedColor && (
+                <div className="pd-sticky-hide-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span
+                    style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      backgroundColor: selectedColor.hex,
+                      border: "1px solid #D1D5DB",
+                      display: "inline-block",
+                    }}
+                  />
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "#17191C" }}>
+                    {selectedColor.name}
+                  </span>
+                </div>
+              )}
+
               {/* Quantity Selector */}
+              {selectedColor && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                    Colour
+                  </div>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, color: "#17191C" }}>
+                    <span
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: selectedColor.hex,
+                        border: "1px solid #D1D5DB",
+                        display: "inline-block",
+                      }}
+                    />
+                    {selectedColor.name}
+                  </div>
+                </div>
+              )}
+
               {!isInactive && !isOutOfStock && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span className="pd-sticky-hide-sm" style={{ fontSize: 12, fontWeight: 700, color: "#303638" }}>

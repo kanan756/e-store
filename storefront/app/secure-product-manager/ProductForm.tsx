@@ -10,6 +10,7 @@ import type {
   ProductVideoItem,
   ProductReviewItem,
   ProductHowToStep,
+  ProductColorVariant,
 } from "@/lib/sheets"
 
 interface ProductFormProps {
@@ -98,6 +99,17 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
   const [stepInstruction, setStepInstruction] = useState("")
   const [editingStepId, setEditingStepId] = useState<string | null>(null)
   const [stepFormError, setStepFormError] = useState("")
+
+  // Available Colours State
+  const [colors, setColors] = useState<ProductColorVariant[]>(() =>
+    Array.isArray(initialData?.colors) ? initialData.colors : []
+  )
+  const [colorName, setColorName] = useState("")
+  const [colorHex, setColorHex] = useState("#17191C")
+  const [colorAvailable, setColorAvailable] = useState(true)
+  const [colorStock, setColorStock] = useState("")
+  const [editingColorId, setEditingColorId] = useState<string | null>(null)
+  const [colorFormError, setColorFormError] = useState("")
 
   // Uploading / saving state
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -407,6 +419,95 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     })
   }
 
+  // Available Colours Handlers
+  const resetColorForm = () => {
+    setColorName("")
+    setColorHex("#17191C")
+    setColorAvailable(true)
+    setColorStock("")
+    setEditingColorId(null)
+    setColorFormError("")
+  }
+
+  const handleAddOrUpdateColor = () => {
+    setColorFormError("")
+    const trimmedName = colorName.trim()
+    if (!trimmedName) {
+      setColorFormError("Please enter a colour name (e.g. Black, White, Blue).")
+      return
+    }
+    const normalizedHex = colorHex.trim()
+    if (!/^#[0-9a-fA-F]{6}$/.test(normalizedHex) && !/^#[0-9a-fA-F]{3}$/.test(normalizedHex)) {
+      setColorFormError("Please enter a valid hex colour code (e.g. #17191C).")
+      return
+    }
+    const duplicate = colors.find(
+      (c) =>
+        c.id !== editingColorId &&
+        c.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    )
+    if (duplicate) {
+      setColorFormError(`"${trimmedName}" is already added. Please use a unique colour name.`)
+      return
+    }
+
+    let parsedStock: number | null = null
+    if (colorStock.trim() !== "") {
+      const n = Number(colorStock)
+      if (!Number.isInteger(n) || n < 0) {
+        setColorFormError("Colour stock must be a whole number (0 or more).")
+        return
+      }
+      parsedStock = n
+    }
+
+    if (editingColorId) {
+      setColors((prev) =>
+        prev.map((c) =>
+          c.id === editingColorId
+            ? {
+                ...c,
+                name: trimmedName,
+                hex: normalizedHex,
+                available: colorAvailable,
+                stock: parsedStock,
+              }
+            : c
+        )
+      )
+    } else {
+      const newColor: ProductColorVariant = {
+        id: `color_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        name: trimmedName,
+        hex: normalizedHex,
+        available: colorAvailable,
+        stock: parsedStock,
+      }
+      setColors((prev) => [...prev, newColor])
+    }
+    resetColorForm()
+  }
+
+  const startEditColor = (color: ProductColorVariant) => {
+    setColorName(color.name)
+    setColorHex(color.hex)
+    setColorAvailable(color.available !== false)
+    setColorStock(color.stock !== undefined && color.stock !== null ? String(color.stock) : "")
+    setEditingColorId(color.id)
+    setColorFormError("")
+  }
+
+  const removeColor = (id: string) => {
+    setColors((prev) => prev.filter((c) => c.id !== id))
+    if (editingColorId === id) resetColorForm()
+  }
+
+  const toggleColorAvailability = (id: string) => {
+    setColors((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, available: !c.available } : c))
+    )
+  }
+
   // Form Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -476,6 +577,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         additionalVideos: videos,
         reviews,
         howToUse: howToUse.map((s, idx) => ({ ...s, stepNumber: idx + 1 })),
+        colors,
       }
 
       const endpoint = isEdit
@@ -968,6 +1070,243 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── Available Colours Section ── */}
+            <div className="pm-card" style={{ padding: "28px", marginTop: 28 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+                <div>
+                  <h2 style={{ fontSize: 16, fontWeight: 800, color: "#17191C", margin: "0 0 4px" }}>
+                    Available Colours ({colors.length})
+                  </h2>
+                  <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
+                    Add colour variants for this product. Customers can select one on the product page.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  backgroundColor: "#F9FAFB",
+                  border: "1px solid #E5E7EB",
+                  borderRadius: 10,
+                  padding: 16,
+                  marginBottom: colors.length > 0 ? 18 : 0,
+                }}
+              >
+                {colorFormError && (
+                  <div
+                    style={{
+                      backgroundColor: "#FEF2F2",
+                      border: "1px solid #FECACA",
+                      color: "#DC2626",
+                      padding: "10px 12px",
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      marginBottom: 12,
+                    }}
+                  >
+                    {colorFormError}
+                  </div>
+                )}
+
+                <div className="pm-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                  <div>
+                    <label className="pm-label">Colour Name *</label>
+                    <input
+                      type="text"
+                      value={colorName}
+                      onChange={(e) => {
+                        setColorName(e.target.value)
+                        if (colorFormError) setColorFormError("")
+                      }}
+                      placeholder="e.g. Matte Black, Pearl White"
+                      className="pm-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="pm-label">Colour Picker &amp; Hex</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <input
+                        type="color"
+                        value={/^#[0-9a-fA-F]{6}$/.test(colorHex) ? colorHex : "#17191C"}
+                        onChange={(e) => setColorHex(e.target.value.toUpperCase())}
+                        aria-label="Pick colour"
+                        style={{
+                          width: 44,
+                          height: 40,
+                          padding: 2,
+                          border: "1px solid #D1D5DB",
+                          borderRadius: 8,
+                          backgroundColor: "#FFFFFF",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={colorHex}
+                        onChange={(e) => {
+                          setColorHex(e.target.value)
+                          if (colorFormError) setColorFormError("")
+                        }}
+                        placeholder="#17191C"
+                        className="pm-input"
+                        style={{ fontFamily: "monospace" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pm-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+                  <div>
+                    <label className="pm-label">Availability Status</label>
+                    <select
+                      value={colorAvailable ? "available" : "unavailable"}
+                      onChange={(e) => setColorAvailable(e.target.value === "available")}
+                      className="pm-input"
+                    >
+                      <option value="available">Available</option>
+                      <option value="unavailable">Unavailable (Out of Stock / Disabled)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="pm-label">Colour Stock (Optional)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={colorStock}
+                      onChange={(e) => setColorStock(e.target.value)}
+                      placeholder="Leave blank to use product stock"
+                      className="pm-input"
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={handleAddOrUpdateColor}
+                    className="pm-btn pm-btn-primary"
+                    style={{ fontSize: 13 }}
+                  >
+                    {editingColorId ? "✓ Update Colour" : "+ Add Colour"}
+                  </button>
+                  {editingColorId && (
+                    <button
+                      type="button"
+                      onClick={resetColorForm}
+                      className="pm-btn pm-btn-secondary"
+                      style={{ fontSize: 13 }}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {colors.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {colors.map((c) => {
+                    const isAvail = c.available !== false && (c.stock == null || c.stock > 0)
+                    return (
+                      <div
+                        key={c.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 12,
+                          padding: "12px 14px",
+                          backgroundColor: "#FFFFFF",
+                          border: "1px solid #E5E7EB",
+                          borderRadius: 10,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
+                          <span
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              backgroundColor: c.hex,
+                              border: "2px solid #E5E7EB",
+                              boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                              <span style={{ fontSize: 14, fontWeight: 700, color: "#17191C" }}>
+                                {c.name}
+                              </span>
+                              <span style={{ fontSize: 12, fontFamily: "monospace", color: "#6B7280" }}>
+                                {c.hex.toUpperCase()}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  padding: "2px 8px",
+                                  borderRadius: 999,
+                                  backgroundColor: isAvail ? "#ECFDF5" : "#FEF2F2",
+                                  color: isAvail ? "#059669" : "#DC2626",
+                                }}
+                              >
+                                {isAvail ? "Available" : "Unavailable"}
+                              </span>
+                              {c.stock != null && (
+                                <span
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 600,
+                                    padding: "2px 8px",
+                                    borderRadius: 999,
+                                    backgroundColor: "#F3F4F6",
+                                    color: "#374151",
+                                  }}
+                                >
+                                  Stock: {c.stock}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <button
+                            type="button"
+                            onClick={() => toggleColorAvailability(c.id)}
+                            className="pm-btn pm-btn-secondary"
+                            style={{ padding: "6px 10px", fontSize: 12 }}
+                          >
+                            {c.available !== false ? "Disable" : "Enable"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => startEditColor(c)}
+                            className="pm-btn pm-btn-secondary"
+                            style={{ padding: "6px 10px", fontSize: 12 }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeColor(c.id)}
+                            className="pm-btn pm-btn-danger"
+                            style={{ padding: "6px 10px", fontSize: 12 }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

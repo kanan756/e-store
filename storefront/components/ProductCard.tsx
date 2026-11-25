@@ -78,7 +78,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     if (first && isValidUrl(first)) primaryImage = first
   }
 
-  const outOfStock = product.inStock === false
+  const availableColors = Array.isArray(product.colors)
+    ? product.colors.filter((c) => c.available !== false && (c.stock == null || c.stock > 0))
+    : []
+  const hasColorConfig = Array.isArray(product.colors) && product.colors.length > 0
+  const allColorsUnavailable = hasColorConfig && availableColors.length === 0
+  const outOfStock = product.inStock === false || allColorsUnavailable
 
   // Compute pricing with discount support from Product Manager
   const regularPrice = Number.isFinite(Number(product.price)) ? Number(product.price) : 0
@@ -107,11 +112,18 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     e.preventDefault()
     e.stopPropagation()
 
+    if (availableColors.length > 1) {
+      router.push(href)
+      return
+    }
+
     if (!session?.user) {
       const message = "Please log in to your CLASPO account to add products to your cart."
       router.push(`/login?callbackUrl=${encodeURIComponent(href)}&message=${encodeURIComponent(message)}`)
       return
     }
+
+    const autoColor = availableColors.length === 1 ? availableColors[0] : null
 
     setAdding(true)
     addItem({
@@ -121,15 +133,18 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       price: sellingPrice,
       regularPrice,
       discountPrice: hasDiscount ? parsedDiscount : null,
-      stock: product.stock,
+      stock: autoColor?.stock != null ? autoColor.stock : product.stock,
       inStock: product.inStock,
       imageUrl: primaryImage || "",
       category: product.category,
+      selectedColor: autoColor
+        ? { id: autoColor.id, name: autoColor.name, hex: autoColor.hex }
+        : null,
     })
     setAdding(false)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
-  }, [addItem, product, session, router, href, sellingPrice, primaryImage])
+  }, [addItem, availableColors, product, session, router, href, sellingPrice, regularPrice, hasDiscount, parsedDiscount, primaryImage])
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -369,8 +384,47 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
         {/* Part Number / Description */}
         {product.partNumber && (
-          <div style={{ fontSize: "11.5px", color: "#747474", fontFamily: "monospace", marginBottom: 12 }}>
+          <div style={{ fontSize: "11.5px", color: "#747474", fontFamily: "monospace", marginBottom: availableColors.length > 0 ? 8 : 12 }}>
             SKU: <span style={{ color: "#17191C", fontWeight: 600 }}>{product.partNumber}</span>
+          </div>
+        )}
+
+        {/* Compact Available Colour Swatches */}
+        {availableColors.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              marginBottom: 12,
+              flexWrap: "wrap",
+            }}
+            aria-label={`${availableColors.length} available ${availableColors.length === 1 ? "colour" : "colours"}`}
+          >
+            {availableColors.slice(0, 5).map((c) => (
+              <span
+                key={c.id || c.name}
+                title={c.name}
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: "50%",
+                  backgroundColor: c.hex,
+                  border: "1.5px solid #D1D5DB",
+                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
+                  display: "inline-block",
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+            {availableColors.length > 5 && (
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "#6B7280" }}>
+                +{availableColors.length - 5}
+              </span>
+            )}
+            <span style={{ fontSize: "11px", color: "#6B7280", fontWeight: 500, marginLeft: 2 }}>
+              {availableColors.length} {availableColors.length === 1 ? "colour" : "colours"}
+            </span>
           </div>
         )}
 
@@ -423,7 +477,17 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
           }}
         >
           <CartIcon />
-          <span>{outOfStock ? "Out of Stock" : added ? "✓ Added to Bag" : adding ? "Adding..." : "Add to Cart"}</span>
+          <span>
+            {outOfStock
+              ? "Out of Stock"
+              : added
+                ? "✓ Added to Bag"
+                : adding
+                  ? "Adding..."
+                  : availableColors.length > 1
+                    ? "Select Colour"
+                    : "Add to Cart"}
+          </span>
         </button>
       </div>
     </div>

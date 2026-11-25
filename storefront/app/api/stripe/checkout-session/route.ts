@@ -38,6 +38,14 @@ const checkoutSessionSchema = z.object({
       productId: z.string().optional(),
       name:      z.string().min(1).transform(stripEmoji),
       quantity:  z.number().int().positive().max(1000),
+      selectedColor: z
+        .object({
+          id: z.string().optional(),
+          name: z.string(),
+          hex: z.string().optional(),
+        })
+        .nullable()
+        .optional(),
     })
   ).min(1, "Cart is empty"),
   expectedTotal: z.number().min(0).optional(),
@@ -110,9 +118,42 @@ export async function POST(request: Request) {
           { status: 400 }
         )
       }
-      if (item.quantity > availableStock) {
+
+      const productColors = Array.isArray(product.colors) ? product.colors : []
+      let resolvedColorName = ""
+      let effectiveStock = availableStock
+
+      if (productColors.length > 0) {
+        if (!item.selectedColor?.name) {
+          return NextResponse.json(
+            { error: `Please select an available colour for "${product.name}".` },
+            { status: 400 }
+          )
+        }
+        const matchedColor = productColors.find(
+          (c) =>
+            (item.selectedColor?.id && c.id === item.selectedColor.id) ||
+            c.name.trim().toLowerCase() === item.selectedColor!.name.trim().toLowerCase()
+        )
+        if (
+          !matchedColor ||
+          matchedColor.available === false ||
+          (matchedColor.stock != null && matchedColor.stock <= 0)
+        ) {
+          return NextResponse.json(
+            { error: `The selected colour "${item.selectedColor.name}" for "${product.name}" is no longer available. Please select another colour.` },
+            { status: 400 }
+          )
+        }
+        resolvedColorName = matchedColor.name
+        if (matchedColor.stock != null) {
+          effectiveStock = Math.min(availableStock, matchedColor.stock)
+        }
+      }
+
+      if (item.quantity > effectiveStock) {
         return NextResponse.json(
-          { error: `Only ${availableStock} unit(s) of "${product.name}" are available in stock.` },
+          { error: `Only ${effectiveStock} unit(s) of "${product.name}"${resolvedColorName ? ` (${resolvedColorName})` : ""} are available in stock.` },
           { status: 400 }
         )
       }
@@ -124,7 +165,9 @@ export async function POST(request: Request) {
         )
       }
       serverAmount += sellingPrice * item.quantity
-      productSummaryParts.push(`${product.name} x${item.quantity}`)
+      productSummaryParts.push(
+        `${product.name}${resolvedColorName ? ` (${resolvedColorName})` : ""} x${item.quantity}`
+      )
     }
 
     if (serverAmount <= 0) {

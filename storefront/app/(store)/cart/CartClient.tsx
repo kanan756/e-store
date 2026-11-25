@@ -210,7 +210,7 @@ export default function CartClient() {
 
                 return (
                   <div
-                    key={item.productId || item.id}
+                    key={`${item.productId || item.id}::${item.selectedColor?.name || ""}`}
                     className="cart-item"
                     style={{
                       border: isUnavailable
@@ -248,7 +248,23 @@ export default function CartClient() {
                       <div style={{ fontFamily: "var(--font-sora)", fontWeight: 700, fontSize: 16, marginBottom: 4, color: "#17191C" }}>
                         {item.name}
                       </div>
-                      <div style={{ fontSize: 13, color: "#747474", marginBottom: 6 }}>{item.category}</div>
+                      <div style={{ fontSize: 13, color: "#747474", marginBottom: item.selectedColor ? 4 : 6 }}>{item.category}</div>
+                      {item.selectedColor && (
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 6, fontSize: 12.5, fontWeight: 600, color: "#374151" }}>
+                          <span
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: "50%",
+                              backgroundColor: item.selectedColor.hex,
+                              border: "1px solid #D1D5DB",
+                              display: "inline-block",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span>Colour: {item.selectedColor.name}</span>
+                        </div>
+                      )}
                       <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
                         <span style={{ fontSize: 14.5, color: "#F36B12", fontWeight: 800 }}>
                           {formatPrice(item.price)}
@@ -270,6 +286,8 @@ export default function CartClient() {
                             ? "This product is no longer available."
                             : item.unavailableReason === "inactive"
                             ? "This product is currently unavailable."
+                            : item.unavailableReason === "color_unavailable"
+                            ? "Selected colour is unavailable. Please remove it and select another colour."
                             : "Out of stock."}
                         </div>
                       )}
@@ -279,7 +297,7 @@ export default function CartClient() {
                     <div style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", padding: "4px 8px", opacity: isUnavailable ? 0.5 : 1 }}>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1), item.selectedColor?.name ?? null)}
                         disabled={loading || isUnavailable}
                         style={{ color: "#17191C", display: "flex", padding: 4, cursor: isUnavailable ? "not-allowed" : "pointer", background: "none", border: "none" }}
                       >
@@ -290,7 +308,7 @@ export default function CartClient() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedColor?.name ?? null)}
                         disabled={loading || isUnavailable || atMaxStock}
                         title={atMaxStock ? `Max available stock: ${item.stock}` : "Increase quantity"}
                         style={{ color: "#17191C", display: "flex", padding: 4, cursor: isUnavailable || atMaxStock ? "not-allowed" : "pointer", opacity: atMaxStock ? 0.35 : 1, background: "none", border: "none" }}
@@ -306,7 +324,7 @@ export default function CartClient() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => removeItem(item.productId || item.id)}
+                        onClick={() => removeItem(item.productId || item.id, item.selectedColor?.name ?? null)}
                         disabled={loading}
                         aria-label={`Remove ${item.name}`}
                         style={{ color: "var(--text2)", display: "flex", opacity: 0.7, transition: "opacity 0.2s", background: "none", border: "none", cursor: "pointer" }}

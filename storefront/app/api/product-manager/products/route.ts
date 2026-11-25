@@ -43,6 +43,14 @@ const howToStepSchema = z.object({
   instruction: z.string().trim().min(1, "Step instruction is required").max(2000),
 })
 
+const colorVariantSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1, "Colour name is required").max(50),
+  hex: z.string().trim().regex(/^#[0-9a-fA-F]{3,8}$/, "Valid hex colour code is required"),
+  available: z.boolean().default(true),
+  stock: z.number().int().min(0, "Colour stock cannot be negative").optional().nullable(),
+})
+
 const createProductSchema = z
   .object({
     productId: z.string().trim().optional(),
@@ -62,6 +70,21 @@ const createProductSchema = z
     additionalVideos: z.array(videoItemSchema).default([]),
     reviews: z.array(reviewItemSchema).default([]),
     howToUse: z.array(howToStepSchema).default([]),
+    colors: z
+      .array(colorVariantSchema)
+      .default([])
+      .refine(
+        (colors) => {
+          const seen = new Set<string>()
+          for (const c of colors) {
+            const key = c.name.trim().toLowerCase()
+            if (seen.has(key)) return false
+            seen.add(key)
+          }
+          return true
+        },
+        { message: "Duplicate colour names are not allowed." }
+      ),
   })
   .refine(
     (data) => {
@@ -214,6 +237,7 @@ export async function POST(request: Request) {
       additionalVideos: data.additionalVideos,
       reviews: data.reviews,
       howToUse: data.howToUse,
+      colors: data.colors,
       status: data.status,
     })
 

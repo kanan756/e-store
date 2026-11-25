@@ -11,6 +11,12 @@ import React, {
 import { useSession } from "next-auth/react"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+export interface CartSelectedColor {
+  id?: string
+  name: string
+  hex: string
+}
+
 export interface CartItem {
   id: string         // product handle or id
   productId?: string // immutable Google Sheets productId (prod_...)
@@ -23,7 +29,8 @@ export interface CartItem {
   category: string
   stock?: number
   inStock?: boolean
-  unavailableReason?: "deleted" | "inactive" | "out_of_stock" | null
+  selectedColor?: CartSelectedColor | null
+  unavailableReason?: "deleted" | "inactive" | "out_of_stock" | "color_unavailable" | null
 }
 
 export interface CartPriceChange {
@@ -54,8 +61,8 @@ interface CartContextValue {
   confirmPriceChanges: () => void
   syncCart: () => Promise<void>
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
+  removeItem: (id: string, colorName?: string | null) => void
+  updateQuantity: (id: string, quantity: number, colorName?: string | null) => void
   clearCart: () => void
 }
 
@@ -68,9 +75,18 @@ export function useCart(): CartContextValue {
   return ctx
 }
 
-function sameCartItem(a: Pick<CartItem, "id" | "productId">, b: Pick<CartItem, "id" | "productId">): boolean {
-  if (a.productId && b.productId && a.productId === b.productId) return true
-  return a.id === b.id
+function normalizeColorKey(colorName?: string | null): string {
+  return (colorName || "").trim().toLowerCase()
+}
+
+function sameCartItem(
+  a: Pick<CartItem, "id" | "productId" | "selectedColor">,
+  b: Pick<CartItem, "id" | "productId" | "selectedColor">
+): boolean {
+  const productMatches =
+    a.productId && b.productId ? a.productId === b.productId : a.id === b.id
+  if (!productMatches) return false
+  return normalizeColorKey(a.selectedColor?.name) === normalizeColorKey(b.selectedColor?.name)
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────
@@ -109,6 +125,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             productId: i.productId,
             price: i.price,
             quantity: i.quantity,
+            selectedColor: i.selectedColor ?? null,
           })),
         }),
       })
@@ -120,13 +137,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const detectedPriceChanges: CartPriceChange[] = []
       const detectedStockAdjustments: CartStockAdjustment[] = []
 
-      const updated: CartItem[] = target.map((existing) => {
-        const match = data.items.find(
-          (s: any) =>
-            (existing.productId && s.productId === existing.productId) ||
-            s.legacyId === existing.id ||
-            s.id === existing.id
-        )
+      const updated: CartItem[] = target.map((existing, idx) => {
+        const existingColorKey = normalizeColorKey(existing.selectedColor?.name)
+        const match =
+          data.items[idx] ??
+          data.items.find(
+            (s: any) =>
+              ((existing.productId && s.productId === existing.productId) ||
+                s.legacyId === existing.id ||
+                s.id === existing.id) &&
+              normalizeColorKey(s.selectedColor?.name) === existingColorKey
+          )
         if (!match) return existing
 
         if (match.priceChanged && match.found) {
@@ -169,6 +190,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           price: match.price,
           stock: match.stock,
           inStock: match.available,
+          selectedColor: match.selectedColor !== undefined ? match.selectedColor : existing.selectedColor,
           unavailableReason: match.unavailableReason ?? null,
           quantity: match.stockAdjusted ? match.adjustedQuantity : existing.quantity,
         }
@@ -282,18 +304,38 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
-  const removeItem = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id && i.productId !== id))
+  const removeItem = useCallback((id: string, colorName?: string | null) => {
+    const targetColorKey = normalizeColorKey(colorName)
+    setItems((prev) =>
+      prev.filter((i) => {
+        const matchesId = i.id === id || i.productId === id
+        if (!matchesId) return true
+        if (colorName !== undefined) {
+          return normalizeColorKey(i.selectedColor?.name) !== targetColorKey
+        }
+        return false
+      })
+    )
     setPriceChanges((prev) => prev.filter((c) => c.id !== id && c.productId !== id))
   }, [])
 
-  const updateQuantity = useCallback((id: string, quantity: number) => {
+  const updateQuantity = useCallback((id: string, quantity: number, colorName?: string | null) => {
+    const targetColorKey = normalizeColorKey(colorName)
+    const matchesTarget = (i: CartItem) => {
+      const matchesId = i.id === id || i.productId === id
+      if (!matchesId) return false
+      if (colorName !== undefined) {
+        return normalizeColorKey(i.selectedColor?.name) === targetColorKey
+      }
+      return true
+    }
+
     if (quantity < 1) {
-      setItems((prev) => prev.filter((i) => i.id !== id && i.productId !== id))
+      setItems((prev) => prev.filter((i) => !matchesTarget(i)))
     } else {
       setItems((prev) =>
         prev.map((i) => {
-          if (i.id !== id && i.productId !== id) return i
+          if (!matchesTarget(i)) return i
           const capped = i.stock != null && i.stock > 0 ? Math.min(quantity, i.stock) : quantity
           return { ...i, quantity: capped }
         })
