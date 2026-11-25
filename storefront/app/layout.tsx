@@ -1,31 +1,6 @@
 import type { Metadata } from "next"
-import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google"
 import "@/styles/globals.css"
 import Providers from "@/components/Providers"
-
-// Display / headline font — tight tracking, bold weights
-const hanken = Hanken_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-sora",   // keep same CSS var name — no component changes needed
-  display: "swap",
-})
-
-// Body copy — exceptional legibility across locales
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-dm-sans", // keep same CSS var name — no component changes needed
-  display: "swap",
-})
-
-// Labels, metadata, technical specs — "Precision" brand pillar
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-mono",
-  display: "swap",
-})
 
 
 export const metadata: Metadata = {
@@ -60,6 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG1DPLRRCB"></script>
         <script dangerouslySetInnerHTML={{
@@ -71,7 +52,7 @@ export default function RootLayout({
           `
         }} />
       </head>
-      <body suppressHydrationWarning className={`${hanken.variable} ${inter.variable} ${mono.variable}`}>
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
