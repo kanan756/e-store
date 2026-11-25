@@ -29,6 +29,7 @@ export default function LoginClient() {
   const registered = searchParams.get("registered")
   const resetSuccess = searchParams.get("reset")
   const messageParam = searchParams.get("message")
+  const errorParam = searchParams.get("error")
   const callbackUrl = searchParams.get("callbackUrl") || "/account"
 
   const [email, setEmail] = useState("")
@@ -51,7 +52,18 @@ export default function LoginClient() {
     if (messageParam) {
       setInfoMessage(messageParam)
     }
-  }, [registered, resetSuccess, messageParam])
+    if (errorParam) {
+      const errorMessages: Record<string, string> = {
+        OAuthSignin: "Could not start Google Sign-In. Verify GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.local.",
+        OAuthCallback: "Google authentication failed during callback. Verify the authorized redirect URI in Google Cloud Console.",
+        OAuthCreateAccount: "Could not create your account from Google Sign-In. Please try again.",
+        OAuthAccountNotLinked: "This email is already registered with another sign-in method.",
+        AccessDenied: "Google Sign-In was cancelled or access was denied.",
+        Configuration: "Authentication configuration error. Please check server environment variables.",
+      }
+      setError(errorMessages[errorParam] || "Authentication failed. Please try again.")
+    }
+  }, [registered, resetSuccess, messageParam, errorParam])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -82,8 +94,18 @@ export default function LoginClient() {
   }
 
   const handleGoogleLogin = async () => {
+    setError("")
     setGoogleLoading(true)
-    await signIn("google", { callbackUrl: callbackUrl || "/account" })
+    try {
+      const res = await signIn("google", { callbackUrl: callbackUrl || "/account" })
+      if (res?.error) {
+        setError("Google Sign-In failed. Please check your Google OAuth configuration and try again.")
+        setGoogleLoading(false)
+      }
+    } catch {
+      setError("Unable to connect to Google Sign-In. Please try again.")
+      setGoogleLoading(false)
+    }
   }
 
   return (

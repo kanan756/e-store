@@ -17,6 +17,18 @@ async function generateUniqueUsername(base: string): Promise<string> {
   return candidate
 }
 
+const googleClientId = (process.env.GOOGLE_CLIENT_ID ?? "").replace(/^["']|["']$/g, "").trim()
+const googleClientSecret = (process.env.GOOGLE_CLIENT_SECRET ?? "").replace(/^["']|["']$/g, "").trim()
+
+export function isGoogleOAuthConfigured(): boolean {
+  return Boolean(
+    googleClientId &&
+      googleClientSecret &&
+      !/your_|placeholder|xxxx/i.test(googleClientId) &&
+      !/your_|placeholder|xxxx/i.test(googleClientSecret)
+  )
+}
+
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -64,8 +76,14 @@ export const authOptions: AuthOptions = {
       },
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+      allowDangerousEmailAccountLinking: true,
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
     }),
   ],
   pages: {
@@ -103,12 +121,19 @@ export const authOptions: AuthOptions = {
               updatedAt: now,
             })
 
+            user.id = userId
+            ;(user as any).username = uniqueUsername
+
             await logUserActivity(
               userId,
               "USER_REGISTER_GOOGLE",
               `Created account via Google OAuth (${email})`
             ).catch(() => {})
           } else {
+            user.id = existing.userId
+            if (existing.fullName) user.name = existing.fullName
+            ;(user as any).username = existing.username
+
             // Update profile image if missing
             if (user.image && !existing.profileImage) {
               await updateUser(existing.userId, { profileImage: user.image })
@@ -122,6 +147,7 @@ export const authOptions: AuthOptions = {
           }
         } catch (err) {
           console.error("Google signIn callback error:", err)
+          return false
         }
       }
       return true
