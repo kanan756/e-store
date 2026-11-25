@@ -81,13 +81,18 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   const outOfStock = product.inStock === false
 
   // Compute pricing with discount support from Product Manager
-  const regularPrice = Number(product.price) || 0
-  const rawDiscount = product.discountPrice ? Number(product.discountPrice) : null
-  const hasDiscount = Boolean(rawDiscount !== null && rawDiscount > 0 && rawDiscount < regularPrice)
-  const sellingPrice = hasDiscount ? rawDiscount! : regularPrice
+  const regularPrice = Number.isFinite(Number(product.price)) ? Number(product.price) : 0
+  const parsedDiscount =
+    product.discountPrice != null && Number.isFinite(Number(product.discountPrice))
+      ? Number(product.discountPrice)
+      : null
+  const hasDiscount = Boolean(
+    parsedDiscount !== null && parsedDiscount > 0 && parsedDiscount < regularPrice
+  )
+  const sellingPrice = hasDiscount ? parsedDiscount! : regularPrice
   const originalPrice = hasDiscount ? regularPrice : 0
   const discountPercent = hasDiscount
-    ? Math.round(((regularPrice - rawDiscount!) / regularPrice) * 100)
+    ? Math.round(((regularPrice - parsedDiscount!) / regularPrice) * 100)
     : 0
   const hasPrice = sellingPrice > 0
 
@@ -352,9 +357,9 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         )}
 
         {/* Price Row */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: "auto", marginBottom: 16 }}>
-          <span style={{ fontSize: "18px", fontWeight: 900, color: "#17191C", fontFamily: "var(--font-sora), sans-serif" }}>
-            {hasPrice ? formatPrice(product.price) : "Contact for Price"}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: "auto", marginBottom: 16, flexWrap: "wrap" }}>
+          <span style={{ fontSize: "18px", fontWeight: 900, color: hasDiscount ? "#F36B12" : "#17191C", fontFamily: "var(--font-sora), sans-serif" }}>
+            {hasPrice ? formatPrice(sellingPrice) : "Contact for Price"}
           </span>
 
           {hasPrice && originalPrice > 0 && (
