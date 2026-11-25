@@ -601,7 +601,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       </section>
 
       {/* ── 2. TABBED CONTENT SECTION (Single Container with 3 Tabs) ── */}
-      <section id="pd-tabs-container" style={{ padding: "48px 0 130px", background: "#FAFAFA" }}>
+      <section id="pd-tabs-container" style={{ padding: "48px 0 48px", background: "#FAFAFA" }}>
         <div className="W">
           <div
             style={{
@@ -988,6 +988,138 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. NATURAL-FLOW BOTTOM ORDER SECTION (Scrolls normally with page) ── */}
+      <section aria-label="Bottom order summary" style={{ padding: "36px 0 72px", background: "#FFFFFF", borderTop: "1px solid #E5E5E5" }}>
+        <div className="W">
+          <div
+            style={{
+              background: "#FAFAFA",
+              border: "1px solid #E5E5E5",
+              borderRadius: 14,
+              padding: "24px 28px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 24,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                  Product Price
+                </div>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                  <span style={{ fontSize: 18, fontWeight: 800, color: "#17191C" }}>
+                    {effectivePrice > 0 ? formatPrice(effectivePrice) : "N/A"}
+                  </span>
+                  {hasDiscount && (
+                    <span style={{ fontSize: 13.5, color: "#9CA3AF", textDecoration: "line-through" }}>
+                      {formatPrice(product.price)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {!isInactive && !isOutOfStock && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "#303638" }}>
+                    Quantity:
+                  </span>
+                  <div style={{ display: "inline-flex", alignItems: "center", border: "1px solid #E5E5E5", borderRadius: 6, background: "#FFFFFF", overflow: "hidden" }}>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      aria-label="Decrease quantity"
+                      style={{ width: 36, height: 36, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                    >
+                      -
+                    </button>
+                    <span style={{ minWidth: 38, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: "#17191C" }}>
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(maxStock, q + 1))}
+                      aria-label="Increase quantity"
+                      style={{ width: 36, height: 36, background: "#FFF0E5", border: "none", color: "#D9570A", fontSize: 16, cursor: "pointer", fontWeight: 700 }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                  Shipping
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#303638" }}>
+                  {formatPrice(shippingCharge)}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
+                  Final Total
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: "#F36B12" }}>
+                  {totalWithShipping > 0 ? formatPrice(totalWithShipping) : "Contact for price"}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={adding || isOutOfStock || isInactive}
+                style={{
+                  padding: "13px 24px",
+                  borderRadius: 8,
+                  background: isInactive || isOutOfStock ? "#F5F5F5" : "#F36B12",
+                  color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
+                  border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #F36B12",
+                  fontWeight: 700,
+                  fontSize: 14.5,
+                  cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
+                  minHeight: 44,
+                }}
+              >
+                {isInactive
+                  ? "Unavailable"
+                  : isOutOfStock
+                  ? "Out of Stock"
+                  : added
+                  ? "✓ Added to Cart"
+                  : adding
+                  ? "Adding…"
+                  : "Add to Cart"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePlaceOrder}
+                disabled={placingOrder || isOutOfStock || isInactive}
+                style={{
+                  padding: "13px 24px",
+                  borderRadius: 8,
+                  background: isInactive || isOutOfStock ? "#F5F5F5" : "#303638",
+                  color: isInactive || isOutOfStock ? "#747474" : "#FFFFFF",
+                  border: isInactive || isOutOfStock ? "1px solid #E5E5E5" : "1px solid #303638",
+                  fontWeight: 700,
+                  fontSize: 14.5,
+                  cursor: isInactive || isOutOfStock ? "not-allowed" : "pointer",
+                  minHeight: 44,
+                }}
+              >
+                {placingOrder ? "Redirecting…" : "Place Order"}
+              </button>
             </div>
           </div>
         </div>
