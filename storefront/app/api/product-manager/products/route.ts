@@ -65,6 +65,11 @@ const createProductSchema = z
     discountPrice: z.number().min(0, "Discounted price cannot be negative").optional().nullable(),
     activeStock: z.number().int().min(0, "Active stock cannot be negative").optional(),
     stock: z.number().int().min(0, "Stock cannot be negative").optional(),
+    length: z.number().positive("Length must be a positive number (cm)"),
+    width: z.number().positive("Width must be a positive number (cm)"),
+    height: z.number().positive("Height must be a positive number (cm)"),
+    actualWeight: z.number().positive("Actual weight must be a positive number"),
+    weightUnit: z.enum(["g", "kg"]).default("g"),
     status: z.enum(["Active", "Inactive"]).default("Active"),
     primaryImage: z.string().optional(),
     additionalImages: z.array(mediaItemSchema).default([]),
@@ -252,6 +257,11 @@ export async function POST(request: Request) {
       howToUse: data.howToUse,
       colors: normalizedColors,
       status: data.status,
+      length: data.length,
+      width: data.width,
+      height: data.height,
+      actualWeight: data.actualWeight,
+      weightUnit: data.weightUnit,
     })
 
     revalidatePath("/")

@@ -5,12 +5,12 @@
  * @description Manages the shopping cart user interface with live server synchronization.
  */
 
-import { useEffect } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
-import { formatPrice, FLAT_SHIPPING_INR } from "@/lib/format"
+import { formatPrice } from "@/lib/format"
 
 function ArrowIcon() {
   return (
@@ -49,6 +49,97 @@ export default function CartClient() {
     removeItem,
     updateQuantity,
   } = useCart()
+
+  // Delhivery Shipping Calculation State
+  const [deliveryPincode, setDeliveryPincode] = useState("")
+  const [shippingCharge, setShippingCharge] = useState<number | null>(null)
+  const [shippingLoading, setShippingLoading] = useState(false)
+  const [shippingError, setShippingError] = useState<string | null>(null)
+  const [shippingDetails, setShippingDetails] = useState<{
+    chargeableWeightGrams?: number
+    dimensions?: { length: number; width: number; height: number }
+  } | null>(null)
+
+  // Load saved delivery pincode on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("claspo_delivery_pincode") || localStorage.getItem("claspo_delivery_pincode")
+      if (saved && /^[1-9][0-9]{5}$/.test(saved)) {
+        setDeliveryPincode(saved)
+      }
+    } catch {}
+  }, [])
+
+  // Live Delhivery rate calculation when valid 6-digit PIN code or cart items/quantities change
+  useEffect(() => {
+    const cleanPin = deliveryPincode.trim()
+    if (!/^[1-9][0-9]{5}$/.test(cleanPin)) {
+      setShippingCharge(null)
+      setShippingError(null)
+      setShippingDetails(null)
+      return
+    }
+
+    if (items.length === 0 || subtotal <= 0) {
+      setShippingCharge(null)
+      setShippingError(null)
+      setShippingDetails(null)
+      return
+    }
+
+    let active = true
+    const timer = setTimeout(async () => {
+      setShippingLoading(true)
+      setShippingError(null)
+
+      try {
+        const res = await fetch("/api/shipping/calculate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pincode: cleanPin,
+            items: items.map((i) => ({
+              productId: i.productId || i.id,
+              handle: i.id,
+              quantity: i.quantity,
+            })),
+          }),
+        })
+
+        const data = await res.json()
+        if (!active) return
+
+        if (!res.ok || !data.success) {
+          setShippingCharge(null)
+          setShippingDetails(null)
+          setShippingError(data.error || "Unable to calculate shipping charges. Please try again.")
+        } else {
+          setShippingCharge(data.shippingCharge)
+          setShippingDetails({
+            chargeableWeightGrams: data.chargeableWeightGrams,
+            dimensions: data.dimensions,
+          })
+          setShippingError(null)
+          try {
+            sessionStorage.setItem("claspo_delivery_pincode", cleanPin)
+            localStorage.setItem("claspo_delivery_pincode", cleanPin)
+          } catch {}
+        }
+      } catch {
+        if (!active) return
+        setShippingCharge(null)
+        setShippingDetails(null)
+        setShippingError("Unable to calculate shipping charges. Please try again.")
+      } finally {
+        if (active) setShippingLoading(false)
+      }
+    }, 400)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [deliveryPincode, items, subtotal])
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -125,7 +216,7 @@ export default function CartClient() {
             </ul>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
               <span style={{ fontSize: 13.5, color: "#303638", fontWeight: 600 }}>
-                Your cart total has been updated to {formatPrice(subtotal + FLAT_SHIPPING_INR)}. Please confirm before proceeding to checkout.
+                Your cart total has been updated to {formatPrice(subtotal + (shippingCharge ?? 0))}. Please confirm before proceeding to checkout.
               </span>
               <button
                 type="button"
@@ -347,15 +438,79 @@ export default function CartClient() {
                 <span style={{ color: "var(--text2)" }}>Subtotal</span>
                 <span style={{ fontWeight: 700 }}>{formatPrice(subtotal)}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24, fontSize: 13, color: "var(--text2)" }}>
-                <span>Shipping (Flat Rate)</span>
-                <span>{formatPrice(subtotal > 0 ? FLAT_SHIPPING_INR : 0)}</span>
+
+              {/* Delivery PIN Code Input */}
+              <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--bg)", borderRadius: 10, border: "1px solid var(--bd)" }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--text2)", marginBottom: 6 }}>
+                  Delivery PIN Code (Delhivery)
+                </label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="Enter 6-digit PIN"
+                    value={deliveryPincode}
+                    onChange={(e) => setDeliveryPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      borderRadius: 6,
+                      border: "1px solid var(--bd)",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      background: "var(--cBg)",
+                      color: "var(--text)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+                {deliveryPincode.length > 0 && deliveryPincode.length < 6 && (
+                  <span style={{ fontSize: 11, color: "var(--text2)", marginTop: 4, display: "block" }}>
+                    Enter complete 6-digit PIN code
+                  </span>
+                )}
               </div>
 
-              <div style={{ borderTop: "1px solid var(--bd)", paddingTop: 20, marginBottom: 24, display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
+              {/* Shipping Row */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 20, fontSize: 13 }}>
+                <span style={{ color: "var(--text2)", flexShrink: 0 }}>
+                  Shipping {shippingCharge !== null ? "(Delhivery)" : ""}
+                </span>
+                <span style={{ textAlign: "right" }}>
+                  {shippingLoading ? (
+                    <span style={{ color: "var(--text2)", fontStyle: "italic" }}>Calculating shipping…</span>
+                  ) : shippingCharge !== null ? (
+                    <div>
+                      <span style={{ fontWeight: 700, color: "var(--text)" }}>{formatPrice(shippingCharge)}</span>
+                      {shippingDetails?.chargeableWeightGrams && (
+                        <div style={{ fontSize: 10.5, color: "var(--text2)", marginTop: 2 }}>
+                          Chargeable: {(shippingDetails.chargeableWeightGrams / 1000).toFixed(2)} kg
+                        </div>
+                      )}
+                    </div>
+                  ) : shippingError ? (
+                    <span style={{ color: "#DC2626", fontWeight: 600, fontSize: 12 }}>
+                      {shippingError}
+                    </span>
+                  ) : (
+                    <span style={{ color: "var(--text2)", fontStyle: "italic", fontSize: 12 }}>
+                      Enter delivery PIN code to calculate shipping.
+                    </span>
+                  )}
+                </span>
+              </div>
+
+              <div style={{ borderTop: "1px solid var(--bd)", paddingTop: 20, marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div>
+                  <span style={{ fontFamily: "var(--font-sora)", fontWeight: 700 }}>Total</span>
+                  {shippingCharge === null && (
+                    <div style={{ fontSize: 10.5, color: "var(--text2)", marginTop: 2 }}>
+                      *Excluding shipping charges
+                    </div>
+                  )}
+                </div>
                 <span style={{ fontFamily: "var(--font-sora)", fontWeight: 800, fontSize: 22, color: "var(--acc)" }}>
-                  {formatPrice(subtotal > 0 ? subtotal + FLAT_SHIPPING_INR : 0)}
+                  {formatPrice(subtotal > 0 ? subtotal + (shippingCharge ?? 0) : 0)}
                 </span>
               </div>
 

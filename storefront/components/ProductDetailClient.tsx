@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCart } from "@/context/cart-context"
 import type { Product, ProductReviewItem } from "@/lib/sheets"
-import { formatPrice, FLAT_SHIPPING_INR } from "@/lib/format"
+import { formatPrice } from "@/lib/format"
 
 export interface UnifiedMediaItem {
   type: "image" | "video"
@@ -312,8 +312,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const baseMaxStock = product.stock && product.stock > 0 ? product.stock : 999
   const maxStock = selectedColor?.stock != null ? Math.min(baseMaxStock, Math.max(1, selectedColor.stock)) : baseMaxStock
   const itemsSubtotal = effectivePrice * quantity
-  const shippingCharge = FLAT_SHIPPING_INR
-  const totalWithShipping = effectivePrice > 0 ? itemsSubtotal + shippingCharge : 0
+  const totalSubtotal = effectivePrice > 0 ? itemsSubtotal : 0
 
   const handleAddToCart = useCallback(() => {
     if (availableColors.length > 0 && !selectedColor) {
@@ -718,7 +717,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   </div>
                 )}
                 <div style={{ fontSize: 12.5, color: "#747474", marginTop: 4 }}>
-                  Price in INR (₹) • Flat shipping {formatPrice(shippingCharge)}
+                  Price in INR (₹) • Shipping calculated at checkout by PIN code
                 </div>
               </div>
 
@@ -1388,17 +1387,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
                   Shipping
                 </div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#303638" }}>
-                  {formatPrice(shippingCharge)}
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#4B5563" }}>
+                  By PIN at checkout
                 </div>
               </div>
 
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#747474" }}>
-                  Final Total
+                  Subtotal
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 900, color: "#F36B12" }}>
-                  {totalWithShipping > 0 ? formatPrice(totalWithShipping) : "Contact for price"}
+                  {totalSubtotal > 0 ? formatPrice(totalSubtotal) : "Contact for price"}
                 </div>
               </div>
             </div>
@@ -1582,17 +1581,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#747474" }}>
                   Shipping
                 </div>
-                <div style={{ fontSize: 14.5, fontWeight: 700, color: "#303638" }}>
-                  {formatPrice(shippingCharge)}
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#4B5563" }}>
+                  At checkout
                 </div>
               </div>
 
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#747474" }}>
-                  Total (incl. shipping)
+                  Subtotal
                 </div>
                 <div style={{ fontSize: 20, fontWeight: 900, color: "#F36B12" }}>
-                  {totalWithShipping > 0 ? formatPrice(totalWithShipping) : "Contact for price"}
+                  {totalSubtotal > 0 ? formatPrice(totalSubtotal) : "Contact for price"}
                 </div>
               </div>
             </div>

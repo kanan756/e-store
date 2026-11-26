@@ -98,6 +98,14 @@ export async function POST(request: Request) {
         userId,
         subtotal,
         shippingCharge,
+        deliveryPincode,
+        shippingProvider,
+        shipmentActualWeight,
+        shipmentChargeableWeight,
+        shipmentDimensions,
+        shippingCalculationDate,
+        shippingAddress: metadataShippingAddress,
+        phoneNumber: metadataPhone,
       } = session.metadata || {}
 
       if (!customerName || !email) {
@@ -157,12 +165,14 @@ export async function POST(request: Request) {
 
       const shippingDetails = (session as any).shipping_details || session.customer_details
       const addrObj = shippingDetails?.address
-      const formattedAddress = addrObj
-        ? [addrObj.line1, addrObj.line2, addrObj.city, addrObj.state, addrObj.postal_code, addrObj.country]
-            .filter(Boolean)
-            .join(", ")
-        : ""
-      const phoneNumber = session.customer_details?.phone || ""
+      const formattedAddress =
+        metadataShippingAddress ||
+        (addrObj
+          ? [addrObj.line1, addrObj.line2, addrObj.city, addrObj.state, addrObj.postal_code, addrObj.country]
+              .filter(Boolean)
+              .join(", ")
+          : "")
+      const phoneNumber = metadataPhone || session.customer_details?.phone || ""
 
       try {
         await appendOrder({
@@ -182,6 +192,12 @@ export async function POST(request: Request) {
           paymentStatus: "Paid",
           orderStatus: "Pending",
           paymentId: paymentIntentId,
+          deliveryPincode: deliveryPincode || addrObj?.postal_code || undefined,
+          shippingProvider: shippingProvider || "Delhivery",
+          shipmentActualWeight: shipmentActualWeight ? Number(shipmentActualWeight) : undefined,
+          shipmentChargeableWeight: shipmentChargeableWeight ? Number(shipmentChargeableWeight) : undefined,
+          shipmentDimensions: shipmentDimensions || undefined,
+          shippingCalculationDate: shippingCalculationDate || undefined,
         })
       } catch (orderErr) {
         // Roll back reserved stock if order creation fails so stock & orders never go inconsistent

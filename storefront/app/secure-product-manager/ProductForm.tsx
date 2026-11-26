@@ -69,6 +69,27 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     initialData?.status === "Inactive" ? "Inactive" : "Active"
   )
 
+  // Delhivery Shipping Dimensions & Weight State
+  const [length, setLength] = useState(
+    initialData?.length != null ? initialData.length.toString() : ""
+  )
+  const [width, setWidth] = useState(
+    initialData?.width != null ? initialData.width.toString() : ""
+  )
+  const [height, setHeight] = useState(
+    initialData?.height != null ? initialData.height.toString() : ""
+  )
+  const [actualWeight, setActualWeight] = useState(
+    initialData?.actualWeight != null ? initialData.actualWeight.toString() : ""
+  )
+  const [weightUnit, setWeightUnit] = useState<"g" | "kg">(
+    (initialData?.weightUnit as "g" | "kg") === "kg" ? "kg" : "g"
+  )
+  const [lengthError, setLengthError] = useState("")
+  const [widthError, setWidthError] = useState("")
+  const [heightError, setHeightError] = useState("")
+  const [weightError, setWeightError] = useState("")
+
   // Media State
   const [images, setImages] = useState<ProductMediaItem[]>(() => {
     if (initialData?.additionalImages && initialData.additionalImages.length > 0) {
@@ -573,6 +594,48 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
       return
     }
 
+    // Validate Package Dimensions and Weight (Mandatory for shippable products)
+    const parsedLength = parseFloat(length)
+    const parsedWidth = parseFloat(width)
+    const parsedHeight = parseFloat(height)
+    const parsedWeight = parseFloat(actualWeight)
+
+    let hasShippingError = false
+    if (!length || isNaN(parsedLength) || parsedLength <= 0) {
+      setLengthError("Length must be a positive number in cm.")
+      hasShippingError = true
+    } else {
+      setLengthError("")
+    }
+
+    if (!width || isNaN(parsedWidth) || parsedWidth <= 0) {
+      setWidthError("Width must be a positive number in cm.")
+      hasShippingError = true
+    } else {
+      setWidthError("")
+    }
+
+    if (!height || isNaN(parsedHeight) || parsedHeight <= 0) {
+      setHeightError("Height must be a positive number in cm.")
+      hasShippingError = true
+    } else {
+      setHeightError("")
+    }
+
+    if (!actualWeight || isNaN(parsedWeight) || parsedWeight <= 0) {
+      setWeightError("Weight must be a positive number.")
+      hasShippingError = true
+    } else {
+      setWeightError("")
+    }
+
+    if (hasShippingError) {
+      setErrorMessage("Please provide valid positive package dimensions and product weight.")
+      const el = document.getElementById("pm-shipping-card")
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -599,6 +662,11 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         reviews,
         howToUse: howToUse.map((s, idx) => ({ ...s, stepNumber: idx + 1 })),
         colors,
+        length: parsedLength,
+        width: parsedWidth,
+        height: parsedHeight,
+        actualWeight: parsedWeight,
+        weightUnit,
       }
 
       const endpoint = isEdit
@@ -1848,6 +1916,156 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                     ⚠️ Passive stock is 0: Product will show as Out of Stock to customers.
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Shipping & Dimensions Card */}
+            <div id="pm-shipping-card" className="pm-card" style={{ padding: "24px", marginBottom: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 18 }}>📦</span>
+                <h2 style={{ fontSize: 15, fontWeight: 800, color: "#17191C", margin: 0 }}>
+                  Shipping &amp; Dimensions
+                </h2>
+              </div>
+              <p style={{ fontSize: 12, color: "#6B7280", margin: "4px 0 16px" }}>
+                Mandatory for Delhivery shipping rate calculations. Enter positive values.
+              </p>
+
+              {/* Dimensions (cm) */}
+              <div style={{ marginBottom: 16 }}>
+                <label className="pm-label" style={{ marginBottom: 6 }}>
+                  Package Dimensions (cm) *
+                </label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                  <div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#4B5563", display: "block", marginBottom: 3 }}>
+                      Length (cm)
+                    </span>
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      className="pm-input"
+                      placeholder="e.g. 20"
+                      value={length}
+                      onChange={(e) => {
+                        setLength(e.target.value)
+                        if (parseFloat(e.target.value) > 0) setLengthError("")
+                      }}
+                      style={lengthError ? { borderColor: "#DC2626", background: "#FEF2F2" } : undefined}
+                      required
+                    />
+                    {lengthError && (
+                      <span style={{ fontSize: 11, color: "#DC2626", fontWeight: 700, marginTop: 3, display: "block" }}>
+                        {lengthError}
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#4B5563", display: "block", marginBottom: 3 }}>
+                      Width (cm)
+                    </span>
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      className="pm-input"
+                      placeholder="e.g. 15"
+                      value={width}
+                      onChange={(e) => {
+                        setWidth(e.target.value)
+                        if (parseFloat(e.target.value) > 0) setWidthError("")
+                      }}
+                      style={widthError ? { borderColor: "#DC2626", background: "#FEF2F2" } : undefined}
+                      required
+                    />
+                    {widthError && (
+                      <span style={{ fontSize: 11, color: "#DC2626", fontWeight: 700, marginTop: 3, display: "block" }}>
+                        {widthError}
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#4B5563", display: "block", marginBottom: 3 }}>
+                      Height (cm)
+                    </span>
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      className="pm-input"
+                      placeholder="e.g. 10"
+                      value={height}
+                      onChange={(e) => {
+                        setHeight(e.target.value)
+                        if (parseFloat(e.target.value) > 0) setHeightError("")
+                      }}
+                      style={heightError ? { borderColor: "#DC2626", background: "#FEF2F2" } : undefined}
+                      required
+                    />
+                    {heightError && (
+                      <span style={{ fontSize: 11, color: "#DC2626", fontWeight: 700, marginTop: 3, display: "block" }}>
+                        {heightError}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actual Product Weight */}
+              <div style={{ marginBottom: 12 }}>
+                <label className="pm-label" style={{ marginBottom: 6 }}>
+                  Actual Product Weight *
+                </label>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 10 }}>
+                  <div>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="any"
+                      className="pm-input"
+                      placeholder="e.g. 500"
+                      value={actualWeight}
+                      onChange={(e) => {
+                        setActualWeight(e.target.value)
+                        if (parseFloat(e.target.value) > 0) setWeightError("")
+                      }}
+                      style={weightError ? { borderColor: "#DC2626", background: "#FEF2F2" } : undefined}
+                      required
+                    />
+                    {weightError && (
+                      <span style={{ fontSize: 11, color: "#DC2626", fontWeight: 700, marginTop: 3, display: "block" }}>
+                        {weightError}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <select
+                      className="pm-input"
+                      value={weightUnit}
+                      onChange={(e) => setWeightUnit(e.target.value as "g" | "kg")}
+                      style={{ cursor: "pointer", fontWeight: 600 }}
+                    >
+                      <option value="g">Grams (g)</option>
+                      <option value="kg">Kilograms (kg)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: 11.5,
+                  color: "#4B5563",
+                  background: "#F3F4F6",
+                  padding: "8px 10px",
+                  borderRadius: 6,
+                  lineHeight: 1.5,
+                }}
+              >
+                Volumetric divisor: 5000 cm³/kg. Delhivery charges by the higher of actual weight or volumetric weight.
               </div>
             </div>
 

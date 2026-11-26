@@ -418,11 +418,21 @@ export default function OrderDetailClient({
 
         <div className="pm-card" style={{ padding: 20 }}>
           <h2 style={{ fontSize: 14, fontWeight: 800, color: "#6B7280", textTransform: "uppercase", margin: "0 0 12px" }}>
-            Delivery Address
+            Delivery Address &amp; Shipping
           </h2>
-          <div style={{ fontSize: 13.5, color: "#374151", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+          <div style={{ fontSize: 13.5, color: "#374151", lineHeight: 1.6, whiteSpace: "pre-line", marginBottom: 10 }}>
             {order.shippingAddress || "Address collected via Stripe Checkout / Not provided"}
           </div>
+          {(order.shippingProvider || order.deliveryPincode || order.shipmentChargeableWeight) && (
+            <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #E5E7EB", fontSize: 12.5, color: "#4B5563", lineHeight: 1.6 }}>
+              <div>Carrier: <strong>{order.shippingProvider || "Delhivery"}</strong></div>
+              {order.deliveryPincode && <div>PIN Code: <strong>{order.deliveryPincode}</strong></div>}
+              {order.shipmentChargeableWeight != null && (
+                <div>Chargeable Wt: <strong>{order.shipmentChargeableWeight} g</strong></div>
+              )}
+              {order.shipmentDimensions && <div>Package Dims: <strong>{order.shipmentDimensions}</strong></div>}
+            </div>
+          )}
         </div>
 
         <div className="pm-card" style={{ padding: 20 }}>

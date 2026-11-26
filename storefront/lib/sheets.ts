@@ -144,6 +144,12 @@ export const REQUIRED_SHEETS = {
     "collectedAt",
     "lastStatusUpdatedAt",
     "lastStatusUpdatedBy",
+    "deliveryPincode",
+    "shippingProvider",
+    "shipmentActualWeight",
+    "shipmentChargeableWeight",
+    "shipmentDimensions",
+    "shippingCalculationDate",
   ],
   OrderStatusHistory: [
     "historyId",
@@ -210,6 +216,11 @@ export const STORE_SHEETS = {
     "howToUse",
     "colors",
     "activeStock",
+    "length",
+    "width",
+    "height",
+    "actualWeight",
+    "weightUnit",
   ],
   Blogs: [
     "title",
@@ -315,6 +326,13 @@ export interface Order {
   collectedAt?: string
   lastStatusUpdatedAt?: string
   lastStatusUpdatedBy?: string
+  // Delhivery shipping integration fields
+  deliveryPincode?: string
+  shippingProvider?: string
+  shipmentActualWeight?: number
+  shipmentChargeableWeight?: number
+  shipmentDimensions?: string
+  shippingCalculationDate?: string
 }
 
 export interface OrderStatusHistoryItem {
@@ -427,6 +445,12 @@ export interface Product {
   status?: "Active" | "Inactive" | string
   createdAt?: string
   updatedAt?: string
+  // Delhivery shipping & package dimensions
+  length?: number
+  width?: number
+  height?: number
+  actualWeight?: number
+  weightUnit?: "g" | "kg" | string
 }
 
 export interface Blog {
@@ -559,6 +583,34 @@ export async function ensureAllSheetsInitialized(): Promise<void> {
         const title = allTitles[i]
         const columns = allDefinitions[title]
         const currentHeaders = valueRanges[i]?.values?.[0] ?? []
+
+        // Ensure grid has enough columns before updating header ranges
+        const sheetObj = existingSheetList.find((s) => s.properties?.title === title)
+        const currentColCount = sheetObj?.properties?.gridProperties?.columnCount ?? 26
+        if (currentColCount < columns.length && sheetObj?.properties?.sheetId !== undefined) {
+          try {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId,
+              requestBody: {
+                requests: [
+                  {
+                    updateSheetProperties: {
+                      properties: {
+                        sheetId: sheetObj.properties.sheetId,
+                        gridProperties: {
+                          columnCount: Math.max(columns.length + 10, 40),
+                        },
+                      },
+                      fields: "gridProperties.columnCount",
+                    },
+                  },
+                ],
+              },
+            })
+          } catch {
+            // ignore if already expanded or concurrent
+          }
+        }
 
         if (currentHeaders.length === 0) {
           await sheets.spreadsheets.values.update({
@@ -1322,6 +1374,12 @@ export async function appendOrder(orderData: {
   orderStatus?: string
   transactionId?: string
   paymentId?: string
+  deliveryPincode?: string
+  shippingProvider?: string
+  shipmentActualWeight?: number
+  shipmentChargeableWeight?: number
+  shipmentDimensions?: string
+  shippingCalculationDate?: string
 }): Promise<string> {
   const orderId = orderData.orderId || `ORD-${Date.now()}`
   const orderNumber = orderData.orderNumber || `CLS-${Date.now().toString().slice(-6)}`
@@ -1374,6 +1432,12 @@ export async function appendOrder(orderData: {
     comments: transactionId ? `Payment ID: ${transactionId}` : "",
     createdAt: now,
     updatedAt: now,
+    deliveryPincode: orderData.deliveryPincode || "",
+    shippingProvider: orderData.shippingProvider || "Delhivery",
+    shipmentActualWeight: orderData.shipmentActualWeight,
+    shipmentChargeableWeight: orderData.shipmentChargeableWeight,
+    shipmentDimensions: orderData.shipmentDimensions || "",
+    shippingCalculationDate: orderData.shippingCalculationDate || (orderData.deliveryPincode ? now : ""),
   }
 
   const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
@@ -1389,7 +1453,7 @@ export async function appendOrder(orderData: {
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "Orders!A:AA",
+        range: "Orders!A:AG",
         valueInputOption: "RAW",
         requestBody: {
           values: [
@@ -1421,6 +1485,12 @@ export async function appendOrder(orderData: {
               "", // collectedAt
               now, // lastStatusUpdatedAt
               "Customer", // lastStatusUpdatedBy
+              orderRecord.deliveryPincode || "",
+              orderRecord.shippingProvider || "Delhivery",
+              orderRecord.shipmentActualWeight != null ? orderRecord.shipmentActualWeight : "",
+              orderRecord.shipmentChargeableWeight != null ? orderRecord.shipmentChargeableWeight : "",
+              orderRecord.shipmentDimensions || "",
+              orderRecord.shippingCalculationDate || "",
             ],
           ],
         },
@@ -1470,7 +1540,7 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:AA",
+      range: "Orders!A2:AG",
     })
 
     const rows = res.data.values ?? []
@@ -1530,6 +1600,12 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
           collectedAt: r[24] ?? "",
           lastStatusUpdatedAt: r[25] ?? (r[17] ?? ""),
           lastStatusUpdatedBy: r[26] ?? "",
+          deliveryPincode: r[27] ?? "",
+          shippingProvider: r[28] ?? "",
+          shipmentActualWeight: r[29] !== undefined && r[29] !== "" ? Number(r[29]) : undefined,
+          shipmentChargeableWeight: r[30] !== undefined && r[30] !== "" ? Number(r[30]) : undefined,
+          shipmentDimensions: r[31] ?? "",
+          shippingCalculationDate: r[32] ?? "",
         }
       })
   } catch (err) {
@@ -1552,7 +1628,7 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:AA",
+      range: "Orders!A2:AG",
     })
 
     const rows = res.data.values ?? []
@@ -1591,6 +1667,12 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
         collectedAt: r[24] ?? "",
         lastStatusUpdatedAt: r[25] ?? (r[17] ?? ""),
         lastStatusUpdatedBy: r[26] ?? "",
+        deliveryPincode: r[27] ?? "",
+        shippingProvider: r[28] ?? "",
+        shipmentActualWeight: r[29] !== undefined && r[29] !== "" ? Number(r[29]) : undefined,
+        shipmentChargeableWeight: r[30] !== undefined && r[30] !== "" ? Number(r[30]) : undefined,
+        shipmentDimensions: r[31] ?? "",
+        shippingCalculationDate: r[32] ?? "",
       }))
   } catch (err) {
     console.error("Error fetching orders by userId:", err)
@@ -1612,7 +1694,7 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:AA",
+      range: "Orders!A2:AG",
     })
 
     const rows = res.data.values ?? []
@@ -1651,6 +1733,12 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
         collectedAt: r[24] ?? "",
         lastStatusUpdatedAt: r[25] ?? (r[17] ?? ""),
         lastStatusUpdatedBy: r[26] ?? "",
+        deliveryPincode: r[27] ?? "",
+        shippingProvider: r[28] ?? "",
+        shipmentActualWeight: r[29] !== undefined && r[29] !== "" ? Number(r[29]) : undefined,
+        shipmentChargeableWeight: r[30] !== undefined && r[30] !== "" ? Number(r[30]) : undefined,
+        shipmentDimensions: r[31] ?? "",
+        shippingCalculationDate: r[32] ?? "",
       }))
   } catch (err) {
     console.error("Error reading all orders:", err)
@@ -1727,7 +1815,7 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
 
       const res = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: "Products!A1:T",
+        range: "Products!A1:Z",
       })
 
       const allRows = res.data.values ?? []
@@ -1841,6 +1929,14 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
             const rawActiveStock = parseSheetNumber(r[20])
             const activeStock = rawActiveStock !== null ? Math.max(0, Math.floor(rawActiveStock)) : undefined
 
+            // Dimensions & Weight (columns V-Z, indices 21-25)
+            const length = parseSheetNumber(r[21]) ?? undefined
+            const width = parseSheetNumber(r[22]) ?? undefined
+            const height = parseSheetNumber(r[23]) ?? undefined
+            const actualWeight = parseSheetNumber(r[24]) ?? undefined
+            const rawWeightUnit = (r[25] || "").trim().toLowerCase()
+            const weightUnit = rawWeightUnit === "kg" ? "kg" : (actualWeight ? "g" : undefined)
+
             return {
               rowIndex,
               id: productId,
@@ -1872,6 +1968,11 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
               status,
               createdAt,
               updatedAt,
+              length,
+              width,
+              height,
+              actualWeight,
+              weightUnit,
             }
           } else {
             // Legacy 8-column layout
@@ -1992,6 +2093,11 @@ export async function createProduct(product: {
   howToUse?: ProductHowToStep[]
   colors?: ProductColorVariant[]
   status?: "Active" | "Inactive"
+  length?: number
+  width?: number
+  height?: number
+  actualWeight?: number
+  weightUnit?: "g" | "kg" | string
 }): Promise<Product> {
   if (!isSheetsConfigured()) throw new Error("Google Sheets not configured")
   await ensureAllSheetsInitialized()
@@ -2019,11 +2125,16 @@ export async function createProduct(product: {
   const howToUseJson = product.howToUse ? JSON.stringify(product.howToUse) : "[]"
   const colorsJson = product.colors ? JSON.stringify(product.colors) : "[]"
   const status = product.status || "Active"
+  const lengthVal = product.length != null && product.length > 0 ? product.length : ""
+  const widthVal = product.width != null && product.width > 0 ? product.width : ""
+  const heightVal = product.height != null && product.height > 0 ? product.height : ""
+  const actualWeightVal = product.actualWeight != null && product.actualWeight > 0 ? product.actualWeight : ""
+  const weightUnitVal = product.weightUnit || (actualWeightVal ? "g" : "")
   const now = new Date().toISOString()
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "Products!A:U",
+    range: "Products!A:Z",
     valueInputOption: "RAW",
     requestBody: {
       values: [
@@ -2049,6 +2160,11 @@ export async function createProduct(product: {
           howToUseJson,
           colorsJson,
           activeStockVal,
+          lengthVal,
+          widthVal,
+          heightVal,
+          actualWeightVal,
+          weightUnitVal,
         ],
       ],
     },
@@ -2084,6 +2200,11 @@ export async function createProduct(product: {
     status,
     createdAt: now,
     updatedAt: now,
+    length: typeof lengthVal === "number" ? lengthVal : undefined,
+    width: typeof widthVal === "number" ? widthVal : undefined,
+    height: typeof heightVal === "number" ? heightVal : undefined,
+    actualWeight: typeof actualWeightVal === "number" ? actualWeightVal : undefined,
+    weightUnit: weightUnitVal || undefined,
   }
 }
 
@@ -2120,6 +2241,12 @@ export async function updateProductById(
   const updatedStatus = updates.status ?? existing.status ?? "Active"
   const now = new Date().toISOString()
 
+  const updatedLength = updates.length !== undefined ? updates.length : existing.length
+  const updatedWidth = updates.width !== undefined ? updates.width : existing.width
+  const updatedHeight = updates.height !== undefined ? updates.height : existing.height
+  const updatedWeight = updates.actualWeight !== undefined ? updates.actualWeight : existing.actualWeight
+  const updatedWeightUnit = updates.weightUnit !== undefined ? updates.weightUnit : (existing.weightUnit || (updatedWeight ? "g" : ""))
+
   const rowValues = [
     existing.id,
     updatedName,
@@ -2142,11 +2269,16 @@ export async function updateProductById(
     JSON.stringify(updatedHowToUse),
     JSON.stringify(updatedColors),
     updatedActiveStock != null ? updatedActiveStock : "",
+    updatedLength != null && updatedLength > 0 ? updatedLength : "",
+    updatedWidth != null && updatedWidth > 0 ? updatedWidth : "",
+    updatedHeight != null && updatedHeight > 0 ? updatedHeight : "",
+    updatedWeight != null && updatedWeight > 0 ? updatedWeight : "",
+    updatedWeightUnit || "",
   ]
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `Products!A${existing.rowIndex}:U${existing.rowIndex}`,
+    range: `Products!A${existing.rowIndex}:Z${existing.rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
       values: [rowValues],
@@ -2181,6 +2313,11 @@ export async function updateProductById(
     colors: updatedColors,
     status: updatedStatus,
     updatedAt: now,
+    length: typeof updatedLength === "number" ? updatedLength : undefined,
+    width: typeof updatedWidth === "number" ? updatedWidth : undefined,
+    height: typeof updatedHeight === "number" ? updatedHeight : undefined,
+    actualWeight: typeof updatedWeight === "number" ? updatedWeight : undefined,
+    weightUnit: updatedWeightUnit || undefined,
   }
 }
 

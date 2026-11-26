@@ -20,9 +20,12 @@ import { z } from "zod"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { generateInvoiceToken } from "@/lib/invoice-token"
-import { FLAT_SHIPPING_INR } from "@/lib/format"
 import { getEffectivePricing } from "@/lib/pricing"
 import { stripEmoji } from "@/lib/sanitize"
+import {
+  calculateDelhiveryShippingRate,
+  isValidPincode,
+} from "@/lib/delhivery"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
   apiVersion: "2025-01-27.acacia" as any,
@@ -31,6 +34,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder"
 const checkoutSessionSchema = z.object({
   customerName: z.string().min(1).transform(stripEmoji),
   email:        z.email(),
+  deliveryPincode: z.string().trim().min(6).max(6),
+  shippingAddress: z.string().optional(),
+  phoneNumber: z.string().optional(),
   // Array of cart items — price is resolved server-side, never trusted from client
   items: z.array(
     z.object({
@@ -73,9 +79,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request data" }, { status: 400 })
     }
 
-    const { customerName, items, expectedTotal, successUrl, cancelUrl } = parsed.data
+    const {
+      customerName,
+      email,
+      deliveryPincode,
+      shippingAddress,
+      phoneNumber,
+      items,
+      expectedTotal,
+      successUrl,
+      cancelUrl,
+    } = parsed.data
     // Always bind order to verified session customer email rather than unverified client payload
     const verifiedEmail = authSession.user.email.toLowerCase()
+
+    if (!isValidPincode(deliveryPincode)) {
+      return NextResponse.json(
+        { error: "Please enter a valid 6-digit delivery PIN code." },
+        { status: 400 }
+      )
+    }
 
     // ── Lookup Verified User Record ──────────────────────────────────────────
     const { getProducts, getUserByEmail, invalidateProductsCache } = await import("@/lib/sheets")
@@ -88,6 +111,7 @@ export async function POST(request: Request) {
     const productSummaryParts: string[] = []
     const resolvedOrderItems: Array<{ pid: string; qty: number; cid?: string; cname?: string }> = []
     const cumulativeProductQty = new Map<string, number>()
+    const itemsForShipping: Array<{ product: (typeof allProducts)[0]; quantity: number }> = []
 
     for (const item of items) {
       const product =
@@ -187,14 +211,33 @@ export async function POST(request: Request) {
         qty: item.quantity,
         ...(resolvedColorName ? { cname: resolvedColorName } : {}),
       })
+      itemsForShipping.push({
+        product,
+        quantity: item.quantity,
+      })
     }
 
     if (serverAmount <= 0) {
       return NextResponse.json({ error: "Invalid order amount" }, { status: 400 })
     }
 
+    // ── Server-Side Delhivery Shipping Calculation ───────────────────────────
+    const shippingCalc = await calculateDelhiveryShippingRate({
+      destinationPincode: deliveryPincode,
+      items: itemsForShipping,
+    })
+
+    if (!shippingCalc.success) {
+      return NextResponse.json(
+        {
+          error: shippingCalc.error || "Unable to calculate shipping charges for your PIN code.",
+        },
+        { status: 422 }
+      )
+    }
+
     const productSummary = productSummaryParts.join(", ").substring(0, 500)
-    const shippingAmount = FLAT_SHIPPING_INR
+    const shippingAmount = shippingCalc.shippingCharge ?? 0
     const totalAmountInr = serverAmount + shippingAmount
 
     if (
@@ -229,7 +272,7 @@ export async function POST(request: Request) {
           price_data: {
             currency: "inr",
             product_data: {
-              name: "Shipping (Flat Rate)",
+              name: "Shipping (Delhivery)",
             },
             unit_amount: Math.round(shippingAmount * 100), // INR to paise
           },
@@ -249,6 +292,14 @@ export async function POST(request: Request) {
         subtotal: serverAmount.toString(),
         shippingCharge: shippingAmount.toString(),
         amount: totalAmountInr.toString(), // server-computed INR total, stored for reference only
+        deliveryPincode,
+        shippingProvider: "Delhivery",
+        shipmentActualWeight: String(shippingCalc.actualWeightGrams || ""),
+        shipmentChargeableWeight: String(shippingCalc.chargeableWeightGrams || ""),
+        shipmentDimensions: shippingCalc.dimensions ? JSON.stringify(shippingCalc.dimensions) : "",
+        shippingCalculationDate: new Date().toISOString(),
+        shippingAddress: (shippingAddress || "").slice(0, 450),
+        phoneNumber: (phoneNumber || "").slice(0, 30),
       },
     })
 

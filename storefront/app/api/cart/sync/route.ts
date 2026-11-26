@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getProducts, type Product } from "@/lib/sheets"
 import { getEffectivePricing } from "@/lib/pricing"
-import { FLAT_SHIPPING_INR } from "@/lib/format"
 
 const syncSchema = z.object({
   items: z.array(
@@ -153,8 +152,9 @@ export async function POST(request: Request) {
     const subtotal = syncedItems
       .filter((i) => i.available)
       .reduce((sum, i) => sum + (i.price ?? 0) * i.adjustedQuantity, 0)
-    const shippingCharge = syncedItems.some((i) => i.available) ? FLAT_SHIPPING_INR : 0
-    const total = subtotal + shippingCharge
+    // Shipping is calculated dynamically by PIN code via /api/shipping/calculate (Delhivery)
+    const shippingCharge: number | null = null
+    const total = subtotal
 
     return NextResponse.json({
       success: true,
