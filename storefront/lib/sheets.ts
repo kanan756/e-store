@@ -138,6 +138,21 @@ export const REQUIRED_SHEETS = {
     "acceptedAt",
     "rejectedAt",
     "rejectionReason",
+    "packingAt",
+    "readyToShipAt",
+    "shippingAt",
+    "collectedAt",
+    "lastStatusUpdatedAt",
+    "lastStatusUpdatedBy",
+  ],
+  OrderStatusHistory: [
+    "historyId",
+    "orderId",
+    "previousStatus",
+    "newStatus",
+    "changedAt",
+    "changedBy",
+    "remarks",
   ],
   "User Activity": [
     "activityId",
@@ -290,10 +305,27 @@ export interface Order {
   updatedAt: string
   comments?: string
   updatedBy?: string
-  // Extended fields for order management
+  // Extended fields for order management & tracking
   acceptedAt?: string
   rejectedAt?: string
   rejectionReason?: string
+  packingAt?: string
+  readyToShipAt?: string
+  shippingAt?: string
+  collectedAt?: string
+  lastStatusUpdatedAt?: string
+  lastStatusUpdatedBy?: string
+}
+
+export interface OrderStatusHistoryItem {
+  rowIndex?: number
+  historyId: string
+  orderId: string
+  previousStatus: string
+  newStatus: string
+  changedAt: string
+  changedBy: string
+  remarks?: string
 }
 
 export interface UserActivityRecord {
@@ -452,6 +484,18 @@ export interface VisitorEvent {
   utmCampaign: string
 }
 
+export function columnIndexToLetter(colIndex: number): string {
+  let temp: number
+  let letter = ""
+  let n = colIndex
+  while (n > 0) {
+    temp = (n - 1) % 26
+    letter = String.fromCharCode(temp + 65) + letter
+    n = Math.floor((n - temp - 1) / 26)
+  }
+  return letter || "A"
+}
+
 // ── Database Initialization (Auto-Create Tabs & Headers) ──────────────────────
 let dbInitPromise: Promise<void> | null = null
 
@@ -484,38 +528,50 @@ export async function ensureAllSheetsInitialized(): Promise<void> {
         }
       }
 
-      // Add missing sheets in batch
+      // Add missing sheets in batch (safe against concurrent multi-worker initializations)
       if (sheetsToCreate.length > 0) {
-        await sheets.spreadsheets.batchUpdate({
-          spreadsheetId,
-          requestBody: {
-            requests: sheetsToCreate.map((title) => ({
-              addSheet: { properties: { title } },
-            })),
-          },
-        })
+        try {
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+              requests: sheetsToCreate.map((title) => ({
+                addSheet: { properties: { title } },
+              })),
+            },
+          })
+        } catch (addErr: any) {
+          const msg = String(addErr?.message || addErr?.cause?.message || "")
+          if (!msg.includes("already exists")) {
+            throw addErr
+          }
+        }
       }
 
-      // Populate header row for each tab if not already present
-      for (const [title, columns] of Object.entries(allDefinitions)) {
-        const headerRange = `${title}!1:1`
-        const headerCheck = await sheets.spreadsheets.values.get({
-          spreadsheetId,
-          range: headerRange,
-        })
-        const currentHeaders = headerCheck.data.values?.[0] ?? []
+      // Populate header row for each tab if not already present (using single batchGet for efficiency)
+      const allTitles = Object.keys(allDefinitions)
+      const headerBatch = await sheets.spreadsheets.values.batchGet({
+        spreadsheetId,
+        ranges: allTitles.map((t) => `${t}!1:1`),
+      })
+      const valueRanges = headerBatch.data.valueRanges || []
+
+      for (let i = 0; i < allTitles.length; i++) {
+        const title = allTitles[i]
+        const columns = allDefinitions[title]
+        const currentHeaders = valueRanges[i]?.values?.[0] ?? []
+
         if (currentHeaders.length === 0) {
           await sheets.spreadsheets.values.update({
             spreadsheetId,
-            range: `${title}!A1:${String.fromCharCode(64 + columns.length)}1`,
+            range: `${title}!A1:${columnIndexToLetter(columns.length)}1`,
             valueInputOption: "RAW",
             requestBody: {
               values: [columns as string[]],
             },
           })
         } else if (currentHeaders.length < columns.length) {
-          const startCol = String.fromCharCode(65 + currentHeaders.length)
-          const endCol = String.fromCharCode(64 + columns.length)
+          const startCol = columnIndexToLetter(currentHeaders.length + 1)
+          const endCol = columnIndexToLetter(columns.length)
           await sheets.spreadsheets.values.update({
             spreadsheetId,
             range: `${title}!${startCol}1:${endCol}1`,
@@ -560,6 +616,7 @@ export async function ensureAllSheetsInitialized(): Promise<void> {
 // ── Local Fallback Stores (used when offline/local without sheets creds) ────────
 const LOCAL_USERS_FILE = path.join(process.cwd(), ".users_store.json")
 const LOCAL_ORDERS_FILE = path.join(process.cwd(), ".orders_store.json")
+const LOCAL_ORDER_HISTORY_FILE = path.join(process.cwd(), ".order_history_store.json")
 const LOCAL_ACTIVITY_FILE = path.join(process.cwd(), ".activity_store.json")
 const LOCAL_RESET_FILE = path.join(process.cwd(), ".reset_store.json")
 
@@ -981,143 +1038,257 @@ export function invalidateOrdersCache() {
   getOrderByPaymentId.invalidate()
 }
 
-// ── Order Accept / Reject ─────────────────────────────────────────────────────
-export async function acceptOrder(orderId: string): Promise<{ success: boolean; error?: string }> {
-  const now = new Date().toISOString()
-  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
-  const localIdx = localOrders.findIndex((o) => o.orderId === orderId)
+// ── Order Tracking & Lifecycle Constants ──────────────────────────────────────
+export const ORDER_LIFECYCLE_SEQUENCE = [
+  "Pending",
+  "Accepted",
+  "Packing",
+  "Ready to Ship",
+  "Shipping",
+  "Collected by Customer",
+] as const
 
+export const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
+  Pending: ["Accepted", "Rejected"],
+  Accepted: ["Packing"],
+  Packing: ["Ready to Ship"],
+  "Ready to Ship": ["Shipping"],
+  Shipping: ["Collected by Customer"],
+}
+
+export const NEXT_STATUS_MAP: Record<string, string> = {
+  Pending: "Accepted",
+  Accepted: "Packing",
+  Packing: "Ready to Ship",
+  "Ready to Ship": "Shipping",
+  Shipping: "Collected by Customer",
+}
+
+export const NEXT_ACTION_LABELS: Record<string, string> = {
+  Accepted: "Packing",
+  Packing: "Ready to Ship",
+  "Ready to Ship": "Shipping",
+  Shipping: "Collected by Customer",
+}
+
+// ── Order Status History Management ───────────────────────────────────────────
+export async function getOrderStatusHistory(orderId?: string): Promise<OrderStatusHistoryItem[]> {
+  const localHistory = loadLocalFile<OrderStatusHistoryItem>(LOCAL_ORDER_HISTORY_FILE)
   if (!isSheetsConfigured()) {
-    if (localIdx === -1) return { success: false, error: "Order not found" }
-    if (localOrders[localIdx].orderStatus === "Accepted") return { success: false, error: "Order already accepted" }
-    if (localOrders[localIdx].orderStatus === "Rejected") return { success: false, error: "Cannot accept a rejected order" }
-    localOrders[localIdx] = {
-      ...localOrders[localIdx],
-      orderStatus: "Accepted",
-      status: "Accepted",
-      updatedAt: now,
-      acceptedAt: now,
-    }
-    saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
-    invalidateOrdersCache()
-    return { success: true }
+    return orderId ? localHistory.filter((h) => h.orderId === orderId) : localHistory
   }
 
   try {
     await ensureAllSheetsInitialized()
-    invalidateOrdersCache()
-    const orders = await getAllOrders()
-    const match = orders.find((o) => o.orderId === orderId)
-    if (!match || !match.rowIndex) return { success: false, error: "Order not found" }
-    if (match.orderStatus === "Accepted") return { success: false, error: "Order already accepted" }
-    if (match.orderStatus === "Rejected") return { success: false, error: "Cannot accept a rejected order" }
-
     const auth = getAuth()
     const sheets = google.sheets({ version: "v4", auth })
     const spreadsheetId = getSheetId()
 
-    // Update orderStatus (col O=15), updatedAt (col R=18), acceptedAt (col S=19)
-    await sheets.spreadsheets.values.batchUpdate({
+    const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      requestBody: {
-        valueInputOption: "RAW",
-        data: [
-          { range: `Orders!O${match.rowIndex}`, values: [["Accepted"]] },
-          { range: `Orders!R${match.rowIndex}`, values: [[now]] },
-          { range: `Orders!S${match.rowIndex}`, values: [[now]] },
-        ],
-      },
+      range: "OrderStatusHistory!A2:G",
     })
 
-    if (localIdx !== -1) {
-      localOrders[localIdx] = {
-        ...localOrders[localIdx],
-        orderStatus: "Accepted",
-        status: "Accepted",
-        updatedAt: now,
-        acceptedAt: now,
-      }
-      saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
-    }
+    const rows = res.data.values ?? []
+    const sheetHistory: OrderStatusHistoryItem[] = rows
+      .filter((r) => r[0])
+      .map((r, i) => ({
+        rowIndex: i + 2,
+        historyId: r[0] ?? "",
+        orderId: r[1] ?? "",
+        previousStatus: r[2] ?? "",
+        newStatus: r[3] ?? "",
+        changedAt: r[4] ?? "",
+        changedBy: r[5] ?? "",
+        remarks: r[6] ?? "",
+      }))
 
-    invalidateOrdersCache()
-    return { success: true }
-  } catch (err: any) {
-    console.error("acceptOrder error:", err)
-    return { success: false, error: err.message || "Failed to accept order" }
+    const list = sheetHistory.length > 0 ? sheetHistory : localHistory
+    return orderId ? list.filter((h) => h.orderId === orderId) : list
+  } catch (err) {
+    console.error("Error reading OrderStatusHistory sheet:", err)
+    return orderId ? localHistory.filter((h) => h.orderId === orderId) : localHistory
   }
+}
+
+export async function appendOrderStatusHistory(
+  item: Omit<OrderStatusHistoryItem, "rowIndex">
+): Promise<OrderStatusHistoryItem> {
+  const historyItem: OrderStatusHistoryItem = { ...item }
+  const localHistory = loadLocalFile<OrderStatusHistoryItem>(LOCAL_ORDER_HISTORY_FILE)
+  localHistory.push(historyItem)
+  saveLocalFile(LOCAL_ORDER_HISTORY_FILE, localHistory)
+
+  if (isSheetsConfigured()) {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "OrderStatusHistory!A:G",
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [
+            [
+              historyItem.historyId,
+              historyItem.orderId,
+              historyItem.previousStatus,
+              historyItem.newStatus,
+              historyItem.changedAt,
+              historyItem.changedBy,
+              historyItem.remarks || "",
+            ],
+          ],
+        },
+      })
+    } catch (err) {
+      console.error("Error appending to OrderStatusHistory sheet:", err)
+    }
+  }
+
+  return historyItem
+}
+
+// ── Unified Order Status Transition ───────────────────────────────────────────
+export async function transitionOrderStatus(params: {
+  orderId: string
+  newStatus: string
+  changedBy: string
+  remarks?: string
+  rejectionReason?: string
+}): Promise<{ success: boolean; error?: string; order?: Order }> {
+  const { orderId, newStatus, changedBy, remarks, rejectionReason } = params
+  const now = new Date().toISOString()
+
+  invalidateOrdersCache()
+  const orders = await getAllOrders()
+  const match = orders.find((o) => o.orderId === orderId)
+  if (!match) {
+    return { success: false, error: "Order not found" }
+  }
+
+  const currentStatus = match.orderStatus || "Pending"
+
+  // Prevent duplicate updates
+  if (currentStatus === newStatus) {
+    return { success: false, error: `Order is already in "${newStatus}" status.` }
+  }
+
+  // Validate allowed transition
+  const allowed = ALLOWED_STATUS_TRANSITIONS[currentStatus] || []
+  if (!allowed.includes(newStatus)) {
+    return {
+      success: false,
+      error: `Invalid status transition: cannot move order from "${currentStatus}" to "${newStatus}".`,
+    }
+  }
+
+  // Map specific stage timestamps
+  const timestampUpdates: Partial<Order> = {
+    updatedAt: now,
+    lastStatusUpdatedAt: now,
+    lastStatusUpdatedBy: changedBy,
+    orderStatus: newStatus,
+    status: newStatus,
+  }
+
+  if (newStatus === "Accepted") timestampUpdates.acceptedAt = now
+  else if (newStatus === "Rejected") {
+    timestampUpdates.rejectedAt = now
+    timestampUpdates.rejectionReason = rejectionReason || remarks || ""
+  } else if (newStatus === "Packing") timestampUpdates.packingAt = now
+  else if (newStatus === "Ready to Ship") timestampUpdates.readyToShipAt = now
+  else if (newStatus === "Shipping") timestampUpdates.shippingAt = now
+  else if (newStatus === "Collected by Customer") timestampUpdates.collectedAt = now
+
+  // Local fallback update
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
+  const localIdx = localOrders.findIndex((o) => o.orderId === orderId)
+  let updatedOrderRecord: Order = { ...match, ...timestampUpdates }
+  if (localIdx !== -1) {
+    localOrders[localIdx] = { ...localOrders[localIdx], ...timestampUpdates }
+    updatedOrderRecord = localOrders[localIdx]
+    saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
+  }
+
+  // Google Sheets database update
+  if (isSheetsConfigured() && match.rowIndex) {
+    try {
+      await ensureAllSheetsInitialized()
+      const auth = getAuth()
+      const sheets = google.sheets({ version: "v4", auth })
+      const spreadsheetId = getSheetId()
+
+      const batchData: Array<{ range: string; values: string[][] }> = [
+        { range: `Orders!O${match.rowIndex}`, values: [[newStatus]] },
+        { range: `Orders!R${match.rowIndex}`, values: [[now]] },
+        { range: `Orders!Z${match.rowIndex}:AA${match.rowIndex}`, values: [[now, changedBy]] },
+      ]
+
+      if (newStatus === "Accepted") {
+        batchData.push({ range: `Orders!S${match.rowIndex}`, values: [[now]] })
+      } else if (newStatus === "Rejected") {
+        batchData.push({ range: `Orders!T${match.rowIndex}:U${match.rowIndex}`, values: [[now, rejectionReason || ""]] })
+      } else if (newStatus === "Packing") {
+        batchData.push({ range: `Orders!V${match.rowIndex}`, values: [[now]] })
+      } else if (newStatus === "Ready to Ship") {
+        batchData.push({ range: `Orders!W${match.rowIndex}`, values: [[now]] })
+      } else if (newStatus === "Shipping") {
+        batchData.push({ range: `Orders!X${match.rowIndex}`, values: [[now]] })
+      } else if (newStatus === "Collected by Customer") {
+        batchData.push({ range: `Orders!Y${match.rowIndex}`, values: [[now]] })
+      }
+
+      await sheets.spreadsheets.values.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          valueInputOption: "RAW",
+          data: batchData,
+        },
+      })
+    } catch (err: any) {
+      console.error("Failed to update order status in Google Sheets:", err)
+      return { success: false, error: err.message || "Failed to update order in database" }
+    }
+  }
+
+  // Create immutable OrderStatusHistory record
+  await appendOrderStatusHistory({
+    historyId: `HST-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    orderId,
+    previousStatus: currentStatus,
+    newStatus,
+    changedAt: now,
+    changedBy,
+    remarks: remarks || (newStatus === "Rejected" ? rejectionReason : `Order moved to ${newStatus}`),
+  })
+
+  invalidateOrdersCache()
+  return { success: true, order: updatedOrderRecord }
+}
+
+export async function acceptOrder(orderId: string, changedBy = "manager"): Promise<{ success: boolean; error?: string }> {
+  return transitionOrderStatus({
+    orderId,
+    newStatus: "Accepted",
+    changedBy,
+  })
 }
 
 export async function rejectOrder(
   orderId: string,
-  rejectionReason = ""
+  rejectionReason = "",
+  changedBy = "manager"
 ): Promise<{ success: boolean; error?: string }> {
-  const now = new Date().toISOString()
-  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
-  const localIdx = localOrders.findIndex((o) => o.orderId === orderId)
-
-  if (!isSheetsConfigured()) {
-    if (localIdx === -1) return { success: false, error: "Order not found" }
-    if (localOrders[localIdx].orderStatus === "Rejected") return { success: false, error: "Order already rejected" }
-    if (localOrders[localIdx].orderStatus === "Accepted") return { success: false, error: "Cannot reject an already accepted order" }
-    localOrders[localIdx] = {
-      ...localOrders[localIdx],
-      orderStatus: "Rejected",
-      status: "Rejected",
-      updatedAt: now,
-      rejectedAt: now,
-      rejectionReason,
-    }
-    saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
-    invalidateOrdersCache()
-    return { success: true }
-  }
-
-  try {
-    await ensureAllSheetsInitialized()
-    invalidateOrdersCache()
-    const orders = await getAllOrders()
-    const match = orders.find((o) => o.orderId === orderId)
-    if (!match || !match.rowIndex) return { success: false, error: "Order not found" }
-    if (match.orderStatus === "Rejected") return { success: false, error: "Order already rejected" }
-    if (match.orderStatus === "Accepted") return { success: false, error: "Cannot reject an already accepted order" }
-
-    const auth = getAuth()
-    const sheets = google.sheets({ version: "v4", auth })
-    const spreadsheetId = getSheetId()
-
-    // Update orderStatus (O), updatedAt (R), rejectedAt (T), rejectionReason (U)
-    await sheets.spreadsheets.values.batchUpdate({
-      spreadsheetId,
-      requestBody: {
-        valueInputOption: "RAW",
-        data: [
-          { range: `Orders!O${match.rowIndex}`, values: [["Rejected"]] },
-          { range: `Orders!R${match.rowIndex}`, values: [[now]] },
-          { range: `Orders!T${match.rowIndex}`, values: [[now]] },
-          { range: `Orders!U${match.rowIndex}`, values: [[rejectionReason]] },
-        ],
-      },
-    })
-
-    if (localIdx !== -1) {
-      localOrders[localIdx] = {
-        ...localOrders[localIdx],
-        orderStatus: "Rejected",
-        status: "Rejected",
-        updatedAt: now,
-        rejectedAt: now,
-        rejectionReason,
-      }
-      saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
-    }
-
-    invalidateOrdersCache()
-    return { success: true }
-  } catch (err: any) {
-    console.error("rejectOrder error:", err)
-    return { success: false, error: err.message || "Failed to reject order" }
-  }
+  return transitionOrderStatus({
+    orderId,
+    newStatus: "Rejected",
+    changedBy,
+    rejectionReason,
+  })
 }
 
 export async function appendOrder(orderData: {
@@ -1207,7 +1378,7 @@ export async function appendOrder(orderData: {
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "Orders!A:U",
+        range: "Orders!A:AA",
         valueInputOption: "RAW",
         requestBody: {
           values: [
@@ -1230,14 +1401,30 @@ export async function appendOrder(orderData: {
               orderRecord.transactionId,
               orderRecord.createdAt,
               orderRecord.updatedAt,
-              "",
-              "",
-              "",
+              "", // acceptedAt
+              "", // rejectedAt
+              "", // rejectionReason
+              "", // packingAt
+              "", // readyToShipAt
+              "", // shippingAt
+              "", // collectedAt
+              now, // lastStatusUpdatedAt
+              "Customer", // lastStatusUpdatedBy
             ],
           ],
         },
       })
       invalidateOrdersCache()
+
+      await appendOrderStatusHistory({
+        historyId: `HST-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        orderId: orderRecord.orderId,
+        previousStatus: "None",
+        newStatus: "Pending",
+        changedAt: now,
+        changedBy: orderRecord.customerName || "Customer",
+        remarks: "Customer placed order",
+      }).catch(() => {})
 
       if (resolvedUserId) {
         await logUserActivity(
@@ -1272,7 +1459,7 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:U",
+      range: "Orders!A2:AA",
     })
 
     const rows = res.data.values ?? []
@@ -1325,6 +1512,12 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
           acceptedAt: r[18] ?? "",
           rejectedAt: r[19] ?? "",
           rejectionReason: r[20] ?? "",
+          packingAt: r[21] ?? "",
+          readyToShipAt: r[22] ?? "",
+          shippingAt: r[23] ?? "",
+          collectedAt: r[24] ?? "",
+          lastStatusUpdatedAt: r[25] ?? (r[17] ?? ""),
+          lastStatusUpdatedBy: r[26] ?? "",
         }
       })
   } catch (err) {
@@ -1347,7 +1540,7 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:U",
+      range: "Orders!A2:AA",
     })
 
     const rows = res.data.values ?? []
@@ -1380,6 +1573,12 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
         acceptedAt: r[18] ?? "",
         rejectedAt: r[19] ?? "",
         rejectionReason: r[20] ?? "",
+        packingAt: r[21] ?? "",
+        readyToShipAt: r[22] ?? "",
+        shippingAt: r[23] ?? "",
+        collectedAt: r[24] ?? "",
+        lastStatusUpdatedAt: r[25] ?? (r[17] ?? ""),
+        lastStatusUpdatedBy: r[26] ?? "",
       }))
   } catch (err) {
     console.error("Error fetching orders by userId:", err)
@@ -1401,7 +1600,7 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:U",
+      range: "Orders!A2:AA",
     })
 
     const rows = res.data.values ?? []
@@ -1434,6 +1633,12 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
         acceptedAt: r[18] ?? "",
         rejectedAt: r[19] ?? "",
         rejectionReason: r[20] ?? "",
+        packingAt: r[21] ?? "",
+        readyToShipAt: r[22] ?? "",
+        shippingAt: r[23] ?? "",
+        collectedAt: r[24] ?? "",
+        lastStatusUpdatedAt: r[25] ?? (r[17] ?? ""),
+        lastStatusUpdatedBy: r[26] ?? "",
       }))
   } catch (err) {
     console.error("Error reading all orders:", err)

@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server"
 import { getProductManagerSession } from "@/lib/pm-auth"
-import { getAllOrders } from "@/lib/sheets"
+import { getAllOrders, getOrderStatusHistory } from "@/lib/sheets"
 
 export async function GET(
   _request: Request,
@@ -42,11 +42,14 @@ export async function GET(
       // items is a plain text summary
     }
 
+    const history = await getOrderStatusHistory(orderId)
+
     return NextResponse.json({
       success: true,
       order: {
         ...order,
         parsedItems,
+        history,
       },
     })
   } catch (err: any) {

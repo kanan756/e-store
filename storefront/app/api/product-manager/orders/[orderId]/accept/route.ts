@@ -46,7 +46,7 @@ export async function POST(
     )
   }
 
-  const result = await acceptOrder(orderId)
+  const result = await acceptOrder(orderId, session.email)
 
   if (!result.success) {
     return NextResponse.json(
@@ -57,6 +57,9 @@ export async function POST(
 
   revalidatePath("/secure-product-manager/orders")
   revalidatePath(`/secure-product-manager/orders/${orderId}`)
+  revalidatePath("/secure-product-manager/order-tracking")
+  revalidatePath("/track-order")
+  revalidatePath("/account")
 
   return NextResponse.json({
     success: true,

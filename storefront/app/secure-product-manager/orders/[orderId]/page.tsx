@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { getAllOrders, getProducts } from "@/lib/sheets"
+import { getAllOrders, getProducts, getOrderStatusHistory } from "@/lib/sheets"
 import OrderDetailClient from "./OrderDetailClient"
 
 export const metadata = {
@@ -14,12 +14,22 @@ export default async function OrderDetailPage({
   const { orderId } = await params
   const decodedId = decodeURIComponent(orderId)
 
-  const [orders, products] = await Promise.all([getAllOrders(), getProducts(true)])
+  const [orders, products, history] = await Promise.all([
+    getAllOrders(),
+    getProducts(true),
+    getOrderStatusHistory(decodedId),
+  ])
   const order = orders.find((o) => o.orderId === decodedId)
 
   if (!order) {
     notFound()
   }
 
-  return <OrderDetailClient initialOrder={order} products={products} />
+  return (
+    <OrderDetailClient
+      initialOrder={order}
+      products={products}
+      initialHistory={history}
+    />
+  )
 }

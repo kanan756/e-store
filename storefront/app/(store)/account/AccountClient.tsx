@@ -611,8 +611,34 @@ export default function AccountClient() {
                                 fontWeight: 800,
                                 padding: "3px 10px",
                                 borderRadius: 9999,
-                                background: o.status === "Delivered" ? "#F0FDF4" : "#FFF0E5",
-                                color: o.status === "Delivered" ? "#16A34A" : "#F36B12",
+                                background:
+                                  o.status === "Collected by Customer" || o.status === "Delivered"
+                                    ? "#ECFDF5"
+                                    : o.status === "Rejected"
+                                    ? "#FEF2F2"
+                                    : o.status === "Shipping" || o.status === "Shipped"
+                                    ? "#F0FDF4"
+                                    : o.status === "Ready to Ship"
+                                    ? "#EFF6FF"
+                                    : o.status === "Packing"
+                                    ? "#F5F3FF"
+                                    : o.status === "Accepted"
+                                    ? "#ECFDF5"
+                                    : "#FFF0E5",
+                                color:
+                                  o.status === "Collected by Customer" || o.status === "Delivered"
+                                    ? "#065F46"
+                                    : o.status === "Rejected"
+                                    ? "#DC2626"
+                                    : o.status === "Shipping" || o.status === "Shipped"
+                                    ? "#059669"
+                                    : o.status === "Ready to Ship"
+                                    ? "#1D4ED8"
+                                    : o.status === "Packing"
+                                    ? "#6D28D9"
+                                    : o.status === "Accepted"
+                                    ? "#047857"
+                                    : "#F36B12",
                               }}
                             >
                               {o.status}

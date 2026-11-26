@@ -3,26 +3,43 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import type { Order, Product } from "@/lib/sheets"
+import type { Order, Product, OrderStatusHistoryItem } from "@/lib/sheets"
 import { formatPrice } from "@/lib/format"
 import {
   parseOrderItems,
   formatDateTime,
   ORDER_STATUS_STYLES,
   PAYMENT_STATUS_STYLES,
+  NEXT_AVAILABLE_ACTIONS,
 } from "../order-utils"
+import OrderTimeline from "../OrderTimeline"
 
 interface OrderDetailClientProps {
   initialOrder: Order
   products: Product[]
+  initialHistory?: OrderStatusHistoryItem[]
 }
 
-export default function OrderDetailClient({ initialOrder, products }: OrderDetailClientProps) {
+export default function OrderDetailClient({
+  initialOrder,
+  products,
+  initialHistory = [],
+}: OrderDetailClientProps) {
   const [order, setOrder] = useState<Order>(initialOrder)
+  const [history, setHistory] = useState<OrderStatusHistoryItem[]>(initialHistory)
   const [busy, setBusy] = useState(false)
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [rejectionReason, setRejectionReason] = useState("")
   const [refundOnReject, setRefundOnReject] = useState(order.paymentStatus === "Paid")
+
+  // Transition modal for adding optional remarks/tracking info
+  const [actionModal, setActionModal] = useState<{
+    targetStatus: string
+    title: string
+    defaultRemarks: string
+  } | null>(null)
+  const [actionRemarks, setActionRemarks] = useState("")
+
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
 
   const showToast = (type: "success" | "error", message: string) => {
@@ -72,6 +89,8 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
   }, [order.items, order.product, products])
 
   const isPending = order.orderStatus === "Pending"
+  const nextAction = NEXT_AVAILABLE_ACTIONS[order.orderStatus]
+
   const statusStyle = ORDER_STATUS_STYLES[order.orderStatus] || {
     bg: "#F3F4F6",
     color: "#374151",
@@ -82,43 +101,52 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
     color: "#374151",
   }
 
-  const handleAccept = async () => {
-    if (!isPending || busy) return
+  const handleExecuteTransition = async (targetStatus: string, remarks?: string) => {
+    if (busy) return
     setBusy(true)
     try {
       const res = await fetch(
-        `/api/product-manager/orders/${encodeURIComponent(order.orderId)}/accept`,
-        { method: "POST" }
+        `/api/product-manager/orders/${encodeURIComponent(order.orderId)}/status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: targetStatus,
+            remarks: remarks || `Order advanced to ${targetStatus}`,
+          }),
+        }
       )
       const data = await res.json()
       if (!res.ok) {
-        showToast("error", data.error || "Failed to accept order")
+        showToast("error", data.error || `Failed to transition order to ${targetStatus}`)
         return
       }
-      setOrder((prev) => ({
-        ...prev,
-        orderStatus: "Accepted",
-        status: "Accepted",
-        acceptedAt: data.acceptedAt || new Date().toISOString(),
-      }))
-      showToast("success", "Order accepted and database updated.")
+
+      setOrder(data.order)
+      if (data.historyItem) {
+        setHistory((prev) => [data.historyItem, ...prev])
+      }
+      showToast("success", `Order advanced to "${targetStatus}" successfully.`)
+      setActionModal(null)
+      setActionRemarks("")
     } catch {
-      showToast("error", "Network error while accepting order.")
+      showToast("error", `Network error while advancing order to ${targetStatus}.`)
     } finally {
       setBusy(false)
     }
   }
 
   const handleRejectConfirm = async () => {
-    if (!isPending || busy) return
+    if (busy) return
     setBusy(true)
     try {
       const res = await fetch(
-        `/api/product-manager/orders/${encodeURIComponent(order.orderId)}/reject`,
+        `/api/product-manager/orders/${encodeURIComponent(order.orderId)}/status`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            status: "Rejected",
             rejectionReason: rejectionReason.trim(),
             refundPayment: refundOnReject,
           }),
@@ -129,14 +157,11 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
         showToast("error", data.error || "Failed to reject order")
         return
       }
-      setOrder((prev) => ({
-        ...prev,
-        orderStatus: "Rejected",
-        status: "Rejected",
-        rejectedAt: data.rejectedAt || new Date().toISOString(),
-        rejectionReason: rejectionReason.trim(),
-        paymentStatus: data.refundIssued ? "Refunded" : prev.paymentStatus,
-      }))
+
+      setOrder(data.order)
+      if (data.historyItem) {
+        setHistory((prev) => [data.historyItem, ...prev])
+      }
       setShowRejectModal(false)
 
       const notes: string[] = []
@@ -158,21 +183,37 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
     <div>
       {/* Breadcrumb + Header */}
       <div style={{ marginBottom: 20 }}>
-        <Link
-          href="/secure-product-manager/orders"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 13.5,
-            fontWeight: 600,
-            color: "#6B7280",
-            textDecoration: "none",
-            marginBottom: 12,
-          }}
-        >
-          ← Back to Orders
-        </Link>
+        <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 12 }}>
+          <Link
+            href="/secure-product-manager/orders"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13.5,
+              fontWeight: 600,
+              color: "#6B7280",
+              textDecoration: "none",
+            }}
+          >
+            ← Orders List
+          </Link>
+          <span style={{ color: "#D1D5DB" }}>|</span>
+          <Link
+            href="/secure-product-manager/order-tracking"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13.5,
+              fontWeight: 600,
+              color: "#6B7280",
+              textDecoration: "none",
+            }}
+          >
+            🚚 Tracking Board
+          </Link>
+        </div>
 
         <div
           style={{
@@ -208,48 +249,83 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
             </p>
           </div>
 
-          {isPending && (
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={handleAccept}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "#059669",
-                  color: "#FFFFFF",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  cursor: busy ? "wait" : "pointer",
-                }}
-              >
-                {busy ? "Processing…" : "Accept Order"}
-              </button>
+          {/* Action buttons */}
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            {isPending && (
+              <>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => handleExecuteTransition("Accepted", "Order accepted by manager")}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "#059669",
+                    color: "#FFFFFF",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: busy ? "wait" : "pointer",
+                  }}
+                >
+                  {busy ? "Processing…" : "Accept Order"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    setRejectionReason("")
+                    setRefundOnReject(order.paymentStatus === "Paid")
+                    setShowRejectModal(true)
+                  }}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: 8,
+                    border: "1px solid #DC2626",
+                    background: "#FFFFFF",
+                    color: "#DC2626",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: busy ? "wait" : "pointer",
+                  }}
+                >
+                  Reject Order
+                </button>
+              </>
+            )}
+
+            {!isPending && nextAction && (
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => {
-                  setRejectionReason("")
-                  setRefundOnReject(order.paymentStatus === "Paid")
-                  setShowRejectModal(true)
+                  setActionRemarks("")
+                  setActionModal({
+                    targetStatus: nextAction.nextStatus,
+                    title: `Advance to "${nextAction.nextStatus}"`,
+                    defaultRemarks: `Order moved to ${nextAction.nextStatus}`,
+                  })
                 }}
                 style={{
                   padding: "10px 20px",
                   borderRadius: 8,
-                  border: "1px solid #DC2626",
-                  background: "#FFFFFF",
-                  color: "#DC2626",
+                  border: `1px solid ${nextAction.border}`,
+                  background: nextAction.bg,
+                  color: nextAction.color,
                   fontSize: 14,
                   fontWeight: 700,
                   cursor: busy ? "wait" : "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
                 }}
               >
-                Reject Order
+                <span>{busy ? "Updating…" : `Advance to: ${nextAction.label}`}</span>
+                <span style={{ fontSize: 16 }}>→</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -271,30 +347,8 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
         </div>
       )}
 
-      {/* Status Timestamps Banner */}
-      {(order.acceptedAt || order.rejectedAt) && (
-        <div
-          className="pm-card"
-          style={{
-            padding: "14px 20px",
-            marginBottom: 20,
-            background: order.acceptedAt ? "#ECFDF5" : "#FEF2F2",
-            border: `1px solid ${order.acceptedAt ? "#A7F3D0" : "#FECACA"}`,
-          }}
-        >
-          {order.acceptedAt && (
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: "#065F46" }}>
-              Accepted on {formatDateTime(order.acceptedAt)}
-            </div>
-          )}
-          {order.rejectedAt && (
-            <div style={{ fontSize: 13.5, color: "#991B1B" }}>
-              <strong>Rejected on {formatDateTime(order.rejectedAt)}</strong>
-              {order.rejectionReason ? ` — Reason: ${order.rejectionReason}` : ""}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Visual Order Tracking Timeline */}
+      <OrderTimeline order={order} history={history} />
 
       {/* Grid: Customer Info, Delivery Address, Payment Info */}
       <div
@@ -517,6 +571,94 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
         </div>
       </div>
 
+      {/* Action / Next Status Modal */}
+      {actionModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(17, 24, 39, 0.55)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: 16,
+          }}
+        >
+          <div
+            style={{
+              background: "#FFFFFF",
+              borderRadius: 12,
+              maxWidth: 480,
+              width: "100%",
+              padding: 24,
+              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#17191C", margin: "0 0 8px" }}>
+              {actionModal.title}
+            </h2>
+            <p style={{ fontSize: 13.5, color: "#4B5563", margin: "0 0 16px", lineHeight: 1.5 }}>
+              Advance order <strong>{order.orderId}</strong> from <em>{order.orderStatus}</em> to{" "}
+              <strong>{actionModal.targetStatus}</strong>. This update will be recorded in the tracking history.
+            </p>
+
+            <label
+              style={{
+                display: "block",
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#374151",
+                marginBottom: 6,
+              }}
+            >
+              Tracking Remarks / Notes (optional)
+            </label>
+            <textarea
+              className="pm-input"
+              rows={3}
+              placeholder="e.g. Courier: BlueDart, Tracking #: 981245102, packed with bubble wrap…"
+              value={actionRemarks}
+              onChange={(e) => setActionRemarks(e.target.value)}
+              style={{ width: "100%", marginBottom: 18, resize: "vertical" }}
+            />
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+              <button
+                type="button"
+                className="pm-btn pm-btn-secondary"
+                onClick={() => setActionModal(null)}
+                disabled={busy}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  handleExecuteTransition(
+                    actionModal.targetStatus,
+                    actionRemarks.trim() || undefined
+                  )
+                }
+                disabled={busy}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#2563EB",
+                  color: "#FFFFFF",
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  cursor: busy ? "wait" : "pointer",
+                }}
+              >
+                {busy ? "Updating…" : `Confirm Advance to ${actionModal.targetStatus}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reject Confirmation Modal */}
       {showRejectModal && (
         <div
@@ -545,8 +687,8 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
               Confirm Order Rejection
             </h2>
             <p style={{ fontSize: 13.5, color: "#4B5563", margin: "0 0 16px", lineHeight: 1.5 }}>
-              Are you sure you want to reject order <strong>{order.orderId}</strong>? Reserved
-              stock will be restored automatically.
+              Are you sure you want to reject order <strong>{order.orderId}</strong> for{" "}
+              <strong>{order.customerName}</strong>? Reserved stock will be restored automatically.
             </p>
 
             <label
@@ -563,7 +705,7 @@ export default function OrderDetailClient({ initialOrder, products }: OrderDetai
             <textarea
               className="pm-input"
               rows={3}
-              placeholder="Enter reason for rejecting this order…"
+              placeholder="e.g. Out of stock, address unserviceable, suspected fraud…"
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               style={{ width: "100%", marginBottom: 14, resize: "vertical" }}

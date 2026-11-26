@@ -9,16 +9,18 @@ import {
   formatDateTime,
   ORDER_STATUS_STYLES,
   PAYMENT_STATUS_STYLES,
+  NEXT_AVAILABLE_ACTIONS,
 } from "./order-utils"
 
 const ALL_STATUSES = [
   "All",
   "Pending",
   "Accepted",
+  "Packing",
+  "Ready to Ship",
+  "Shipping",
+  "Collected by Customer",
   "Rejected",
-  "Processing",
-  "Shipped",
-  "Delivered",
   "Cancelled",
 ]
 
@@ -42,19 +44,26 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message })
-    setTimeout(() => setToast(null), 4500)
+    setTimeout(() => setToast(null), 5000)
   }
 
   const metrics = useMemo(() => {
     let pending = 0
-    let accepted = 0
+    let inFulfillment = 0
+    let collected = 0
     let rejected = 0
     for (const o of orders) {
-      if (o.orderStatus === "Pending") pending++
-      else if (o.orderStatus === "Accepted") accepted++
-      else if (o.orderStatus === "Rejected") rejected++
+      const st = o.orderStatus
+      if (st === "Pending") pending++
+      else if (st === "Accepted" || st === "Packing" || st === "Ready to Ship" || st === "Shipping") {
+        inFulfillment++
+      } else if (st === "Collected by Customer" || st === "Delivered") {
+        collected++
+      } else if (st === "Rejected" || st === "Cancelled") {
+        rejected++
+      }
     }
-    return { total: orders.length, pending, accepted, rejected }
+    return { total: orders.length, pending, inFulfillment, collected, rejected }
   }, [orders])
 
   const filteredOrders = useMemo(() => {
@@ -75,33 +84,40 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
     })
   }, [orders, searchTerm, statusFilter])
 
-  const handleAccept = async (order: Order) => {
-    if (order.orderStatus !== "Pending" || processingId) return
+  // Status transition handler for lifecycle actions (Accept, Packing, Ready to Ship, Shipping, Collected)
+  const handleTransition = async (order: Order, targetStatus: string, remarks?: string) => {
+    if (processingId) return
     setProcessingId(order.orderId)
     try {
-      const res = await fetch(`/api/product-manager/orders/${encodeURIComponent(order.orderId)}/accept`, {
-        method: "POST",
-      })
+      const res = await fetch(
+        `/api/product-manager/orders/${encodeURIComponent(order.orderId)}/status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: targetStatus,
+            remarks: remarks || `Order transitioned to ${targetStatus} from Orders list`,
+          }),
+        }
+      )
       const data = await res.json()
       if (!res.ok) {
-        showToast("error", data.error || "Failed to accept order")
+        showToast("error", data.error || `Failed to transition order to ${targetStatus}`)
         return
       }
+
+      const updatedOrder: Order = data.order || {
+        ...order,
+        orderStatus: targetStatus,
+        status: targetStatus,
+      }
+
       setOrders((prev) =>
-        prev.map((o) =>
-          o.orderId === order.orderId
-            ? {
-                ...o,
-                orderStatus: "Accepted",
-                status: "Accepted",
-                acceptedAt: data.acceptedAt || new Date().toISOString(),
-              }
-            : o
-        )
+        prev.map((o) => (o.orderId === order.orderId ? updatedOrder : o))
       )
-      showToast("success", `Order ${order.orderId} accepted successfully.`)
+      showToast("success", `Order ${order.orderId} moved to "${targetStatus}".`)
     } catch {
-      showToast("error", "Network error while accepting order.")
+      showToast("error", `Network error while updating status to ${targetStatus}.`)
     } finally {
       setProcessingId(null)
     }
@@ -113,11 +129,12 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
     setProcessingId(targetOrder.orderId)
     try {
       const res = await fetch(
-        `/api/product-manager/orders/${encodeURIComponent(targetOrder.orderId)}/reject`,
+        `/api/product-manager/orders/${encodeURIComponent(targetOrder.orderId)}/status`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            status: "Rejected",
             rejectionReason: rejectionReason.trim(),
             refundPayment: refundOnReject,
           }),
@@ -129,19 +146,17 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
         return
       }
 
+      const updatedOrder: Order = data.order || {
+        ...targetOrder,
+        orderStatus: "Rejected",
+        status: "Rejected",
+        rejectedAt: new Date().toISOString(),
+        rejectionReason: rejectionReason.trim(),
+        paymentStatus: data.refundIssued ? "Refunded" : targetOrder.paymentStatus,
+      }
+
       setOrders((prev) =>
-        prev.map((o) =>
-          o.orderId === targetOrder.orderId
-            ? {
-                ...o,
-                orderStatus: "Rejected",
-                status: "Rejected",
-                rejectedAt: data.rejectedAt || new Date().toISOString(),
-                rejectionReason: rejectionReason.trim(),
-                paymentStatus: data.refundIssued ? "Refunded" : o.paymentStatus,
-              }
-            : o
-        )
+        prev.map((o) => (o.orderId === targetOrder.orderId ? updatedOrder : o))
       )
       const extras: string[] = []
       if (data.stockRestored) extras.push("stock restored")
@@ -179,8 +194,17 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
             Customer Orders
           </h1>
           <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>
-            Review customer orders, inspect purchase details, and accept or reject pending orders.
+            Manage customer orders and progress fulfillment through each tracking stage.
           </p>
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Link
+            href="/secure-product-manager/order-tracking"
+            className="pm-btn pm-btn-secondary"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 700 }}
+          >
+            🚚 Order Tracking Board →
+          </Link>
         </div>
       </div>
 
@@ -240,19 +264,19 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
 
         <div className="pm-stat-card">
           <div className="pm-stat-header">
-            <span className="pm-stat-label">Accepted</span>
+            <span className="pm-stat-label">In Fulfillment</span>
           </div>
-          <div className="pm-stat-value" style={{ color: "#059669" }}>
-            {metrics.accepted}
+          <div className="pm-stat-value" style={{ color: "#2563EB" }}>
+            {metrics.inFulfillment}
           </div>
         </div>
 
         <div className="pm-stat-card">
           <div className="pm-stat-header">
-            <span className="pm-stat-label">Rejected</span>
+            <span className="pm-stat-label">Collected</span>
           </div>
-          <div className="pm-stat-value" style={{ color: "#DC2626" }}>
-            {metrics.rejected}
+          <div className="pm-stat-value" style={{ color: "#059669" }}>
+            {metrics.collected}
           </div>
         </div>
       </div>
@@ -292,7 +316,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
           </svg>
         </div>
 
-        <div style={{ flex: "0 1 220px", minWidth: 0, width: "100%", maxWidth: 240 }}>
+        <div style={{ flex: "0 1 240px", minWidth: 0, width: "100%", maxWidth: 260 }}>
           <select
             className="pm-select"
             value={statusFilter}
@@ -349,6 +373,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                   }
                   const productCount = countOrderProducts(order)
                   const isPending = order.orderStatus === "Pending"
+                  const nextAction = NEXT_AVAILABLE_ACTIONS[order.orderStatus]
                   const isBusy = processingId === order.orderId
 
                   return (
@@ -433,12 +458,13 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                             View
                           </Link>
 
+                          {/* For Pending orders: Accept / Reject */}
                           {isPending && (
                             <>
                               <button
                                 type="button"
                                 disabled={isBusy}
-                                onClick={() => handleAccept(order)}
+                                onClick={() => handleTransition(order, "Accepted")}
                                 style={{
                                   padding: "6px 12px",
                                   fontSize: 12.5,
@@ -474,6 +500,28 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                                 Reject
                               </button>
                             </>
+                          )}
+
+                          {/* For Accepted, Packing, Ready to Ship, Shipping: Next available action */}
+                          {!isPending && nextAction && (
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              onClick={() => handleTransition(order, nextAction.nextStatus)}
+                              style={{
+                                padding: "6px 12px",
+                                fontSize: 12.5,
+                                fontWeight: 700,
+                                borderRadius: 6,
+                                border: `1px solid ${nextAction.border}`,
+                                background: nextAction.bg,
+                                color: nextAction.color,
+                                cursor: isBusy ? "wait" : "pointer",
+                              }}
+                              title={`Advance to ${nextAction.nextStatus}`}
+                            >
+                              {isBusy ? "…" : nextAction.label}
+                            </button>
                           )}
                         </div>
                       </td>

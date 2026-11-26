@@ -54,9 +54,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { getOrdersByEmail } = await import("@/lib/sheets")
+    const { getOrdersByEmail, getOrderStatusHistory } = await import("@/lib/sheets")
     const orders = await getOrdersByEmail(email)
-    return NextResponse.json({ orders })
+    const enriched = await Promise.all(
+      orders.map(async (o) => {
+        const history = await getOrderStatusHistory(o.orderId)
+        return {
+          ...o,
+          history,
+        }
+      })
+    )
+    return NextResponse.json({ orders: enriched })
   } catch (err) {
     console.error("Failed to fetch orders:", err)
     return NextResponse.json({ orders: [] }, { status: 500 })

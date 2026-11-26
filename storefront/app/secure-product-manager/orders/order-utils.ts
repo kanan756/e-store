@@ -65,12 +65,58 @@ export function countOrderProducts(order: Order): number {
 export const ORDER_STATUS_STYLES: Record<string, { bg: string; color: string; border: string }> = {
   Pending: { bg: "#FFF7ED", color: "#C2410C", border: "#FED7AA" },
   Accepted: { bg: "#ECFDF5", color: "#047857", border: "#A7F3D0" },
+  Packing: { bg: "#F5F3FF", color: "#6D28D9", border: "#DDD6FE" },
+  "Ready to Ship": { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE" },
+  Shipping: { bg: "#F0FDF4", color: "#059669", border: "#86EFAC" },
+  "Collected by Customer": { bg: "#ECFDF5", color: "#065F46", border: "#34D399" },
   Rejected: { bg: "#FEF2F2", color: "#B91C1C", border: "#FECACA" },
   Processing: { bg: "#EFF6FF", color: "#1D4ED8", border: "#BFDBFE" },
   Shipped: { bg: "#F5F3FF", color: "#6D28D9", border: "#DDD6FE" },
   Delivered: { bg: "#ECFDF5", color: "#065F46", border: "#6EE7B7" },
   Cancelled: { bg: "#F3F4F6", color: "#4B5563", border: "#D1D5DB" },
 }
+
+export const NEXT_AVAILABLE_ACTIONS: Record<
+  string,
+  { nextStatus: string; label: string; bg: string; border: string; color: string } | null
+> = {
+  Accepted: {
+    nextStatus: "Packing",
+    label: "Packing",
+    bg: "#6D28D9",
+    border: "#6D28D9",
+    color: "#FFFFFF",
+  },
+  Packing: {
+    nextStatus: "Ready to Ship",
+    label: "Ready to Ship",
+    bg: "#2563EB",
+    border: "#2563EB",
+    color: "#FFFFFF",
+  },
+  "Ready to Ship": {
+    nextStatus: "Shipping",
+    label: "Shipping",
+    bg: "#059669",
+    border: "#059669",
+    color: "#FFFFFF",
+  },
+  Shipping: {
+    nextStatus: "Collected by Customer",
+    label: "Collected by Customer",
+    bg: "#047857",
+    border: "#047857",
+    color: "#FFFFFF",
+  },
+}
+
+export const TRACKING_STAGES = [
+  { key: "Accepted", label: "Order Accepted", field: "acceptedAt" as const },
+  { key: "Packing", label: "Packing", field: "packingAt" as const },
+  { key: "Ready to Ship", label: "Ready to Ship", field: "readyToShipAt" as const },
+  { key: "Shipping", label: "Shipping", field: "shippingAt" as const },
+  { key: "Collected by Customer", label: "Collected by Customer", field: "collectedAt" as const },
+] as const
 
 export const PAYMENT_STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   Paid: { bg: "#ECFDF5", color: "#065F46" },

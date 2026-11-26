@@ -68,7 +68,7 @@ export async function POST(
   }
 
   // 1. Reject the order in the database
-  const rejectResult = await rejectOrder(orderId, rejectionReason)
+  const rejectResult = await rejectOrder(orderId, rejectionReason, session.email)
   if (!rejectResult.success) {
     return NextResponse.json(
       { error: rejectResult.error || "Failed to reject order" },
@@ -114,6 +114,9 @@ export async function POST(
 
   revalidatePath("/secure-product-manager/orders")
   revalidatePath(`/secure-product-manager/orders/${orderId}`)
+  revalidatePath("/secure-product-manager/order-tracking")
+  revalidatePath("/track-order")
+  revalidatePath("/account")
 
   return NextResponse.json({
     success: true,
