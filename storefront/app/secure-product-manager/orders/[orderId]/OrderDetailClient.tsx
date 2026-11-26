@@ -88,8 +88,13 @@ export default function OrderDetailClient({
     })
   }, [order.items, order.product, products])
 
-  const isPending = order.orderStatus === "Pending"
-  const nextAction = NEXT_AVAILABLE_ACTIONS[order.orderStatus]
+  const isAwaitingAcceptance =
+    order.orderStatus === "Pending" ||
+    (order.orderStatus === "Processing" && !order.acceptedAt)
+  const nextAction =
+    order.orderStatus === "Processing" && order.acceptedAt
+      ? NEXT_AVAILABLE_ACTIONS["Accepted"]
+      : NEXT_AVAILABLE_ACTIONS[order.orderStatus]
 
   const statusStyle = ORDER_STATUS_STYLES[order.orderStatus] || {
     bg: "#F3F4F6",
@@ -250,8 +255,8 @@ export default function OrderDetailClient({
           </div>
 
           {/* Action buttons */}
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {isPending && (
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            {isAwaitingAcceptance && (
               <>
                 <button
                   type="button"
@@ -266,6 +271,7 @@ export default function OrderDetailClient({
                     fontSize: 14,
                     fontWeight: 700,
                     cursor: busy ? "wait" : "pointer",
+                    boxShadow: "0 2px 4px rgba(5,150,105,0.2)",
                   }}
                 >
                   {busy ? "Processing…" : "Accept Order"}
@@ -294,7 +300,7 @@ export default function OrderDetailClient({
               </>
             )}
 
-            {!isPending && nextAction && (
+            {!isAwaitingAcceptance && nextAction && (
               <button
                 type="button"
                 disabled={busy}
@@ -325,6 +331,42 @@ export default function OrderDetailClient({
                 <span style={{ fontSize: 16 }}>→</span>
               </button>
             )}
+
+            {/* Direct Status Selector Dropdown */}
+            <div>
+              <select
+                aria-label="Change Status manually"
+                value=""
+                onChange={(e) => {
+                  const target = e.target.value
+                  if (!target) return
+                  setActionRemarks("")
+                  setActionModal({
+                    targetStatus: target,
+                    title: `Change order status to "${target}"`,
+                    defaultRemarks: `Status manually updated to ${target}`,
+                  })
+                }}
+                style={{
+                  padding: "10px 14px",
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  borderRadius: 8,
+                  border: "1.5px solid #D1D5DB",
+                  background: "#F9FAFB",
+                  color: "#374151",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="">Change Status ▾</option>
+                <option value="Accepted">Move to: Accepted</option>
+                <option value="Packing">Move to: Packing</option>
+                <option value="Ready to Ship">Move to: Ready to Ship</option>
+                <option value="Shipping">Move to: Shipping</option>
+                <option value="Collected by Customer">Move to: Collected by Customer</option>
+                <option value="Rejected">Move to: Rejected</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

@@ -80,6 +80,13 @@ export const NEXT_AVAILABLE_ACTIONS: Record<
   string,
   { nextStatus: string; label: string; bg: string; border: string; color: string } | null
 > = {
+  Processing: {
+    nextStatus: "Accepted",
+    label: "Accept Order",
+    bg: "#059669",
+    border: "#059669",
+    color: "#FFFFFF",
+  },
   Accepted: {
     nextStatus: "Packing",
     label: "Start Packing",
@@ -102,6 +109,13 @@ export const NEXT_AVAILABLE_ACTIONS: Record<
     color: "#FFFFFF",
   },
   Shipping: {
+    nextStatus: "Collected by Customer",
+    label: "Mark as Collected",
+    bg: "#047857",
+    border: "#047857",
+    color: "#FFFFFF",
+  },
+  Shipped: {
     nextStatus: "Collected by Customer",
     label: "Mark as Collected",
     bg: "#047857",

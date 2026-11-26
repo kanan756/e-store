@@ -372,8 +372,13 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                     color: "#374151",
                   }
                   const productCount = countOrderProducts(order)
-                  const isPending = order.orderStatus === "Pending"
-                  const nextAction = NEXT_AVAILABLE_ACTIONS[order.orderStatus]
+                  const isAwaitingAcceptance =
+                    order.orderStatus === "Pending" ||
+                    (order.orderStatus === "Processing" && !order.acceptedAt)
+                  const nextAction =
+                    order.orderStatus === "Processing" && order.acceptedAt
+                      ? NEXT_AVAILABLE_ACTIONS["Accepted"]
+                      : NEXT_AVAILABLE_ACTIONS[order.orderStatus]
                   const isBusy = processingId === order.orderId
 
                   return (
@@ -458,8 +463,8 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                             View
                           </Link>
 
-                          {/* For Pending orders: Accept / Reject */}
-                          {isPending && (
+                          {/* For Pending or Unprocessed orders: Accept / Reject */}
+                          {isAwaitingAcceptance && (
                             <>
                               <button
                                 type="button"
@@ -503,7 +508,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                           )}
 
                           {/* For Accepted, Packing, Ready to Ship, Shipping: Next available action */}
-                          {!isPending && nextAction && (
+                          {!isAwaitingAcceptance && nextAction && (
                             <button
                               type="button"
                               disabled={isBusy}

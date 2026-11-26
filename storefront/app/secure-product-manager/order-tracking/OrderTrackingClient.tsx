@@ -771,57 +771,117 @@ export default function OrderTrackingClient({
                 />
               </div>
 
-              {/* Next Action in Drawer if available */}
-              {NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus] && (
-                <div
-                  style={{
-                    padding: "16px 20px",
-                    background: "#F8FAFC",
-                    border: "1px solid #E2E8F0",
-                    borderRadius: 10,
-                    marginBottom: 24,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: 12,
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: "#1E293B" }}>
-                      Next Fulfillment Stage
-                    </div>
-                    <div style={{ fontSize: 12.5, color: "#64748B" }}>
-                      Advance order to &quot;{NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.nextStatus}&quot;
-                    </div>
+              {/* Next Action in Drawer */}
+              <div
+                style={{
+                  padding: "16px 20px",
+                  background: "#F8FAFC",
+                  border: "1px solid #E2E8F0",
+                  borderRadius: 10,
+                  marginBottom: 24,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: "#1E293B" }}>
+                    Fulfillment Status Actions
                   </div>
-                  <button
-                    type="button"
-                    disabled={processingId === selectedOrder.orderId}
-                    onClick={() => {
-                      const next = NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]!
+                  <div style={{ fontSize: 12.5, color: "#64748B" }}>
+                    Current status: <strong>{selectedOrder.orderStatus}</strong>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                  {/* If awaiting acceptance */}
+                  {(selectedOrder.orderStatus === "Pending" ||
+                    (selectedOrder.orderStatus === "Processing" && !selectedOrder.acceptedAt)) && (
+                    <button
+                      type="button"
+                      disabled={processingId === selectedOrder.orderId}
+                      onClick={() => handleAdvanceStatus(selectedOrder, "Accepted", "Accepted by manager")}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: 6,
+                        border: "1px solid #059669",
+                        background: "#059669",
+                        color: "#FFFFFF",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        cursor: processingId === selectedOrder.orderId ? "wait" : "pointer",
+                      }}
+                    >
+                      Accept Order ✓
+                    </button>
+                  )}
+
+                  {/* Standard Next Stage button */}
+                  {NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus] && (
+                    <button
+                      type="button"
+                      disabled={processingId === selectedOrder.orderId}
+                      onClick={() => {
+                        const next = NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]!
+                        setTransitionRemarks("")
+                        setTransitionTarget({
+                          order: selectedOrder,
+                          nextStatus: next.nextStatus,
+                          label: next.label,
+                        })
+                      }}
+                      style={{
+                        padding: "8px 16px",
+                        borderRadius: 6,
+                        border: `1px solid ${NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.border}`,
+                        background: NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.bg,
+                        color: NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.color,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        cursor: processingId === selectedOrder.orderId ? "wait" : "pointer",
+                      }}
+                    >
+                      {NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.label} →
+                    </button>
+                  )}
+
+                  {/* Change Status Dropdown */}
+                  <select
+                    aria-label="Change status manually"
+                    value=""
+                    onChange={(e) => {
+                      const target = e.target.value
+                      if (!target) return
                       setTransitionRemarks("")
                       setTransitionTarget({
                         order: selectedOrder,
-                        nextStatus: next.nextStatus,
-                        label: next.label,
+                        nextStatus: target,
+                        label: `Move to ${target}`,
                       })
                     }}
                     style={{
-                      padding: "8px 16px",
-                      borderRadius: 6,
-                      border: `1px solid ${NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.border}`,
-                      background: NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.bg,
-                      color: NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.color,
-                      fontSize: 13,
+                      padding: "8px 12px",
+                      fontSize: 12.5,
                       fontWeight: 700,
-                      cursor: processingId === selectedOrder.orderId ? "wait" : "pointer",
+                      borderRadius: 6,
+                      border: "1px solid #D1D5DB",
+                      background: "#FFFFFF",
+                      color: "#374151",
+                      cursor: "pointer",
                     }}
                   >
-                    Advance to: {NEXT_AVAILABLE_ACTIONS[selectedOrder.orderStatus]?.label} →
-                  </button>
+                    <option value="">Change Status ▾</option>
+                    <option value="Accepted">Accepted</option>
+                    <option value="Packing">Packing</option>
+                    <option value="Ready to Ship">Ready to Ship</option>
+                    <option value="Shipping">Shipping</option>
+                    <option value="Collected by Customer">Collected by Customer</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
                 </div>
-              )}
+              </div>
 
               {/* Customer & Delivery Grid */}
               <div

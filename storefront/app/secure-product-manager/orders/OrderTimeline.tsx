@@ -110,8 +110,8 @@ export default function OrderTimeline({ order, history = [] }: OrderTimelineProp
     )
   }
 
-  // Pending order notice
-  if (currentStatus === "Pending") {
+  // Pending or Unprocessed order notice
+  if (currentStatus === "Pending" || (currentStatus === "Processing" && !order.acceptedAt)) {
     return (
       <div
         style={{
@@ -145,7 +145,7 @@ export default function OrderTimeline({ order, history = [] }: OrderTimelineProp
               Awaiting Manager Acceptance
             </div>
             <div style={{ fontSize: 13, color: "#B45309" }}>
-              Order tracking timeline will begin once you accept this order. Once accepted, the order can progress through Packing, Ready to Ship, Shipping, and Collection.
+              Order tracking timeline will begin once you accept this order. Use the <strong>&quot;Accept Order&quot;</strong> button above to accept and start fulfillment tracking.
             </div>
           </div>
         </div>
@@ -153,7 +153,16 @@ export default function OrderTimeline({ order, history = [] }: OrderTimelineProp
     )
   }
 
-  const currentIdx = LIFECYCLE_ORDER.indexOf(currentStatus)
+  const normalizedStatus =
+    currentStatus === "Processing"
+      ? (order.acceptedAt ? "Accepted" : "Pending")
+      : currentStatus === "Shipped"
+      ? "Shipping"
+      : currentStatus === "Delivered"
+      ? "Collected by Customer"
+      : currentStatus
+
+  const currentIdx = LIFECYCLE_ORDER.indexOf(normalizedStatus)
 
   return (
     <div

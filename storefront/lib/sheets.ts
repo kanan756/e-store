@@ -1050,26 +1050,36 @@ export const ORDER_LIFECYCLE_SEQUENCE = [
 
 export const ALLOWED_STATUS_TRANSITIONS: Record<string, string[]> = {
   Pending: ["Accepted", "Rejected"],
-  Accepted: ["Packing"],
-  Packing: ["Ready to Ship"],
-  "Ready to Ship": ["Shipping"],
+  Processing: ["Accepted", "Packing", "Ready to Ship", "Shipping", "Collected by Customer", "Rejected"],
+  Accepted: ["Packing", "Ready to Ship", "Shipping", "Collected by Customer", "Rejected"],
+  Packing: ["Ready to Ship", "Shipping", "Collected by Customer"],
+  "Ready to Ship": ["Shipping", "Collected by Customer"],
   Shipping: ["Collected by Customer"],
+  Shipped: ["Collected by Customer"],
+  "Collected by Customer": [],
+  Delivered: [],
+  Rejected: [],
+  Cancelled: [],
 }
 
 export const NEXT_STATUS_MAP: Record<string, string> = {
   Pending: "Accepted",
+  Processing: "Accepted",
   Accepted: "Packing",
   Packing: "Ready to Ship",
   "Ready to Ship": "Shipping",
   Shipping: "Collected by Customer",
+  Shipped: "Collected by Customer",
 }
 
 export const NEXT_ACTION_LABELS: Record<string, string> = {
   Pending: "Accept Order",
+  Processing: "Accept Order",
   Accepted: "Start Packing",
   Packing: "Ready to Ship",
   "Ready to Ship": "Ship Order",
   Shipping: "Mark as Collected",
+  Shipped: "Mark as Collected",
 }
 
 // ── Order Status History Management ───────────────────────────────────────────
@@ -1481,7 +1491,8 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
         const totalAmount = Number(r[11]) || 0
         const paymentMethod = r[12] ?? ""
         const paymentStatus = r[13] ?? ""
-        const orderStatus = r[14] ?? "Processing"
+        const rawStatus = (r[14] ?? "").trim()
+        const orderStatus = rawStatus || "Pending"
         const transactionId = r[15] ?? ""
         const createdAt = r[16] ?? ""
         const updatedAt = r[17] ?? ""
@@ -1565,8 +1576,8 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
         amount: Number(r[11]) || 0,
         paymentMethod: r[12] ?? "",
         paymentStatus: r[13] ?? "",
-        orderStatus: r[14] ?? "Processing",
-        status: r[14] ?? "Processing",
+        orderStatus: (r[14] ?? "").trim() || "Pending",
+        status: (r[14] ?? "").trim() || "Pending",
         transactionId: r[15] ?? "",
         comments: r[15] ? `Payment ID: ${r[15]}` : "",
         createdAt: r[16] ?? "",
@@ -1625,8 +1636,8 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
         amount: Number(r[11]) || 0,
         paymentMethod: r[12] ?? "",
         paymentStatus: r[13] ?? "",
-        orderStatus: r[14] ?? "Processing",
-        status: r[14] ?? "Processing",
+        orderStatus: (r[14] ?? "").trim() || "Pending",
+        status: (r[14] ?? "").trim() || "Pending",
         transactionId: r[15] ?? "",
         comments: r[15] ? `Payment ID: ${r[15]}` : "",
         createdAt: r[16] ?? "",
