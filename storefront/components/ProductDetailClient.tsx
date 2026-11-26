@@ -448,7 +448,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       <div style={{ borderBottom: "1px solid #E5E5E5", background: "#FAFAFA", padding: "14px 0" }}>
         <div className="W" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div style={{ fontSize: 13, color: "#747474", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <Link href="/products" style={{ color: "#303638", textDecoration: "none", fontWeight: 600 }}>
+            <Link href="/products" prefetch={false} style={{ color: "#303638", textDecoration: "none", fontWeight: 600 }}>
               Products
             </Link>
             <span>/</span>
@@ -1482,7 +1482,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               }}
             >
               <span>✓ Added {quantity} × {product.name} to your cart!</span>
-              <Link href="/cart" style={{ color: "#059669", textDecoration: "underline", fontWeight: 800 }}>
+              <Link href="/cart" prefetch={false} style={{ color: "#059669", textDecoration: "underline", fontWeight: 800 }}>
                 View Cart →
               </Link>
             </div>

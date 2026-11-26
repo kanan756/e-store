@@ -140,7 +140,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
               }}
             >
               {/* Media */}
-              <Link href={`/blog/${b.slug}`} style={{ position: "relative", width: "100%", aspectRatio: "16/9", display: "block", background: "#F5F5F5", overflow: "hidden" }}>
+              <Link href={`/blog/${b.slug}`} prefetch={false} style={{ position: "relative", width: "100%", aspectRatio: "16/9", display: "block", background: "#F5F5F5", overflow: "hidden" }}>
                 <Image
                   src={b.imageUrl || "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?q=80&w=800"}
                   alt={b.title}
@@ -183,7 +183,7 @@ export default function LatestBlogs({ blogs = [] }: LatestBlogsProps) {
                     letterSpacing: "-0.01em",
                   }}
                 >
-                  <Link href={`/blog/${b.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
+                  <Link href={`/blog/${b.slug}`} prefetch={false} style={{ color: "inherit", textDecoration: "none" }}>
                     {b.title}
                   </Link>
                 </h3>

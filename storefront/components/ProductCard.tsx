@@ -184,7 +184,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       }}
     >
       {/* ── Image & Badges Container ── */}
-      <Link href={href} style={{ textDecoration: "none", position: "relative", display: "block" }}>
+      <Link href={href} prefetch={false} style={{ textDecoration: "none", position: "relative", display: "block" }}>
         <div
           style={{
             position: "relative",
@@ -368,6 +368,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Product Title */}
         <Link
           href={href}
+          prefetch={false}
           style={{
             textDecoration: "none",
             color: "#17191C",

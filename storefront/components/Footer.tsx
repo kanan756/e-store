@@ -86,7 +86,7 @@ export default function Footer() {
         >
           {/* Col 1: Brand & Description */}
           <div style={{ maxWidth: 320 }}>
-            <Link href="/" style={{ display: "inline-block", position: "relative", width: 154, height: 48, marginBottom: 14 }}>
+            <Link href="/" prefetch={false} style={{ display: "inline-block", position: "relative", width: 154, height: 48, marginBottom: 14 }}>
               <Image
                 src="/images/claspo-latest-logo-white.png"
                 alt="CLASPO™ - SMART HOME SOLUTIONS"
@@ -212,6 +212,7 @@ export default function Footer() {
                 <Link
                   key={link.label}
                   href={link.href}
+                  prefetch={false}
                   style={{
                     fontSize: 13.5,
                     color: "#DADADA",
@@ -236,6 +237,7 @@ export default function Footer() {
                 <Link
                   key={link.label}
                   href={link.href}
+                  prefetch={false}
                   style={{
                     fontSize: 13.5,
                     color: "#DADADA",
@@ -306,9 +308,9 @@ export default function Footer() {
           </div>
 
           <div style={{ display: "flex", gap: 20 }}>
-            <Link href="/privacy" className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Privacy Policy</Link>
-            <Link href="/terms" className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Terms of Service</Link>
-            <Link href="/cookies" className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Cookie Preferences</Link>
+            <Link href="/privacy" prefetch={false} className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Privacy Policy</Link>
+            <Link href="/terms" prefetch={false} className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Terms of Service</Link>
+            <Link href="/cookies" prefetch={false} className="footer-link" style={{ color: "#DADADA", textDecoration: "none" }}>Cookie Preferences</Link>
           </div>
         </div>
       </div>

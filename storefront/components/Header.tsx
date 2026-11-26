@@ -161,6 +161,7 @@ export default function Header() {
           {/* Left: Brand Logo & Tagline */}
           <Link
             href="/"
+            prefetch={false}
             style={{
               display: "flex",
               alignItems: "center",
@@ -195,6 +196,7 @@ export default function Header() {
           >
             <Link
               href="/"
+              prefetch={false}
               style={{
                 textDecoration: "none",
                 color: isHome ? "#F36B12" : "#17191C",
@@ -209,6 +211,7 @@ export default function Header() {
 
             <Link
               href="/products"
+              prefetch={false}
               style={{
                 textDecoration: "none",
                 color: isProducts ? "#F36B12" : "#17191C",
@@ -223,6 +226,7 @@ export default function Header() {
 
             <Link
               href="/about"
+              prefetch={false}
               style={{
                 textDecoration: "none",
                 color: isAbout ? "#F36B12" : "#17191C",
@@ -236,6 +240,7 @@ export default function Header() {
 
             <Link
               href="/contact"
+              prefetch={false}
               style={{
                 textDecoration: "none",
                 color: isContact ? "#F36B12" : "#17191C",
@@ -249,6 +254,7 @@ export default function Header() {
 
             <Link
               href="/blog"
+              prefetch={false}
               style={{
                 textDecoration: "none",
                 color: isBlog ? "#F36B12" : "#17191C",
@@ -362,6 +368,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/login"
+                  prefetch={false}
                   aria-label="Sign In / Register"
                   title="Sign In / Register"
                   style={{
@@ -419,6 +426,7 @@ export default function Header() {
 
                   <Link
                     href="/account"
+                    prefetch={false}
                     onClick={() => setUserMenuOpen(false)}
                     style={{
                       display: "flex",
@@ -439,6 +447,7 @@ export default function Header() {
 
                   <Link
                     href="/track-order"
+                    prefetch={false}
                     onClick={() => setUserMenuOpen(false)}
                     style={{
                       display: "flex",
@@ -491,6 +500,7 @@ export default function Header() {
             {/* Wishlist Icon with Item Count */}
             <Link
               href="/wishlist"
+              prefetch={false}
               aria-label="Wishlist"
               title="Wishlist"
               style={{
@@ -547,6 +557,7 @@ export default function Header() {
             {/* Shopping Cart Icon with Item Count */}
             <Link
               href="/cart"
+              prefetch={false}
               aria-label="Shopping Cart"
               title="Shopping Cart"
               style={{
@@ -707,13 +718,13 @@ export default function Header() {
 
               {/* Mobile links */}
               <nav style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                <Link href="/" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isHome ? "#F36B12" : "#17191C", background: isHome ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Home</Link>
-                <Link href="/products" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isProducts ? "#F36B12" : "#17191C", background: isProducts ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Products</Link>
-                <Link href="/about" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
-                <Link href="/contact" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
-                <Link href="/blog" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
-                <Link href="/wishlist" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Wishlist ({wishlistCount})</Link>
-                <Link href="/track-order" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Track Your Order</Link>
+                <Link href="/" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isHome ? "#F36B12" : "#17191C", background: isHome ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Home</Link>
+                <Link href="/products" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isProducts ? "#F36B12" : "#17191C", background: isProducts ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Products</Link>
+                <Link href="/about" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isAbout ? "#F36B12" : "#17191C", background: isAbout ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>About Us</Link>
+                <Link href="/contact" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isContact ? "#F36B12" : "#17191C", background: isContact ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Contact</Link>
+                <Link href="/blog" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: isBlog ? "#F36B12" : "#17191C", background: isBlog ? "#FFF0E5" : "transparent", fontWeight: 600, fontSize: "15px" }}>Blogs</Link>
+                <Link href="/wishlist" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Wishlist ({wishlistCount})</Link>
+                <Link href="/track-order" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", fontWeight: 600, fontSize: "15px" }}>Track Your Order</Link>
 
                 <div style={{ height: 1, background: "#E5E5E5", margin: "8px 0" }} />
 
@@ -722,7 +733,7 @@ export default function Header() {
                     <div style={{ padding: "6px 12px", fontSize: "12px", color: "#747474" }}>
                       Signed in as <strong style={{ color: "#17191C" }}>{session.user.name || session.user.email}</strong>
                     </div>
-                    <Link href="/account" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#F36B12", fontWeight: 700, fontSize: "15px", background: "#FFF0E5" }}>My Account</Link>
+                    <Link href="/account" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#F36B12", fontWeight: 700, fontSize: "15px", background: "#FFF0E5" }}>My Account</Link>
                     <button
                       type="button"
                       onClick={() => {
@@ -736,8 +747,8 @@ export default function Header() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#FFFFFF", background: "#F36B12", fontWeight: 700, fontSize: "15px", textAlign: "center" }}>Sign In</Link>
-                    <Link href="/signup" onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", background: "#F5F5F5", border: "1px solid #E5E5E5", fontWeight: 600, fontSize: "15px", textAlign: "center" }}>Create Account</Link>
+                    <Link href="/login" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#FFFFFF", background: "#F36B12", fontWeight: 700, fontSize: "15px", textAlign: "center" }}>Sign In</Link>
+                    <Link href="/signup" prefetch={false} onClick={() => setMenuOpen(false)} style={{ padding: "10px 12px", borderRadius: 6, textDecoration: "none", color: "#17191C", background: "#F5F5F5", border: "1px solid #E5E5E5", fontWeight: 600, fontSize: "15px", textAlign: "center" }}>Create Account</Link>
                   </>
                 )}
               </nav>
