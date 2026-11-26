@@ -83,7 +83,19 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
     : []
   const hasColorConfig = Array.isArray(product.colors) && product.colors.length > 0
   const allColorsUnavailable = hasColorConfig && availableColors.length === 0
-  const outOfStock = product.inStock === false || allColorsUnavailable
+  const effectivePassiveStock =
+    hasColorConfig && availableColors.length === 1 && availableColors[0].stock != null
+      ? availableColors[0].stock
+      : product.stock
+  const outOfStock =
+    product.inStock === false ||
+    (effectivePassiveStock !== undefined && effectivePassiveStock <= 0) ||
+    allColorsUnavailable
+  const isLowStock =
+    !outOfStock &&
+    effectivePassiveStock !== undefined &&
+    effectivePassiveStock >= 1 &&
+    effectivePassiveStock <= 10
 
   // Compute pricing with discount support from Product Manager
   const regularPrice = Number.isFinite(Number(product.price)) ? Number(product.price) : 0
@@ -429,7 +441,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         )}
 
         {/* Price Row */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: "auto", marginBottom: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: "auto", marginBottom: isLowStock ? 8 : 16, flexWrap: "wrap" }}>
           <span style={{ fontSize: "18px", fontWeight: 900, color: hasDiscount ? "#F36B12" : "#17191C", fontFamily: "var(--font-sora), sans-serif" }}>
             {hasPrice ? formatPrice(sellingPrice) : "Contact for Price"}
           </span>
@@ -440,6 +452,12 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
             </span>
           )}
         </div>
+
+        {isLowStock && (
+          <div style={{ fontSize: "12px", fontWeight: 700, color: "#C2410C", marginBottom: 12 }}>
+            Only {effectivePassiveStock} left in stock!
+          </div>
+        )}
 
         {/* Add to Cart CTA */}
         <button

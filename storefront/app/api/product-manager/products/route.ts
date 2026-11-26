@@ -48,6 +48,7 @@ const colorVariantSchema = z.object({
   name: z.string().trim().min(1, "Colour name is required").max(50),
   hex: z.string().trim().regex(/^#[0-9a-fA-F]{3,8}$/, "Valid hex colour code is required"),
   available: z.boolean().default(true),
+  activeStock: z.number().int().min(0, "Colour active stock cannot be negative").optional().nullable(),
   stock: z.number().int().min(0, "Colour stock cannot be negative").optional().nullable(),
 })
 
@@ -62,7 +63,8 @@ const createProductSchema = z
     description: z.string().trim().max(5000).optional(),
     price: z.number().min(0, "Price cannot be negative"),
     discountPrice: z.number().min(0, "Discounted price cannot be negative").optional().nullable(),
-    stock: z.number().int().min(0, "Stock cannot be negative"),
+    activeStock: z.number().int().min(0, "Active stock cannot be negative").optional(),
+    stock: z.number().int().min(0, "Stock cannot be negative").optional(),
     status: z.enum(["Active", "Inactive"]).default("Active"),
     primaryImage: z.string().optional(),
     additionalImages: z.array(mediaItemSchema).default([]),
@@ -220,6 +222,16 @@ export async function POST(request: Request) {
       primaryVideo = data.additionalVideos[0].url
     }
 
+    const resolvedActiveStock = data.activeStock ?? data.stock ?? 0
+    const normalizedColors = data.colors.map((c) => {
+      const colActive = c.activeStock ?? c.stock ?? null
+      return {
+        ...c,
+        activeStock: colActive,
+        stock: colActive,
+      }
+    })
+
     const created = await createProduct({
       productId: data.productId,
       productName: data.productName,
@@ -230,14 +242,15 @@ export async function POST(request: Request) {
       description: data.description,
       price: data.price,
       discountPrice: data.discountPrice != null ? data.discountPrice : undefined,
-      stock: data.stock,
+      activeStock: resolvedActiveStock,
+      stock: resolvedActiveStock,
       primaryImage,
       additionalImages: data.additionalImages,
       primaryVideo,
       additionalVideos: data.additionalVideos,
       reviews: data.reviews,
       howToUse: data.howToUse,
-      colors: data.colors,
+      colors: normalizedColors,
       status: data.status,
     })
 

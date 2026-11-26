@@ -259,7 +259,8 @@ export default function DashboardClient({
                   <th>Product</th>
                   <th>Category</th>
                   <th>Pricing</th>
-                  <th>Stock</th>
+                  <th>Active Stock</th>
+                  <th>Passive Stock</th>
                   <th>Status</th>
                   <th>Media</th>
                   <th style={{ textAlign: "right" }}>Actions</th>
@@ -332,12 +333,25 @@ export default function DashboardClient({
                       </td>
 
                       <td>
-                        <div style={{ fontWeight: 600, color: isOutOfStock ? "#DC2626" : "#374151" }}>
+                        <div style={{ fontWeight: 700, color: "#1F2937" }}>
+                          {p.activeStock ?? p.stock ?? 0} units
+                        </div>
+                        <div style={{ fontSize: 11, color: "#6B7280" }}>
+                          Physical
+                        </div>
+                      </td>
+
+                      <td>
+                        <div style={{ fontWeight: 700, color: isOutOfStock ? "#DC2626" : (p.stock ?? 0) <= 10 ? "#D97706" : "#059669" }}>
                           {p.stock ?? 0} units
                         </div>
-                        {isOutOfStock && (
+                        {isOutOfStock ? (
                           <span style={{ fontSize: 11, color: "#DC2626", fontWeight: 700 }}>
                             OUT OF STOCK
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "#6B7280" }}>
+                            Available
                           </span>
                         )}
                       </td>
@@ -477,9 +491,14 @@ export default function DashboardClient({
                           </span>
                         )}
                       </div>
-                      <span style={{ fontWeight: 700, color: isOutOfStock ? "#DC2626" : "#374151" }}>
-                        {isOutOfStock ? "Out of Stock" : `${p.stock ?? 0} units`}
-                      </span>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontSize: 12, color: "#4B5563" }}>
+                          Active: <strong>{p.activeStock ?? p.stock ?? 0}</strong>
+                        </div>
+                        <div style={{ fontWeight: 700, color: isOutOfStock ? "#DC2626" : "#059669" }}>
+                          {isOutOfStock ? "Passive: 0 (Out of Stock)" : `Passive: ${p.stock ?? 0}`}
+                        </div>
+                      </div>
                     </div>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>

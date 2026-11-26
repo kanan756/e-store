@@ -50,9 +50,21 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
   const [discountPrice, setDiscountPrice] = useState(
     initialData?.discountPrice != null ? initialData.discountPrice.toString() : ""
   )
-  const [stock, setStock] = useState(
-    initialData?.stock !== undefined ? initialData.stock.toString() : "50"
+  const [activeStock, setActiveStock] = useState(
+    initialData?.activeStock !== undefined
+      ? initialData.activeStock.toString()
+      : initialData?.stock !== undefined
+        ? initialData.stock.toString()
+        : "50"
   )
+  const initialPassiveStock = initialData?.stock !== undefined ? initialData.stock : 50
+  const reservedStockQty = isEdit
+    ? Math.max(0, (initialData?.activeStock ?? initialPassiveStock) - initialPassiveStock)
+    : 0
+  const parsedActiveStock = parseInt(activeStock || "0", 10)
+  const calculatedPassiveStock = isEdit
+    ? Math.max(0, (isNaN(parsedActiveStock) ? 0 : parsedActiveStock) - reservedStockQty)
+    : Math.max(0, isNaN(parsedActiveStock) ? 0 : parsedActiveStock)
   const [status, setStatus] = useState<"Active" | "Inactive">(
     initialData?.status === "Inactive" ? "Inactive" : "Active"
   )
@@ -463,17 +475,23 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
     if (editingColorId) {
       setColors((prev) =>
-        prev.map((c) =>
-          c.id === editingColorId
-            ? {
-                ...c,
-                name: trimmedName,
-                hex: normalizedHex,
-                available: colorAvailable,
-                stock: parsedStock,
-              }
-            : c
-        )
+        prev.map((c) => {
+          if (c.id !== editingColorId) return c
+          const prevActive = c.activeStock ?? c.stock
+          const prevPassive = c.stock
+          const colReserved =
+            prevActive != null && prevPassive != null
+              ? Math.max(0, prevActive - prevPassive)
+              : 0
+          return {
+            ...c,
+            name: trimmedName,
+            hex: normalizedHex,
+            available: colorAvailable,
+            activeStock: parsedStock,
+            stock: parsedStock != null ? Math.max(0, parsedStock - colReserved) : null,
+          }
+        })
       )
     } else {
       const newColor: ProductColorVariant = {
@@ -481,6 +499,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         name: trimmedName,
         hex: normalizedHex,
         available: colorAvailable,
+        activeStock: parsedStock,
         stock: parsedStock,
       }
       setColors((prev) => [...prev, newColor])
@@ -492,7 +511,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     setColorName(color.name)
     setColorHex(color.hex)
     setColorAvailable(color.available !== false)
-    setColorStock(color.stock !== undefined && color.stock !== null ? String(color.stock) : "")
+    const initialColActive = color.activeStock ?? color.stock
+    setColorStock(initialColActive !== undefined && initialColActive !== null ? String(initialColActive) : "")
     setEditingColorId(color.id)
     setColorFormError("")
   }
@@ -547,9 +567,9 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     }
     setPricingError("")
 
-    const stockNumber = parseInt(stock || "0", 10)
-    if (isNaN(stockNumber) || stockNumber < 0) {
-      setErrorMessage("Please enter a valid stock quantity.")
+    const activeStockNumber = parseInt(activeStock || "0", 10)
+    if (isNaN(activeStockNumber) || activeStockNumber < 0) {
+      setErrorMessage("Please enter a valid Active Stock quantity.")
       return
     }
 
@@ -569,7 +589,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         description: description.trim(),
         price: regularPriceInr,
         discountPrice: discountInr ?? null,
-        stock: stockNumber,
+        activeStock: activeStockNumber,
+        stock: calculatedPassiveStock,
         status,
         primaryImage: primaryItem ? primaryItem.url : "",
         additionalImages: images,
@@ -1174,7 +1195,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                     </select>
                   </div>
                   <div>
-                    <label className="pm-label">Colour Stock (Optional)</label>
+                    <label className="pm-label">Colour Active Stock (Optional)</label>
                     <input
                       type="number"
                       min="0"
@@ -1260,19 +1281,33 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                               >
                                 {isAvail ? "Available" : "Unavailable"}
                               </span>
-                              {c.stock != null && (
-                                <span
-                                  style={{
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    padding: "2px 8px",
-                                    borderRadius: 999,
-                                    backgroundColor: "#F3F4F6",
-                                    color: "#374151",
-                                  }}
-                                >
-                                  Stock: {c.stock}
-                                </span>
+                              {(c.activeStock != null || c.stock != null) && (
+                                <>
+                                  <span
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 600,
+                                      padding: "2px 8px",
+                                      borderRadius: 999,
+                                      backgroundColor: "#EFF6FF",
+                                      color: "#1D4ED8",
+                                    }}
+                                  >
+                                    Active: {c.activeStock ?? c.stock}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: 11,
+                                      fontWeight: 600,
+                                      padding: "2px 8px",
+                                      borderRadius: 999,
+                                      backgroundColor: "#F3F4F6",
+                                      color: "#374151",
+                                    }}
+                                  >
+                                    Passive: {c.stock ?? c.activeStock}
+                                  </span>
+                                </>
                               )}
                             </div>
                           </div>
@@ -1766,23 +1801,53 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                 Inventory Management
               </h2>
 
-              <div className="pm-field-group" style={{ marginBottom: 0 }}>
-                <label className="pm-label">Stock Quantity</label>
+              <div className="pm-field-group" style={{ marginBottom: 16 }}>
+                <label className="pm-label">Active Stock (Physical Inventory)</label>
                 <input
                   type="number"
                   min="0"
                   step="1"
                   className="pm-input"
                   placeholder="100"
-                  value={stock}
-                  onChange={(e) => setStock(e.target.value)}
+                  value={activeStock}
+                  onChange={(e) => setActiveStock(e.target.value)}
                   required
                 />
-                <span style={{ fontSize: 11.5, color: parseInt(stock, 10) <= 0 ? "#EF4444" : "#059669", marginTop: 6, display: "block", fontWeight: 600 }}>
-                  {parseInt(stock, 10) <= 0
-                    ? "⚠️ Stock is 0: Product will show as Out of Stock."
-                    : `✓ Available inventory: ${stock} units.`}
+                <span style={{ fontSize: 11.5, color: "#6B7280", marginTop: 6, display: "block" }}>
+                  Total stock physically maintained by manager. Never overwritten by customer orders.
                 </span>
+              </div>
+
+              <div
+                style={{
+                  padding: "12px 14px",
+                  borderRadius: 10,
+                  background: calculatedPassiveStock <= 0 ? "#FEF2F2" : "#F0FDF4",
+                  border: `1px solid ${calculatedPassiveStock <= 0 ? "#FECACA" : "#BBF7D0"}`,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#374151", textTransform: "uppercase" }}>
+                    Passive Stock (Available)
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 800,
+                      color: calculatedPassiveStock <= 0 ? "#DC2626" : "#059669",
+                    }}
+                  >
+                    {calculatedPassiveStock} units
+                  </span>
+                </div>
+                <div style={{ fontSize: 11.5, color: "#4B5563" }}>
+                  Auto-calculated: Active ({isNaN(parsedActiveStock) ? 0 : parsedActiveStock}) − Reserved ({reservedStockQty}) = {calculatedPassiveStock}
+                </div>
+                {calculatedPassiveStock <= 0 && (
+                  <div style={{ fontSize: 11.5, color: "#DC2626", fontWeight: 700, marginTop: 4 }}>
+                    ⚠️ Passive stock is 0: Product will show as Out of Stock to customers.
+                  </div>
+                )}
               </div>
             </div>
 

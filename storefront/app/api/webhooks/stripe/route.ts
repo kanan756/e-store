@@ -5,10 +5,12 @@ import {
   appendOrder,
   deductStockForOrder,
   getOrderByPaymentId,
+  getProducts,
   restoreStockForOrder,
   updateOrderStatusByPaymentId,
   type StockOrderLineInput,
 } from "@/lib/sheets"
+import { getEffectivePricing } from "@/lib/pricing"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_placeholder", {
   apiVersion: "2025-01-27.acacia" as any,
@@ -107,6 +109,32 @@ export async function POST(request: Request) {
       const orderId = existingOrder?.orderId || `ORD-${Date.now()}`
 
       const lineItems = parseOrderItemsFromMetadata(orderItems, productSummary)
+
+      // Snapshot product details & historical prices before stock deduction
+      const catalogProducts = await getProducts(true)
+      const structuredItems = lineItems.map((line) => {
+        const matched =
+          (line.productId
+            ? catalogProducts.find((p) => p.productId === line.productId || p.id === line.productId)
+            : undefined) ||
+          (line.name
+            ? catalogProducts.find((p) => p.name.trim().toLowerCase() === line.name!.trim().toLowerCase())
+            : undefined)
+
+        const pricing = matched ? getEffectivePricing(matched) : null
+        return {
+          productId: matched?.productId || matched?.id || line.productId || "",
+          name: matched?.name || line.name || "Product",
+          imageUrl: matched?.primaryImage || matched?.imageUrl || matched?.additionalImages?.[0]?.url || "",
+          colorName: line.colorName || "",
+          colorId: line.colorId || "",
+          quantity: line.quantity,
+          regularPrice: pricing ? pricing.regularPrice : undefined,
+          discountPrice: pricing && pricing.hasDiscount ? pricing.sellingPrice : null,
+          effectivePrice: pricing ? pricing.sellingPrice : undefined,
+        }
+      })
+
       const deductionResult = await deductStockForOrder({
         eventId: event.id,
         orderId,
@@ -127,22 +155,48 @@ export async function POST(request: Request) {
           ? Number(subtotal)
           : Math.max(0, confirmedAmount - parsedShipping)
 
-      await appendOrder({
-        orderId,
-        userId: userId || undefined,
-        customerName,
-        email,
-        product: productSummary || "Stripe Order",
-        subtotal: parsedSubtotal,
-        shippingCharge: parsedShipping,
-        totalAmount: confirmedAmount,
-        amount: confirmedAmount,
-        paymentId: paymentIntentId,
-      })
+      const shippingDetails = (session as any).shipping_details || session.customer_details
+      const addrObj = shippingDetails?.address
+      const formattedAddress = addrObj
+        ? [addrObj.line1, addrObj.line2, addrObj.city, addrObj.state, addrObj.postal_code, addrObj.country]
+            .filter(Boolean)
+            .join(", ")
+        : ""
+      const phoneNumber = session.customer_details?.phone || ""
+
+      try {
+        await appendOrder({
+          orderId,
+          userId: userId || undefined,
+          customerName,
+          email,
+          phoneNumber,
+          shippingAddress: formattedAddress,
+          items: structuredItems.length > 0 ? JSON.stringify(structuredItems) : (productSummary || "Stripe Order"),
+          product: productSummary || "Stripe Order",
+          subtotal: parsedSubtotal,
+          shippingCharge: parsedShipping,
+          totalAmount: confirmedAmount,
+          amount: confirmedAmount,
+          paymentMethod: "Stripe",
+          paymentStatus: "Paid",
+          orderStatus: "Pending",
+          paymentId: paymentIntentId,
+        })
+      } catch (orderErr) {
+        // Roll back reserved stock if order creation fails so stock & orders never go inconsistent
+        await restoreStockForOrder({
+          eventId: `rollback_${event.id}`,
+          orderId,
+          paymentId: paymentIntentId,
+        }).catch(() => {})
+        throw orderErr
+      }
 
       revalidatePath("/")
       revalidatePath("/products")
       revalidatePath("/shop")
+      revalidatePath("/secure-product-manager/orders")
       for (const updated of deductionResult.updatedProducts) {
         if (updated.handle) {
           revalidatePath(`/products/${updated.handle}`)
@@ -202,8 +256,25 @@ export async function POST(request: Request) {
       event.type === "checkout.session.expired" ||
       event.type === "payment_intent.payment_failed"
     ) {
-      // Do not deduct stock for failed or expired/cancelled payments
-      console.log(`Payment event ${event.type} received; no stock deducted.`)
+      // Release any stock reservation if one existed for this payment intent
+      const obj = event.data.object as { payment_intent?: string; id?: string }
+      const failedPaymentId =
+        event.type === "payment_intent.payment_failed"
+          ? obj.id
+          : typeof obj.payment_intent === "string"
+            ? obj.payment_intent
+            : ""
+
+      if (failedPaymentId) {
+        const existingOrder = await getOrderByPaymentId(failedPaymentId)
+        await restoreStockForOrder({
+          eventId: event.id,
+          orderId: existingOrder?.orderId,
+          paymentId: failedPaymentId,
+        }).catch(() => {})
+        await updateOrderStatusByPaymentId(failedPaymentId, "Failed", "Cancelled").catch(() => {})
+      }
+      console.log(`Payment event ${event.type} handled; reservation released if present.`)
     }
 
     return NextResponse.json({ received: true })

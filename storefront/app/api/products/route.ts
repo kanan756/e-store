@@ -17,7 +17,14 @@ export const revalidate = 0
 export async function GET() {
   try {
     const products = await getProducts()
-    return NextResponse.json({ products })
+    // Never expose Active Stock to customer-facing APIs
+    const sanitized = products.map(({ activeStock: _a, colors, ...rest }) => ({
+      ...rest,
+      colors: Array.isArray(colors)
+        ? colors.map(({ activeStock: _ca, ...cRest }) => cRest)
+        : colors,
+    }))
+    return NextResponse.json({ products: sanitized })
   } catch (err) {
     console.error("Failed to fetch products from Google Sheets:", err)
     return NextResponse.json({ products: [] }, { status: 500 })

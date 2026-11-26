@@ -38,10 +38,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   if (!product) notFound()
 
+  // Never expose Active Stock to customer-facing pages
+  const { activeStock: _a, colors, ...rest } = product
+  const publicProduct = {
+    ...rest,
+    colors: Array.isArray(colors)
+      ? colors.map(({ activeStock: _ca, ...cRest }) => cRest)
+      : colors,
+  }
+
   return (
     <>
-      <ProductSchema product={product} />
-      <ProductDetailClient product={product} />
+      <ProductSchema product={publicProduct} />
+      <ProductDetailClient product={publicProduct} />
     </>
   )
 }

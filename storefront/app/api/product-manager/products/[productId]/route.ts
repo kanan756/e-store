@@ -47,6 +47,7 @@ const colorVariantSchema = z.object({
   name: z.string().trim().min(1, "Colour name is required").max(50),
   hex: z.string().trim().regex(/^#[0-9a-fA-F]{3,8}$/, "Valid hex colour code is required"),
   available: z.boolean().default(true),
+  activeStock: z.number().int().min(0, "Colour active stock cannot be negative").optional().nullable(),
   stock: z.number().int().min(0, "Colour stock cannot be negative").optional().nullable(),
 })
 
@@ -60,6 +61,7 @@ const updateProductSchema = z
     description: z.string().trim().max(5000).optional(),
     price: z.number().min(0).optional(),
     discountPrice: z.number().min(0).optional().nullable(),
+    activeStock: z.number().int().min(0).optional(),
     stock: z.number().int().min(0).optional(),
     status: z.enum(["Active", "Inactive"]).optional(),
     primaryImage: z.string().optional(),
@@ -171,12 +173,67 @@ export async function PUT(
       primaryImage = primaryItem.url
     }
 
+    // Calculate Active Stock & Passive Stock consistently (never allow manager form to overwrite reserved qty)
+    const oldPassiveStock = Math.max(0, existing.stock ?? 0)
+    const oldActiveStock = Math.max(0, existing.activeStock ?? oldPassiveStock)
+    const reservedQty = Math.max(0, oldActiveStock - oldPassiveStock)
+
+    const nextActiveStock =
+      data.activeStock !== undefined
+        ? Math.max(0, data.activeStock)
+        : existing.activeStock !== undefined
+          ? oldActiveStock
+          : data.stock !== undefined
+            ? Math.max(0, data.stock)
+            : oldActiveStock
+
+    const nextPassiveStock =
+      data.activeStock !== undefined
+        ? Math.max(0, nextActiveStock - reservedQty)
+        : existing.activeStock !== undefined
+          ? oldPassiveStock
+          : data.stock !== undefined
+            ? Math.max(0, data.stock)
+            : oldPassiveStock
+
+    // Recompute colour-level Passive Stock when colour Active Stock is updated
+    const existingColors = Array.isArray(existing.colors) ? existing.colors : []
+    const nextColors = data.colors
+      ? data.colors.map((c) => {
+          const prevColor = existingColors.find(
+            (ec) => ec.id === c.id || ec.name.trim().toLowerCase() === c.name.trim().toLowerCase()
+          )
+          const oldColPassive = prevColor?.stock != null ? Math.max(0, prevColor.stock) : null
+          const oldColActive =
+            prevColor?.activeStock != null
+              ? Math.max(0, prevColor.activeStock)
+              : oldColPassive
+
+          const colActiveInput = c.activeStock !== undefined ? c.activeStock : c.stock
+          if (colActiveInput == null) {
+            return { ...c, activeStock: null, stock: null }
+          }
+          const colReserved =
+            oldColActive != null && oldColPassive != null
+              ? Math.max(0, oldColActive - oldColPassive)
+              : 0
+          const newColPassive = Math.max(0, colActiveInput - colReserved)
+          return {
+            ...c,
+            activeStock: colActiveInput,
+            stock: newColPassive,
+          }
+        })
+      : undefined
+
     const updated = await updateProductById(productId, {
       ...data,
+      activeStock: nextActiveStock,
+      stock: nextPassiveStock,
       discountPrice: data.discountPrice === null ? null : (data.discountPrice ?? undefined),
       primaryImage: primaryImage ?? existing.primaryImage,
       imageUrl: primaryImage ?? existing.imageUrl,
-      colors: data.colors,
+      colors: nextColors,
     })
 
     if (!updated) {

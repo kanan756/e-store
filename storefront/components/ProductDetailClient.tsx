@@ -681,11 +681,21 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   <span style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", padding: "5px 12px", borderRadius: 20, fontSize: 12.5, fontWeight: 700 }}>
                     Out of Stock
                   </span>
-                ) : (
-                  <span style={{ background: "#ECFDF5", color: "#059669", border: "1px solid #A7F3D0", padding: "5px 12px", borderRadius: 20, fontSize: 12.5, fontWeight: 700 }}>
-                    ✓ In Stock {product.stock != null ? `(${product.stock} available)` : ""}
-                  </span>
-                )}
+                ) : (() => {
+                  const displayStock = selectedColor?.stock != null ? selectedColor.stock : product.stock
+                  if (displayStock != null && displayStock >= 1 && displayStock <= 10) {
+                    return (
+                      <span style={{ background: "#FFF7ED", color: "#C2410C", border: "1px solid #FED7AA", padding: "5px 12px", borderRadius: 20, fontSize: 12.5, fontWeight: 700 }}>
+                        Only {displayStock} left in stock!
+                      </span>
+                    )
+                  }
+                  return (
+                    <span style={{ background: "#ECFDF5", color: "#059669", border: "1px solid #A7F3D0", padding: "5px 12px", borderRadius: 20, fontSize: 12.5, fontWeight: 700 }}>
+                      ✓ In Stock
+                    </span>
+                  )
+                })()}
               </div>
 
               {/* Price & Discount Price in INR (₹) */}

@@ -25,11 +25,14 @@ import path from "path"
 // ── Rate Limiting / Caching ───────────────────────────────────────────────────
 // Google Sheets has a 60 requests per minute quota. This wrapper caches results
 // in-memory for TTL duration while consolidating concurrent in-flight requests.
-function withTTL<T extends (...args: any[]) => Promise<any>>(fn: T, ttlMs = 60_000): T {
+function withTTL<T extends (...args: any[]) => Promise<any>>(
+  fn: T,
+  ttlMs = 60_000
+): T & { invalidate: () => void } {
   const cacheMap = new Map<string, { data: any; timestamp: number }>()
   const inflightMap = new Map<string, Promise<any>>()
 
-  return (async (...args: any[]) => {
+  const wrapped = (async (...args: any[]) => {
     const key = JSON.stringify(args)
     const cached = cacheMap.get(key)
 
@@ -53,7 +56,13 @@ function withTTL<T extends (...args: any[]) => Promise<any>>(fn: T, ttlMs = 60_0
 
     inflightMap.set(key, promise)
     return promise
-  }) as any
+  }) as T & { invalidate: () => void }
+
+  wrapped.invalidate = () => {
+    cacheMap.clear()
+  }
+
+  return wrapped
 }
 
 // ── Auth & Sheet ID Helpers ───────────────────────────────────────────────────
@@ -126,6 +135,9 @@ export const REQUIRED_SHEETS = {
     "transactionId",
     "createdAt",
     "updatedAt",
+    "acceptedAt",
+    "rejectedAt",
+    "rejectionReason",
   ],
   "User Activity": [
     "activityId",
@@ -182,6 +194,7 @@ export const STORE_SHEETS = {
     "reviews",
     "howToUse",
     "colors",
+    "activeStock",
   ],
   Blogs: [
     "title",
@@ -277,6 +290,10 @@ export interface Order {
   updatedAt: string
   comments?: string
   updatedBy?: string
+  // Extended fields for order management
+  acceptedAt?: string
+  rejectedAt?: string
+  rejectionReason?: string
 }
 
 export interface UserActivityRecord {
@@ -343,6 +360,7 @@ export interface ProductColorVariant {
   name: string
   hex: string
   available: boolean
+  activeStock?: number | null
   stock?: number | null
 }
 
@@ -361,7 +379,8 @@ export interface Product {
   description: string
   price: number           // Regular price
   discountPrice?: number | null  // Discounted price
-  stock?: number          // Available inventory count
+  activeStock?: number    // Manager-set physical stock quantity
+  stock?: number          // Passive Stock = activeStock - reserved quantity (never goes negative)
   inStock: boolean        // Stock status (stock > 0 and status === 'Active')
   imageUrl: string        // Primary image URL (backward compatible)
   primaryImage?: string
@@ -954,6 +973,153 @@ export async function markPasswordResetAsUsed(resetId: string): Promise<boolean>
 }
 
 // ── Orders Management (Sheet 2: Orders) ───────────────────────────────────────
+
+export function invalidateOrdersCache() {
+  getAllOrders.invalidate()
+  getOrdersByEmail.invalidate()
+  getOrdersByUserId.invalidate()
+  getOrderByPaymentId.invalidate()
+}
+
+// ── Order Accept / Reject ─────────────────────────────────────────────────────
+export async function acceptOrder(orderId: string): Promise<{ success: boolean; error?: string }> {
+  const now = new Date().toISOString()
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
+  const localIdx = localOrders.findIndex((o) => o.orderId === orderId)
+
+  if (!isSheetsConfigured()) {
+    if (localIdx === -1) return { success: false, error: "Order not found" }
+    if (localOrders[localIdx].orderStatus === "Accepted") return { success: false, error: "Order already accepted" }
+    if (localOrders[localIdx].orderStatus === "Rejected") return { success: false, error: "Cannot accept a rejected order" }
+    localOrders[localIdx] = {
+      ...localOrders[localIdx],
+      orderStatus: "Accepted",
+      status: "Accepted",
+      updatedAt: now,
+      acceptedAt: now,
+    }
+    saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
+    invalidateOrdersCache()
+    return { success: true }
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    invalidateOrdersCache()
+    const orders = await getAllOrders()
+    const match = orders.find((o) => o.orderId === orderId)
+    if (!match || !match.rowIndex) return { success: false, error: "Order not found" }
+    if (match.orderStatus === "Accepted") return { success: false, error: "Order already accepted" }
+    if (match.orderStatus === "Rejected") return { success: false, error: "Cannot accept a rejected order" }
+
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    // Update orderStatus (col O=15), updatedAt (col R=18), acceptedAt (col S=19)
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        valueInputOption: "RAW",
+        data: [
+          { range: `Orders!O${match.rowIndex}`, values: [["Accepted"]] },
+          { range: `Orders!R${match.rowIndex}`, values: [[now]] },
+          { range: `Orders!S${match.rowIndex}`, values: [[now]] },
+        ],
+      },
+    })
+
+    if (localIdx !== -1) {
+      localOrders[localIdx] = {
+        ...localOrders[localIdx],
+        orderStatus: "Accepted",
+        status: "Accepted",
+        updatedAt: now,
+        acceptedAt: now,
+      }
+      saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
+    }
+
+    invalidateOrdersCache()
+    return { success: true }
+  } catch (err: any) {
+    console.error("acceptOrder error:", err)
+    return { success: false, error: err.message || "Failed to accept order" }
+  }
+}
+
+export async function rejectOrder(
+  orderId: string,
+  rejectionReason = ""
+): Promise<{ success: boolean; error?: string }> {
+  const now = new Date().toISOString()
+  const localOrders = loadLocalFile<Order>(LOCAL_ORDERS_FILE)
+  const localIdx = localOrders.findIndex((o) => o.orderId === orderId)
+
+  if (!isSheetsConfigured()) {
+    if (localIdx === -1) return { success: false, error: "Order not found" }
+    if (localOrders[localIdx].orderStatus === "Rejected") return { success: false, error: "Order already rejected" }
+    if (localOrders[localIdx].orderStatus === "Accepted") return { success: false, error: "Cannot reject an already accepted order" }
+    localOrders[localIdx] = {
+      ...localOrders[localIdx],
+      orderStatus: "Rejected",
+      status: "Rejected",
+      updatedAt: now,
+      rejectedAt: now,
+      rejectionReason,
+    }
+    saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
+    invalidateOrdersCache()
+    return { success: true }
+  }
+
+  try {
+    await ensureAllSheetsInitialized()
+    invalidateOrdersCache()
+    const orders = await getAllOrders()
+    const match = orders.find((o) => o.orderId === orderId)
+    if (!match || !match.rowIndex) return { success: false, error: "Order not found" }
+    if (match.orderStatus === "Rejected") return { success: false, error: "Order already rejected" }
+    if (match.orderStatus === "Accepted") return { success: false, error: "Cannot reject an already accepted order" }
+
+    const auth = getAuth()
+    const sheets = google.sheets({ version: "v4", auth })
+    const spreadsheetId = getSheetId()
+
+    // Update orderStatus (O), updatedAt (R), rejectedAt (T), rejectionReason (U)
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        valueInputOption: "RAW",
+        data: [
+          { range: `Orders!O${match.rowIndex}`, values: [["Rejected"]] },
+          { range: `Orders!R${match.rowIndex}`, values: [[now]] },
+          { range: `Orders!T${match.rowIndex}`, values: [[now]] },
+          { range: `Orders!U${match.rowIndex}`, values: [[rejectionReason]] },
+        ],
+      },
+    })
+
+    if (localIdx !== -1) {
+      localOrders[localIdx] = {
+        ...localOrders[localIdx],
+        orderStatus: "Rejected",
+        status: "Rejected",
+        updatedAt: now,
+        rejectedAt: now,
+        rejectionReason,
+      }
+      saveLocalFile(LOCAL_ORDERS_FILE, localOrders)
+    }
+
+    invalidateOrdersCache()
+    return { success: true }
+  } catch (err: any) {
+    console.error("rejectOrder error:", err)
+    return { success: false, error: err.message || "Failed to reject order" }
+  }
+}
+
 export async function appendOrder(orderData: {
   orderId?: string
   customerName: string
@@ -999,7 +1165,7 @@ export async function appendOrder(orderData: {
   const discount = orderData.discount ?? 0
   const paymentMethod = orderData.paymentMethod || "Stripe"
   const paymentStatus = orderData.paymentStatus || "Paid"
-  const orderStatus = orderData.orderStatus || "Processing"
+  const orderStatus = orderData.orderStatus || "Pending"
   const transactionId = orderData.transactionId || orderData.paymentId || ""
   const now = new Date().toISOString()
 
@@ -1041,7 +1207,7 @@ export async function appendOrder(orderData: {
 
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: "Orders!A:R",
+        range: "Orders!A:U",
         valueInputOption: "RAW",
         requestBody: {
           values: [
@@ -1064,10 +1230,14 @@ export async function appendOrder(orderData: {
               orderRecord.transactionId,
               orderRecord.createdAt,
               orderRecord.updatedAt,
+              "",
+              "",
+              "",
             ],
           ],
         },
       })
+      invalidateOrdersCache()
 
       if (resolvedUserId) {
         await logUserActivity(
@@ -1102,7 +1272,7 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:R",
+      range: "Orders!A2:U",
     })
 
     const rows = res.data.values ?? []
@@ -1152,6 +1322,9 @@ export const getOrdersByEmail = withTTL(async (email: string): Promise<Order[]> 
           comments: transactionId ? `Payment ID: ${transactionId}` : "",
           createdAt,
           updatedAt,
+          acceptedAt: r[18] ?? "",
+          rejectedAt: r[19] ?? "",
+          rejectionReason: r[20] ?? "",
         }
       })
   } catch (err) {
@@ -1174,7 +1347,7 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:R",
+      range: "Orders!A2:U",
     })
 
     const rows = res.data.values ?? []
@@ -1204,6 +1377,9 @@ export const getOrdersByUserId = withTTL(async (userId: string): Promise<Order[]
         comments: r[15] ? `Payment ID: ${r[15]}` : "",
         createdAt: r[16] ?? "",
         updatedAt: r[17] ?? "",
+        acceptedAt: r[18] ?? "",
+        rejectedAt: r[19] ?? "",
+        rejectionReason: r[20] ?? "",
       }))
   } catch (err) {
     console.error("Error fetching orders by userId:", err)
@@ -1225,7 +1401,7 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Orders!A2:R",
+      range: "Orders!A2:U",
     })
 
     const rows = res.data.values ?? []
@@ -1255,6 +1431,9 @@ export const getAllOrders = withTTL(async (): Promise<Order[]> => {
         comments: r[15] ? `Payment ID: ${r[15]}` : "",
         createdAt: r[16] ?? "",
         updatedAt: r[17] ?? "",
+        acceptedAt: r[18] ?? "",
+        rejectedAt: r[19] ?? "",
+        rejectionReason: r[20] ?? "",
       }))
   } catch (err) {
     console.error("Error reading all orders:", err)
@@ -1419,6 +1598,9 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
                       name: String(c.name).trim(),
                       hex: typeof c.hex === "string" && /^#[0-9a-fA-F]{3,8}$/.test(c.hex.trim()) ? c.hex.trim() : "#17191C",
                       available: c.available !== false,
+                      activeStock: c.activeStock !== undefined && c.activeStock !== null && c.activeStock !== "" && Number.isFinite(Number(c.activeStock))
+                        ? Math.max(0, Math.floor(Number(c.activeStock)))
+                        : null,
                       stock: c.stock !== undefined && c.stock !== null && c.stock !== "" && Number.isFinite(Number(c.stock))
                         ? Math.max(0, Math.floor(Number(c.stock)))
                         : null,
@@ -1437,6 +1619,11 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
             const fallbackImage = additionalImages.length > 0 ? additionalImages[0].url : ""
             const resolvedImageUrl = primaryImage || fallbackImage || ""
 
+            // Active Stock (column U, index 20): manager-set physical stock
+            // Passive Stock (column J, index 9): automatically decremented by orders
+            const rawActiveStock = parseSheetNumber(r[20])
+            const activeStock = rawActiveStock !== null ? Math.max(0, Math.floor(rawActiveStock)) : undefined
+
             return {
               rowIndex,
               id: productId,
@@ -1452,6 +1639,7 @@ async function fetchAllProductsFromSheets(): Promise<Product[]> {
               description,
               price,
               discountPrice,
+              activeStock,
               stock,
               inStock: status === "Active" && stock > 0,
               imageUrl: resolvedImageUrl,
@@ -1578,6 +1766,7 @@ export async function createProduct(product: {
   price: number
   discountPrice?: number
   stock?: number
+  activeStock?: number
   primaryImage?: string
   additionalImages?: ProductMediaItem[]
   primaryVideo?: string
@@ -1601,7 +1790,10 @@ export async function createProduct(product: {
   const description = product.description || ""
   const price = product.price || 0
   const discountPrice = product.discountPrice != null ? product.discountPrice : ""
-  const stock = product.stock != null ? product.stock : 0
+  // Active Stock: manager-set physical quantity
+  const activeStockVal = product.activeStock != null ? product.activeStock : (product.stock != null ? product.stock : 0)
+  // Passive Stock = Active Stock (at creation; decremented by orders later)
+  const stock = product.stock != null ? product.stock : activeStockVal
   const primaryImage = product.primaryImage || (product.additionalImages?.[0]?.url || "")
   const additionalImagesJson = product.additionalImages ? JSON.stringify(product.additionalImages) : "[]"
   const primaryVideo = product.primaryVideo || (product.additionalVideos?.[0]?.url || "")
@@ -1614,7 +1806,7 @@ export async function createProduct(product: {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "Products!A:T",
+    range: "Products!A:U",
     valueInputOption: "RAW",
     requestBody: {
       values: [
@@ -1639,6 +1831,7 @@ export async function createProduct(product: {
           reviewsJson,
           howToUseJson,
           colorsJson,
+          activeStockVal,
         ],
       ],
     },
@@ -1660,6 +1853,7 @@ export async function createProduct(product: {
     description,
     price,
     discountPrice: typeof discountPrice === "number" ? discountPrice : undefined,
+    activeStock: activeStockVal,
     stock,
     inStock: status === "Active" && stock > 0,
     imageUrl: primaryImage,
@@ -1698,6 +1892,7 @@ export async function updateProductById(
   const updatedPrice = updates.price ?? existing.price
   const updatedDiscount = updates.discountPrice !== undefined ? updates.discountPrice : existing.discountPrice
   const updatedStock = updates.stock !== undefined ? updates.stock : (existing.stock ?? (existing.inStock ? 50 : 0))
+  const updatedActiveStock = updates.activeStock !== undefined ? updates.activeStock : existing.activeStock
   const updatedPrimaryImage = updates.primaryImage ?? updates.imageUrl ?? existing.primaryImage ?? existing.imageUrl
   const updatedAdditionalImages = updates.additionalImages ?? existing.additionalImages ?? []
   const updatedPrimaryVideo = updates.primaryVideo ?? existing.primaryVideo ?? ""
@@ -1729,11 +1924,12 @@ export async function updateProductById(
     JSON.stringify(updatedReviews),
     JSON.stringify(updatedHowToUse),
     JSON.stringify(updatedColors),
+    updatedActiveStock != null ? updatedActiveStock : "",
   ]
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: `Products!A${existing.rowIndex}:T${existing.rowIndex}`,
+    range: `Products!A${existing.rowIndex}:U${existing.rowIndex}`,
     valueInputOption: "RAW",
     requestBody: {
       values: [rowValues],
@@ -1755,6 +1951,7 @@ export async function updateProductById(
     description: updatedDesc,
     price: updatedPrice,
     discountPrice: updatedDiscount,
+    activeStock: updatedActiveStock,
     stock: updatedStock,
     inStock: updatedStatus === "Active" && updatedStock > 0,
     primaryImage: updatedPrimaryImage,
@@ -2413,12 +2610,14 @@ export async function deductStockForOrder(params: {
       if (!product) continue
 
       const resolvedPid = product.productId || product.id
-      const previousStock = Math.max(0, product.stock ?? (product.inStock ? 100 : 0))
-      const updatedStock = Math.max(0, previousStock - qty)
-      const clampedZero = previousStock < qty
+      let previousStock = Math.max(0, product.stock ?? (product.inStock ? 100 : 0))
+      let updatedStock = Math.max(0, previousStock - qty)
+      let clampedZero = previousStock < qty
 
       let updatedColors = product.colors
       let resolvedColorName = line.colorName || ""
+      let updatedColorSpecific = false
+
       if (Array.isArray(product.colors) && product.colors.length > 0 && (line.colorId || line.colorName)) {
         updatedColors = product.colors.map((c) => {
           const matches =
@@ -2427,20 +2626,37 @@ export async function deductStockForOrder(params: {
           if (!matches) return c
           resolvedColorName = c.name
           if (c.stock != null) {
-            return { ...c, stock: Math.max(0, c.stock - qty) }
+            updatedColorSpecific = true
+            previousStock = Math.max(0, c.stock)
+            const nextColorStock = Math.max(0, previousStock - qty)
+            clampedZero = previousStock < qty
+            updatedStock = nextColorStock
+            return { ...c, stock: nextColorStock }
           }
           return c
         })
       }
 
+      // If colour-specific stock was updated, keep product-level passive stock synced
+      // if all colours have stock configured; otherwise only update product.stock when no colour stock.
+      let nextProductStock = updatedStock
+      if (updatedColorSpecific && Array.isArray(updatedColors)) {
+        const allHaveColorStock = updatedColors.every((c) => c.stock != null)
+        if (allHaveColorStock) {
+          nextProductStock = updatedColors.reduce((sum, c) => sum + Math.max(0, c.stock ?? 0), 0)
+        } else {
+          nextProductStock = Math.max(0, (product.stock ?? 0) - qty)
+        }
+      }
+
       const updated = await updateProductById(product.id, {
-        stock: updatedStock,
+        stock: nextProductStock,
         colors: updatedColors,
       })
 
       if (updated) {
         // Keep local snapshot in sync if multiple lines reference the same product with different colours
-        product.stock = updatedStock
+        product.stock = nextProductStock
         product.inStock = updated.inStock
         product.colors = updatedColors
       }
@@ -2559,11 +2775,13 @@ export async function restoreStockForOrder(params: {
       if (!product) continue
 
       const resolvedPid = product.productId || product.id
-      const previousStock = Math.max(0, product.stock ?? 0)
-      const updatedStock = previousStock + qty
+      let previousStock = Math.max(0, product.stock ?? 0)
+      let updatedStock = previousStock + qty
 
       let updatedColors = product.colors
       let resolvedColorName = line.colorName || ""
+      let updatedColorSpecific = false
+
       if (Array.isArray(product.colors) && product.colors.length > 0 && (line.colorId || line.colorName)) {
         updatedColors = product.colors.map((c) => {
           const matches =
@@ -2572,19 +2790,32 @@ export async function restoreStockForOrder(params: {
           if (!matches) return c
           resolvedColorName = c.name
           if (c.stock != null) {
-            return { ...c, stock: Math.max(0, c.stock + qty) }
+            updatedColorSpecific = true
+            previousStock = Math.max(0, c.stock)
+            updatedStock = previousStock + qty
+            return { ...c, stock: updatedStock }
           }
           return c
         })
       }
 
+      let nextProductStock = updatedStock
+      if (updatedColorSpecific && Array.isArray(updatedColors)) {
+        const allHaveColorStock = updatedColors.every((c) => c.stock != null)
+        if (allHaveColorStock) {
+          nextProductStock = updatedColors.reduce((sum, c) => sum + Math.max(0, c.stock ?? 0), 0)
+        } else {
+          nextProductStock = Math.max(0, (product.stock ?? 0) + qty)
+        }
+      }
+
       const updated = await updateProductById(product.id, {
-        stock: updatedStock,
+        stock: nextProductStock,
         colors: updatedColors,
       })
 
       if (updated) {
-        product.stock = updatedStock
+        product.stock = nextProductStock
         product.inStock = updated.inStock
         product.colors = updatedColors
       }
@@ -2659,6 +2890,7 @@ export async function updateOrderStatusByPaymentId(
         values: [[now]],
       },
     })
+    invalidateOrdersCache()
     return true
   } catch (err) {
     console.error("Failed to update order status by paymentId:", err)
