@@ -1065,10 +1065,11 @@ export const NEXT_STATUS_MAP: Record<string, string> = {
 }
 
 export const NEXT_ACTION_LABELS: Record<string, string> = {
-  Accepted: "Packing",
+  Pending: "Accept Order",
+  Accepted: "Start Packing",
   Packing: "Ready to Ship",
-  "Ready to Ship": "Shipping",
-  Shipping: "Collected by Customer",
+  "Ready to Ship": "Ship Order",
+  Shipping: "Mark as Collected",
 }
 
 // ── Order Status History Management ───────────────────────────────────────────

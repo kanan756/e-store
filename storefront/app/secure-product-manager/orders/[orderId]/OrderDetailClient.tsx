@@ -302,7 +302,7 @@ export default function OrderDetailClient({
                   setActionRemarks("")
                   setActionModal({
                     targetStatus: nextAction.nextStatus,
-                    title: `Advance to "${nextAction.nextStatus}"`,
+                    title: `Advance order to "${nextAction.nextStatus}"`,
                     defaultRemarks: `Order moved to ${nextAction.nextStatus}`,
                   })
                 }}
@@ -321,7 +321,7 @@ export default function OrderDetailClient({
                   boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
                 }}
               >
-                <span>{busy ? "Updating…" : `Advance to: ${nextAction.label}`}</span>
+                <span>{busy ? "Updating…" : nextAction.label}</span>
                 <span style={{ fontSize: 16 }}>→</span>
               </button>
             )}

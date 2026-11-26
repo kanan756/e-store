@@ -33,11 +33,11 @@ interface TabConfig {
 
 const TABS: TabConfig[] = [
   { id: "Accepted", label: "Accepted Orders", color: "#047857", badgeBg: "#ECFDF5" },
+  { id: "Rejected", label: "Rejected Orders", color: "#B91C1C", badgeBg: "#FEF2F2" },
   { id: "Packing", label: "Packing Orders", color: "#6D28D9", badgeBg: "#F5F3FF" },
-  { id: "Ready to Ship", label: "Ready to Ship", color: "#1D4ED8", badgeBg: "#EFF6FF" },
+  { id: "Ready to Ship", label: "Ready to Ship Orders", color: "#1D4ED8", badgeBg: "#EFF6FF" },
   { id: "Shipping", label: "Shipping Orders", color: "#059669", badgeBg: "#F0FDF4" },
   { id: "Collected by Customer", label: "Collected Orders", color: "#065F46", badgeBg: "#ECFDF5" },
-  { id: "Rejected", label: "Rejected Orders", color: "#B91C1C", badgeBg: "#FEF2F2" },
   { id: "All", label: "All Tracked Orders", color: "#374151", badgeBg: "#F3F4F6" },
 ]
 

@@ -476,7 +476,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                                   cursor: isBusy ? "wait" : "pointer",
                                 }}
                               >
-                                {isBusy ? "…" : "Accept"}
+                                {isBusy ? "…" : "Accept Order"}
                               </button>
                               <button
                                 type="button"
@@ -497,7 +497,7 @@ export default function OrdersClient({ initialOrders }: OrdersClientProps) {
                                   cursor: isBusy ? "wait" : "pointer",
                                 }}
                               >
-                                Reject
+                                Reject Order
                               </button>
                             </>
                           )}
