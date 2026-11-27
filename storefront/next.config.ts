@@ -86,7 +86,6 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: getLocalDevOrigins(),
-  outputFileTracingRoot: path.join(__dirname),
   turbopack: {
     root: path.join(__dirname),
   },
