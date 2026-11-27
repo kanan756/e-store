@@ -442,7 +442,7 @@ export default function CartClient() {
               {/* Delivery PIN Code Input */}
               <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--bg)", borderRadius: 10, border: "1px solid var(--bd)" }}>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--text2)", marginBottom: 6 }}>
-                  Delivery PIN Code (Delhivery)
+                  Delivery PIN Code
                 </label>
                 <div style={{ display: "flex", gap: 8 }}>
                   <input
@@ -474,7 +474,7 @@ export default function CartClient() {
               {/* Shipping Row */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 20, fontSize: 13 }}>
                 <span style={{ color: "var(--text2)", flexShrink: 0 }}>
-                  Shipping {shippingCharge !== null ? "(Delhivery)" : ""}
+                  Shipping {shippingCharge !== null ? "" : ""}
                 </span>
                 <span style={{ textAlign: "right" }}>
                   {shippingLoading ? (

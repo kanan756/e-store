@@ -79,5 +79,50 @@
     "changedAt": "2026-11-26T06:25:43.969Z",
     "changedBy": "info@claspo.store",
     "remarks": "Order advanced to Shipping"
+  },
+  {
+    "historyId": "HST-1795692404471-7ypel",
+    "orderId": "ORD-TEST-1795512881558",
+    "previousStatus": "Processing",
+    "newStatus": "Accepted",
+    "changedAt": "2026-11-26T11:26:43.469Z",
+    "changedBy": "info@claspo.store",
+    "remarks": "Order transitioned to Accepted from Orders list"
+  },
+  {
+    "historyId": "HST-1795692434685-ulgcd",
+    "orderId": "ORD-TEST-1795504613264",
+    "previousStatus": "Processing",
+    "newStatus": "Accepted",
+    "changedAt": "2026-11-26T11:27:13.718Z",
+    "changedBy": "info@claspo.store",
+    "remarks": "Order transitioned to Accepted from Orders list"
+  },
+  {
+    "historyId": "HST-1795692456782-tzond",
+    "orderId": "ORD-TEST-1795504613264",
+    "previousStatus": "Accepted",
+    "newStatus": "Rejected",
+    "changedAt": "2026-11-26T11:27:35.608Z",
+    "changedBy": "info@claspo.store",
+    "remarks": ""
+  },
+  {
+    "historyId": "HST-1795692485598-k21r1",
+    "orderId": "ORD-TEST-1795512881558",
+    "previousStatus": "Accepted",
+    "newStatus": "Packing",
+    "changedAt": "2026-11-26T11:28:04.729Z",
+    "changedBy": "info@claspo.store",
+    "remarks": "Order advanced to Packing"
+  },
+  {
+    "historyId": "HST-1795692491758-7otsv",
+    "orderId": "ORD-TEST-1795512881558",
+    "previousStatus": "Packing",
+    "newStatus": "Ready to Ship",
+    "changedAt": "2026-11-26T11:28:10.917Z",
+    "changedBy": "info@claspo.store",
+    "remarks": "Order advanced to Ready to Ship"
   }
 ]

@@ -479,7 +479,7 @@ export default function CheckoutClient() {
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12, fontSize: 13, color: "var(--text2)", marginTop: 12 }}>
                 <span style={{ flexShrink: 0 }}>
-                  Shipping {shippingCharge !== null ? "(Delhivery)" : ""}
+                  Shipping {shippingCharge !== null ? "" : ""}
                 </span>
                 <span style={{ textAlign: "right" }}>
                   {shippingLoading ? (

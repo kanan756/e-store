@@ -191,7 +191,7 @@ export async function checkDelhiveryServiceability(
     return {
       serviceable: false,
       pincode: cleanPin,
-      error: "Delhivery shipping is currently unconfigured on the server.",
+      error: "Shipping is currently unconfigured on the server.",
     }
   }
 
